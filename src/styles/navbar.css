@@ -1,0 +1,18 @@
+#navbar {
+  display: flex;
+  flex-direction: row;
+  border-bottom: 1px solid gray;
+}
+
+#navbar > .navbar-item {
+  padding: 10px;
+}
+
+#navbar > .navbar-item.selected {
+  background-color: #808080 !important;
+}
+
+#navbar > .navbar-item:hover {
+  cursor: pointer;
+  background-color: #80808020;
+}
