@@ -1,19 +1,13 @@
+import { Tabs } from "@/models/tabs";
 import { createContext, JSX, useState } from "react";
 
-export enum Categories {
-  FEATURE = 0,
-  RELEASE,
-  BUGFIX,
-  HOTFIX,
-}
-
 interface AppContexType {
-  tab: Categories;
-  setTab: (category: Categories) => void;
+  tab: Tabs;
+  setTab: (category: Tabs) => void;
 }
 
 const defaultValue: AppContexType = {
-  tab: Categories.FEATURE,
+  tab: Tabs.WORKOUTS,
   setTab: () => {
     /* empty */
   },
@@ -26,7 +20,7 @@ export function AppProvider({
 }: {
   children: JSX.Element;
 }): JSX.Element {
-  const [tab, setTab] = useState(Categories.FEATURE);
+  const [tab, setTab] = useState(Tabs.WORKOUTS);
 
   return (
     <AppContext.Provider

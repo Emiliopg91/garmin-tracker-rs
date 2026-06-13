@@ -29,3 +29,11 @@ indexmap = "2.14.0"
 rfd = "0.17.2"
 rusqlite = { version = "0.40.1", features = ["bundled"] }
 thiserror = "2.0.18"
+
+
+[profile.release]
+lto = "fat"
+codegen-units = 1
+strip = "symbols"
+panic = "unwind"
+opt-level = 3

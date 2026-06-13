@@ -1,7 +1,7 @@
 #navbar {
   display: flex;
   flex-direction: row;
-  border-bottom: 1px solid gray;
+  border-bottom: 1px solid var(--primary-color);
 }
 
 #navbar > .navbar-item {
@@ -9,10 +9,9 @@
 }
 
 #navbar > .navbar-item.selected {
-  background-color: #808080 !important;
+  background-color: var(--primary-color) !important;
 }
 
 #navbar > .navbar-item:hover {
   cursor: pointer;
-  background-color: #80808020;
 }

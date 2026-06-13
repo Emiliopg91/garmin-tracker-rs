@@ -1,28 +1,20 @@
-//use std::rc::Rc;
-//
-//use rfd::FileDialog;
-//use slint::{ModelRc, SharedString, StandardListViewItem, VecModel, Weak};
-//
-//use crate::{
-//    App, ExerciseListItem, SessionListItem,
-//    database::DATABASE_INST,
-//    models::{exercise::Exercise, serie::Serie, session::Session},
-//};
-//
-//pub fn get_session_list() -> ModelRc<SessionListItem> {
-//    let sessions = Session::load_from_db().unwrap_or_default();
-//
-//    let items = sessions
-//        .into_iter()
-//        .map(|s| SessionListItem {
-//            name: SharedString::from(&s.workout),
-//            timestamp: SharedString::from(&s.timestamp.to_rfc3339()),
-//            date: SharedString::from(&s.format_date()),
-//        })
-//        .collect::<Vec<_>>();
-//
-//    ModelRc::from(Rc::new(VecModel::from(items)))
-//}
+use crate::{
+    garmin::models::{exercise::Exercise, serie::Serie, session::Session},
+    models::{exercises::ExerciseListItem, records::RecordListItem, workouts::WorkoutListItem},
+};
+
+pub fn get_session_list() -> Vec<WorkoutListItem> {
+    let sessions = Session::load_from_db().unwrap_or_default();
+
+    sessions
+        .into_iter()
+        .map(|s| WorkoutListItem {
+            name: s.workout.clone(),
+            timestamp: s.timestamp.timestamp(),
+            date: s.format_date().clone(),
+        })
+        .collect::<Vec<_>>()
+}
 //
 //pub fn show_session_details(app: Weak<App>, timestamp: SharedString) {
 //    let session = Session::find_by_id(&timestamp.to_string())
@@ -138,39 +130,37 @@
 //        .unwrap();
 //    }
 //}
-//
-//pub fn get_exercise_list() -> ModelRc<ExerciseListItem> {
-//    let exercises = Exercise::load_from_db().unwrap_or_default();
-//
-//    let items = exercises
-//        .into_iter()
-//        .map(|s| ExerciseListItem {
-//            category: SharedString::from(&s.category),
-//            id: s.id as i32,
-//            name: SharedString::from(&s.name),
-//        })
-//        .collect::<Vec<_>>();
-//
-//    ModelRc::from(Rc::new(VecModel::from(items)))
-//}
-//
-//pub fn get_record_list() -> Rc<VecModel<ModelRc<StandardListViewItem>>> {
-//    let records = Rc::new(VecModel::default());
-//
-//    let exercises = Exercise::load_from_db().unwrap();
-//    for exercise in exercises {
-//        let pr = Serie::get_pr_for_exercise(&exercise).unwrap();
-//
-//        let items = Rc::new(VecModel::default());
-//        items.push(SharedString::from(exercise.name).into());
-//        items.push(SharedString::from(format!("{}x{:.1} Kg", pr.reps, pr.weight)).into());
-//        items.push(SharedString::from(format!("{:.1} Kg", pr.get_1rm_estimation())).into());
-//        records.push(items.into());
-//    }
-//
-//    records
-//}
-//
+
+pub fn get_exercise_list() -> Vec<ExerciseListItem> {
+    let exercises = Exercise::load_from_db().unwrap_or_default();
+
+    exercises
+        .into_iter()
+        .map(|s| ExerciseListItem {
+            category: s.category.clone(),
+            id: s.id,
+            name: s.name.clone(),
+        })
+        .collect::<Vec<_>>()
+}
+
+pub fn get_record_list() -> Vec<RecordListItem> {
+    let mut records = Vec::new();
+
+    let exercises = Exercise::load_from_db().unwrap();
+    for exercise in exercises {
+        let pr = Serie::get_pr_for_exercise(&exercise).unwrap();
+        records.push(RecordListItem {
+            exercise: exercise.name,
+            reps: pr.reps,
+            weight: pr.weight,
+            rm: pr.get_1rm_estimation(),
+        });
+    }
+
+    records
+}
+
 //pub fn show_exercise_details(app: Weak<App>, category: SharedString, id: i32) {
 //    let exercise = Exercise::load_by_cat_and_id(&category, id as u16)
 //        .unwrap()

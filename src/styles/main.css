@@ -28,3 +28,7 @@ body {
   justify-content: center;
   text-align: center;
 }
+
+:root {
+  --primary-color: #058282;
+}
