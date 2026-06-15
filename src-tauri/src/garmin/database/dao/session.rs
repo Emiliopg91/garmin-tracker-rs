@@ -1,8 +1,4 @@
-use std::{
-    fmt::Display,
-    fs::{self, File},
-    path::Path,
-};
+use std::{fmt::Display, fs::File, path::Path};
 
 use chrono::{DateTime, Datelike, Local, TimeZone, Timelike};
 use fitparser::{FitDataRecord, Value, profile};
@@ -144,7 +140,7 @@ impl Session {
     }
 
     pub fn insert(
-        &self,
+        &mut self,
         tx: &rusqlite::Transaction,
     ) -> crate::garmin::database::errors::Result<()> {
         tx.execute(
@@ -163,11 +159,12 @@ impl Session {
         .map_err(DatabaseError::Insert)
         .map(|_| ())?;
 
-        for (exercise, series) in &self.series {
+        for (exercise, series) in &mut self.series {
             exercise.insert(tx)?;
-            for serie in series {
+            for serie in series.iter_mut() {
                 serie.insert(tx)?;
             }
+            Serie::update_pr(tx, &exercise.category.to_string(), exercise.id);
         }
 
         Ok(())
@@ -187,7 +184,6 @@ impl Session {
             entries.iter().for_each(|e| {
                 txt.push(format!("{:#?}", e));
             });
-            fs::write("activity.txt", txt.join("\n")).unwrap();
         }
 
         let session_entry = entries
@@ -269,17 +265,5 @@ impl Session {
             return Ok(name.clone());
         }
         panic!("Invalid workout name type");
-    }
-
-    pub fn get_volume(&self) -> f64 {
-        let mut accum = 0.0;
-
-        for (_, series) in &self.series {
-            for serie in series {
-                accum += serie.reps as f64 * serie.weight;
-            }
-        }
-
-        accum
     }
 }

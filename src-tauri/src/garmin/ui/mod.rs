@@ -10,7 +10,7 @@ use crate::{
     },
     models::{
         exercises::{ExerciseDetails, ExerciseListItem},
-        workouts::{WorkoutDetails, WorkoutListItem, WorkoutSerie},
+        workouts::{WorkoutDetails, WorkoutListItem, WorkoutSerie, WorkoutSeriesUpdate},
     },
 };
 
@@ -29,12 +29,12 @@ pub fn get_session_details(timestamp: i64) -> WorkoutDetails {
     let mut details = WorkoutDetails::from(&session);
 
     for (exercise, series) in &session.series {
+        if !details.exercises.contains(&exercise.name) {
+            details.exercises.push(exercise.name.clone())
+        }
         let entry = details.series.entry(exercise.name.clone()).or_default();
         for serie in series {
-            entry.push(WorkoutSerie {
-                reps: serie.reps,
-                weight: serie.weight,
-            });
+            entry.push(WorkoutSerie::from(serie));
         }
     }
 
@@ -47,7 +47,7 @@ pub fn import_fit_file(app: AppHandle) -> Result<(), String> {
     app.dialog()
         .file()
         .add_filter("Garmin FIT file", &["fit"])
-        .pick_file(move |file| {
+        .pick_files(move |file| {
             if let Some(file) = file {
                 let _ = tx.send(file);
             }
@@ -55,24 +55,31 @@ pub fn import_fit_file(app: AppHandle) -> Result<(), String> {
 
     let mut res = Ok(());
     match rx.recv() {
-        Ok(file) => match Session::load_from_file(file.as_path().unwrap()) {
-            Ok(session) => match DATABASE_INST.lock() {
-                Ok(mut db) => {
-                    match db.run_in_transaction(|tx| {
-                        session.insert(tx)?;
-                        Ok(())
-                    }) {
-                        Ok(_) => {}
-                        Err(e) => {
-                            res = Err(format!("Error writing to database: {}", e));
+        Ok(files) => match DATABASE_INST.lock() {
+            Ok(mut db) => {
+                match db.run_in_transaction(|tx| {
+                    for file in &files {
+                        match Session::load_from_file(file.as_path().unwrap()) {
+                            Ok(mut session) => {
+                                session.insert(tx)?;
+                            }
+                            Err(e) => {
+                                res = Err(format!("Error parsing session: {}", e));
+                                break;
+                            }
                         }
                     }
+                    Ok(())
+                }) {
+                    Ok(_) => {}
+                    Err(e) => {
+                        res = Err(format!("Error writing to database: {}", e));
+                    }
                 }
-                Err(e) => {
-                    res = Err(format!("Error accesing to database: {}", e));
-                }
-            },
-            Err(e) => res = Err(format!("Error parsing session: {}", e)),
+            }
+            Err(e) => {
+                res = Err(format!("Error accesing to database: {}", e));
+            }
         },
         Err(e) => res = Err(e.to_string()),
     }
@@ -100,7 +107,7 @@ pub fn get_exercise_list() -> Vec<ExerciseListItem> {
 }
 
 pub fn show_exercise_details(category: &str, id: i16) -> ExerciseDetails {
-    let exercise = Exercise::load_by_cat_and_id(&category, id as u16)
+    let exercise = Exercise::load_by_cat_and_id(category, id as u16)
         .unwrap()
         .unwrap();
     let mut res = ExerciseDetails::from(&exercise);
@@ -109,6 +116,7 @@ pub fn show_exercise_details(category: &str, id: i16) -> ExerciseDetails {
     res.reps = pr.reps;
     res.weight = pr.weight;
     res.rm = pr.get_1rm_estimation();
+    res.pr_date = pr.format_date();
 
     let series = Serie::load_for_exercise(category, id).unwrap();
     for serie in series {
@@ -117,12 +125,40 @@ pub fn show_exercise_details(category: &str, id: i16) -> ExerciseDetails {
             .unwrap()
             .unwrap();
 
-        let entry = res
-            .workouts
-            .entry(format!("{}\n{}", ses.workout, ses.format_date()))
-            .or_default();
+        let ex_str = format!("{}\n{}", ses.workout, ses.format_date());
+
+        if !res.workouts.contains(&ex_str) {
+            res.workouts.push(ex_str.clone());
+        }
+
+        let entry = res.series.entry(ex_str).or_default();
         entry.push(wk);
     }
 
     res
+}
+
+pub fn update_workout_sets(details: WorkoutSeriesUpdate) {
+    let mut to_update = Vec::new();
+    for serie in details.series {
+        let db_serie = Serie::load_for_session_and_idx(details.timestamp, serie.idx).unwrap();
+        if let Some(mut db_serie) = db_serie {
+            db_serie.reps = serie.reps;
+            db_serie.weight = serie.weight;
+            to_update.push(db_serie);
+        }
+    }
+    let exercises = Exercise::load_from_db().unwrap();
+
+    let mut db = DATABASE_INST.lock().unwrap();
+    db.run_in_transaction(move |tx| {
+        for to_upd in &to_update {
+            to_upd.update_serie(tx);
+        }
+        for exer in &exercises {
+            Serie::update_pr(tx, &exer.category, exer.id);
+        }
+        Ok(())
+    })
+    .unwrap();
 }

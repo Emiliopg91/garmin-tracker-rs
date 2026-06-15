@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use chrono::{DateTime, Local, TimeZone};
+use chrono::{DateTime, Datelike, Local, TimeZone, Timelike};
 use fitparser::{FitDataRecord, Value, profile};
 use indexmap::IndexMap;
 use rusqlite::Row;
@@ -21,6 +21,7 @@ pub struct Serie {
     pub exercise_id: u16,
     pub reps: u16,
     pub weight: f64,
+    pub pr: bool,
 }
 impl Display for Serie {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -29,6 +30,17 @@ impl Display for Serie {
 }
 
 impl Serie {
+    pub fn format_date(&self) -> String {
+        format!(
+            "{}:{} {}/{}/{}",
+            self.session.hour(),
+            self.session.minute(),
+            self.session.day(),
+            self.session.month(),
+            self.session.year()
+        )
+    }
+
     fn get_steps(entries: &[FitDataRecord], exercises: &[Exercise]) -> Vec<Option<Exercise>> {
         let mut steps = Vec::new();
 
@@ -146,11 +158,12 @@ impl Serie {
 
                                 entry.push(Serie {
                                     session: session.timestamp,
-                                    idx: idx as u8,
+                                    idx,
                                     exercise_category: exercise.category.clone(),
                                     exercise_id: exercise.id,
                                     reps: *reps,
                                     weight: *weight,
+                                    pr: false,
                                 });
                                 idx += 1;
                             }
@@ -163,12 +176,11 @@ impl Serie {
     }
 
     pub fn insert(
-        &self,
+        &mut self,
         tx: &rusqlite::Transaction,
     ) -> crate::garmin::database::errors::Result<()> {
-        println!("{} {}", self.session.timestamp(), self.idx);
         tx.execute(
-            "INSERT INTO SERIE VALUES(?,?,?,?,?,?)",
+            "INSERT INTO SERIE VALUES(?,?,?,?,?,?,?)",
             (
                 self.session.timestamp(),
                 self.idx,
@@ -176,11 +188,38 @@ impl Serie {
                 self.exercise_id,
                 self.reps,
                 self.weight,
+                self.pr,
             ),
         )
         .map_err(DatabaseError::Insert)?;
 
         Ok(())
+    }
+
+    pub fn update_pr(tx: &rusqlite::Transaction, category: &str, id: u16) {
+        let result = tx.query_one(
+            "SELECT * FROM SERIE WHERE exercise_category=? AND exercise_id=? ORDER BY weight DESC, reps DESC LIMIT 1",
+            (&category, id),
+            Self::map_from_row,
+        );
+
+        if let Ok(serie) = result {
+            let _ = tx.execute(
+                "UPDATE SERIE SET pr=0 WHERE exercise_category=? AND exercise_id=?",
+                (&category, id),
+            );
+            let _ = tx.execute(
+                "UPDATE SERIE SET pr=1 WHERE session=? AND idx=?",
+                (serie.session.timestamp(), serie.idx),
+            );
+        }
+    }
+
+    pub fn update_serie(&self, tx: &rusqlite::Transaction) {
+        let _ = tx.execute(
+            "UPDATE SERIE SET reps=?, weight=? WHERE session=? AND idx=?",
+            (self.reps, self.weight, &self.session.timestamp(), self.idx),
+        );
     }
 
     pub fn load_for_session(session: DateTime<Local>) -> Result<IndexMap<Exercise, Vec<Serie>>> {
@@ -220,6 +259,24 @@ impl Serie {
         Ok(res)
     }
 
+    pub fn load_for_session_and_idx(session: i64, idx: u8) -> Result<Option<Serie>> {
+        let mut db = DATABASE_INST.lock().unwrap();
+        let conn = db.get_connection()?;
+
+        let mut stmt = conn
+            .prepare("SELECT * FROM SERIE WHERE session=? AND idx=?")
+            .map_err(DatabaseError::Select)?;
+        let rows = stmt
+            .query_map((session, idx), Self::map_from_row)
+            .map_err(DatabaseError::Select)?;
+        for row in rows {
+            if let Ok(r) = row {
+                return Ok(Some(r));
+            }
+        }
+        return Ok(None);
+    }
+
     pub fn load_for_exercise(category: &str, id: i16) -> Result<Vec<Serie>> {
         let mut db = DATABASE_INST.lock().unwrap();
         let conn = db.get_connection()?;
@@ -230,9 +287,8 @@ impl Serie {
         let rows = stmt
             .query_map((category, id), Self::map_from_row)
             .map_err(DatabaseError::Select)?;
-        Ok(rows
-            .collect::<std::result::Result<Vec<_>, _>>()
-            .map_err(DatabaseError::Select)?)
+        rows.collect::<std::result::Result<Vec<_>, _>>()
+            .map_err(DatabaseError::Select)
     }
 
     fn map_from_row(row: &Row) -> std::result::Result<Self, rusqlite::Error> {
@@ -243,6 +299,7 @@ impl Serie {
             exercise_id: row.get::<_, u16>(3)?,
             reps: row.get::<_, u16>(4)?,
             weight: row.get::<_, f64>(5)?,
+            pr: row.get::<_, bool>(6)?,
         })
     }
 
@@ -250,7 +307,9 @@ impl Serie {
         let mut db = DATABASE_INST.lock().unwrap();
         let conn = db.get_connection()?;
 
-        let mut stmt = conn.prepare("SELECT * FROM SERIE WHERE exercise_category=? AND exercise_id=? ORDER BY weight DESC, reps DESC LIMIT 1").unwrap();
+        let mut stmt = conn
+            .prepare("SELECT * FROM SERIE WHERE exercise_category=? AND exercise_id=? AND pr=TRUE")
+            .unwrap();
         let rows = stmt
             .query_map((&exercise.category, &exercise.id), Self::map_from_row)
             .unwrap();

@@ -1,9 +1,11 @@
-use indexmap::IndexMap;
+use std::collections::HashMap;
+
 use serde::Serialize;
+use specta::Type;
 
 use crate::{garmin::database::dao::exercise::Exercise, models::workouts::WorkoutSerie};
 
-#[derive(Serialize)]
+#[derive(Serialize, Type)]
 pub struct ExerciseListItem {
     pub category: String,
     pub id: u16,
@@ -26,7 +28,7 @@ impl From<&Exercise> for ExerciseListItem {
     }
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Type)]
 pub struct ExerciseDetails {
     pub category: String,
     pub id: u16,
@@ -34,7 +36,9 @@ pub struct ExerciseDetails {
     pub reps: u16,
     pub weight: f64,
     pub rm: f64,
-    pub workouts: IndexMap<String, Vec<WorkoutSerie>>,
+    pub workouts: Vec<String>,
+    pub series: HashMap<String, Vec<WorkoutSerie>>,
+    pub pr_date: String,
 }
 
 impl From<&Exercise> for ExerciseDetails {
@@ -46,7 +50,9 @@ impl From<&Exercise> for ExerciseDetails {
             reps: 0,
             weight: 0_f64,
             rm: 0_f64,
-            workouts: IndexMap::new(),
+            workouts: Vec::new(),
+            series: HashMap::new(),
+            pr_date: "".to_string(),
         }
     }
 }

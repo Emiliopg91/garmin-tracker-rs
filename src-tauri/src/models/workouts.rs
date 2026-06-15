@@ -1,14 +1,15 @@
-use std::hash::Hash;
+use std::{collections::HashMap, hash::Hash};
 
-use indexmap::IndexMap;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
+use specta::Type;
 
 use crate::garmin::database::dao::{serie::Serie, session::Session};
 
-#[derive(Serialize)]
+#[derive(Serialize, Type)]
 pub struct WorkoutListItem {
     pub name: String,
     pub date: String,
+    #[specta(type = String)]
     pub timestamp: i64,
 }
 
@@ -33,8 +34,9 @@ impl Hash for WorkoutListItem {
     }
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize, Type)]
 pub struct WorkoutSerie {
+    pub idx: u8,
     pub reps: u16,
     pub weight: f64,
 }
@@ -42,17 +44,20 @@ pub struct WorkoutSerie {
 impl From<&Serie> for WorkoutSerie {
     fn from(value: &Serie) -> Self {
         Self {
+            idx: value.idx,
             reps: value.reps,
             weight: value.weight,
         }
     }
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Type)]
 pub struct WorkoutDetails {
     pub name: String,
 
     pub date: String,
+    #[specta(type = String)]
+    pub timestamp: i64,
 
     pub total_elapsed_time: String,
     pub active_time: String,
@@ -62,10 +67,8 @@ pub struct WorkoutDetails {
 
     pub avg_heart_rate: u8,
     pub max_heart_rate: u8,
-
-    pub volume: f64,
-
-    pub series: IndexMap<String, Vec<WorkoutSerie>>,
+    pub exercises: Vec<String>,
+    pub series: HashMap<String, Vec<WorkoutSerie>>,
 }
 
 impl From<&Session> for WorkoutDetails {
@@ -73,14 +76,22 @@ impl From<&Session> for WorkoutDetails {
         Self {
             name: value.workout.clone(),
             date: value.format_date(),
+            timestamp: value.timestamp.timestamp(),
             active_time: value.format_active_time(),
             avg_heart_rate: value.avg_heart_rate,
             max_heart_rate: value.max_heart_rate,
             metabolic_calories: value.metabolic_calories,
             total_calories: value.total_calories,
             total_elapsed_time: value.format_total_time(),
-            volume: value.get_volume(),
-            series: IndexMap::new(),
+            exercises: Vec::new(),
+            series: HashMap::new(),
         }
     }
+}
+
+#[derive(Deserialize, Type)]
+pub struct WorkoutSeriesUpdate {
+    #[specta(type = String)]
+    pub timestamp: i64,
+    pub series: Vec<WorkoutSerie>,
 }

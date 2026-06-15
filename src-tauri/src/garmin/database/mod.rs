@@ -43,16 +43,16 @@ impl Database {
         Ok(())
     }
 
-    pub fn run_in_transaction<F>(&mut self, f: F) -> Result<()>
+    pub fn run_in_transaction<F>(&mut self, mut f: F) -> Result<()>
     where
-        F: Fn(&Transaction) -> Result<()>,
+        F: FnMut(&mut Transaction) -> Result<()>,
     {
         if let Some(connection) = self.connection.as_mut() {
-            let tx = connection
+            let mut tx = connection
                 .transaction()
                 .map_err(DatabaseError::Transaction)?;
 
-            f(&tx)?;
+            f(&mut tx)?;
 
             tx.commit().map_err(DatabaseError::Transaction)
         } else {
@@ -94,6 +94,7 @@ impl Database {
                 exercise_id INTEGER NOT NULL,
                 reps INTEGER NOT NULL,
                 weight REAL NOT NULL,
+                pr BOOLEAN NOT NULL,
         
                 PRIMARY KEY(session, idx),
         
@@ -103,6 +104,7 @@ impl Database {
         
             CREATE INDEX IF NOT EXISTS SERIE_ID ON SERIE(session, idx);
             CREATE INDEX IF NOT EXISTS SERIE_EXERCISE ON SERIE(exercise_category, exercise_id);
+            
         COMMIT;
     "#;
 
