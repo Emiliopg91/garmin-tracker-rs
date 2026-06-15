@@ -1,12 +1,16 @@
 import { ExerciseDetails, ExerciseListItem } from "@/models/exercises";
-import { WorkoutDetails, WorkoutListItem } from "@/models/workouts";
+import {
+  WorkoutDetails,
+  WorkoutListItem,
+  WorkoutSeriesUpdate,
+} from "@/models/workouts";
 import { invoke } from "@tauri-apps/api/core";
 
 export class RpcUtils {
   public static getWorkouts(): Promise<WorkoutListItem[]> {
     return invoke("get_workouts");
   }
-  public static getWorkoutDetails(timestamp: string): Promise<WorkoutDetails> {
+  public static getWorkoutDetails(timestamp: number): Promise<WorkoutDetails> {
     return invoke("get_workout_details", { timestamp });
   }
   public static getExercises(): Promise<ExerciseListItem[]> {
@@ -20,5 +24,8 @@ export class RpcUtils {
   }
   public static importFile(): Promise<void> {
     return invoke("import_file");
+  }
+  public static saveWorkoutChanges(workout: WorkoutSeriesUpdate) {
+    return invoke("save_workout_changes", { details: workout });
   }
 }

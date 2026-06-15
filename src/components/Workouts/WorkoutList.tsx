@@ -2,7 +2,7 @@ import { WorkoutListItem } from "@/models/workouts";
 
 type Props = {
   workouts: WorkoutListItem[];
-  onRowClick: (timestamp: string) => void;
+  onRowClick: (timestamp: number) => void;
 };
 
 export function WorkoutsList({ workouts, onRowClick }: Props) {

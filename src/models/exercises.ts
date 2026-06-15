@@ -16,5 +16,7 @@ export interface ExerciseDetails {
   reps: number;
   weight: number;
   rm: number;
-  workouts: Record<string, WorkoutSerie[]>;
+  workouts: string[];
+  series: Record<string, WorkoutSerie[]>;
+  pr_date: string;
 }

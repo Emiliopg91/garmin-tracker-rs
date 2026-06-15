@@ -26,16 +26,13 @@ export function App(): JSX.Element {
   >(undefined);
 
   useEffect(() => {
-    switch (tab) {
-      case Tabs.WORKOUTS:
-        RpcUtils.getWorkouts().then((data) => {
-          setWorkouts(data);
+    RpcUtils.getWorkouts().then((data) => {
+      setWorkouts(data);
 
-          RpcUtils.getExercises().then((data) => {
-            setExercises(data);
-          });
-        });
-    }
+      RpcUtils.getExercises().then((data) => {
+        setExercises(data);
+      });
+    });
   }, []);
 
   const navBarItems = [
@@ -55,7 +52,7 @@ export function App(): JSX.Element {
     },
   ];
 
-  const getWorkoutDetails = (timestamp: string) => {
+  const getWorkoutDetails = (timestamp: number) => {
     RpcUtils.getWorkoutDetails(timestamp).then((details) => {
       setWorkoutDetails(details);
     });
@@ -69,7 +66,13 @@ export function App(): JSX.Element {
 
   const importFile = () => {
     RpcUtils.importFile().then(() => {
-      /** */
+      RpcUtils.getWorkouts().then((data) => {
+        setWorkouts(data);
+
+        RpcUtils.getExercises().then((data) => {
+          setExercises(data);
+        });
+      });
     });
   };
 

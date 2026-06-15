@@ -30,6 +30,10 @@ export function ExerciseModal({ exercise, onClose }: Props) {
                 <td>{exercise.reps + "x" + exercise.weight + " Kg"}</td>
               </tr>
               <tr>
+                <td>Record date:</td>
+                <td>{exercise.pr_date}</td>
+              </tr>
+              <tr>
                 <td>1 RM:</td>
                 <td>{Math.floor(exercise.rm) + " Kg"}</td>
               </tr>
@@ -51,8 +55,8 @@ export function ExerciseModal({ exercise, onClose }: Props) {
                   </tr>
                 </thead>
                 <tbody>
-                  {Object.entries(exercise.workouts).map(([workout, series]) =>
-                    series.map((serie, idx) => (
+                  {exercise.workouts.map((workout) =>
+                    exercise.series[workout].map((serie, idx) => (
                       <tr key={`${workout}-${idx}`}>
                         {idx === 0 && (
                           <td
@@ -60,7 +64,7 @@ export function ExerciseModal({ exercise, onClose }: Props) {
                               borderBottom:
                                 idx === 0 ? "1px solid #e4e4e430" : "",
                             }}
-                            rowSpan={series.length}
+                            rowSpan={exercise.series[workout].length}
                           >
                             {workout.split("\n")[0]}
                             <br />
@@ -71,7 +75,7 @@ export function ExerciseModal({ exercise, onClose }: Props) {
                         <td
                           style={{
                             borderBottom:
-                              idx === series.length - 1
+                              idx === exercise.series[workout].length - 1
                                 ? "1px solid #e4e4e430"
                                 : "",
                           }}

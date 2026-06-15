@@ -1,5 +1,7 @@
-import { WorkoutDetails } from "@/models/workouts";
-import { Modal } from "react-bootstrap";
+import { WorkoutDetails, WorkoutSeriesUpdate } from "@/models/workouts";
+import { RpcUtils } from "@/utils/RpcUtils";
+import { useState } from "react";
+import { Button, Modal } from "react-bootstrap";
 
 type Props = {
   workout: WorkoutDetails;
@@ -7,6 +9,71 @@ type Props = {
 };
 
 export function WorkoutModal({ workout, onClose }: Props) {
+  const [localWorkout, setLocalWorkout] = useState({ ...workout });
+  const [changed, setChanged] = useState(false);
+
+  const updateSerieReps = (exercise: string, idx: number, newVal: string) => {
+    let reps = parseInt(newVal);
+    if (isNaN(reps)) {
+      reps = 0;
+    }
+    const newObj = {
+      ...localWorkout,
+      series: {
+        ...localWorkout.series,
+        [exercise]: localWorkout.series[exercise].map((serie, id) =>
+          id === idx ? { ...serie, reps } : serie,
+        ),
+      },
+    };
+    setLocalWorkout(newObj);
+    setChanged(JSON.stringify(newObj) != JSON.stringify(workout));
+  };
+
+  const updateSerieWeight = (exercise: string, idx: number, newVal: string) => {
+    let weight = parseFloat(newVal);
+    if (isNaN(weight)) {
+      weight = 0;
+    }
+    const newObj = {
+      ...localWorkout,
+      series: {
+        ...localWorkout.series,
+        [exercise]: localWorkout.series[exercise].map((serie, id) =>
+          id === idx ? { ...serie, weight } : serie,
+        ),
+      },
+    };
+    setLocalWorkout(newObj);
+    setChanged(JSON.stringify(newObj) != JSON.stringify(workout));
+  };
+
+  const getVolume = () => {
+    let volume = 0;
+    Object.entries(localWorkout.series).map(([_, series]) => {
+      series.forEach((serie) => {
+        volume += serie.reps * serie.weight;
+      });
+    });
+
+    return volume;
+  };
+
+  const saveChanges = () => {
+    const update: WorkoutSeriesUpdate = {
+      timestamp: localWorkout.timestamp,
+      series: [],
+    };
+    Object.entries(localWorkout.series).forEach(([_, series]) => {
+      series.forEach((serie) => {
+        update.series.push(serie);
+      });
+    });
+    RpcUtils.saveWorkoutChanges(update).then(() => {
+      onClose();
+    });
+  };
+
   return (
     <div
       className="modal show"
@@ -15,9 +82,9 @@ export function WorkoutModal({ workout, onClose }: Props) {
       <Modal show={true} onHide={onClose} data-bs-theme="dark">
         <Modal.Header closeButton>
           <Modal.Title>
-            {workout.name}
+            {localWorkout.name}
             <small style={{ fontSize: "17px", marginLeft: "30px" }}>
-              {workout.date}
+              {localWorkout.date}
             </small>
           </Modal.Title>
         </Modal.Header>
@@ -32,37 +99,38 @@ export function WorkoutModal({ workout, onClose }: Props) {
             <tbody>
               <tr>
                 <td>Total time:</td>
-                <td>{workout.total_elapsed_time}</td>
+                <td>{localWorkout.total_elapsed_time}</td>
               </tr>
               <tr>
                 <td>Active time:</td>
-                <td>{workout.active_time}</td>
+                <td>{localWorkout.active_time}</td>
               </tr>
               <tr>
                 <td>Total calories:</td>
-                <td>{workout.total_calories} Kcal</td>
+                <td>{localWorkout.total_calories} Kcal</td>
               </tr>
               <tr>
                 <td>Active calories:</td>
                 <td>
-                  {workout.total_calories - workout.metabolic_calories} Kcal
+                  {localWorkout.total_calories - workout.metabolic_calories}{" "}
+                  Kcal
                 </td>
               </tr>
               <tr>
                 <td>Average heart rate:</td>
-                <td> {workout.avg_heart_rate} BPM</td>
+                <td> {localWorkout.avg_heart_rate} BPM</td>
               </tr>
               <tr>
                 <td>Max heart rate:</td>
-                <td>{workout.max_heart_rate} BPM</td>
+                <td>{localWorkout.max_heart_rate} BPM</td>
               </tr>
               <tr>
                 <td>Volume:</td>
-                <td>{workout.volume} Kg</td>
+                <td>{getVolume()} Kg</td>
               </tr>
             </tbody>
           </table>
-          {Object.keys(workout.series).length > 0 && (
+          {Object.keys(localWorkout.series).length > 0 && (
             <>
               <hr />
               <table>
@@ -78,8 +146,8 @@ export function WorkoutModal({ workout, onClose }: Props) {
                   </tr>
                 </thead>
                 <tbody>
-                  {Object.entries(workout.series).map(([exercise, series]) =>
-                    series.map((serie, idx) => (
+                  {localWorkout.exercises.map((exercise) =>
+                    localWorkout.series[exercise].map((serie, idx) => (
                       <tr key={`${exercise}-${idx}`}>
                         {idx === 0 && (
                           <td
@@ -87,7 +155,7 @@ export function WorkoutModal({ workout, onClose }: Props) {
                               borderBottom:
                                 idx === 0 ? "1px solid #e4e4e430" : "",
                             }}
-                            rowSpan={series.length}
+                            rowSpan={localWorkout.series[exercise].length}
                           >
                             {exercise}
                           </td>
@@ -96,18 +164,54 @@ export function WorkoutModal({ workout, onClose }: Props) {
                         <td
                           style={{
                             borderBottom:
-                              idx === series.length - 1
+                              idx === localWorkout.series[exercise].length - 1
                                 ? "1px solid #e4e4e430"
                                 : "",
+                            paddingBottom:
+                              idx === localWorkout.series[exercise].length - 1
+                                ? "5px"
+                                : "",
+                            paddingTop: idx === 0 ? "5px" : "",
                           }}
                         >
-                          {serie.reps}x{serie.weight} Kg
+                          <input
+                            type="number"
+                            value={serie.reps}
+                            className="no-spinner"
+                            min={0}
+                            style={{ width: "2em", textAlign: "center" }}
+                            onChange={(e) => {
+                              updateSerieReps(exercise, idx, e.target.value);
+                            }}
+                          />{" "}
+                          x{" "}
+                          <input
+                            type="number"
+                            value={serie.weight}
+                            className="no-spinner"
+                            min={0}
+                            style={{ width: "3em", textAlign: "center" }}
+                            onChange={(e) => {
+                              updateSerieWeight(exercise, idx, e.target.value);
+                            }}
+                          />
+                          Kg
                         </td>
                       </tr>
                     )),
                   )}
                 </tbody>
               </table>
+              <div style={{ padding: "5px" }}>
+                <Button
+                  id="import-button"
+                  disabled={!changed}
+                  style={{ width: "100%" }}
+                  onClick={saveChanges}
+                >
+                  Update sets
+                </Button>
+              </div>
             </>
           )}
         </Modal.Body>
