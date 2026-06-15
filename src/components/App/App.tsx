@@ -4,16 +4,39 @@ import { NavBar } from "../NavBar/NavBar";
 import "@/styles/app.css";
 import { RpcUtils } from "@/utils/RpcUtils";
 import { Tabs } from "@/models/tabs";
-import { WorkoutListItem } from "@/models/workouts";
-import { ExerciseListItem } from "@/models/exercises";
-import { RecordListItem } from "@/models/records";
+import { WorkoutDetails, WorkoutListItem } from "@/models/workouts";
+import { ExerciseDetails, ExerciseListItem } from "@/models/exercises";
 import { Button } from "react-bootstrap";
+import { WorkoutsList } from "../Workouts/WorkoutList";
+import { ExercisesList } from "../Exercises/ExercisesList";
+import { WorkoutModal } from "../Workouts/WorkoutModal";
+import { ExerciseModal } from "../Exercises/ExerciseModal";
 
 export function App(): JSX.Element {
   const { tab, setTab } = useContext(AppContext);
+
   const [workouts, setWorkouts] = useState<WorkoutListItem[]>([]);
+  const [workoutDetails, setWorkoutDetails] = useState<
+    WorkoutDetails | undefined
+  >(undefined);
+
   const [exercises, setExercises] = useState<ExerciseListItem[]>([]);
-  const [records, setRecords] = useState<RecordListItem[]>([]);
+  const [exerciseDetails, setExerciseDetails] = useState<
+    ExerciseDetails | undefined
+  >(undefined);
+
+  useEffect(() => {
+    switch (tab) {
+      case Tabs.WORKOUTS:
+        RpcUtils.getWorkouts().then((data) => {
+          setWorkouts(data);
+
+          RpcUtils.getExercises().then((data) => {
+            setExercises(data);
+          });
+        });
+    }
+  }, []);
 
   const navBarItems = [
     {
@@ -30,98 +53,71 @@ export function App(): JSX.Element {
       },
       selected: tab == Tabs.EXERCISES,
     },
-    {
-      label: "Records",
-      onSelected: () => {
-        setTab(Tabs.RECORDS);
-      },
-      selected: tab == Tabs.RECORDS,
-    },
   ];
 
-  useEffect(() => {
-    switch (tab) {
-      case Tabs.WORKOUTS:
-        RpcUtils.getWorkouts().then((data) => {
-          setWorkouts(data);
+  const getWorkoutDetails = (timestamp: string) => {
+    RpcUtils.getWorkoutDetails(timestamp).then((details) => {
+      setWorkoutDetails(details);
+    });
+  };
 
-          RpcUtils.getExercises().then((data) => {
-            setExercises(data);
+  const getExerciseDetails = (category: string, id: number) => {
+    RpcUtils.getExerciseDetails(category, id).then((details) => {
+      setExerciseDetails(details);
+    });
+  };
 
-            RpcUtils.getRecords().then((data) => {
-              setRecords(data);
-            });
-          });
-        });
-    }
-  }, []);
+  const importFile = () => {
+    RpcUtils.importFile().then(() => {
+      /** */
+    });
+  };
 
   return (
     <>
       <div id="viewport">
         <NavBar items={navBarItems} />
+
         <div id="list-layer">
           {tab == Tabs.WORKOUTS && (
-            <table>
-              <thead>
-                <th>Exercise</th>
-                <th>Date</th>
-              </thead>
-              <tbody>
-                {workouts.map((workout, idx) => (
-                  <tr
-                    key={idx}
-                    onClick={() => {
-                      console.log("Aleee");
-                    }}
-                  >
-                    <td>{workout.name}</td>
-                    <td>{workout.date}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <WorkoutsList
+              workouts={workouts}
+              onRowClick={(timestamp) => {
+                getWorkoutDetails(timestamp);
+              }}
+            />
           )}
           {tab == Tabs.EXERCISES && (
-            <table>
-              <tbody>
-                {exercises.map((exercise, idx) => (
-                  <tr key={idx}>
-                    <td>
-                      <a>{exercise.name}</a>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-
-          {tab == Tabs.RECORDS && (
-            <table>
-              <thead>
-                <th>Exercise</th>
-                <th>PR</th>
-                <th>1 RM</th>
-              </thead>
-              <tbody>
-                {tab == Tabs.RECORDS &&
-                  records.map((record, idx) => (
-                    <tr key={idx} style={{ borderBottom: "1px solid gray" }}>
-                      <td style={{ textAlign: "left" }}>{record.exercise}</td>
-                      <td style={{ textAlign: "left" }}>
-                        {record.reps + "x" + record.weight + " Kg"}
-                      </td>
-                      <td style={{ textAlign: "left" }}>
-                        {Math.floor(record.rm) + " Kg"}
-                      </td>
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
+            <ExercisesList
+              exercises={exercises}
+              onRowClick={(category, id) => {
+                getExerciseDetails(category, id);
+              }}
+            />
           )}
         </div>
         <div style={{ padding: "5px" }}>
-          <Button id="import-button">Import .fit file</Button>
+          <Button id="import-button" onClick={importFile}>
+            Import .fit file
+          </Button>
+        </div>
+
+        <div>
+          {workoutDetails && (
+            <WorkoutModal
+              workout={workoutDetails}
+              onClose={() => setWorkoutDetails(undefined)}
+            />
+          )}
+        </div>
+
+        <div>
+          {exerciseDetails && (
+            <ExerciseModal
+              exercise={exerciseDetails}
+              onClose={() => setExerciseDetails(undefined)}
+            />
+          )}
         </div>
       </div>
     </>

@@ -1,4 +1,6 @@
+pub mod dao;
 pub mod errors;
+
 use std::{
     path::Path,
     sync::{LazyLock, Mutex},
@@ -71,7 +73,7 @@ impl Database {
             CREATE INDEX IF NOT EXISTS EXERCISE_ID_CAT ON EXERCISE(category, id);
         
             CREATE TABLE IF NOT EXISTS SESSION(
-                date TEXT NOT NULL,
+                date INTEGER NOT NULL,
                 workout TEXT NOT NULL,
                 total_elapsed_time REAL NOT NULL,
                 active_time REAL NOT NULL,
@@ -86,7 +88,7 @@ impl Database {
             CREATE INDEX IF NOT EXISTS SESSION_DATE ON SESSION(date);
         
             CREATE TABLE IF NOT EXISTS SERIE(
-                session TEXT NOT NULL,
+                session INTEGER NOT NULL,
                 idx INTEGER NOT NULL,
                 exercise_category TEXT NOT NULL,
                 exercise_id INTEGER NOT NULL,

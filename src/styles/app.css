@@ -23,10 +23,6 @@
           cursor: pointer;
           transition: background-color 200ms ease;
 
-          &:nth-child(odd) {
-            background-color: #00000020;
-          }
-
           &:hover {
             background-color: var(--primary-color);
           }
