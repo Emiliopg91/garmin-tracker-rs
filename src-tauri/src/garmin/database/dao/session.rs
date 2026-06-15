@@ -7,7 +7,7 @@ use std::{
 use chrono::{DateTime, Datelike, Local, TimeZone, Timelike};
 use fitparser::{FitDataRecord, Value, profile};
 use indexmap::IndexMap;
-use rusqlite::{Row, types::Type};
+use rusqlite::Row;
 
 use crate::garmin::database::{
     DATABASE_INST,
@@ -281,21 +281,5 @@ impl Session {
         }
 
         accum
-    }
-
-    pub fn get_num_series(&self) -> u16 {
-        let mut accum = 0;
-
-        for (_, series) in &self.series {
-            for serie in series {
-                accum += serie.reps;
-            }
-        }
-
-        accum
-    }
-
-    pub fn get_density(&self) -> f64 {
-        self.get_volume() / self.get_num_series() as f64
     }
 }

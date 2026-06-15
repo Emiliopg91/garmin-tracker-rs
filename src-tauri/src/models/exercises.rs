@@ -1,10 +1,7 @@
 use indexmap::IndexMap;
 use serde::Serialize;
 
-use crate::{
-    garmin::database::dao::exercise::Exercise,
-    models::workouts::{WorkoutListItem, WorkoutSerie},
-};
+use crate::{garmin::database::dao::exercise::Exercise, models::workouts::WorkoutSerie};
 
 #[derive(Serialize)]
 pub struct ExerciseListItem {

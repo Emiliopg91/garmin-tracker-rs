@@ -3,7 +3,7 @@ use std::fmt::Display;
 use chrono::{DateTime, Local, TimeZone};
 use fitparser::{FitDataRecord, Value, profile};
 use indexmap::IndexMap;
-use rusqlite::{Row, types::Type};
+use rusqlite::Row;
 
 use crate::garmin::database::{
     DATABASE_INST,
