@@ -1,4 +1,4 @@
-import { ExerciseListItem } from "@/models/exercises";
+import { ExerciseListItem } from "@/utils/RustBridge";
 
 type Props = {
   exercises: ExerciseListItem[];
@@ -24,7 +24,7 @@ export function ExercisesList({ exercises, onRowClick }: Props) {
           >
             <td style={{ textAlign: "left" }}>{exercise.name}</td>
             <td>{exercise.reps + "x" + exercise.weight + " Kg"}</td>
-            <td>{Math.floor(exercise.rm) + " Kg"}</td>
+            <td>{Math.floor(exercise.rm!) + " Kg"}</td>
           </tr>
         ))}
       </tbody>

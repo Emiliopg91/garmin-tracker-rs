@@ -1,4 +1,4 @@
-import { ExerciseDetails } from "@/models/exercises";
+import { ExerciseDetails } from "@/utils/RustBridge";
 import { Modal } from "react-bootstrap";
 
 type Props = {
@@ -35,7 +35,7 @@ export function ExerciseModal({ exercise, onClose }: Props) {
               </tr>
               <tr>
                 <td>1 RM:</td>
-                <td>{Math.floor(exercise.rm) + " Kg"}</td>
+                <td>{Math.floor(exercise.rm!) + " Kg"}</td>
               </tr>
             </tbody>
           </table>

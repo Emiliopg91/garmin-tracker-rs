@@ -1,5 +1,8 @@
-import { WorkoutDetails, WorkoutSeriesUpdate } from "@/models/workouts";
-import { RpcUtils } from "@/utils/RpcUtils";
+import {
+  RustBridge,
+  WorkoutDetails,
+  WorkoutSeriesUpdate,
+} from "@/utils/RustBridge";
 import { useState } from "react";
 import { Button, Modal } from "react-bootstrap";
 
@@ -52,7 +55,7 @@ export function WorkoutModal({ workout, onClose }: Props) {
     let volume = 0;
     Object.entries(localWorkout.series).map(([_, series]) => {
       series.forEach((serie) => {
-        volume += serie.reps * serie.weight;
+        volume += serie.reps * serie.weight!;
       });
     });
 
@@ -69,7 +72,7 @@ export function WorkoutModal({ workout, onClose }: Props) {
         update.series.push(serie);
       });
     });
-    RpcUtils.saveWorkoutChanges(update).then(() => {
+    RustBridge.saveWorkoutChanges(update).then(() => {
       onClose();
     });
   };
@@ -187,7 +190,7 @@ export function WorkoutModal({ workout, onClose }: Props) {
                           x{" "}
                           <input
                             type="number"
-                            value={serie.weight}
+                            value={serie.weight?.toString()}
                             className="no-spinner"
                             min={0}
                             style={{ width: "3em", textAlign: "center" }}

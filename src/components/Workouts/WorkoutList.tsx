@@ -1,4 +1,4 @@
-import { WorkoutListItem } from "@/models/workouts";
+import { WorkoutListItem } from "@/utils/RustBridge";
 
 type Props = {
   workouts: WorkoutListItem[];

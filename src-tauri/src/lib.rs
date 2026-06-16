@@ -1,4 +1,3 @@
-#[cfg(debug_assertions)]
 use tauri::AppHandle;
 
 use crate::{
@@ -14,65 +13,41 @@ use crate::{
         workouts::{WorkoutDetails, WorkoutListItem, WorkoutSeriesUpdate},
     },
 };
-use tauri_specta::*;
 
 mod garmin;
 mod models;
 
 #[tauri::command]
-#[specta::specta]
 fn get_workouts() -> Vec<WorkoutListItem> {
     get_session_list()
 }
 
 #[tauri::command]
-#[specta::specta]
 fn get_workout_details(timestamp: i64) -> WorkoutDetails {
     get_session_details(timestamp)
 }
 
 #[tauri::command]
-#[specta::specta]
 fn get_exercises() -> Vec<ExerciseListItem> {
     get_exercise_list()
 }
 
 #[tauri::command]
-#[specta::specta]
 fn get_exercise_details(category: &str, id: i16) -> ExerciseDetails {
     show_exercise_details(category, id)
 }
 
 #[tauri::command]
-#[specta::specta]
 async fn import_file(app: AppHandle) -> Result<(), String> {
     import_fit_file(app)
 }
 
 #[tauri::command]
-#[specta::specta]
 fn save_workout_changes(details: WorkoutSeriesUpdate) {
     update_workout_sets(details);
 }
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    #[cfg(debug_assertions)]
-    {
-        use specta::Types;
-        use specta_typescript::Typescript;
-
-        let types = Types::default()
-            .register::<WorkoutListItem>()
-            .register::<WorkoutDetails>()
-            .register::<ExerciseListItem>()
-            .register::<ExerciseDetails>()
-            .register::<WorkoutSeriesUpdate>();
-
-        Typescript::default()
-            .export_to("../src/models/RpcModels.ts", &types, specta_serde::Format)
-            .unwrap();
-    }
-
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .setup(|_| {

@@ -2,10 +2,14 @@ import { AppContext } from "@/context/AppContext";
 import { JSX, useContext, useEffect, useState } from "react";
 import { NavBar } from "../NavBar/NavBar";
 import "@/styles/app.css";
-import { RpcUtils } from "@/utils/RpcUtils";
+import {
+  ExerciseDetails,
+  ExerciseListItem,
+  RustBridge,
+  WorkoutDetails,
+  WorkoutListItem,
+} from "@/utils/RustBridge";
 import { Tabs } from "@/models/tabs";
-import { WorkoutDetails, WorkoutListItem } from "@/models/workouts";
-import { ExerciseDetails, ExerciseListItem } from "@/models/exercises";
 import { Button } from "react-bootstrap";
 import { WorkoutsList } from "../Workouts/WorkoutList";
 import { ExercisesList } from "../Exercises/ExercisesList";
@@ -26,10 +30,10 @@ export function App(): JSX.Element {
   >(undefined);
 
   useEffect(() => {
-    RpcUtils.getWorkouts().then((data) => {
+    RustBridge.getWorkouts().then((data) => {
       setWorkouts(data);
 
-      RpcUtils.getExercises().then((data) => {
+      RustBridge.getExercises().then((data) => {
         setExercises(data);
       });
     });
@@ -53,23 +57,23 @@ export function App(): JSX.Element {
   ];
 
   const getWorkoutDetails = (timestamp: number) => {
-    RpcUtils.getWorkoutDetails(timestamp).then((details) => {
+    RustBridge.getWorkoutDetails(timestamp).then((details) => {
       setWorkoutDetails(details);
     });
   };
 
   const getExerciseDetails = (category: string, id: number) => {
-    RpcUtils.getExerciseDetails(category, id).then((details) => {
+    RustBridge.getExerciseDetails(category, id).then((details) => {
       setExerciseDetails(details);
     });
   };
 
   const importFile = () => {
-    RpcUtils.importFile().then(() => {
-      RpcUtils.getWorkouts().then((data) => {
+    RustBridge.importFile().then(() => {
+      RustBridge.getWorkouts().then((data) => {
         setWorkouts(data);
 
-        RpcUtils.getExercises().then((data) => {
+        RustBridge.getExercises().then((data) => {
           setExercises(data);
         });
       });

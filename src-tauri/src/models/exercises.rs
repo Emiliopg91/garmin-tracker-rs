@@ -1,11 +1,10 @@
 use std::collections::HashMap;
 
 use serde::Serialize;
-use specta::Type;
 
 use crate::{garmin::database::dao::exercise::Exercise, models::workouts::WorkoutSerie};
 
-#[derive(Serialize, Type)]
+#[derive(Serialize)]
 pub struct ExerciseListItem {
     pub category: String,
     pub id: u16,
@@ -28,7 +27,7 @@ impl From<&Exercise> for ExerciseListItem {
     }
 }
 
-#[derive(Serialize, Type)]
+#[derive(Serialize)]
 pub struct ExerciseDetails {
     pub category: String,
     pub id: u16,

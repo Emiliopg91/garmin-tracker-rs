@@ -1,15 +1,13 @@
 use std::{collections::HashMap, hash::Hash};
 
 use serde::{Deserialize, Serialize};
-use specta::Type;
 
 use crate::garmin::database::dao::{serie::Serie, session::Session};
 
-#[derive(Serialize, Type)]
+#[derive(Serialize)]
 pub struct WorkoutListItem {
     pub name: String,
     pub date: String,
-    #[specta(type = String)]
     pub timestamp: i64,
 }
 
@@ -34,7 +32,7 @@ impl Hash for WorkoutListItem {
     }
 }
 
-#[derive(Serialize, Deserialize, Type)]
+#[derive(Serialize, Deserialize)]
 pub struct WorkoutSerie {
     pub idx: u8,
     pub reps: u16,
@@ -51,12 +49,11 @@ impl From<&Serie> for WorkoutSerie {
     }
 }
 
-#[derive(Serialize, Type)]
+#[derive(Serialize)]
 pub struct WorkoutDetails {
     pub name: String,
 
     pub date: String,
-    #[specta(type = String)]
     pub timestamp: i64,
 
     pub total_elapsed_time: String,
@@ -89,9 +86,8 @@ impl From<&Session> for WorkoutDetails {
     }
 }
 
-#[derive(Deserialize, Type)]
+#[derive(Deserialize)]
 pub struct WorkoutSeriesUpdate {
-    #[specta(type = String)]
     pub timestamp: i64,
     pub series: Vec<WorkoutSerie>,
 }
