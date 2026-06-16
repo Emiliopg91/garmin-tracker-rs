@@ -269,12 +269,11 @@ impl Serie {
         let rows = stmt
             .query_map((session, idx), Self::map_from_row)
             .map_err(DatabaseError::Select)?;
-        for row in rows {
-            if let Ok(r) = row {
-                return Ok(Some(r));
-            }
+
+        if let Some(r) = rows.flatten().next() {
+            return Ok(Some(r));
         }
-        return Ok(None);
+        Ok(None)
     }
 
     pub fn load_for_exercise(category: &str, id: i16) -> Result<Vec<Serie>> {

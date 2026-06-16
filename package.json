@@ -8,7 +8,8 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "pretauri": "./scripts/gen_bridge/main.py",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "lint": "eslint src --ext .js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix"
   },
   "dependencies": {
     "@tauri-apps/api": "^2",

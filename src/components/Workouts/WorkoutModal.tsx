@@ -53,7 +53,7 @@ export function WorkoutModal({ workout, onClose }: Props) {
 
   const getVolume = () => {
     let volume = 0;
-    Object.entries(localWorkout.series).map(([_, series]) => {
+    Object.entries(localWorkout.series).map(([, series]) => {
       series.forEach((serie) => {
         volume += serie.reps * serie.weight!;
       });
@@ -67,7 +67,7 @@ export function WorkoutModal({ workout, onClose }: Props) {
       timestamp: localWorkout.timestamp,
       series: [],
     };
-    Object.entries(localWorkout.series).forEach(([_, series]) => {
+    Object.entries(localWorkout.series).forEach(([, series]) => {
       series.forEach((serie) => {
         update.series.push(serie);
       });
