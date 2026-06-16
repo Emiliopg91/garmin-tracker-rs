@@ -1,6 +1,6 @@
 from pathlib import Path
 from dataclasses import dataclass
-from .commons import STANDARD_TYPE_ASSOC
+from .commons import STANDARD_TYPE_ASSOC,GenericType,GenericWrapper
 
 @dataclass
 class StructDefinition:
@@ -65,28 +65,23 @@ class StructDefinition:
 
     @staticmethod
     def __rust_to_ts(type_str: str) -> str:
-        if "<" in type_str:
-            template = type_str[0:type_str.find("<")]
+        gen_type = GenericType.from_str(type_str)
+        if not isinstance(gen_type,GenericType):
+            if type_str in STANDARD_TYPE_ASSOC.keys():
+                type_str = STANDARD_TYPE_ASSOC[type_str]
+            return type_str
+        
 
-            generics = type_str[type_str.find("<")+1:type_str.rfind(">")].split(", ")
+        if gen_type.wrapper==GenericWrapper.VEC:
+            return StructDefinition.__rust_to_ts(gen_type.strings[0])+"[]"
 
-            handled_generics = []
-            for generic in generics:
-                handled_generics.append(StructDefinition.__rust_to_ts(generic))
+        if gen_type.wrapper==GenericWrapper.MAP:
+            return "Record<"+StructDefinition.__rust_to_ts(gen_type.strings[0])+", "+StructDefinition.__rust_to_ts(gen_type.strings[1])+">"
 
-            if template=="Vec":
-                return handled_generics[0]+"[]"
+        if gen_type.wrapper==GenericWrapper.OPTION:
+            return StructDefinition.__rust_to_ts(gen_type.strings[0])+" | null"
+        
 
-            if template.endswith("Map"):
-                return "Record<"+handled_generics[0]+", "+handled_generics[1]+">"
-
-            if template=="Option":
-                return handled_generics[0]+" | null"
-
-        if type_str in STANDARD_TYPE_ASSOC.keys():
-            type_str = STANDARD_TYPE_ASSOC[type_str]
-
-        return type_str
 
     def to_typescript(self):
         result_lines = []

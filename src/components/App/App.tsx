@@ -56,7 +56,7 @@ export function App(): JSX.Element {
     },
   ];
 
-  const getWorkoutDetails = (timestamp: number) => {
+  const getWorkoutDetails = (timestamp: string) => {
     RustBridge.getWorkoutDetails(timestamp).then((details) => {
       setWorkoutDetails(details);
     });

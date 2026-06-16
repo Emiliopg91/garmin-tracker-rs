@@ -15,8 +15,8 @@ LIB_RS = SRC_TAURI / "lib.rs"
 SRC_TS = BASE_DIR / "src"
 BRIDGE_FILE = SRC_TS / "utils/RustBridge.ts"
 
-print("---- TAURI command TS bridge generation ----")
 
+print("---- TS code generator for Tauri commands ----")
 print("  Scanning for structs...")
 custom_types = []
 structs = set()
@@ -69,4 +69,4 @@ with open(BRIDGE_FILE, "w", encoding="utf-8") as f:
     f.write("\n".join(result_lines))
 
 print("  Finished")
-print("--------------------------------------------")
+print("----------------------------------------------")

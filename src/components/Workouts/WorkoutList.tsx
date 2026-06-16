@@ -2,7 +2,7 @@ import { WorkoutListItem } from "@/utils/RustBridge";
 
 type Props = {
   workouts: WorkoutListItem[];
-  onRowClick: (timestamp: number) => void;
+  onRowClick: (timestamp: string) => void;
 };
 
 export function WorkoutsList({ workouts, onRowClick }: Props) {

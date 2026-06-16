@@ -1,4 +1,4 @@
-from .commons import STANDARD_TYPE_ASSOC
+from .commons import STANDARD_TYPE_ASSOC, GenericType
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -41,7 +41,7 @@ class MethodDefinition:
                         ret=None
                 methods.append(MethodDefinition(method,params,ret))
         return methods
-    
+
     def get_custom_types(self):
         types = []
         for p in self.params:
@@ -54,15 +54,16 @@ class MethodDefinition:
             if t.startswith("&"):
                 t = t[1:]
                 types[idx] = t
-            if t.endswith(">"):
-                t=t.split("<")[1].split(">")[0]
-                if "," in t:
-                    t=t.split(",")[1].strip()
-            if t not in STANDARD_TYPE_ASSOC.keys():
-                res.append(t)
+            t = GenericType.from_str(t)
+            if isinstance(t,str):
+                if t not in STANDARD_TYPE_ASSOC.keys():
+                    res.append(t)
+            else:
+                for tt in t.get_inner_types():
+                    if tt not in STANDARD_TYPE_ASSOC.keys():
+                        res.append(tt)
 
         return res
-
 
     def to_typescript(self):
         ts_name = ""
