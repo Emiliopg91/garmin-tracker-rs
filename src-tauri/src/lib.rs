@@ -4,13 +4,13 @@ use crate::{
     garmin::{
         database::DATABASE_INST,
         ui::{
-            get_exercise_list, get_session_details, get_session_list, import_fit_file,
-            show_exercise_details, update_workout_sets,
+            self, get_exercise_list, get_session_list, import_fit_file, show_exercise_details,
+            update_session_sets,
         },
     },
     models::{
         exercises::{ExerciseDetails, ExerciseListItem},
-        workouts::{WorkoutDetails, WorkoutListItem, WorkoutSeriesUpdate},
+        sessions::{SessionDetails, SessionListItem, SessionSeriesUpdate},
     },
 };
 
@@ -18,34 +18,65 @@ mod garmin;
 mod models;
 
 #[tauri::command]
-fn get_workouts() -> Vec<WorkoutListItem> {
-    get_session_list()
+fn get_sessions() -> Result<Vec<SessionListItem>, String> {
+    match get_session_list() {
+        Ok(r) => Ok(r),
+        Err(e) => {
+            eprintln!("{}", e);
+            Err(e.to_string())
+        }
+    }
 }
 
 #[tauri::command]
-fn get_workout_details(timestamp: i64) -> WorkoutDetails {
-    get_session_details(timestamp)
+fn get_session_details(timestamp: i64) -> Result<SessionDetails, String> {
+    match ui::get_session_details(timestamp) {
+        Ok(r) => Ok(r),
+        Err(e) => {
+            eprintln!("{}", e);
+            Err(e.to_string())
+        }
+    }
 }
 
 #[tauri::command]
-fn get_exercises() -> Vec<ExerciseListItem> {
-    get_exercise_list()
+fn get_exercises() -> Result<Vec<ExerciseListItem>, String> {
+    match get_exercise_list() {
+        Ok(r) => Ok(r),
+        Err(e) => {
+            eprintln!("{}", e);
+            Err(e.to_string())
+        }
+    }
 }
 
 #[tauri::command]
-fn get_exercise_details(category: &str, id: i16) -> ExerciseDetails {
-    show_exercise_details(category, id)
+fn get_exercise_details(category: &str, id: i16) -> Result<ExerciseDetails, String> {
+    match show_exercise_details(category, id) {
+        Ok(r) => Ok(r),
+        Err(e) => {
+            eprintln!("{}", e);
+            Err(e.to_string())
+        }
+    }
 }
 
 #[tauri::command]
-async fn import_file(app: AppHandle) -> Result<(), String> {
-    import_fit_file(app)
+async fn import_file(app: AppHandle) -> Result<SessionListItem, String> {
+    match import_fit_file(app) {
+        Ok(r) => Ok(r),
+        Err(e) => {
+            eprintln!("{}", e);
+            Err(e.to_string())
+        }
+    }
 }
 
 #[tauri::command]
-fn save_workout_changes(details: WorkoutSeriesUpdate) {
-    update_workout_sets(details);
+fn save_session_changes(details: SessionSeriesUpdate) -> Result<(), String> {
+    update_session_sets(details)
 }
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -59,12 +90,12 @@ pub fn run() {
         })
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
-            get_workouts,
+            get_sessions,
             get_exercises,
-            get_workout_details,
+            get_session_details,
             get_exercise_details,
             import_file,
-            save_workout_changes
+            save_session_changes
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -4,42 +4,48 @@ use serde::{Deserialize, Serialize};
 
 use crate::garmin::database::dao::{serie::Serie, session::Session};
 
-#[derive(Serialize)]
-pub struct WorkoutListItem {
+#[derive(Serialize, Default)]
+pub struct SessionListItem {
     pub name: String,
     pub date: String,
     pub timestamp: i64,
+    pub volume: f64,
+    pub exercises_num: u8,
+    pub series_num: u8,
 }
 
-impl From<&Session> for WorkoutListItem {
+impl From<&Session> for SessionListItem {
     fn from(value: &Session) -> Self {
         Self {
             name: value.workout.clone(),
             date: value.format_date(),
             timestamp: value.timestamp.timestamp(),
+            exercises_num: value.get_exercises_num(),
+            series_num: value.get_series_num(),
+            volume: value.get_volume(),
         }
     }
 }
-impl PartialEq for WorkoutListItem {
+impl PartialEq for SessionListItem {
     fn eq(&self, other: &Self) -> bool {
         self.timestamp == other.timestamp
     }
 }
-impl Eq for WorkoutListItem {}
-impl Hash for WorkoutListItem {
+impl Eq for SessionListItem {}
+impl Hash for SessionListItem {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.timestamp.hash(state);
     }
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct WorkoutSerie {
+pub struct SessionSerie {
     pub idx: u8,
     pub reps: u16,
     pub weight: f64,
 }
 
-impl From<&Serie> for WorkoutSerie {
+impl From<&Serie> for SessionSerie {
     fn from(value: &Serie) -> Self {
         Self {
             idx: value.idx,
@@ -50,7 +56,7 @@ impl From<&Serie> for WorkoutSerie {
 }
 
 #[derive(Serialize)]
-pub struct WorkoutDetails {
+pub struct SessionDetails {
     pub name: String,
 
     pub date: String,
@@ -65,10 +71,10 @@ pub struct WorkoutDetails {
     pub avg_heart_rate: u8,
     pub max_heart_rate: u8,
     pub exercises: Vec<String>,
-    pub series: HashMap<String, Vec<WorkoutSerie>>,
+    pub series: HashMap<String, Vec<SessionSerie>>,
 }
 
-impl From<&Session> for WorkoutDetails {
+impl From<&Session> for SessionDetails {
     fn from(value: &Session) -> Self {
         Self {
             name: value.workout.clone(),
@@ -87,7 +93,7 @@ impl From<&Session> for WorkoutDetails {
 }
 
 #[derive(Deserialize)]
-pub struct WorkoutSeriesUpdate {
+pub struct SessionSeriesUpdate {
     pub timestamp: i64,
-    pub series: Vec<WorkoutSerie>,
+    pub series: Vec<SessionSerie>,
 }

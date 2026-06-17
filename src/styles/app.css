@@ -3,6 +3,13 @@
   flex-direction: column;
   height: 100vh;
 
+  #alert-zone {
+    position: absolute;
+    width: 80%;
+    right: 0;
+    margin: 10px;
+  }
+
   #list-layer {
     padding: 5px;
     flex: 1;

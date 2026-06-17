@@ -8,6 +8,8 @@ pub enum ParseFitFileError {
     WorkoutEntry(),
     #[error("Missing workout name")]
     WorkoutName(),
+    #[error("Invalid workout name")]
+    InvalidWorkoutName(),
     #[error("Missing exercise name")]
     ExerciseName(),
     #[error("Missing exercise category")]

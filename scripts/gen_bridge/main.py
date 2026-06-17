@@ -27,7 +27,7 @@ for file in MODELS_FLD.glob("**/*.rs"):
             custom_types.append(t)
 
 print("  Scanning for tauri commands...")
-methods = MethodDefinition.get_definitions(LIB_RS)
+methods = MethodDefinition.get_definitions(BASE_DIR, LIB_RS)
 for d in methods:
     for t in d.get_custom_types():
         custom_types.append(t)
@@ -45,19 +45,24 @@ for custom_type in custom_types:
 
 print("  Generating bridge...")
 result_lines = []
+result_lines.append('/* eslint-disable */')
+result_lines.append('')
 result_lines.append('//Auto generated file, do not edit manually')
 result_lines.append('')
-result_lines.append('import { invoke } from "@tauri-apps/api/core";')
+result_lines.append('import { invoke, InvokeArgs } from "@tauri-apps/api/core";')
 result_lines.append("")
 
 for struct in structs :
     result_lines.append(struct.to_typescript())
     result_lines.append("")
 
-
 result_lines.append("export class RustBridge {")
+result_lines.append("")
+result_lines.append("\tprivate static inner_invoke<R>(method: string, payload?: InvokeArgs): Promise<R> {")
+result_lines.append('\t\treturn invoke(method, payload);')
+result_lines.append("\t}")
+result_lines.append("")
 for method in methods:
-    result_lines.append("")
     result_lines.append(method.to_typescript())
     result_lines.append("")
 result_lines.append("}")

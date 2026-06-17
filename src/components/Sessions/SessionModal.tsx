@@ -1,18 +1,22 @@
+import { AppContext } from "@/context/AppContext";
+import { AlertType } from "@/models/alert";
 import {
   RustBridge,
-  WorkoutDetails,
-  WorkoutSeriesUpdate,
+  SessionDetails,
+  SessionSeriesUpdate,
 } from "@/utils/RustBridge";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { Button, Modal } from "react-bootstrap";
 
 type Props = {
-  workout: WorkoutDetails;
+  session: SessionDetails;
   onClose: () => void;
 };
 
-export function WorkoutModal({ workout, onClose }: Props) {
-  const [localWorkout, setLocalWorkout] = useState({ ...workout });
+export function SessionModal({ session, onClose }: Props) {
+  const { addAlert } = useContext(AppContext);
+
+  const [localSession, setLocalSession] = useState({ ...session });
   const [changed, setChanged] = useState(false);
 
   const updateSerieReps = (exercise: string, idx: number, newVal: string) => {
@@ -21,16 +25,16 @@ export function WorkoutModal({ workout, onClose }: Props) {
       reps = 0;
     }
     const newObj = {
-      ...localWorkout,
+      ...localSession,
       series: {
-        ...localWorkout.series,
-        [exercise]: localWorkout.series[exercise].map((serie, id) =>
+        ...localSession.series,
+        [exercise]: localSession.series[exercise].map((serie, id) =>
           id === idx ? { ...serie, reps } : serie,
         ),
       },
     };
-    setLocalWorkout(newObj);
-    setChanged(JSON.stringify(newObj) != JSON.stringify(workout));
+    setLocalSession(newObj);
+    setChanged(JSON.stringify(newObj) != JSON.stringify(session));
   };
 
   const updateSerieWeight = (exercise: string, idx: number, newVal: string) => {
@@ -39,21 +43,21 @@ export function WorkoutModal({ workout, onClose }: Props) {
       weight = 0;
     }
     const newObj = {
-      ...localWorkout,
+      ...localSession,
       series: {
-        ...localWorkout.series,
-        [exercise]: localWorkout.series[exercise].map((serie, id) =>
+        ...localSession.series,
+        [exercise]: localSession.series[exercise].map((serie, id) =>
           id === idx ? { ...serie, weight } : serie,
         ),
       },
     };
-    setLocalWorkout(newObj);
-    setChanged(JSON.stringify(newObj) != JSON.stringify(workout));
+    setLocalSession(newObj);
+    setChanged(JSON.stringify(newObj) != JSON.stringify(session));
   };
 
   const getVolume = () => {
     let volume = 0;
-    Object.entries(localWorkout.series).map(([, series]) => {
+    Object.entries(localSession.series).map(([, series]) => {
       series.forEach((serie) => {
         volume += serie.reps * serie.weight!;
       });
@@ -63,18 +67,33 @@ export function WorkoutModal({ workout, onClose }: Props) {
   };
 
   const saveChanges = () => {
-    const update: WorkoutSeriesUpdate = {
-      timestamp: localWorkout.timestamp,
+    const update: SessionSeriesUpdate = {
+      timestamp: localSession.timestamp,
       series: [],
     };
-    Object.entries(localWorkout.series).forEach(([, series]) => {
+    Object.entries(localSession.series).forEach(([, series]) => {
       series.forEach((serie) => {
         update.series.push(serie);
       });
     });
-    RustBridge.saveWorkoutChanges(update).then(() => {
-      onClose();
-    });
+    RustBridge.saveSessionChanges(update)
+      .then(() => {
+        onClose();
+      })
+      .then(() => {
+        addAlert({
+          title: "Updated succesful",
+          body: "Workout session updated succesfully",
+          type: AlertType.INFO,
+        });
+      })
+      .catch((e) => {
+        addAlert({
+          title: "Error on session update",
+          body: e,
+          type: AlertType.ERROR,
+        });
+      });
   };
 
   return (
@@ -85,15 +104,15 @@ export function WorkoutModal({ workout, onClose }: Props) {
       <Modal show={true} onHide={onClose} data-bs-theme="dark">
         <Modal.Header closeButton>
           <Modal.Title>
-            {localWorkout.name}
+            {localSession.name}
             <small style={{ fontSize: "17px", marginLeft: "30px" }}>
-              {localWorkout.date}
+              {localSession.date}
             </small>
           </Modal.Title>
         </Modal.Header>
 
         <Modal.Body>
-          <table id="workout-details-table">
+          <table id="session-details-table">
             <colgroup>
               <col style={{ width: "200px" }} />
               <col style={{ width: "150px" }} />
@@ -102,30 +121,31 @@ export function WorkoutModal({ workout, onClose }: Props) {
             <tbody>
               <tr>
                 <td>Total time:</td>
-                <td>{localWorkout.total_elapsed_time}</td>
+                <td>{localSession.total_elapsed_time}</td>
               </tr>
               <tr>
                 <td>Active time:</td>
-                <td>{localWorkout.active_time}</td>
+                <td>{localSession.active_time}</td>
               </tr>
               <tr>
                 <td>Total calories:</td>
-                <td>{localWorkout.total_calories} Kcal</td>
+                <td>{localSession.total_calories} Kcal</td>
               </tr>
               <tr>
                 <td>Active calories:</td>
                 <td>
-                  {localWorkout.total_calories - workout.metabolic_calories}{" "}
+                  {localSession.total_calories -
+                    localSession.metabolic_calories}{" "}
                   Kcal
                 </td>
               </tr>
               <tr>
                 <td>Average heart rate:</td>
-                <td> {localWorkout.avg_heart_rate} BPM</td>
+                <td> {localSession.avg_heart_rate} BPM</td>
               </tr>
               <tr>
                 <td>Max heart rate:</td>
-                <td>{localWorkout.max_heart_rate} BPM</td>
+                <td>{localSession.max_heart_rate} BPM</td>
               </tr>
               <tr>
                 <td>Volume:</td>
@@ -133,7 +153,7 @@ export function WorkoutModal({ workout, onClose }: Props) {
               </tr>
             </tbody>
           </table>
-          {Object.keys(localWorkout.series).length > 0 && (
+          {Object.keys(localSession.series).length > 0 && (
             <>
               <hr />
               <table>
@@ -149,8 +169,8 @@ export function WorkoutModal({ workout, onClose }: Props) {
                   </tr>
                 </thead>
                 <tbody>
-                  {localWorkout.exercises.map((exercise) =>
-                    localWorkout.series[exercise].map((serie, idx) => (
+                  {localSession.exercises.map((exercise) =>
+                    localSession.series[exercise].map((serie, idx) => (
                       <tr key={`${exercise}-${idx}`}>
                         {idx === 0 && (
                           <td
@@ -158,7 +178,7 @@ export function WorkoutModal({ workout, onClose }: Props) {
                               borderBottom:
                                 idx === 0 ? "1px solid #e4e4e430" : "",
                             }}
-                            rowSpan={localWorkout.series[exercise].length}
+                            rowSpan={localSession.series[exercise].length}
                           >
                             {exercise}
                           </td>
@@ -167,11 +187,11 @@ export function WorkoutModal({ workout, onClose }: Props) {
                         <td
                           style={{
                             borderBottom:
-                              idx === localWorkout.series[exercise].length - 1
+                              idx === localSession.series[exercise].length - 1
                                 ? "1px solid #e4e4e430"
                                 : "",
                             paddingBottom:
-                              idx === localWorkout.series[exercise].length - 1
+                              idx === localSession.series[exercise].length - 1
                                 ? "5px"
                                 : "",
                             paddingTop: idx === 0 ? "5px" : "",

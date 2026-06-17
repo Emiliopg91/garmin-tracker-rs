@@ -41,7 +41,7 @@ class StructDefinition:
                 definitions.append(definition)
 
         return definitions
-    
+
     def get_custom_types(self):
         types = []
         for p in self.fields.keys():
@@ -63,31 +63,13 @@ class StructDefinition:
     
 
 
-    @staticmethod
-    def __rust_to_ts(type_str: str) -> str:
-        gen_type = GenericType.from_str(type_str)
-        if not isinstance(gen_type,GenericType):
-            if type_str in STANDARD_TYPE_ASSOC.keys():
-                type_str = STANDARD_TYPE_ASSOC[type_str]
-            return type_str
-        
-
-        if gen_type.wrapper==GenericWrapper.VEC:
-            return StructDefinition.__rust_to_ts(gen_type.strings[0])+"[]"
-
-        if gen_type.wrapper==GenericWrapper.MAP:
-            return "Record<"+StructDefinition.__rust_to_ts(gen_type.strings[0])+", "+StructDefinition.__rust_to_ts(gen_type.strings[1])+">"
-
-        if gen_type.wrapper==GenericWrapper.OPTION:
-            return StructDefinition.__rust_to_ts(gen_type.strings[0])+" | null"
-        
-
-
     def to_typescript(self):
         result_lines = []
         result_lines.append(f"export interface {self.name} {{")
         for (name,typ) in self.fields.items():
-            typ = StructDefinition.__rust_to_ts(typ)
-            result_lines.append(f"\t{name}: {typ}")
+            typ = GenericType.from_str(typ)
+            if isinstance(typ,GenericType):
+                typ=typ.to_typescript()
+            result_lines.append(f"\t{name}: {typ};")
         result_lines.append("}")
         return "\n".join(result_lines)

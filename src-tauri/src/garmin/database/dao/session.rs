@@ -264,6 +264,38 @@ impl Session {
         if let Value::String(name) = name.value() {
             return Ok(name.clone());
         }
-        panic!("Invalid workout name type");
+        return Err(ParseFitFileError::InvalidWorkoutName());
+    }
+
+    pub fn get_volume(&self) -> f64 {
+        let mut volume = 0_f64;
+
+        for (_, series) in &self.series {
+            for serie in series {
+                volume += (serie.reps as f64) * serie.weight
+            }
+        }
+
+        volume
+    }
+
+    pub fn get_exercises_num(&self) -> u8 {
+        let mut exercises = 0_u8;
+
+        for (_, _) in &self.series {
+            exercises += 1;
+        }
+
+        exercises
+    }
+
+    pub fn get_series_num(&self) -> u8 {
+        let mut series = 0_u8;
+
+        for (_, series_arr) in &self.series {
+            series += series_arr.len() as u8;
+        }
+
+        series
     }
 }

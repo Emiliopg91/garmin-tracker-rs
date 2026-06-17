@@ -1,2 +1,2 @@
 pub mod exercises;
-pub mod workouts;
+pub mod sessions;

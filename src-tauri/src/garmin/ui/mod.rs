@@ -10,38 +10,40 @@ use crate::{
     },
     models::{
         exercises::{ExerciseDetails, ExerciseListItem},
-        workouts::{WorkoutDetails, WorkoutListItem, WorkoutSerie, WorkoutSeriesUpdate},
+        sessions::{SessionDetails, SessionListItem, SessionSerie, SessionSeriesUpdate},
     },
 };
 
-pub fn get_session_list() -> Vec<WorkoutListItem> {
-    let sessions = Session::load_from_db().unwrap();
+pub fn get_session_list() -> Result<Vec<SessionListItem>, String> {
+    let sessions = Session::load_from_db().map_err(|e| e.to_string())?;
 
-    sessions
+    Ok(sessions
         .into_iter()
-        .map(|s| WorkoutListItem::from(&s))
-        .collect::<Vec<_>>()
+        .map(|s| SessionListItem::from(&s))
+        .collect::<Vec<_>>())
 }
 
-pub fn get_session_details(timestamp: i64) -> WorkoutDetails {
-    let session = Session::find_by_id(timestamp).unwrap().unwrap();
+pub fn get_session_details(timestamp: i64) -> Result<SessionDetails, String> {
+    if let Some(session) = Session::find_by_id(timestamp).map_err(|e| e.to_string())? {
+        let mut details = SessionDetails::from(&session);
 
-    let mut details = WorkoutDetails::from(&session);
+        for (exercise, series) in &session.series {
+            if !details.exercises.contains(&exercise.name) {
+                details.exercises.push(exercise.name.clone())
+            }
+            let entry = details.series.entry(exercise.name.clone()).or_default();
+            for serie in series {
+                entry.push(SessionSerie::from(serie));
+            }
+        }
 
-    for (exercise, series) in &session.series {
-        if !details.exercises.contains(&exercise.name) {
-            details.exercises.push(exercise.name.clone())
-        }
-        let entry = details.series.entry(exercise.name.clone()).or_default();
-        for serie in series {
-            entry.push(WorkoutSerie::from(serie));
-        }
+        Ok(details)
+    } else {
+        Err("Could not find session".to_string())
     }
-
-    details
 }
 
-pub fn import_fit_file(app: AppHandle) -> Result<(), String> {
+pub fn import_fit_file(app: AppHandle) -> Result<SessionListItem, String> {
     let (tx, rx) = mpsc::channel();
 
     app.dialog()
@@ -53,7 +55,7 @@ pub fn import_fit_file(app: AppHandle) -> Result<(), String> {
             }
         });
 
-    let mut res = Ok(());
+    let mut res = Ok(SessionListItem::default());
     match rx.recv() {
         Ok(files) => match DATABASE_INST.lock() {
             Ok(mut db) => {
@@ -62,6 +64,7 @@ pub fn import_fit_file(app: AppHandle) -> Result<(), String> {
                         match Session::load_from_file(file.as_path().unwrap()) {
                             Ok(mut session) => {
                                 session.insert(tx)?;
+                                res = Ok(SessionListItem::from(&session))
                             }
                             Err(e) => {
                                 res = Err(format!("Error parsing session: {}", e));
@@ -87,12 +90,12 @@ pub fn import_fit_file(app: AppHandle) -> Result<(), String> {
     res
 }
 
-pub fn get_exercise_list() -> Vec<ExerciseListItem> {
+pub fn get_exercise_list() -> Result<Vec<ExerciseListItem>, String> {
     let mut result = Vec::new();
 
-    let exercises = Exercise::load_from_db().unwrap();
+    let exercises = Exercise::load_from_db().map_err(|e| e.to_string())?;
     for exercise in exercises {
-        let pr = Serie::get_pr_for_exercise(&exercise).unwrap();
+        let pr = Serie::get_pr_for_exercise(&exercise).map_err(|e| e.to_string())?;
         result.push(ExerciseListItem {
             category: exercise.category,
             id: exercise.id,
@@ -103,54 +106,60 @@ pub fn get_exercise_list() -> Vec<ExerciseListItem> {
         });
     }
 
-    result
+    Ok(result)
 }
 
-pub fn show_exercise_details(category: &str, id: i16) -> ExerciseDetails {
-    let exercise = Exercise::load_by_cat_and_id(category, id as u16)
-        .unwrap()
-        .unwrap();
-    let mut res = ExerciseDetails::from(&exercise);
+pub fn show_exercise_details(category: &str, id: i16) -> Result<ExerciseDetails, String> {
+    if let Some(exercise) =
+        Exercise::load_by_cat_and_id(category, id as u16).map_err(|e| e.to_string())?
+    {
+        let mut res = ExerciseDetails::from(&exercise);
 
-    let pr = Serie::get_pr_for_exercise(&exercise).unwrap();
-    res.reps = pr.reps;
-    res.weight = pr.weight;
-    res.rm = pr.get_1rm_estimation();
-    res.pr_date = pr.format_date();
+        let pr = Serie::get_pr_for_exercise(&exercise).map_err(|e| e.to_string())?;
+        res.reps = pr.reps;
+        res.weight = pr.weight;
+        res.rm = pr.get_1rm_estimation();
+        res.pr_date = pr.format_date();
 
-    let series = Serie::load_for_exercise(category, id).unwrap();
-    for serie in series {
-        let wk = WorkoutSerie::from(&serie);
-        let ses = Session::find_by_id(serie.session.timestamp())
-            .unwrap()
-            .unwrap();
+        let series = Serie::load_for_exercise(category, id).map_err(|e| e.to_string())?;
+        for serie in series {
+            let wk = SessionSerie::from(&serie);
+            if let Some(ses) =
+                Session::find_by_id(serie.session.timestamp()).map_err(|e| e.to_string())?
+            {
+                let ex_str = format!("{}\n{}", ses.workout, ses.format_date());
 
-        let ex_str = format!("{}\n{}", ses.workout, ses.format_date());
+                if !res.workouts.contains(&ex_str) {
+                    res.workouts.push(ex_str.clone());
+                }
 
-        if !res.workouts.contains(&ex_str) {
-            res.workouts.push(ex_str.clone());
+                let entry = res.series.entry(ex_str).or_default();
+                entry.push(wk);
+            } else {
+                return Err("Could not find session".to_string());
+            }
         }
 
-        let entry = res.series.entry(ex_str).or_default();
-        entry.push(wk);
+        Ok(res)
+    } else {
+        Err("Could not find exercise".to_string())
     }
-
-    res
 }
 
-pub fn update_workout_sets(details: WorkoutSeriesUpdate) {
+pub fn update_session_sets(details: SessionSeriesUpdate) -> Result<(), String> {
     let mut to_update = Vec::new();
     for serie in details.series {
-        let db_serie = Serie::load_for_session_and_idx(details.timestamp, serie.idx).unwrap();
+        let db_serie = Serie::load_for_session_and_idx(details.timestamp, serie.idx)
+            .map_err(|e| e.to_string())?;
         if let Some(mut db_serie) = db_serie {
             db_serie.reps = serie.reps;
             db_serie.weight = serie.weight;
             to_update.push(db_serie);
         }
     }
-    let exercises = Exercise::load_from_db().unwrap();
+    let exercises = Exercise::load_from_db().map_err(|e| e.to_string())?;
 
-    let mut db = DATABASE_INST.lock().unwrap();
+    let mut db = DATABASE_INST.lock().map_err(|e| e.to_string())?;
     db.run_in_transaction(move |tx| {
         for to_upd in &to_update {
             to_upd.update_serie(tx);
@@ -160,5 +169,7 @@ pub fn update_workout_sets(details: WorkoutSeriesUpdate) {
         }
         Ok(())
     })
-    .unwrap();
+    .map_err(|e| e.to_string())?;
+
+    Ok(())
 }

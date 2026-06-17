@@ -6,40 +6,51 @@ from pathlib import Path
 class MethodDefinition:
     name: str
     params: list[()]
-    ret_type: str
+    ret_type: GenericType
+    defined_at: str
 
     @staticmethod
-    def get_definitions(path: Path) -> list[MethodDefinition]:
+    def get_definitions(base_path: Path, path: Path) -> list[MethodDefinition]:
         with open(path, "r",encoding="utf-8") as librs:
-            lines = librs.read().splitlines()
-            
+            orig_content = content = librs.read()
+
+
         methods = []
-        for idx in range(0,len(lines)): #pylint: disable=consider-using-enumerate
-            line = lines[idx]
-            if line.startswith("#[tauri::command]"):
-                idx+=1
-                line = lines[idx]
-                if line.startswith("async "):
-                    line = line[6:]
-                method=line[3:].split("(")[0].strip()
-                signature = ("("+line[3:].split("(")[1]+(" ".join(lines[idx+1:]))).split("{")[0]
-                sig_parts = signature.split("->")
-                params_str = sig_parts[0].strip()[1:-1]
-                params = []
-                if len(params_str)>0:
-                    for p in params_str.split(","):
-                        p = p.strip()
-                        parts = p.split(":")
-                        name =parts[0].strip()
-                        typ =parts[1].strip()
-                        if not typ.startswith("AppHandle"):
-                            params.append((name,typ))
-                ret = None
-                if len(sig_parts)>1:
-                    ret = sig_parts[1].strip()
-                    if ret.startswith("Result<"):
-                        ret=None
-                methods.append(MethodDefinition(method,params,ret))
+        while True:
+            pos = content.find("#[tauri::command]")
+            if pos < 0:
+                break
+            content = content[pos+18:]
+            while not content.startswith("fn "):
+                if content.startswith("async"):
+                    content = content[6:]
+            pos = orig_content[0:orig_content.find(content)].count("\n")
+            content = content[3:]
+            method=content.split("(")[0].strip()
+            content = content[len(method):]
+            close_idx=content.find("{")
+            signature = content[:close_idx]
+
+            ret = "None"
+            if "->" in signature:
+                ret = signature.split(" -> ")[1].strip()
+            params_str = signature.split(" -> ")[0].strip().replace("(","").replace(")","")
+            params = []
+            for param in params_str.split(","):
+                param=param.strip()
+                if param:
+                    parts= param.split(":")
+                    parts[0]=parts[0].strip()
+                    parts[1]=parts[1].strip()
+                    if parts[1].startswith("&"):
+                        parts[1] = parts[1][1:]
+                    if "AppHandle" not in parts[1]:
+                        params.append((parts[0].strip(),GenericType.from_str(parts[1].strip())))
+
+            methods.append(MethodDefinition(method,params,GenericType.from_str(ret),f"{path.relative_to(base_path)}:{pos}"))
+
+            content = content[close_idx+1:]
+
         return methods
 
     def get_custom_types(self):
@@ -51,17 +62,11 @@ class MethodDefinition:
 
         res = []
         for idx,t in enumerate(types):
-            if t.startswith("&"):
-                t = t[1:]
-                types[idx] = t
-            t = GenericType.from_str(t)
             if isinstance(t,str):
-                if t not in STANDARD_TYPE_ASSOC.keys():
-                    res.append(t)
+                res.append(t)
             else:
                 for tt in t.get_inner_types():
-                    if tt not in STANDARD_TYPE_ASSOC.keys():
-                        res.append(tt)
+                    res.append(tt)
 
         return res
 
@@ -78,19 +83,16 @@ class MethodDefinition:
             else:
                 next_upper=True
 
-        ret = "void"
-        if self.ret_type:
+        if isinstance(self.ret_type, str):
             ret = self.ret_type
-            if ret.startswith("Vec<"):
-                ret = ret[4:-1]+"[]"
+        else:
+            ret = self.ret_type.to_typescript()
 
         params = []
         for p in self.params:
             typ = p[1]
-            if typ.startswith("&"):
-                typ = typ[1:]
-            if typ in STANDARD_TYPE_ASSOC.keys():
-                typ = STANDARD_TYPE_ASSOC[typ]
+            if isinstance(typ,GenericType):
+                typ=typ.to_typescript()
             params.append(p[0]+": "+typ)
 
         payload = ""
@@ -101,7 +103,8 @@ class MethodDefinition:
             payload=f", {{ {", ".join(names)} }}"
 
         result_lines = []
+        result_lines.append(f"\t// Defined at {self.defined_at}")
         result_lines.append(f"\tpublic static {ts_name}({", ".join(params)}): Promise<{ret}> {{")
-        result_lines.append(f'\t\treturn invoke("{self.name}"{payload});')
+        result_lines.append(f'\t\treturn RustBridge.inner_invoke("{self.name}"{payload});')
         result_lines.append("\t}")
         return "\n".join(result_lines)

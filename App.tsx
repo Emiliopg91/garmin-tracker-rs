@@ -6,14 +6,14 @@ import {
   ExerciseDetails,
   ExerciseListItem,
   RustBridge,
-  SessionDetails,
-  SessionListItem,
+  WorkoutDetails,
+  WorkoutListItem,
 } from "@/utils/RustBridge";
 import { Tabs } from "@/models/tabs";
 import { Button } from "react-bootstrap";
-import { SessionsList } from "../Sessions/SessionList";
+import { WorkoutsList } from "../Workouts/WorkoutList";
 import { ExercisesList } from "../Exercises/ExercisesList";
-import { SessionModal } from "../Sessions/SessionModal";
+import { WorkoutModal } from "../Workouts/WorkoutModal";
 import { ExerciseModal } from "../Exercises/ExerciseModal";
 import { Alerts } from "../Alerts/Alerts";
 import { AlertType } from "@/models/alert";
@@ -21,9 +21,9 @@ import { AlertType } from "@/models/alert";
 export function App(): JSX.Element {
   const { tab, setTab, alerts, addAlert } = useContext(AppContext);
 
-  const [sessions, setSessions] = useState<SessionListItem[]>([]);
-  const [sessionDetails, setSessionDetails] = useState<
-    SessionDetails | undefined
+  const [workouts, setWorkouts] = useState<WorkoutListItem[]>([]);
+  const [workoutDetails, setWorkoutDetails] = useState<
+    WorkoutDetails | undefined
   >(undefined);
 
   const [exercises, setExercises] = useState<ExerciseListItem[]>([]);
@@ -32,9 +32,9 @@ export function App(): JSX.Element {
   >(undefined);
 
   const refreshLists = () => {
-    RustBridge.getSessions()
+    RustBridge.getWorkouts()
       .then((data) => {
-        setSessions(data);
+        setWorkouts(data);
 
         RustBridge.getExercises()
           .then((data) => {
@@ -50,7 +50,7 @@ export function App(): JSX.Element {
       })
       .catch((e) => {
         addAlert({
-          title: "Error getting session list",
+          title: "Error getting workout list",
           body: e,
           type: AlertType.ERROR,
         });
@@ -61,14 +61,14 @@ export function App(): JSX.Element {
     refreshLists();
   }, []);
 
-  const getSessionDetails = (timestamp: number) => {
-    RustBridge.getSessionDetails(timestamp)
+  const getWorkoutDetails = (timestamp: number) => {
+    RustBridge.getWorkoutDetails(timestamp)
       .then((details) => {
-        setSessionDetails(details);
+        setWorkoutDetails(details);
       })
       .catch((e) => {
         addAlert({
-          title: "Error getting session details",
+          title: "Error getting workout details",
           body: e,
           type: AlertType.ERROR,
         });
@@ -87,7 +87,7 @@ export function App(): JSX.Element {
         refreshLists();
         addAlert({
           title: "File imported succesfully",
-          body: "Imported session '" + session.name + "' from " + session.date,
+          body: "Imported workout '" + session.name + "' from " + session.date,
           type: AlertType.INFO,
         });
       })
@@ -102,7 +102,7 @@ export function App(): JSX.Element {
 
   const navBarItems = [
     {
-      label: "Sessions",
+      label: "Workouts",
       onSelected: () => {
         setTab(Tabs.WORKOUTS);
       },
@@ -126,10 +126,10 @@ export function App(): JSX.Element {
 
         <div id="list-layer">
           {tab == Tabs.WORKOUTS && (
-            <SessionsList
-              sessions={sessions}
+            <WorkoutsList
+              workouts={workouts}
               onRowClick={(timestamp) => {
-                getSessionDetails(timestamp);
+                getWorkoutDetails(timestamp);
               }}
             />
           )}
@@ -149,10 +149,10 @@ export function App(): JSX.Element {
         </div>
 
         <div>
-          {sessionDetails && (
-            <SessionModal
-              session={sessionDetails}
-              onClose={() => setSessionDetails(undefined)}
+          {workoutDetails && (
+            <WorkoutModal
+              workout={workoutDetails}
+              onClose={() => setWorkoutDetails(undefined)}
             />
           )}
         </div>
