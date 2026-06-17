@@ -2,7 +2,7 @@ import { SessionListItem } from "@/utils/RustBridge";
 
 type Props = {
   sessions: SessionListItem[];
-  onRowClick: (timestamp: number) => void;
+  onRowClick: (timestamp: string) => void;
 };
 
 export function SessionsList({ sessions, onRowClick }: Props) {

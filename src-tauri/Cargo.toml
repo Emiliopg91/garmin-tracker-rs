@@ -30,6 +30,7 @@ rfd = "0.17.2"
 rusqlite = { version = "0.40.1", features = ["bundled"] }
 thiserror = "2.0.18"
 tauri-plugin-dialog = "2"
+dirs = "6.0.0"
 
 
 [profile.release]

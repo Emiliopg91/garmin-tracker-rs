@@ -82,8 +82,13 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .setup(|_| {
+            let config_dir = dirs::config_dir().expect("Could not get config folder");
+            let db_dir = config_dir.join("taurfit");
+            std::fs::create_dir_all(&db_dir).unwrap();
+            let db_path = db_dir.join("taurfit.db");
+
             let mut db = DATABASE_INST.lock().unwrap();
-            db.open("../db.sqlite").unwrap();
+            db.open(db_path).unwrap();
             db.create_schema().unwrap();
 
             Ok(())

@@ -2,10 +2,11 @@ from dataclasses import dataclass
 from enum import Enum
 
 STANDARD_TYPE_ASSOC : dict[str,str] ={
+    "bool":"boolean",
     "i8":"number",
     "i16":"number",
     "i32":"number",
-    "i64":"number",
+    "i64":"string",
     "isize":"number",
     "u8":"number",
     "u16":"number",

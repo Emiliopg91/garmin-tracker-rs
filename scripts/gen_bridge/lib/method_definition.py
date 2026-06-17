@@ -24,7 +24,7 @@ class MethodDefinition:
             while not content.startswith("fn "):
                 if content.startswith("async"):
                     content = content[6:]
-            pos = orig_content[0:orig_content.find(content)].count("\n")
+            pos = orig_content[0:orig_content.find(content)].count("\n")+1
             content = content[3:]
             method=content.split("(")[0].strip()
             content = content[len(method):]
@@ -103,7 +103,7 @@ class MethodDefinition:
             payload=f", {{ {", ".join(names)} }}"
 
         result_lines = []
-        result_lines.append(f"\t// Defined at {self.defined_at}")
+        result_lines.append(f"\t// Declaration: {self.defined_at}")
         result_lines.append(f"\tpublic static {ts_name}({", ".join(params)}): Promise<{ret}> {{")
         result_lines.append(f'\t\treturn RustBridge.inner_invoke("{self.name}"{payload});')
         result_lines.append("\t}")

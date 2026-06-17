@@ -9,8 +9,6 @@ from lib.struct_definition import StructDefinition
 BASE_DIR = Path(os.path.abspath(os.path.join(os.path.dirname(__file__), "..","..")))
 
 SRC_TAURI = BASE_DIR / "src-tauri" / "src"
-MODELS_FLD = SRC_TAURI / "models"
-LIB_RS = SRC_TAURI / "lib.rs"
 
 SRC_TS = BASE_DIR / "src"
 BRIDGE_FILE = SRC_TS / "utils/RustBridge.ts"
@@ -20,14 +18,18 @@ print("---- TS code generator for Tauri commands ----")
 print("  Scanning for structs...")
 custom_types = []
 structs = set()
-for file in MODELS_FLD.glob("**/*.rs"):
-    for s in StructDefinition.get_definitions(file):
+for file in SRC_TAURI.glob("*/*.rs"):
+    for s in StructDefinition.get_definitions(BASE_DIR, file):
         structs.add(s)
         for t in s.get_custom_types():
             custom_types.append(t)
 
 print("  Scanning for tauri commands...")
-methods = MethodDefinition.get_definitions(BASE_DIR, LIB_RS)
+methods = []
+for file in SRC_TAURI.glob("**/*.rs"):
+    for m in MethodDefinition.get_definitions(BASE_DIR, file):
+        methods.append(m)
+
 for d in methods:
     for t in d.get_custom_types():
         custom_types.append(t)
@@ -38,9 +40,9 @@ for custom_type in custom_types:
         if struct.name==custom_type:
             found = True
             break
-    
+
     if not found:
-        """"""
+        pass
 
 
 print("  Generating bridge...")
@@ -52,19 +54,20 @@ result_lines.append('')
 result_lines.append('import { invoke, InvokeArgs } from "@tauri-apps/api/core";')
 result_lines.append("")
 
-for struct in structs :
+for struct in sorted(structs, key=lambda x: x.name):
     result_lines.append(struct.to_typescript())
     result_lines.append("")
 
 result_lines.append("export class RustBridge {")
 result_lines.append("")
-result_lines.append("\tprivate static inner_invoke<R>(method: string, payload?: InvokeArgs): Promise<R> {")
-result_lines.append('\t\treturn invoke(method, payload);')
-result_lines.append("\t}")
-result_lines.append("")
-for method in methods:
+for method in sorted(methods, key=lambda x: x.name):
     result_lines.append(method.to_typescript())
     result_lines.append("")
+result_lines.append(
+    "\tprivate static inner_invoke<R>(method: string, payload?: InvokeArgs): Promise<R> {"
+)
+result_lines.append('\t\treturn invoke(method, payload);')
+result_lines.append("\t}")
 result_lines.append("}")
 
 if not BRIDGE_FILE.parent.exists():

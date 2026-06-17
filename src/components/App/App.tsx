@@ -61,7 +61,7 @@ export function App(): JSX.Element {
     refreshLists();
   }, []);
 
-  const getSessionDetails = (timestamp: number) => {
+  const getSessionDetails = (timestamp: string) => {
     RustBridge.getSessionDetails(timestamp)
       .then((details) => {
         setSessionDetails(details);

@@ -3491,6 +3491,7 @@ name = "taurfit"
 version = "0.1.0"
 dependencies = [
  "chrono",
+ "dirs",
  "fitparser",
  "indexmap 2.14.0",
  "rfd 0.17.2",
