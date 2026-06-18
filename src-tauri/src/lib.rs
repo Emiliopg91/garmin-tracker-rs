@@ -1,4 +1,4 @@
-use tauri::{AppHandle, Manager, image::Image};
+use tauri::AppHandle;
 
 use crate::garmin::{
     database::DATABASE_INST,
