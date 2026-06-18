@@ -33,14 +33,28 @@ pub fn get_workout_details(name: &str) -> Result<WorkoutDetails, String> {
             volume += s.get_volume();
         });
 
-        Ok(WorkoutDetails {
+        let mut details = WorkoutDetails {
             name: name.to_string(),
             avg_time: Session::format_duration((time / (sessions.len() as f64)) as u64),
-            latest_session: latest.format_total_time(),
+            latest_session: latest.format_date(),
             avg_volume: volume / (sessions.len() as f64),
             session_count: count,
             sessions: sessions.iter().map(WorkoutSession::from).collect(),
-        })
+        };
+
+        for i in 0..details.sessions.len().saturating_sub(1) {
+            let (left, right) = details.sessions.split_at_mut(i + 1);
+
+            let current = &mut left[i];
+            let previous = &right[0];
+
+            current.vol_diff = format!(
+                "{:+.2}%",
+                (current.volume - previous.volume) / previous.volume * 100.0
+            );
+        }
+
+        Ok(details)
     };
 
     match res {

@@ -2,5 +2,8 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 fn main() {
-    taurfit_lib::run()
+    unsafe {
+        std::env::set_var("GDK_BACKEND", "x11");
+    }
+    garmin_fit_rs_lib::run()
 }

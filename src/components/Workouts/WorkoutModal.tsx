@@ -48,12 +48,14 @@ export function WorkoutModal({ workout, onClose }: Props) {
               <hr />
               <table>
                 <colgroup>
-                  <col style={{ width: "350px" }} />
-                  <col style={{ width: "150px" }} />
+                  <col style={{ width: "230px" }} />
+                  <col style={{ width: "120px" }} />
+                  <col style={{ width: "280px" }} />
                 </colgroup>
                 <thead>
                   <tr>
                     <th>Date</th>
+                    <th>Time</th>
                     <th>Volume</th>
                   </tr>
                 </thead>
@@ -66,7 +68,12 @@ export function WorkoutModal({ workout, onClose }: Props) {
                       }}
                     >
                       <td>{session.date}</td>
-                      <td>{session.volume} Kg</td>
+                      <td>{session.time}</td>
+                      <td>
+                        {session.volume} Kg{" "}
+                        {session.vol_diff != "-" &&
+                          "(" + session.vol_diff + ")"}
+                      </td>
                     </tr>
                   ))}
                 </tbody>

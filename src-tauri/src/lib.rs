@@ -1,4 +1,4 @@
-use tauri::AppHandle;
+use tauri::{AppHandle, Manager, image::Image};
 
 use crate::garmin::{
     database::DATABASE_INST,
@@ -61,9 +61,9 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .setup(|_| {
             let config_dir = dirs::config_dir().expect("Could not get config folder");
-            let db_dir = config_dir.join("taurfit");
+            let db_dir = config_dir.join("garmin-fit-rs");
             std::fs::create_dir_all(&db_dir).unwrap();
-            let db_path = db_dir.join("taurfit.db");
+            let db_path = db_dir.join("database.db");
 
             let mut db = DATABASE_INST.lock().unwrap();
             db.open(db_path).unwrap();

@@ -14,6 +14,8 @@ pub struct WorkoutListItem {
 pub struct WorkoutSession {
     pub date: String,
     pub volume: f64,
+    pub time: String,
+    pub vol_diff: String,
 }
 
 impl From<&Session> for WorkoutSession {
@@ -21,6 +23,8 @@ impl From<&Session> for WorkoutSession {
         WorkoutSession {
             date: value.format_date(),
             volume: value.get_volume(),
+            time: value.format_total_time(),
+            vol_diff: "-".to_string(),
         }
     }
 }

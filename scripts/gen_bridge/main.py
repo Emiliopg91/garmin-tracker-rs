@@ -28,7 +28,6 @@ m_custom_types = []
 for d in methods:
     for t in d.get_custom_types():
         m_custom_types.append(t)
-print(f"! {m_custom_types}")
 
 print("  Scanning for structs...")
 s_custom_types = []

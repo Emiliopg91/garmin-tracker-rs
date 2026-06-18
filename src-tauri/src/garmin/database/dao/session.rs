@@ -215,10 +215,16 @@ impl Session {
 
         #[cfg(debug_assertions)]
         {
+            use std::fs;
+
             let mut txt = vec![];
             entries.iter().for_each(|e| {
                 txt.push(format!("{:#?}", e));
             });
+            let _ = fs::write(
+                "/var/mnt/Datos/Desarrollo/Workspace/VSCode/taurfit/activity.txt",
+                txt.join("\n"),
+            );
         }
 
         let session_entry = entries
