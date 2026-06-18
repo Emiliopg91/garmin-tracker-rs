@@ -10,12 +10,12 @@ interface AppContexType {
 }
 
 const defaultValue: AppContexType = {
-  tab: Tabs.WORKOUTS,
+  tab: Tabs.SESSIONS,
   setTab: () => {
     /* empty */
   },
   alerts: [],
-  addAlert: (_: AlertDefinition) => {
+  addAlert: () => {
     /* empty */
   },
 };
@@ -27,7 +27,7 @@ export function AppProvider({
 }: {
   children: JSX.Element;
 }): JSX.Element {
-  const [tab, setTab] = useState(Tabs.WORKOUTS);
+  const [tab, setTab] = useState(Tabs.SESSIONS);
   const [alerts, setAlerts] = useState<Record<string, AlertDefinition>>({});
 
   const addAlert = (definition: AlertDefinition) => {

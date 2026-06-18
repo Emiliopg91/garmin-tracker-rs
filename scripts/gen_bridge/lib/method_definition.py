@@ -61,12 +61,14 @@ class MethodDefinition:
             types.append(self.ret_type)
 
         res = []
-        for idx,t in enumerate(types):
+        for _,t in enumerate(types):
             if isinstance(t,str):
-                res.append(t)
+                if t not in STANDARD_TYPE_ASSOC.keys():
+                    res.append(t)
             else:
                 for tt in t.get_inner_types():
-                    res.append(tt)
+                    if tt not in STANDARD_TYPE_ASSOC.keys():
+                        res.append(tt)
 
         return res
 
@@ -93,6 +95,9 @@ class MethodDefinition:
             typ = p[1]
             if isinstance(typ,GenericType):
                 typ=typ.to_typescript()
+            else: 
+                if typ in STANDARD_TYPE_ASSOC.keys():
+                    typ = STANDARD_TYPE_ASSOC[typ]
             params.append(p[0]+": "+typ)
 
         payload = ""
@@ -103,7 +108,7 @@ class MethodDefinition:
             payload=f", {{ {", ".join(names)} }}"
 
         result_lines = []
-        result_lines.append(f"\t// Declaration: {self.defined_at}")
+        result_lines.append(f"\t// Definition: {self.defined_at}")
         result_lines.append(f"\tpublic static {ts_name}({", ".join(params)}): Promise<{ret}> {{")
         result_lines.append(f'\t\treturn RustBridge.inner_invoke("{self.name}"{payload});')
         result_lines.append("\t}")

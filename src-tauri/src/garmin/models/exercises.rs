@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use serde::Serialize;
 
-use crate::{garmin::database::dao::exercise::Exercise, models::sessions::SessionSerie};
+use crate::garmin::{database::dao::exercise::Exercise, models::sessions::SessionSerie};
 
 #[derive(Serialize)]
 pub struct ExerciseListItem {

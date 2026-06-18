@@ -38,9 +38,6 @@ class GenericType:
         if "<" not in type_str:
             if type_str.startswith("&"):
                 type_str = type_str[1:]
-
-            if type_str in STANDARD_TYPE_ASSOC.keys():
-                type_str = STANDARD_TYPE_ASSOC[type_str]
             return type_str
 
         template = type_str[0:type_str.find("<")]
@@ -67,10 +64,14 @@ class GenericType:
 
     def to_typescript(self):
         if isinstance(self.types, str):
+            if self.types in STANDARD_TYPE_ASSOC.keys():
+                self.types = STANDARD_TYPE_ASSOC[self.types]
             return self.types
 
         if isinstance(self.types[0],str):
             handled_0 = self.types[0]
+            if handled_0 in STANDARD_TYPE_ASSOC.keys():
+                handled_0 = STANDARD_TYPE_ASSOC[handled_0]
         else:
             handled_0 = self.types[0].to_typescript()
 
@@ -78,6 +79,8 @@ class GenericType:
         if len(self.types)>1:
             if isinstance(self.types[1],str):
                 handled_1 = self.types[1]
+            if handled_1 in STANDARD_TYPE_ASSOC.keys():
+                handled_1 = STANDARD_TYPE_ASSOC[handled_1]
             else:
                 handled_1 = self.types[1].to_typescript()
 

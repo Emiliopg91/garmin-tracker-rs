@@ -8,6 +8,8 @@ import {
   RustBridge,
   SessionDetails,
   SessionListItem,
+  WorkoutDetails,
+  WorkoutListItem,
 } from "@/utils/RustBridge";
 import { Tabs } from "@/models/tabs";
 import { Button } from "react-bootstrap";
@@ -17,6 +19,8 @@ import { SessionModal } from "../Sessions/SessionModal";
 import { ExerciseModal } from "../Exercises/ExerciseModal";
 import { Alerts } from "../Alerts/Alerts";
 import { AlertType } from "@/models/alert";
+import { WorkoutsList } from "../Workouts/WorkoutList";
+import { WorkoutModal } from "../Workouts/WorkoutModal";
 
 export function App(): JSX.Element {
   const { tab, setTab, alerts, addAlert } = useContext(AppContext);
@@ -31,22 +35,15 @@ export function App(): JSX.Element {
     ExerciseDetails | undefined
   >(undefined);
 
+  const [workouts, setWorkouts] = useState<WorkoutListItem[]>([]);
+  const [workoutDetails, setWorkoutDetails] = useState<
+    WorkoutDetails | undefined
+  >(undefined);
+
   const refreshLists = () => {
     RustBridge.getSessions()
       .then((data) => {
         setSessions(data);
-
-        RustBridge.getExercises()
-          .then((data) => {
-            setExercises(data);
-          })
-          .catch((e) => {
-            addAlert({
-              title: "Error getting exercise list",
-              body: e,
-              type: AlertType.ERROR,
-            });
-          });
       })
       .catch((e) => {
         addAlert({
@@ -54,6 +51,32 @@ export function App(): JSX.Element {
           body: e,
           type: AlertType.ERROR,
         });
+      })
+      .finally(() => {
+        RustBridge.getWorkoutList()
+          .then((data) => {
+            setWorkouts(data);
+          })
+          .catch((e) => {
+            addAlert({
+              title: "Error getting workout list",
+              body: e,
+              type: AlertType.ERROR,
+            });
+          })
+          .finally(() => {
+            RustBridge.getExercises()
+              .then((data) => {
+                setExercises(data);
+              })
+              .catch((e) => {
+                addAlert({
+                  title: "Error getting exercise list",
+                  body: e,
+                  type: AlertType.ERROR,
+                });
+              });
+          });
       });
   };
 
@@ -81,6 +104,12 @@ export function App(): JSX.Element {
     });
   };
 
+  const getWorkoutDetails = (name: string) => {
+    RustBridge.getWorkoutDetails(name).then((details) => {
+      setWorkoutDetails(details);
+    });
+  };
+
   const importFile = () => {
     RustBridge.importFile()
       .then((session) => {
@@ -104,6 +133,13 @@ export function App(): JSX.Element {
     {
       label: "Sessions",
       onSelected: () => {
+        setTab(Tabs.SESSIONS);
+      },
+      selected: tab == Tabs.SESSIONS,
+    },
+    {
+      label: "Workouts",
+      onSelected: () => {
         setTab(Tabs.WORKOUTS);
       },
       selected: tab == Tabs.WORKOUTS,
@@ -125,7 +161,7 @@ export function App(): JSX.Element {
         <NavBar items={navBarItems} />
 
         <div id="list-layer">
-          {tab == Tabs.WORKOUTS && (
+          {tab == Tabs.SESSIONS && (
             <SessionsList
               sessions={sessions}
               onRowClick={(timestamp) => {
@@ -140,6 +176,9 @@ export function App(): JSX.Element {
                 getExerciseDetails(category, id);
               }}
             />
+          )}
+          {tab == Tabs.WORKOUTS && (
+            <WorkoutsList workouts={workouts} onRowClick={getWorkoutDetails} />
           )}
         </div>
         <div style={{ padding: "5px" }}>
@@ -162,6 +201,15 @@ export function App(): JSX.Element {
             <ExerciseModal
               exercise={exerciseDetails}
               onClose={() => setExerciseDetails(undefined)}
+            />
+          )}
+        </div>
+
+        <div>
+          {workoutDetails && (
+            <WorkoutModal
+              workout={workoutDetails}
+              onClose={() => setWorkoutDetails(undefined)}
             />
           )}
         </div>

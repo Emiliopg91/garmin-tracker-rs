@@ -1,4 +1,5 @@
 export enum Tabs {
-  WORKOUTS = 0,
+  SESSIONS = 0,
+  WORKOUTS,
   EXERCISES,
 }

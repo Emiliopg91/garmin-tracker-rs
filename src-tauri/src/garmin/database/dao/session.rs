@@ -55,18 +55,24 @@ impl Session {
         Self::format_duration(self.active_time as u64)
     }
 
-    fn format_duration(seconds: u64) -> String {
+    pub fn format_duration(seconds: u64) -> String {
         let h = seconds / 3600;
         let m = (seconds % 3600) / 60;
         let s = seconds % 60;
 
-        if h > 0 {
+        let mut res = if h > 0 {
             format!("{:02}:{:02}:{:02}", h, m, s)
         } else if m > 0 {
             format!("{:02}:{:02}", m, s)
         } else {
             format!("{s}")
+        };
+
+        while res.starts_with("0") {
+            res.remove(0);
         }
+
+        res
     }
 
     pub fn find_by_id(timestamp: i64) -> Result<Option<Session>> {
@@ -94,6 +100,35 @@ impl Session {
             }
             None => None,
         })
+    }
+
+    pub fn find_by_workout(workout: &str) -> Result<Vec<Session>> {
+        let mut res = Vec::new();
+
+        {
+            let mut db = DATABASE_INST.lock().unwrap();
+            let conn = db.get_connection()?;
+
+            let mut stmt = conn
+                .prepare("SELECT * FROM SESSION WHERE workout=? ORDER BY date DESC")
+                .map_err(DatabaseError::Select)?;
+
+            let rows = stmt
+                .query_map([workout], Self::map_from_row)
+                .map_err(DatabaseError::Select)?;
+
+            rows.for_each(|r| {
+                if let Ok(r) = r {
+                    res.push(r);
+                }
+            });
+        }
+
+        for r in &mut res {
+            r.series = Serie::load_for_session(r.timestamp)?;
+        }
+
+        Ok(res)
     }
 
     pub fn load_from_db() -> Result<Vec<Session>> {
@@ -264,7 +299,7 @@ impl Session {
         if let Value::String(name) = name.value() {
             return Ok(name.clone());
         }
-        return Err(ParseFitFileError::InvalidWorkoutName());
+        Err(ParseFitFileError::InvalidWorkoutName())
     }
 
     pub fn get_volume(&self) -> f64 {

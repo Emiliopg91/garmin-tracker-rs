@@ -28,7 +28,7 @@ class StructDefinition:
             defined_at = orig_content[0:orig_content.find(content[pos:])].count("\n")+1
             content = content[pos+11:]
             pos = content.find("{")
-            name = content[:pos]
+            name = content[:pos].strip()
             content = content[pos+1:]
             pos = content.find("}")
             field_dec = content[:pos].split("\n")
@@ -58,9 +58,10 @@ class StructDefinition:
                 if typ not in STANDARD_TYPE_ASSOC.keys():
                     res.append(typ)
             else:
-                for tt in typ.get_inner_types():
-                    if tt not in STANDARD_TYPE_ASSOC.keys():
-                        res.append(tt)
+                if typ:
+                    for tt in typ.get_inner_types():
+                        if tt not in STANDARD_TYPE_ASSOC.keys():
+                            res.append(tt)
 
         return res
     
@@ -68,11 +69,14 @@ class StructDefinition:
 
     def to_typescript(self):
         result_lines = []
-        result_lines.append("// Declaration: "+self.defined_at)
+        result_lines.append("// Definition: "+self.defined_at)
         result_lines.append(f"export interface {self.name} {{")
         for (name,typ) in self.fields.items():
             if isinstance(typ,GenericType):
                 typ=typ.to_typescript()
+            else:
+                if typ in STANDARD_TYPE_ASSOC.keys():
+                    typ = STANDARD_TYPE_ASSOC[typ]
             result_lines.append(f"\t{name}: {typ};")
         result_lines.append("}")
         return "\n".join(result_lines)
