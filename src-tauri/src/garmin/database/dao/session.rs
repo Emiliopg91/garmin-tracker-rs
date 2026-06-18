@@ -213,20 +213,6 @@ impl Session {
         let mut fp = File::open(path.as_ref()).unwrap();
         let entries = fitparser::from_reader(&mut fp).unwrap();
 
-        #[cfg(debug_assertions)]
-        {
-            use std::fs;
-
-            let mut txt = vec![];
-            entries.iter().for_each(|e| {
-                txt.push(format!("{:#?}", e));
-            });
-            let _ = fs::write(
-                "/var/mnt/Datos/Desarrollo/Workspace/VSCode/taurfit/activity.txt",
-                txt.join("\n"),
-            );
-        }
-
         let session_entry = entries
             .iter()
             .find(|r| r.kind() == profile::MesgNum::Session);
