@@ -37,7 +37,7 @@ tauri-plugin-notification = "2"
 
 
 [profile.release]
-#lto = "fat"
+lto = "fat"
 codegen-units = 1
 strip = "symbols"
 panic = "unwind"
