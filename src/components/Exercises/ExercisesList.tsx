@@ -1,4 +1,4 @@
-import { ExerciseListItem } from "@/utils/RustBridge";
+import { ExerciseListItem } from "@/utils/backend/models";
 
 type Props = {
   exercises: ExerciseListItem[];
@@ -8,11 +8,18 @@ type Props = {
 export function ExercisesList({ exercises, onRowClick }: Props) {
   return (
     <table>
+      <colgroup>
+        <col style={{ width: "400px" }} />
+        <col style={{ width: "100px" }} />
+        <col style={{ width: "60px" }} />
+        <col style={{ width: "100px" }} />
+      </colgroup>
       <thead>
         <tr>
           <th style={{ textAlign: "center" }}>Exercise</th>
           <th style={{ textAlign: "center" }}>PR</th>
           <th style={{ textAlign: "center" }}>1RM</th>
+          <th style={{ textAlign: "center" }}>Date</th>
         </tr>
       </thead>
       <tbody>
@@ -25,6 +32,7 @@ export function ExercisesList({ exercises, onRowClick }: Props) {
             <td style={{ textAlign: "left" }}>{exercise.name}</td>
             <td>{exercise.reps + "x" + exercise.weight + " Kg"}</td>
             <td>{Math.floor(exercise.rm!) + " Kg"}</td>
+            <td>{exercise.date.split(" ")[1]}</td>
           </tr>
         ))}
       </tbody>

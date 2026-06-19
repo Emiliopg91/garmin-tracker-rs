@@ -110,6 +110,43 @@ class MethodDefinition:
         result_lines = []
         result_lines.append(f"\t// Definition: {self.defined_at}")
         result_lines.append(f"\tpublic static {ts_name}({", ".join(params)}): Promise<{ret}> {{")
-        result_lines.append(f'\t\treturn RustBridge.inner_invoke("{self.name}"{payload});')
+        result_lines.append(f'\t\treturn BackendClient.inner_invoke("{self.name}"{payload});')
         result_lines.append("\t}")
         return "\n".join(result_lines)
+
+
+    @staticmethod
+    def generate_file(file, methods: list[MethodDefinition]):
+        models = ""
+        for method in methods:
+            types = method.get_custom_types()
+            if len(types)>0:
+                models+=", ".join(types)+", "
+        if len(models)>2:
+            models=models[:-2]
+
+        result_lines = []
+        result_lines.append('/* eslint-disable */')
+        result_lines.append('')
+        result_lines.append('//Auto generated file, do not edit manually')
+        result_lines.append('')
+        result_lines.append('import { invoke, InvokeArgs } from "@tauri-apps/api/core";')
+        result_lines.append("")
+        result_lines.append(f'import {{ {models} }} from "./models";')
+        result_lines.append("")
+
+
+        result_lines.append("export class BackendClient {")
+        result_lines.append("")
+        for method in sorted(methods, key=lambda x: x.name):
+            result_lines.append(method.to_typescript())
+            result_lines.append("")
+        result_lines.append(
+            "\tprivate static inner_invoke<R>(method: string, payload?: InvokeArgs): Promise<R> {"
+        )
+        result_lines.append('\t\treturn invoke(method, payload);')
+        result_lines.append("\t}")
+        result_lines.append("}")
+
+        with open(file, "w", encoding="utf-8") as f:
+            f.write("\n".join(result_lines))

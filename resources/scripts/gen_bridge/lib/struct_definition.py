@@ -80,3 +80,18 @@ class StructDefinition:
             result_lines.append(f"\t{name}: {typ};")
         result_lines.append("}")
         return "\n".join(result_lines)
+
+    @staticmethod
+    def generate_file(file, structs):
+        result_lines = []
+        result_lines.append('/* eslint-disable */')
+        result_lines.append('')
+        result_lines.append('//Auto generated file, do not edit manually')
+        result_lines.append("")
+
+        for struct in sorted(structs, key=lambda x: x.name):
+            result_lines.append(struct.to_typescript())
+            result_lines.append("")
+
+        with open(file, "w", encoding="utf-8") as f:
+            f.write("\n".join(result_lines))

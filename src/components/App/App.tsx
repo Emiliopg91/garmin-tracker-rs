@@ -2,29 +2,27 @@ import { AppContext } from "@/context/AppContext";
 import { JSX, useContext, useEffect, useRef, useState } from "react";
 import { NavBar } from "../NavBar/NavBar";
 import "@/styles/app.css";
-import {
-  DeviceListItem,
-  ExerciseDetails,
-  ExerciseListItem,
-  RustBridge,
-  SessionDetails,
-  SessionListItem,
-  WorkoutDetails,
-  WorkoutListItem,
-} from "@/utils/RustBridge";
 import { Tabs } from "@/models/tabs";
 import { Dropdown } from "react-bootstrap";
 import { SessionsList } from "../Sessions/SessionList";
 import { ExercisesList } from "../Exercises/ExercisesList";
 import { SessionModal } from "../Sessions/SessionModal";
 import { ExerciseModal } from "../Exercises/ExerciseModal";
-import { Alerts } from "../Alerts/Alerts";
-import { AlertType } from "@/models/alert";
 import { WorkoutsList } from "../Workouts/WorkoutList";
 import { WorkoutModal } from "../Workouts/WorkoutModal";
+import {
+  DeviceListItem,
+  ExerciseDetails,
+  ExerciseListItem,
+  SessionDetails,
+  SessionListItem,
+  WorkoutDetails,
+  WorkoutListItem,
+} from "@/utils/backend/models";
+import { BackendClient } from "@/utils/backend/client";
 
 export function App(): JSX.Element {
-  const { tab, setTab, alerts, addAlert } = useContext(AppContext);
+  const { tab, setTab } = useContext(AppContext);
 
   const [availableDevices, setAvailableDevices] = useState<DeviceListItem[]>(
     [],
@@ -46,39 +44,36 @@ export function App(): JSX.Element {
   >(undefined);
 
   const refreshLists = () => {
-    RustBridge.getSessions()
+    BackendClient.getSessions()
       .then((data) => {
         setSessions(data);
       })
       .catch((e) => {
-        addAlert({
+        BackendClient.showNotification({
           title: "Error getting session list",
           body: e,
-          type: AlertType.ERROR,
         });
       })
       .finally(() => {
-        RustBridge.getWorkoutList()
+        BackendClient.getWorkoutList()
           .then((data) => {
             setWorkouts(data);
           })
           .catch((e) => {
-            addAlert({
+            BackendClient.showNotification({
               title: "Error getting workout list",
               body: e,
-              type: AlertType.ERROR,
             });
           })
           .finally(() => {
-            RustBridge.getExercises()
+            BackendClient.getExercises()
               .then((data) => {
                 setExercises(data);
               })
               .catch((e) => {
-                addAlert({
+                BackendClient.showNotification({
                   title: "Error getting exercise list",
                   body: e,
-                  type: AlertType.ERROR,
                 });
               });
           });
@@ -89,24 +84,13 @@ export function App(): JSX.Element {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      RustBridge.getAvailableDevices().then((devices) => {
+      BackendClient.getAvailableDevices().then((devices) => {
         const previous = availableDevicesRef.current;
 
         devices.forEach((device) => {
           if (!previous.some((d) => d.serial_number === device.serial_number)) {
-            addAlert({
-              type: AlertType.INFO,
+            BackendClient.showNotification({
               title: "Device available",
-              body: device.manufacturer + " " + device.model,
-            });
-          }
-        });
-
-        previous.forEach((device) => {
-          if (!devices.some((d) => d.serial_number === device.serial_number)) {
-            addAlert({
-              type: AlertType.INFO,
-              title: "Device removed",
               body: device.manufacturer + " " + device.model,
             });
           }
@@ -123,65 +107,60 @@ export function App(): JSX.Element {
   }, []);
 
   const getSessionDetails = (timestamp: string) => {
-    RustBridge.getSessionDetails(timestamp)
+    BackendClient.getSessionDetails(timestamp)
       .then((details) => {
         setSessionDetails(details);
       })
       .catch((e) => {
-        addAlert({
+        BackendClient.showNotification({
           title: "Error getting session details",
           body: e,
-          type: AlertType.ERROR,
         });
       });
   };
 
   const getExerciseDetails = (category: string, id: number) => {
-    RustBridge.getExerciseDetails(category, id).then((details) => {
+    BackendClient.getExerciseDetails(category, id).then((details) => {
       setExerciseDetails(details);
     });
   };
 
   const getWorkoutDetails = (name: string) => {
-    RustBridge.getWorkoutDetails(name).then((details) => {
+    BackendClient.getWorkoutDetails(name).then((details) => {
       setWorkoutDetails(details);
     });
   };
 
   const importFile = () => {
-    RustBridge.importFromFile()
+    BackendClient.importFromFile()
       .then((count) => {
-        addAlert({
+        BackendClient.showNotification({
           title: "File imported succesfully",
-          body: "Imported " + count + " sessions",
-          type: AlertType.INFO,
+          body: "Imported " + count + " sessions from file",
         });
         refreshLists();
       })
       .catch((e) => {
-        addAlert({
+        BackendClient.showNotification({
           title: "Error on file import",
           body: e,
-          type: AlertType.ERROR,
         });
       });
   };
 
   const importDevice = (serial: string) => {
-    RustBridge.importFromDevice(serial)
+    BackendClient.importFromDevice(serial)
       .then((count) => {
         refreshLists();
-        addAlert({
+        BackendClient.showNotification({
           title: "Imported succesfully from device",
           body: "Imported " + count + " sessions from device",
-          type: AlertType.INFO,
         });
       })
       .catch((e) => {
-        addAlert({
+        BackendClient.showNotification({
           title: "Error on file import",
           body: e,
-          type: AlertType.ERROR,
         });
       });
   };
@@ -213,8 +192,6 @@ export function App(): JSX.Element {
   return (
     <>
       <div id="viewport">
-        <Alerts alerts={alerts} />
-
         <NavBar items={navBarItems} />
 
         <div id="list-layer">
@@ -248,16 +225,20 @@ export function App(): JSX.Element {
               <Dropdown.Item key={"file"} onClick={importFile}>
                 From file
               </Dropdown.Item>
-              {availableDevices.map((device, idx) => (
-                <Dropdown.Item
-                  key={"dev-" + idx}
-                  onClick={() => {
-                    importDevice(device.serial_number);
-                  }}
-                >
-                  From {device.manufacturer + " " + device.model}
-                </Dropdown.Item>
-              ))}
+              {availableDevices.length > 0 &&
+                availableDevices.map((device, idx) => (
+                  <Dropdown.Item
+                    key={"dev-" + idx}
+                    onClick={() => {
+                      importDevice(device.serial_number);
+                    }}
+                  >
+                    From {device.manufacturer + " " + device.model}
+                  </Dropdown.Item>
+                ))}
+              {availableDevices.length == 0 && (
+                <Dropdown.Item disabled={true}>No device found</Dropdown.Item>
+              )}
             </Dropdown.Menu>
           </Dropdown>
         </div>

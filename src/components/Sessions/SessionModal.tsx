@@ -1,11 +1,6 @@
-import { AppContext } from "@/context/AppContext";
-import { AlertType } from "@/models/alert";
-import {
-  RustBridge,
-  SessionDetails,
-  SessionSeriesUpdate,
-} from "@/utils/RustBridge";
-import { useContext, useState } from "react";
+import { BackendClient } from "@/utils/backend/client";
+import { SessionDetails, SessionSeriesUpdate } from "@/utils/backend/models";
+import { useState } from "react";
 import { Button, Modal } from "react-bootstrap";
 
 type Props = {
@@ -14,8 +9,6 @@ type Props = {
 };
 
 export function SessionModal({ session, onClose }: Props) {
-  const { addAlert } = useContext(AppContext);
-
   const [localSession, setLocalSession] = useState({ ...session });
   const [changed, setChanged] = useState(false);
 
@@ -76,22 +69,20 @@ export function SessionModal({ session, onClose }: Props) {
         update.series.push(serie);
       });
     });
-    RustBridge.saveSessionChanges(update)
+    BackendClient.saveSessionChanges(update)
       .then(() => {
         onClose();
       })
       .then(() => {
-        addAlert({
+        BackendClient.showNotification({
           title: "Updated succesful",
           body: "Workout session updated succesfully",
-          type: AlertType.INFO,
         });
       })
       .catch((e) => {
-        addAlert({
+        BackendClient.showNotification({
           title: "Error on session update",
           body: e,
-          type: AlertType.ERROR,
         });
       });
   };

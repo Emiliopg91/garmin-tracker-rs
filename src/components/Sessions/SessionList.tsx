@@ -1,4 +1,4 @@
-import { SessionListItem } from "@/utils/RustBridge";
+import { SessionListItem } from "@/utils/backend/models";
 
 type Props = {
   sessions: SessionListItem[];

@@ -2,16 +2,17 @@
 
 from pathlib import Path
 import os
-from resources.scripts.gen_bridge.lib.method_definition import MethodDefinition
-from resources.scripts.gen_bridge.lib.struct_definition import StructDefinition
+from lib.method_definition import MethodDefinition
+from lib.struct_definition import StructDefinition
 import time
 
-BASE_DIR = Path(os.path.abspath(os.path.join(os.path.dirname(__file__), "..","..")))
+BASE_DIR = Path(os.path.abspath(os.path.join(os.path.dirname(__file__), "..","..","..")))
 
 SRC_TAURI = BASE_DIR / "src-tauri" / "src"
 
 SRC_TS = BASE_DIR / "src"
-BRIDGE_FILE = SRC_TS / "utils/RustBridge.ts"
+MODELS_FILE = SRC_TS / "utils/backend/models.ts"
+CLIENT_FILE = SRC_TS / "utils/backend/client.ts"
 
 
 t0 = time.time()
@@ -28,6 +29,7 @@ m_custom_types = []
 for d in methods:
     for t in d.get_custom_types():
         m_custom_types.append(t)
+print(f"    Found {len(methods)} commands")
 
 print("  Scanning for structs...")
 s_custom_types = []
@@ -45,38 +47,18 @@ while cont:
                 for ct in s.get_custom_types():
                     cont = True
                     m_custom_types.append(ct)
+print(f"    Found {len(structs)} structs")
 
+if not MODELS_FILE.parent.exists():
+    os.makedirs(MODELS_FILE.parent)
 
-print("  Generating bridge...")
-result_lines = []
-result_lines.append('/* eslint-disable */')
-result_lines.append('')
-result_lines.append('//Auto generated file, do not edit manually')
-result_lines.append('')
-result_lines.append('import { invoke, InvokeArgs } from "@tauri-apps/api/core";')
-result_lines.append("")
+print("  Generating models file...")
+StructDefinition.generate_file(MODELS_FILE, structs)
+print(f"    Generated {MODELS_FILE.relative_to(BASE_DIR)}")
 
-for struct in sorted(structs, key=lambda x: x.name):
-    result_lines.append(struct.to_typescript())
-    result_lines.append("")
-
-result_lines.append("export class RustBridge {")
-result_lines.append("")
-for method in sorted(methods, key=lambda x: x.name):
-    result_lines.append(method.to_typescript())
-    result_lines.append("")
-result_lines.append(
-    "\tprivate static inner_invoke<R>(method: string, payload?: InvokeArgs): Promise<R> {"
-)
-result_lines.append('\t\treturn invoke(method, payload);')
-result_lines.append("\t}")
-result_lines.append("}")
-
-if not BRIDGE_FILE.parent.exists():
-    os.makedirs(BRIDGE_FILE.parent)
-
-with open(BRIDGE_FILE, "w", encoding="utf-8") as f:
-    f.write("\n".join(result_lines))
+print("  Generating client file...")
+MethodDefinition.generate_file(CLIENT_FILE, methods)
+print(f"    Generated {CLIENT_FILE.relative_to(BASE_DIR)}")
 
 print(f"  Finished after {time.time()-t0}")
 print("----------------------------------------------")

@@ -1,4 +1,4 @@
-import { WorkoutDetails } from "@/utils/RustBridge";
+import { WorkoutDetails } from "@/utils/backend/models";
 import { Modal } from "react-bootstrap";
 
 type Props = {

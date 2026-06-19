@@ -4,7 +4,7 @@ import subprocess
 from pathlib import Path
 
 ROOT_DIR = Path(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-BIN_FILE = ROOT_DIR / "src-tauri" / "target" / "release" / "garmin-fit-rs"
+BIN_FILE = ROOT_DIR / "src-tauri" / "target" / "release" / "garmin-tracker-rs"
 
 dependencies = set()
 print(os.path.basename(str(BIN_FILE)))
