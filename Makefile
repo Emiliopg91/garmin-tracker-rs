@@ -10,3 +10,6 @@ lint:
 
 clean:
 	@rm -Rf node_modules && cd src-tauri && cargo clean
+
+version:
+	@python resources/scripts/set_version.py

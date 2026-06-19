@@ -3,21 +3,19 @@ use tauri::AppHandle;
 use crate::garmin::{
     database::DATABASE_INST,
     models::{
+        devices::DeviceListItem,
         exercises::{ExerciseDetails, ExerciseListItem},
         sessions::{SessionDetails, SessionListItem, SessionSeriesUpdate},
         workouts::{WorkoutDetails, WorkoutListItem},
     },
-    ui::{
-        self, get_exercise_list, get_session_list, import_fit_file, show_exercise_details,
-        update_session_sets,
-    },
+    ui,
 };
 
 mod garmin;
 
 #[tauri::command]
 fn get_sessions() -> Result<Vec<SessionListItem>, String> {
-    get_session_list()
+    ui::get_session_list()
 }
 
 #[tauri::command]
@@ -27,22 +25,27 @@ fn get_session_details(timestamp: i64) -> Result<SessionDetails, String> {
 
 #[tauri::command]
 fn get_exercises() -> Result<Vec<ExerciseListItem>, String> {
-    get_exercise_list()
+    ui::get_exercise_list()
 }
 
 #[tauri::command]
 fn get_exercise_details(category: &str, id: i16) -> Result<ExerciseDetails, String> {
-    show_exercise_details(category, id)
+    ui::show_exercise_details(category, id)
 }
 
 #[tauri::command]
-async fn import_file(app: AppHandle) -> Result<SessionListItem, String> {
-    import_fit_file(app)
+async fn import_from_file(app: AppHandle) -> Result<isize, String> {
+    ui::import_fit_file(app)
+}
+
+#[tauri::command]
+async fn import_from_device(serial: &str) -> Result<usize, String> {
+    ui::import_from_device(serial).await
 }
 
 #[tauri::command]
 fn save_session_changes(details: SessionSeriesUpdate) -> Result<(), String> {
-    update_session_sets(details)
+    ui::update_session_sets(details)
 }
 
 #[tauri::command]
@@ -55,11 +58,16 @@ fn get_workout_details(name: &str) -> Result<WorkoutDetails, String> {
     ui::get_workout_details(name)
 }
 
+#[tauri::command]
+async fn get_available_devices() -> Result<Vec<DeviceListItem>, String> {
+    ui::get_available_devices().await
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
-        .setup(|_| {
+        .setup(move |_| {
             let config_dir = dirs::config_dir().expect("Could not get config folder");
             let db_dir = config_dir.join("garmin-fit-rs");
             std::fs::create_dir_all(&db_dir).unwrap();
@@ -77,10 +85,12 @@ pub fn run() {
             get_exercises,
             get_session_details,
             get_exercise_details,
-            import_file,
+            import_from_file,
             save_session_changes,
             get_workout_list,
-            get_workout_details
+            get_workout_details,
+            get_available_devices,
+            import_from_device
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

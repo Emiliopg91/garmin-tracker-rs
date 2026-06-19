@@ -1,5 +1,6 @@
 use std::{collections::HashMap, sync::mpsc};
 
+use chrono::{Datelike, Timelike};
 use tauri::AppHandle;
 use tauri_plugin_dialog::DialogExt;
 
@@ -9,10 +10,12 @@ use crate::garmin::{
         dao::{exercise::Exercise, serie::Serie, session::Session},
     },
     models::{
+        devices::DeviceListItem,
         exercises::{ExerciseDetails, ExerciseListItem},
         sessions::{SessionDetails, SessionListItem, SessionSerie, SessionSeriesUpdate},
         workouts::{WorkoutDetails, WorkoutListItem, WorkoutSession},
     },
+    mtp::MtpClient,
 };
 
 pub fn get_workout_details(name: &str) -> Result<WorkoutDetails, String> {
@@ -163,7 +166,58 @@ pub fn get_session_details(timestamp: i64) -> Result<SessionDetails, String> {
     }
 }
 
-pub fn import_fit_file(app: AppHandle) -> Result<SessionListItem, String> {
+pub async fn import_from_device(serial: &str) -> Result<usize, String> {
+    let latest = Session::find_latest().map_err(|e| e.to_string())?;
+    let mut latest_date = "1970-01-01-00-00-00".to_string();
+    if let Some(latest) = latest {
+        latest_date = format!(
+            "{:04}-{:02}-{:02}-{:02}-{:02}-{:02}",
+            latest.timestamp.year(),
+            latest.timestamp.month(),
+            latest.timestamp.day(),
+            latest.timestamp.hour(),
+            latest.timestamp.minute(),
+            latest.timestamp.second(),
+        );
+    }
+
+    let activities = MtpClient::download_activities_since(serial, latest_date)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    let mut res = Ok(0);
+    match DATABASE_INST.lock() {
+        Ok(mut db) => {
+            match db.run_in_transaction(|tx| {
+                for file in &activities {
+                    match Session::load_from_file(file.as_path()) {
+                        Ok(mut session) => {
+                            session.insert(tx)?;
+                        }
+                        Err(e) => {
+                            res = Err(format!("Error parsing session: {}", e));
+                            break;
+                        }
+                    }
+                }
+                res = Ok(activities.len());
+                Ok(())
+            }) {
+                Ok(_) => {}
+                Err(e) => {
+                    res = Err(format!("Error writing to database: {}", e));
+                }
+            }
+        }
+        Err(e) => {
+            res = Err(format!("Error accesing to database: {}", e));
+        }
+    }
+
+    res
+}
+
+pub fn import_fit_file(app: AppHandle) -> Result<isize, String> {
     let (tx, rx) = mpsc::channel();
 
     app.dialog()
@@ -175,7 +229,7 @@ pub fn import_fit_file(app: AppHandle) -> Result<SessionListItem, String> {
             }
         });
 
-    let mut res = Ok(SessionListItem::default());
+    let mut res = Ok(0);
     match rx.recv() {
         Ok(files) => match DATABASE_INST.lock() {
             Ok(mut db) => {
@@ -184,7 +238,6 @@ pub fn import_fit_file(app: AppHandle) -> Result<SessionListItem, String> {
                         match Session::load_from_file(file.as_path().unwrap()) {
                             Ok(mut session) => {
                                 session.insert(tx)?;
-                                res = Ok(SessionListItem::from(&session))
                             }
                             Err(e) => {
                                 res = Err(format!("Error parsing session: {}", e));
@@ -192,6 +245,7 @@ pub fn import_fit_file(app: AppHandle) -> Result<SessionListItem, String> {
                             }
                         }
                     }
+                    res = Ok(files.len() as isize);
                     Ok(())
                 }) {
                     Ok(_) => {}
@@ -201,14 +255,14 @@ pub fn import_fit_file(app: AppHandle) -> Result<SessionListItem, String> {
                 }
             }
             Err(e) => {
-                res = Err(format!("Error accesing to database: {}", e));
+                res = Err(format!("Error connecting to database: {}", e));
             }
         },
-        Err(e) => res = Err(e.to_string()),
+        Err(_) => res = Ok(-1),
     }
 
     match res {
-        Ok(r) => Ok(r),
+        Ok(r) => Ok(r as isize),
         Err(e) => {
             eprintln!("{}", e);
             Err(e.to_string())
@@ -328,4 +382,10 @@ pub fn update_session_sets(details: SessionSeriesUpdate) -> Result<(), String> {
             Err(e.to_string())
         }
     }
+}
+
+pub async fn get_available_devices() -> Result<Vec<DeviceListItem>, String> {
+    MtpClient::get_connected_devices()
+        .await
+        .map_err(|e| e.to_string())
 }

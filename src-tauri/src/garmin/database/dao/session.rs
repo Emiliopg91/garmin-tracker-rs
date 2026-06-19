@@ -102,6 +102,33 @@ impl Session {
         })
     }
 
+    pub fn find_latest() -> Result<Option<Session>> {
+        let opt_sess = {
+            let mut db = DATABASE_INST.lock().unwrap();
+            let conn = db.get_connection()?;
+
+            let result = conn.query_row(
+                "SELECT * FROM SESSION ORDER BY DATE DESC LIMIT 1",
+                [],
+                Self::map_from_row,
+            );
+
+            match result {
+                Ok(session) => Some(session),
+                Err(rusqlite::Error::QueryReturnedNoRows) => None,
+                Err(e) => return Err(DatabaseError::Select(e)),
+            }
+        };
+
+        Ok(match opt_sess {
+            Some(mut session) => {
+                session.series = Serie::load_for_session(session.timestamp)?;
+                Some(session)
+            }
+            None => None,
+        })
+    }
+
     pub fn find_by_workout(workout: &str) -> Result<Vec<Session>> {
         let mut res = Vec::new();
 
@@ -212,6 +239,20 @@ impl Session {
     {
         let mut fp = File::open(path.as_ref()).unwrap();
         let entries = fitparser::from_reader(&mut fp).unwrap();
+
+        #[cfg(debug_assertions)]
+        {
+            use std::fs;
+
+            let mut txt = vec![];
+            entries.iter().for_each(|e| {
+                txt.push(format!("{:#?}", e));
+            });
+            let _ = fs::write(
+                "/var/mnt/Datos/Desarrollo/Workspace/VSCode/taurfit/activity.txt",
+                txt.join("\n"),
+            );
+        }
 
         let session_entry = entries
             .iter()

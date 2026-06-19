@@ -48,7 +48,11 @@
     }
   }
 
-  #import-button {
+  #import-file-dropdown {
+    width: 100%;
+  }
+
+  #import-file-toggle {
     width: 100%;
     background-color: var(--primary-color);
     border-color: var(--primary-color);

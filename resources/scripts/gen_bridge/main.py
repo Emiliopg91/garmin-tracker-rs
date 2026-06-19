@@ -2,8 +2,8 @@
 
 from pathlib import Path
 import os
-from lib.method_definition import MethodDefinition
-from lib.struct_definition import StructDefinition
+from resources.scripts.gen_bridge.lib.method_definition import MethodDefinition
+from resources.scripts.gen_bridge.lib.struct_definition import StructDefinition
 import time
 
 BASE_DIR = Path(os.path.abspath(os.path.join(os.path.dirname(__file__), "..","..")))

@@ -1,8 +1,9 @@
 import { AppContext } from "@/context/AppContext";
-import { JSX, useContext, useEffect, useState } from "react";
+import { JSX, useContext, useEffect, useRef, useState } from "react";
 import { NavBar } from "../NavBar/NavBar";
 import "@/styles/app.css";
 import {
+  DeviceListItem,
   ExerciseDetails,
   ExerciseListItem,
   RustBridge,
@@ -12,7 +13,7 @@ import {
   WorkoutListItem,
 } from "@/utils/RustBridge";
 import { Tabs } from "@/models/tabs";
-import { Button } from "react-bootstrap";
+import { Dropdown } from "react-bootstrap";
 import { SessionsList } from "../Sessions/SessionList";
 import { ExercisesList } from "../Exercises/ExercisesList";
 import { SessionModal } from "../Sessions/SessionModal";
@@ -24,6 +25,10 @@ import { WorkoutModal } from "../Workouts/WorkoutModal";
 
 export function App(): JSX.Element {
   const { tab, setTab, alerts, addAlert } = useContext(AppContext);
+
+  const [availableDevices, setAvailableDevices] = useState<DeviceListItem[]>(
+    [],
+  );
 
   const [sessions, setSessions] = useState<SessionListItem[]>([]);
   const [sessionDetails, setSessionDetails] = useState<
@@ -80,8 +85,41 @@ export function App(): JSX.Element {
       });
   };
 
+  const availableDevicesRef = useRef<DeviceListItem[]>([]);
+
   useEffect(() => {
+    const interval = setInterval(() => {
+      RustBridge.getAvailableDevices().then((devices) => {
+        const previous = availableDevicesRef.current;
+
+        devices.forEach((device) => {
+          if (!previous.some((d) => d.serial_number === device.serial_number)) {
+            addAlert({
+              type: AlertType.INFO,
+              title: "Device available",
+              body: device.manufacturer + " " + device.model,
+            });
+          }
+        });
+
+        previous.forEach((device) => {
+          if (!devices.some((d) => d.serial_number === device.serial_number)) {
+            addAlert({
+              type: AlertType.INFO,
+              title: "Device removed",
+              body: device.manufacturer + " " + device.model,
+            });
+          }
+        });
+
+        availableDevicesRef.current = devices;
+        setAvailableDevices(devices);
+      });
+    }, 1000);
+
     refreshLists();
+
+    return () => clearInterval(interval);
   }, []);
 
   const getSessionDetails = (timestamp: string) => {
@@ -111,12 +149,31 @@ export function App(): JSX.Element {
   };
 
   const importFile = () => {
-    RustBridge.importFile()
-      .then((session) => {
-        refreshLists();
+    RustBridge.importFromFile()
+      .then((count) => {
         addAlert({
           title: "File imported succesfully",
-          body: "Imported session '" + session.name + "' from " + session.date,
+          body: "Imported " + count + " sessions",
+          type: AlertType.INFO,
+        });
+        refreshLists();
+      })
+      .catch((e) => {
+        addAlert({
+          title: "Error on file import",
+          body: e,
+          type: AlertType.ERROR,
+        });
+      });
+  };
+
+  const importDevice = (serial: string) => {
+    RustBridge.importFromDevice(serial)
+      .then((count) => {
+        refreshLists();
+        addAlert({
+          title: "Imported succesfully from device",
+          body: "Imported " + count + " sessions from device",
           type: AlertType.INFO,
         });
       })
@@ -181,10 +238,28 @@ export function App(): JSX.Element {
             <WorkoutsList workouts={workouts} onRowClick={getWorkoutDetails} />
           )}
         </div>
-        <div style={{ padding: "5px" }}>
-          <Button id="import-button" onClick={importFile}>
-            Import .fit file
-          </Button>
+        <div style={{ padding: "5px", width: "100%" }}>
+          <Dropdown id="import-file-dropdown" className="w-100">
+            <Dropdown.Toggle id="import-file-toggle">
+              Import sessions
+            </Dropdown.Toggle>
+
+            <Dropdown.Menu id="import-file-menu">
+              <Dropdown.Item key={"file"} onClick={importFile}>
+                From file
+              </Dropdown.Item>
+              {availableDevices.map((device, idx) => (
+                <Dropdown.Item
+                  key={"dev-" + idx}
+                  onClick={() => {
+                    importDevice(device.serial_number);
+                  }}
+                >
+                  From {device.manufacturer + " " + device.model}
+                </Dropdown.Item>
+              ))}
+            </Dropdown.Menu>
+          </Dropdown>
         </div>
 
         <div>
