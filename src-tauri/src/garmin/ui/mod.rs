@@ -1,11 +1,10 @@
 use std::{
     collections::HashMap,
-    path::PathBuf,
     sync::{LazyLock, mpsc},
 };
 
 use chrono::{Datelike, Timelike};
-use tauri::{AppHandle, Manager};
+use tauri::AppHandle;
 use tauri_plugin_dialog::DialogExt;
 use tauri_plugin_notification::NotificationExt;
 
@@ -268,7 +267,7 @@ pub fn import_fit_file(app: AppHandle) -> Result<isize, String> {
     }
 
     match res {
-        Ok(r) => Ok(r as isize),
+        Ok(r) => Ok(r),
         Err(e) => {
             eprintln!("{}", e);
             Err(e.to_string())
