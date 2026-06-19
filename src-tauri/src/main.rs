@@ -5,5 +5,5 @@ fn main() {
     unsafe {
         std::env::set_var("GDK_BACKEND", "x11");
     }
-    garmin_fit_rs_lib::run()
+    garmin_tracker_rs_lib::run()
 }

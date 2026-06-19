@@ -12,6 +12,7 @@ pub struct ExerciseListItem {
     pub reps: u16,
     pub weight: f64,
     pub rm: f64,
+    pub date: String,
 }
 
 impl From<&Exercise> for ExerciseListItem {
@@ -23,6 +24,7 @@ impl From<&Exercise> for ExerciseListItem {
             reps: 0,
             weight: 0_f64,
             rm: 0_f64,
+            date: "".to_string(),
         }
     }
 }

@@ -86,7 +86,7 @@ impl MtpClient {
 
                 let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
                 let tmp_dir = PathBuf::from(format!(
-                    "/tmp/garmin-fit-rs-{}",
+                    "/tmp/garmin-tracker-rs-{}",
                     now.as_millis().to_string()
                 ));
 

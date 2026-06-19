@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "garmin-fit-rs",
-  "version": "0.1.0",
-  "identifier": "com.emiliopg91.garmin-fit-rs",
+  "productName": "Garmin Fit Tracker",
+  "version": "1.0.0",
+  "identifier": "com.emiliopg91.garmin-tracker-rs",
   "build": {
     "beforeDevCommand": "pnpm dev",
     "devUrl": "http://localhost:1420",
@@ -13,8 +13,8 @@
     "windows": [
       {
         "title": "Garmin Fit Tracker",
-        "width": 750,
-        "height": 600
+        "width": 850,
+        "height": 650
       }
     ],
     "security": {

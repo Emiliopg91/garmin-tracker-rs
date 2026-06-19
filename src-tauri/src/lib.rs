@@ -5,6 +5,7 @@ use crate::garmin::{
     models::{
         devices::DeviceListItem,
         exercises::{ExerciseDetails, ExerciseListItem},
+        notifications::NotificationDefinition,
         sessions::{SessionDetails, SessionListItem, SessionSeriesUpdate},
         workouts::{WorkoutDetails, WorkoutListItem},
     },
@@ -63,13 +64,23 @@ async fn get_available_devices() -> Result<Vec<DeviceListItem>, String> {
     ui::get_available_devices().await
 }
 
+#[tauri::command]
+async fn show_notification(
+    app: AppHandle,
+    notification: NotificationDefinition,
+) -> Result<(), String> {
+    ui::show_notification(app, notification)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_opener::init())
         .setup(move |_| {
             let config_dir = dirs::config_dir().expect("Could not get config folder");
-            let db_dir = config_dir.join("garmin-fit-rs");
+            let db_dir = config_dir.join("garmin-tracker-rs");
             std::fs::create_dir_all(&db_dir).unwrap();
             let db_path = db_dir.join("database.db");
 
@@ -79,7 +90,6 @@ pub fn run() {
 
             Ok(())
         })
-        .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
             get_sessions,
             get_exercises,
@@ -90,7 +100,8 @@ pub fn run() {
             get_workout_list,
             get_workout_details,
             get_available_devices,
-            import_from_device
+            import_from_device,
+            show_notification
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

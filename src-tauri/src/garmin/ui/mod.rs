@@ -1,8 +1,13 @@
-use std::{collections::HashMap, sync::mpsc};
+use std::{
+    collections::HashMap,
+    path::PathBuf,
+    sync::{LazyLock, mpsc},
+};
 
 use chrono::{Datelike, Timelike};
-use tauri::AppHandle;
+use tauri::{AppHandle, Manager};
 use tauri_plugin_dialog::DialogExt;
+use tauri_plugin_notification::NotificationExt;
 
 use crate::garmin::{
     database::{
@@ -12,6 +17,7 @@ use crate::garmin::{
     models::{
         devices::DeviceListItem,
         exercises::{ExerciseDetails, ExerciseListItem},
+        notifications::NotificationDefinition,
         sessions::{SessionDetails, SessionListItem, SessionSerie, SessionSeriesUpdate},
         workouts::{WorkoutDetails, WorkoutListItem, WorkoutSession},
     },
@@ -168,7 +174,7 @@ pub fn get_session_details(timestamp: i64) -> Result<SessionDetails, String> {
 
 pub async fn import_from_device(serial: &str) -> Result<usize, String> {
     let latest = Session::find_latest().map_err(|e| e.to_string())?;
-    let mut latest_date = "1970-01-01-00-00-00".to_string();
+    let mut latest_date = "2026-06-08-00-00-00".to_string();
     if let Some(latest) = latest {
         latest_date = format!(
             "{:04}-{:02}-{:02}-{:02}-{:02}-{:02}",
@@ -284,6 +290,7 @@ pub fn get_exercise_list() -> Result<Vec<ExerciseListItem>, String> {
                 reps: pr.reps,
                 weight: pr.weight,
                 rm: pr.get_1rm_estimation(),
+                date: pr.format_date(),
             });
         }
 
@@ -388,4 +395,37 @@ pub async fn get_available_devices() -> Result<Vec<DeviceListItem>, String> {
     MtpClient::get_connected_devices()
         .await
         .map_err(|e| e.to_string())
+}
+
+static ICON_PATH: LazyLock<String> = LazyLock::new(|| {
+    #[cfg(debug_assertions)]
+    return std::env::current_exe()
+        .unwrap()
+        .parent()
+        .unwrap()
+        .to_path_buf()
+        .join("../../icons/icon.png")
+        .display()
+        .to_string();
+
+    #[cfg(not(debug_assertions))]
+    return "/usr/share/icons/hicolor/128x128/apps/garmin-tracker-rs.png".to_string();
+});
+
+pub fn show_notification(
+    app: AppHandle,
+    notification: NotificationDefinition,
+) -> Result<(), String> {
+    app.notification()
+        .builder()
+        .title(&notification.title)
+        .body(&notification.body)
+        .icon(ICON_PATH.as_str())
+        .show()
+        .map_err(|e| {
+            eprintln!("Could not send notification: {}", e);
+            e.to_string()
+        })?;
+
+    Ok(())
 }

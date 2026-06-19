@@ -38,7 +38,7 @@ impl Display for Session {
 impl Session {
     pub fn format_date(&self) -> String {
         format!(
-            "{}:{} {}/{}/{}",
+            "{:02}:{:02} {:02}/{:02}/{:04}",
             self.timestamp.hour(),
             self.timestamp.minute(),
             self.timestamp.day(),
