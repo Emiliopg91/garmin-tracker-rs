@@ -13,3 +13,6 @@ clean:
 
 version:
 	@python resources/scripts/set_version.py && make clean
+
+release: lint
+	@python resources/scripts/release.py

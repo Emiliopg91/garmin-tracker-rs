@@ -23,9 +23,8 @@ makedepends=(
   'rust'
   'npm'
   'pnpm'
+  'rpmextract'
 )
-
-#install=git-flow-rs.install
 
 build() {
   cd "$srcdir/${pkgname}"
@@ -33,4 +32,12 @@ build() {
 }
 
 package() {
+  cd "$srcdir/${pkgname}/src-tauri/target/release/bundle/rpm"
+
+  7z x "Garmin Fit Tracker-$pkgver-$pkgrel.x86_64.rpm"
+  cpio -idmv < garmin-fit-tracker-$pkgver-$pkgrel.x86_64.cpio
+  cp -R Garmin\ Fit\ Tracker-$pkgver-$pkgrel.x86_64/usr/* usr/
+
+  cp -r usr "$pkgdir/"
+  chmod 755 $pkgdir/usr/bin/garmin-tracker-rs
 }
