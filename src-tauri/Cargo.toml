@@ -27,7 +27,7 @@ chrono = "0.4.45"
 fitparser = "0.11.0"
 indexmap = { version = "2.14.0", features = ["serde"] }
 rfd = "0.17.2"
-rusqlite = { version = "0.40.1", features = ["bundled"] }
+rusqlite = { version = "0.40.1" }
 thiserror = "2.0.18"
 tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
 tauri-plugin-dialog = "2"
