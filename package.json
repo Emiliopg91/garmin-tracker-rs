@@ -4,10 +4,9 @@
   "version": "1.0.3",
   "type": "module",
   "scripts": {
-    "dev": "tsc && vite",
+    "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "pretauri": "./resources/scripts/gen_bridge/main.py",
     "tauri": "tauri",
     "lint": "eslint src --ext .js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix"
   },

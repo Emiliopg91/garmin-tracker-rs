@@ -6,9 +6,10 @@ import { Button, Modal } from "react-bootstrap";
 type Props = {
   session: SessionDetails;
   onClose: () => void;
+  onUpdate: () => void;
 };
 
-export function SessionModal({ session, onClose }: Props) {
+export function SessionModal({ session, onClose, onUpdate }: Props) {
   const [localSession, setLocalSession] = useState({ ...session });
   const [changed, setChanged] = useState(false);
 
@@ -71,6 +72,7 @@ export function SessionModal({ session, onClose }: Props) {
     });
     BackendClient.saveSessionChanges(update)
       .then(() => {
+        onUpdate();
         onClose();
       })
       .then(() => {

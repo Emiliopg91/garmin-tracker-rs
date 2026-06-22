@@ -248,6 +248,7 @@ export function App(): JSX.Element {
             <SessionModal
               session={sessionDetails}
               onClose={() => setSessionDetails(undefined)}
+              onUpdate={() => refreshLists()}
             />
           )}
         </div>

@@ -16,6 +16,7 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
+tauri-rs-ts-ipc = { path = "/var/mnt/Datos/Desarrollo/Workspace/VSCode/taurfit/syn-test" }
 
 [dependencies]
 tauri = { version = "2", features = [] }
