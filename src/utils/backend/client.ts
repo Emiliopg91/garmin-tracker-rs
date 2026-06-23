@@ -2,7 +2,7 @@
 
 import { invoke, InvokeArgs } from "@tauri-apps/api/core";
 
-import { ExerciseDetails, NotificationDefinition, WorkoutDetails, DeviceListItem, SessionDetails, SessionListItem, ExerciseListItem, WorkoutListItem, SessionSeriesUpdate } from "./models";
+import { ExerciseListItem, SessionSeriesUpdate, SessionDetails, ExerciseDetails, DeviceListItem, WorkoutListItem, NotificationDefinition, WorkoutDetails, SessionListItem } from "./models";
 
 export class BackendClient {
 	// Definition: /lib.rs:63

@@ -23,7 +23,6 @@ makedepends=(
   'rust'
   'npm'
   'pnpm'
-  'rpmextract'
 )
 
 build() {
