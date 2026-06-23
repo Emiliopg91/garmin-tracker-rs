@@ -16,7 +16,7 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
-tauri-rs-ts-ipc = { path = "/var/mnt/Datos/Desarrollo/Workspace/VSCode/taurfit/syn-test" }
+tauri-rs-ts-ipc = { git = "https://github.com/Emiliopg91/tauri-rs-ts-ipc" }
 
 [dependencies]
 tauri = { version = "2", features = [] }
@@ -30,7 +30,7 @@ indexmap = { version = "2.14.0", features = ["serde"] }
 rfd = "0.17.2"
 rusqlite = { version = "0.40.1" }
 thiserror = "2.0.18"
-tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "time"] }
 tauri-plugin-dialog = "2"
 dirs = "6.0.0"
 mtp-rs = "0.19.0"
@@ -41,5 +41,5 @@ tauri-plugin-notification = "2"
 lto = "fat"
 codegen-units = 1
 strip = "symbols"
-panic = "unwind"
+panic = "abort"
 opt-level = 3

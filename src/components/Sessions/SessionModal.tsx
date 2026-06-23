@@ -1,6 +1,7 @@
+import { AppContext } from "@/context/AppContext";
 import { BackendClient } from "@/utils/backend/client";
 import { SessionDetails, SessionSeriesUpdate } from "@/utils/backend/models";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { Button, Modal } from "react-bootstrap";
 
 type Props = {
@@ -10,6 +11,7 @@ type Props = {
 };
 
 export function SessionModal({ session, onClose, onUpdate }: Props) {
+  const { setLoading } = useContext(AppContext);
   const [localSession, setLocalSession] = useState({ ...session });
   const [changed, setChanged] = useState(false);
 
@@ -61,6 +63,7 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
   };
 
   const saveChanges = () => {
+    setLoading(true);
     const update: SessionSeriesUpdate = {
       timestamp: localSession.timestamp,
       series: [],
@@ -86,6 +89,9 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
           title: "Error on session update",
           body: e,
         });
+      })
+      .finally(() => {
+        setLoading(false);
       });
   };
 

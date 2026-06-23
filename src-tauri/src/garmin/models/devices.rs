@@ -1,11 +1,11 @@
 use mtp_rs::ptp::DeviceInfo;
 use serde::Serialize;
 
-#[derive(Serialize)]
+#[derive(Serialize, Clone)]
 pub struct DeviceListItem {
-    manufacturer: String,
-    model: String,
-    serial_number: String,
+    pub manufacturer: String,
+    pub model: String,
+    pub serial_number: String,
 }
 
 impl From<&DeviceInfo> for DeviceListItem {

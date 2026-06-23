@@ -23,5 +23,4 @@ dist-ssr
 *.sln
 *.sw?
 
-src/utils/backend
 activity.txt

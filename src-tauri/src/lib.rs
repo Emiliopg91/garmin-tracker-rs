@@ -1,4 +1,4 @@
-use tauri::AppHandle;
+use tauri::{AppHandle, Emitter};
 
 use crate::garmin::{
     database::DATABASE_INST,
@@ -78,7 +78,7 @@ pub fn run() {
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
-        .setup(move |_| {
+        .setup(move |app| {
             let config_dir = dirs::config_dir().expect("Could not get config folder");
             let db_dir = config_dir.join("garmin-tracker-rs");
             std::fs::create_dir_all(&db_dir).unwrap();
@@ -87,6 +87,8 @@ pub fn run() {
             let mut db = DATABASE_INST.lock().unwrap();
             db.open(db_path).unwrap();
             db.create_schema().unwrap();
+
+            mtp_watcher(app.handle().clone());
 
             Ok(())
         })
@@ -105,4 +107,55 @@ pub fn run() {
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
+}
+
+fn mtp_watcher(app: AppHandle) {
+    tauri::async_runtime::spawn(async move {
+        let mut devices: Vec<DeviceListItem> = Vec::new();
+
+        loop {
+            if let Ok(cur_dev) = ui::get_available_devices().await {
+                // Nuevos dispositivos
+                for device in &cur_dev {
+                    if !devices
+                        .iter()
+                        .any(|e| e.serial_number == device.serial_number)
+                    {
+                        devices.push(device.clone());
+
+                        let payload: DeviceListItem = device.clone();
+                        let _ = app.emit("device_connected", payload);
+
+                        let notification = NotificationDefinition {
+                            title: "Device connected".to_string(),
+                            body: format!("{} {}", device.manufacturer, device.model),
+                        };
+
+                        let _ = ui::show_notification(app.clone(), notification);
+                    }
+                }
+
+                for device in &devices {
+                    if !cur_dev
+                        .iter()
+                        .any(|d| d.serial_number == device.serial_number)
+                    {
+                        let payload: DeviceListItem = device.clone();
+                        let _ = app.emit("device_disconnected", payload);
+
+                        let notification = NotificationDefinition {
+                            title: "Device disconnected".to_string(),
+                            body: format!("{} {}", device.manufacturer, device.model),
+                        };
+
+                        let _ = ui::show_notification(app.clone(), notification);
+                    }
+                }
+
+                devices.retain(|d| cur_dev.iter().any(|cd| cd.serial_number == d.serial_number));
+            }
+
+            tokio::time::sleep(std::time::Duration::from_secs(1)).await;
+        }
+    });
 }

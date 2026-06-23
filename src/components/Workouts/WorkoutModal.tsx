@@ -1,5 +1,16 @@
 import { WorkoutDetails } from "@/utils/backend/models";
+import { useEffect, useState } from "react";
 import { Modal } from "react-bootstrap";
+import {
+  CartesianGrid,
+  Legend,
+  Line,
+  LineChart,
+  ReferenceLine,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+} from "recharts";
 
 type Props = {
   workout: WorkoutDetails;
@@ -7,6 +18,28 @@ type Props = {
 };
 
 export function WorkoutModal({ workout, onClose }: Props) {
+  const [chartData, setChartData] = useState<
+    { date: string; volume: number }[]
+  >([]);
+  const [minVol, setMinVol] = useState(99999);
+  const [maxVol, setMaxVol] = useState(0);
+
+  useEffect(() => {
+    const data = [...workout.sessions].reverse().map((ws) => {
+      return {
+        date: ws.date.split(" ")[1],
+        volume: ws.volume,
+      };
+    });
+    setChartData(data);
+    const volumes = [...data].map(({ volume }) => {
+      return volume;
+    });
+    setMinVol(Math.min(...volumes));
+    setMaxVol(Math.max(...volumes));
+    console.table(data);
+  }, []);
+
   return (
     <div
       className="modal show"
@@ -39,13 +72,54 @@ export function WorkoutModal({ workout, onClose }: Props) {
               </tr>
               <tr>
                 <td>Average volume:</td>
-                <td>{workout.avg_volume} Kg</td>
+                <td>{Math.floor(workout.avg_volume)} Kg</td>
               </tr>
             </tbody>
           </table>
           {workout.sessions.length > 0 && (
             <>
               <hr />
+              <div style={{ width: "100%", height: 200 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart
+                    data={chartData}
+                    margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
+                  >
+                    <CartesianGrid stroke="#80808000" strokeDasharray="5 5" />
+                    <XAxis
+                      dataKey="date"
+                      stroke="#fff"
+                      tick={false}
+                      height={0}
+                    />
+                    <YAxis
+                      stroke="#fff"
+                      width={0}
+                      domain={[minVol * 0.9, maxVol * 1.1]}
+                      tick={false}
+                    />{" "}
+                    {/* ← número, no "auto" */}
+                    <Line
+                      name="Volume"
+                      type="monotone"
+                      dataKey="volume"
+                      stroke="#0f0"
+                      dot={{ fill: "#0f0" }}
+                      activeDot={{ stroke: "#00ff0000" }}
+                      isAnimationActive={false}
+                    />
+                    <ReferenceLine
+                      y={(minVol + maxVol) / 2}
+                      stroke="#808080"
+                      strokeDasharray="10 5"
+                    />
+                    <Legend />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+              <br />
+              <hr />
+              <h5 style={{ textAlign: "center" }}>Sessions</h5>
               <table>
                 <colgroup>
                   <col style={{ width: "230px" }} />

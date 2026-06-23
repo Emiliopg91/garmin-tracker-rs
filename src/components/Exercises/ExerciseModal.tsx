@@ -1,5 +1,15 @@
 import { ExerciseDetails } from "@/utils/backend/models";
+import { useEffect, useState } from "react";
 import { Modal } from "react-bootstrap";
+import {
+  CartesianGrid,
+  Legend,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+} from "recharts";
 
 type Props = {
   exercise: ExerciseDetails;
@@ -7,6 +17,38 @@ type Props = {
 };
 
 export function ExerciseModal({ exercise, onClose }: Props) {
+  const [chartData, setChartData] = useState<
+    { id: number; volume: number; reps: number }[]
+  >([]);
+  const [minVol, setMinVol] = useState(99999);
+  const [maxVol, setMaxVol] = useState(0);
+
+  useEffect(() => {
+    const data: { id: number; volume: number; reps: number }[] = [];
+    Object.keys(exercise.series).forEach((k, idx) => {
+      let count = 0;
+      let weight = 0;
+      exercise.series[k].forEach((s) => {
+        count += s.reps;
+        weight += s.reps * s.weight;
+      });
+      data.push({
+        id: Object.keys(exercise.series).length - idx,
+        volume: weight,
+        reps: count,
+      });
+    });
+    data.sort((a, b) => a.id - b.id);
+    console.table(data);
+    setChartData(data);
+
+    const volumes = data.map(({ volume }) => {
+      return volume;
+    });
+    setMinVol(Math.min(...volumes));
+    setMaxVol(Math.max(...volumes));
+  }, []);
+
   return (
     <div
       className="modal show"
@@ -41,6 +83,53 @@ export function ExerciseModal({ exercise, onClose }: Props) {
           </table>
           {Object.keys(exercise.workouts).length > 0 && (
             <>
+              <hr />
+              <div style={{ width: "100%", height: 200 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart
+                    data={chartData}
+                    margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
+                  >
+                    <CartesianGrid stroke="#80808000" strokeDasharray="5 5" />
+                    <XAxis dataKey="id" stroke="#fff" tick={false} height={0} />
+                    <YAxis
+                      yAxisId="left"
+                      stroke="#fff"
+                      width={0}
+                      domain={[minVol * 0.9, maxVol * 1.1]}
+                      tick={false}
+                    />{" "}
+                    <YAxis
+                      yAxisId="right"
+                      stroke="#fff"
+                      width={0}
+                      tick={false}
+                    />{" "}
+                    <Line
+                      yAxisId="left"
+                      type="monotone"
+                      name="Volume"
+                      dataKey="volume"
+                      stroke="#0f0"
+                      dot={{ fill: "#0f0" }}
+                      activeDot={{ stroke: "#f0f0f000" }}
+                      isAnimationActive={false}
+                    />
+                    <Line
+                      yAxisId="right"
+                      type="monotone"
+                      name="Repetitions"
+                      dataKey="reps"
+                      stroke="#f00"
+                      dot={{ fill: "#f00" }}
+                      activeDot={{ stroke: "#f0f0f000" }}
+                      isAnimationActive={false}
+                    />
+                    <Legend />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+              <br />
               <hr />
               <table>
                 <colgroup>

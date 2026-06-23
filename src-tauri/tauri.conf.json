@@ -7,14 +7,15 @@
     "beforeDevCommand": "pnpm dev",
     "devUrl": "http://localhost:1420",
     "beforeBuildCommand": "pnpm build",
-    "frontendDist": "../dist"
+    "frontendDist": "../dist",
+    "removeUnusedCommands": true
   },
   "app": {
     "windows": [
       {
         "title": "Garmin Fit Tracker",
         "width": 850,
-        "height": 650
+        "height": 750
       }
     ],
     "security": {

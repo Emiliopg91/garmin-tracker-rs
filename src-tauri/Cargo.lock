@@ -3845,6 +3845,7 @@ dependencies = [
 [[package]]
 name = "tauri-rs-ts-ipc"
 version = "0.1.0"
+source = "git+https://github.com/Emiliopg91/tauri-rs-ts-ipc#9454ffaaed09e7d7d40da0747d7bca48c23cfc41"
 dependencies = [
  "proc-macro2",
  "quote",
