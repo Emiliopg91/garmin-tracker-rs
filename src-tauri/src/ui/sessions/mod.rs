@@ -1,5 +1,8 @@
 pub mod models;
-use std::sync::mpsc;
+use std::{
+    path::{Path, PathBuf},
+    sync::mpsc,
+};
 
 use chrono::{Datelike, Timelike};
 use tauri::AppHandle;
@@ -150,47 +153,31 @@ pub async fn import_from_file(app: AppHandle) -> Result<(), String> {
             }
         });
 
-    let mut res = Ok(0);
-    match rx.recv() {
-        Ok(files) => match DATABASE_INST.lock() {
-            Ok(mut db) => {
-                match db.run_in_transaction(|tx| {
-                    for file in &files {
-                        match Session::load_from_file(file.as_path().unwrap()) {
-                            Ok(mut session) => {
-                                session.insert(tx)?;
-                            }
-                            Err(e) => {
-                                res = Err(format!("Error parsing session: {}", e));
-                                break;
-                            }
-                        }
-                    }
-                    res = Ok(files.len() as isize);
-                    Ok(())
-                }) {
-                    Ok(_) => {}
-                    Err(e) => {
-                        res = Err(format!("Error writing to database: {}", e));
-                    }
-                }
-            }
-            Err(e) => {
-                res = Err(format!("Error connecting to database: {}", e));
-            }
-        },
-        Err(_) => res = Ok(-1),
-    }
+    let res = match rx.recv() {
+        Ok(files) => {
+            let files = files
+                .iter()
+                .filter_map(|f| match f.as_path() {
+                    Some(path) => Some(path.to_path_buf()),
+                    None => None,
+                })
+                .collect::<Vec<PathBuf>>();
+            import_file_list(&files)
+        }
+        Err(_) => Ok(-1),
+    };
 
     match res {
         Ok(l) => {
-            let _ = show_notification(
-                app,
-                NotificationDefinition {
-                    title: "Import succesful".to_string(),
-                    body: format!("Imported {} sessions from disk", l),
-                },
-            );
+            if l >= 0 {
+                let _ = show_notification(
+                    app,
+                    NotificationDefinition {
+                        title: "Import succesful".to_string(),
+                        body: format!("Imported {} sessions from disk", l),
+                    },
+                );
+            }
 
             Ok(())
         }
@@ -227,36 +214,7 @@ pub async fn import_from_device(app: AppHandle, serial: &str) -> Result<(), Stri
         .await
         .map_err(|e| e.to_string())?;
 
-    let mut res = Ok(0);
-    match DATABASE_INST.lock() {
-        Ok(mut db) => {
-            match db.run_in_transaction(|tx| {
-                for file in &activities {
-                    match Session::load_from_file(file.as_path()) {
-                        Ok(mut session) => {
-                            session.insert(tx)?;
-                        }
-                        Err(e) => {
-                            res = Err(format!("Error parsing session: {}", e));
-                            break;
-                        }
-                    }
-                }
-                res = Ok(activities.len());
-                Ok(())
-            }) {
-                Ok(_) => {}
-                Err(e) => {
-                    res = Err(format!("Error writing to database: {}", e));
-                }
-            }
-        }
-        Err(e) => {
-            res = Err(format!("Error accesing to database: {}", e));
-        }
-    }
-
-    match res {
+    match import_file_list(&activities) {
         Ok(l) => {
             let _ = show_notification(
                 app,
@@ -278,5 +236,64 @@ pub async fn import_from_device(app: AppHandle, serial: &str) -> Result<(), Stri
             );
             Err(e)
         }
+    }
+}
+
+fn import_file_list<F>(files: &[F]) -> Result<isize, String>
+where
+    F: AsRef<Path>,
+{
+    let mut res = Ok(-1);
+
+    let mut cur_file = None;
+    match DATABASE_INST.lock() {
+        Ok(mut db) => {
+            match db.run_in_transaction(|tx| {
+                let mut inner_res = Ok(());
+                for file in files {
+                    cur_file = Some(file);
+                    match Session::load_from_file(file.as_ref()) {
+                        Ok(mut session) => {
+                            session.insert(tx)?;
+                        }
+                        Err(e) => {
+                            inner_res = Err(format!("Error parsing session: {}", e));
+                            break;
+                        }
+                    }
+                }
+                match inner_res {
+                    Ok(_) => {
+                        res = Ok(files.len() as isize);
+                    }
+                    Err(e) => res = Err(e),
+                }
+                Ok(())
+            }) {
+                Ok(_) => (),
+                Err(e) => {
+                    if e.to_string().contains("UNIQUE constraint") {
+                        res = Err("Session already imported".to_string());
+                    } else {
+                        res = Err(format!("Error writing to database: {}", e));
+                    }
+                }
+            }
+        }
+        Err(e) => {
+            res = Err(format!("Error connecting to database: {}", e));
+        }
+    }
+
+    match res {
+        Ok(v) => Ok(v),
+        Err(e) => match cur_file {
+            Some(f) => Err(format!(
+                "{}: {}",
+                f.as_ref().file_name().unwrap().display(),
+                e
+            )),
+            None => Err(e),
+        },
     }
 }

@@ -4,6 +4,7 @@ import { JSX } from "react/jsx-runtime";
 import { useEffect, useRef, useState } from "react";
 import { Tabs } from "@/models/tabs";
 import { BackendListener } from "@/utils/backend/listener";
+import { BackendClient } from "@/utils/backend/client";
 
 export function AppProvider({
   children,
@@ -25,6 +26,7 @@ export function AppProvider({
       availableDevicesRef.current = devices;
       setAvailableDevices(devices);
     });
+
     const unregisterDisconnection = BackendListener.onDeviceDisconnected(
       (device) => {
         const previous = availableDevicesRef.current;
@@ -36,6 +38,8 @@ export function AppProvider({
         setAvailableDevices(devices);
       },
     );
+
+    BackendClient.startDeviceWatcher();
 
     return () => {
       unregisterConnection();

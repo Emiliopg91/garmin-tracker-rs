@@ -10,19 +10,16 @@ use crate::{
     },
 };
 
-pub async fn get_available_devices() -> Result<Vec<DeviceListItem>, String> {
-    MtpClient::get_connected_devices()
-        .await
-        .map_err(|e| e.to_string())
-}
-
-pub fn mtp_watcher(app: AppHandle) {
+#[tauri::command]
+pub async fn start_device_watcher(app: AppHandle) -> Result<(), String> {
     tauri::async_runtime::spawn(async move {
         let mut devices: Vec<DeviceListItem> = Vec::new();
 
         loop {
-            if let Ok(cur_dev) = get_available_devices().await {
-                // Nuevos dispositivos
+            if let Ok(cur_dev) = MtpClient::get_connected_devices()
+                .await
+                .map_err(|e| e.to_string())
+            {
                 for device in &cur_dev {
                     if !devices
                         .iter()
@@ -67,4 +64,6 @@ pub fn mtp_watcher(app: AppHandle) {
             tokio::time::sleep(std::time::Duration::from_secs(1)).await;
         }
     });
+
+    Ok(())
 }

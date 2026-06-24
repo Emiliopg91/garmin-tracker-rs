@@ -69,7 +69,7 @@ impl Exercise {
                 });
 
                 if ex_cat.is_none() {
-                    return Err(ParseFitFileError::ExerciseCategory());
+                    return Err(ParseFitFileError::InvalidFileFormat());
                 }
                 let ex_cat = ex_cat.unwrap();
 
@@ -86,7 +86,7 @@ impl Exercise {
                 });
 
                 if name.is_none() {
-                    return Err(ParseFitFileError::ExerciseName());
+                    return Err(ParseFitFileError::InvalidFileFormat());
                 }
                 let name = name.unwrap();
 

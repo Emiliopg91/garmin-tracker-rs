@@ -2,7 +2,7 @@
 
 import { invoke, InvokeArgs } from "@tauri-apps/api/core";
 
-import { ExerciseDetails, ExerciseListItem, SessionDetails, SessionListItem, WorkoutDetails, WorkoutListItem, SessionSeriesUpdate } from "./models";
+import { ExerciseListItem, SessionDetails, SessionSeriesUpdate, ExerciseDetails, SessionListItem, WorkoutDetails, WorkoutListItem } from "./models";
 
 export class BackendClient {
 	// Definition: /ui/exercises/mod.rs:52
@@ -17,13 +17,13 @@ export class BackendClient {
 	}
 	
 
-	// Definition: /ui/sessions/mod.rs:49
+	// Definition: /ui/sessions/mod.rs:52
 	public static getSessionDetails(timestamp: string): Promise<SessionDetails> {
 	  return BackendClient.inner_invoke("get_session_details", { timestamp }); 
 	}
 	
 
-	// Definition: /ui/sessions/mod.rs:23
+	// Definition: /ui/sessions/mod.rs:26
 	public static getSessions(): Promise<SessionListItem[]> {
 	  return BackendClient.inner_invoke("get_sessions"); 
 	}
@@ -41,21 +41,27 @@ export class BackendClient {
 	}
 	
 
-	// Definition: /ui/sessions/mod.rs:211
+	// Definition: /ui/sessions/mod.rs:198
 	public static importFromDevice(serial: string): Promise<void> {
 	  return BackendClient.inner_invoke("import_from_device", { serial }); 
 	}
 	
 
-	// Definition: /ui/sessions/mod.rs:141
+	// Definition: /ui/sessions/mod.rs:144
 	public static importFromFile(): Promise<void> {
 	  return BackendClient.inner_invoke("import_from_file"); 
 	}
 	
 
-	// Definition: /ui/sessions/mod.rs:86
+	// Definition: /ui/sessions/mod.rs:89
 	public static saveSessionChanges(details: SessionSeriesUpdate): Promise<void> {
 	  return BackendClient.inner_invoke("save_session_changes", { details }); 
+	}
+	
+
+	// Definition: /ui/devices/mod.rs:14
+	public static startDeviceWatcher(): Promise<void> {
+	  return BackendClient.inner_invoke("start_device_watcher"); 
 	}
 	
 

@@ -3,7 +3,7 @@ use tauri::Manager;
 use crate::{
     garmin::database::DATABASE_INST,
     ui::{
-        devices::mtp_watcher,
+        devices::start_device_watcher,
         exercises::{get_exercise_details, get_exercises},
         sessions::{
             get_session_details, get_sessions, import_from_device, import_from_file,
@@ -19,6 +19,12 @@ mod ui;
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_single_instance::init(|app, _, _| {
+            let _ = app
+                .get_webview_window("main")
+                .expect("no main window")
+                .set_focus();
+        }))
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
@@ -31,8 +37,6 @@ pub fn run() {
             let mut db = DATABASE_INST.lock().unwrap();
             db.open(db_path).unwrap();
             db.create_schema().unwrap();
-
-            mtp_watcher(app.handle().clone());
 
             let window = app.get_webview_window("main").unwrap();
             std::thread::spawn(move || {
@@ -52,6 +56,7 @@ pub fn run() {
             get_workout_list,
             get_workout_details,
             import_from_device,
+            start_device_watcher
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

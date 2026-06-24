@@ -259,55 +259,69 @@ impl Session {
             .find(|r| r.kind() == profile::MesgNum::Session);
 
         if session_entry.is_none() {
-            return Err(ParseFitFileError::SessionEntry());
+            return Err(ParseFitFileError::InvalidFileFormat());
         }
 
         let session_entry = session_entry.unwrap();
 
         let mut session = Session::default();
         session.workout = Self::get_workout_name(&entries)?;
-        session_entry.fields().iter().for_each(|f| match f.name() {
-            "timestamp" => {
-                if let Value::Timestamp(val) = f.value() {
-                    session.timestamp = *val;
-                }
-            }
-            "total_elapsed_time" => {
-                if let Value::Float64(val) = f.value() {
-                    session.total_elapsed_time = *val;
-                }
-            }
-            "active_time" => {
-                if let Value::Float64(val) = f.value() {
-                    session.active_time = *val;
-                }
-            }
-            "total_calories" => {
-                if let Value::UInt16(val) = f.value() {
-                    session.total_calories = *val;
-                }
-            }
-            "metabolic_calories" => {
-                if let Value::UInt16(val) = f.value() {
-                    session.metabolic_calories = *val;
-                }
-            }
-            "avg_heart_rate" => {
-                if let Value::UInt8(val) = f.value() {
-                    session.avg_heart_rate = *val;
-                }
-            }
-            "max_heart_rate" => {
-                if let Value::UInt8(val) = f.value() {
-                    session.max_heart_rate = *val;
-                }
-            }
-            _ => (),
-        });
+        if let Some(sub_sport) = session_entry
+            .fields()
+            .iter()
+            .find(|s| s.name() == "sub_sport")
+        {
+            if let Value::String(subsport_name) = sub_sport.value()
+                && subsport_name == "strength_training"
+            {
+                session_entry.fields().iter().for_each(|f| match f.name() {
+                    "timestamp" => {
+                        if let Value::Timestamp(val) = f.value() {
+                            session.timestamp = *val;
+                        }
+                    }
+                    "total_elapsed_time" => {
+                        if let Value::Float64(val) = f.value() {
+                            session.total_elapsed_time = *val;
+                        }
+                    }
+                    "active_time" => {
+                        if let Value::Float64(val) = f.value() {
+                            session.active_time = *val;
+                        }
+                    }
+                    "total_calories" => {
+                        if let Value::UInt16(val) = f.value() {
+                            session.total_calories = *val;
+                        }
+                    }
+                    "metabolic_calories" => {
+                        if let Value::UInt16(val) = f.value() {
+                            session.metabolic_calories = *val;
+                        }
+                    }
+                    "avg_heart_rate" => {
+                        if let Value::UInt8(val) = f.value() {
+                            session.avg_heart_rate = *val;
+                        }
+                    }
+                    "max_heart_rate" => {
+                        if let Value::UInt8(val) = f.value() {
+                            session.max_heart_rate = *val;
+                        }
+                    }
+                    _ => (),
+                });
 
-        session.series = Serie::get_sets(&entries, &session)?;
+                session.series = Serie::get_sets(&entries, &session)?;
 
-        Ok(session)
+                Ok(session)
+            } else {
+                Err(ParseFitFileError::OnlyStrengthTraining())
+            }
+        } else {
+            Err(ParseFitFileError::InvalidFileFormat())
+        }
     }
 
     fn get_workout_name(entries: &[FitDataRecord]) -> errors::Result<String> {
@@ -316,7 +330,7 @@ impl Session {
             .find(|r| r.kind() == profile::MesgNum::Workout);
 
         if wkt_entry.is_none() {
-            return Err(ParseFitFileError::WorkoutEntry());
+            return Err(ParseFitFileError::InvalidFileFormat());
         }
 
         let wkt_entry = wkt_entry.unwrap();
@@ -324,7 +338,7 @@ impl Session {
         let name = wkt_entry.fields().iter().find(|f| f.name() == "wkt_name");
 
         if name.is_none() {
-            return Err(ParseFitFileError::WorkoutName());
+            return Err(ParseFitFileError::InvalidFileFormat());
         }
 
         let name = name.unwrap();
@@ -332,7 +346,7 @@ impl Session {
         if let Value::String(name) = name.value() {
             return Ok(name.clone());
         }
-        Err(ParseFitFileError::InvalidWorkoutName())
+        Err(ParseFitFileError::InvalidFileFormat())
     }
 
     pub fn get_volume(&self) -> f64 {
