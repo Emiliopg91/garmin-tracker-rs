@@ -78,18 +78,6 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
         onUpdate();
         onClose();
       })
-      .then(() => {
-        BackendClient.showNotification({
-          title: "Updated succesful",
-          body: "Workout session updated succesfully",
-        });
-      })
-      .catch((e) => {
-        BackendClient.showNotification({
-          title: "Error on session update",
-          body: e,
-        });
-      })
       .finally(() => {
         setLoading(false);
       });

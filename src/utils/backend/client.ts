@@ -2,72 +2,60 @@
 
 import { invoke, InvokeArgs } from "@tauri-apps/api/core";
 
-import { ExerciseListItem, SessionSeriesUpdate, SessionDetails, ExerciseDetails, DeviceListItem, WorkoutListItem, NotificationDefinition, WorkoutDetails, SessionListItem } from "./models";
+import { SessionDetails, SessionListItem, WorkoutListItem, SessionSeriesUpdate, ExerciseListItem, WorkoutDetails, ExerciseDetails } from "./models";
 
 export class BackendClient {
-	// Definition: /lib.rs:63
-	public static getAvailableDevices(): Promise<DeviceListItem[]> {
-	  return BackendClient.inner_invoke("get_available_devices"); 
-	}
-	
-
-	// Definition: /lib.rs:33
+	// Definition: /ui/exercises/mod.rs:52
 	public static getExerciseDetails(category: string, id: number): Promise<ExerciseDetails> {
 	  return BackendClient.inner_invoke("get_exercise_details", { category, id }); 
 	}
 	
 
-	// Definition: /lib.rs:28
+	// Definition: /ui/exercises/mod.rs:15
 	public static getExercises(): Promise<ExerciseListItem[]> {
 	  return BackendClient.inner_invoke("get_exercises"); 
 	}
 	
 
-	// Definition: /lib.rs:23
+	// Definition: /ui/sessions/mod.rs:49
 	public static getSessionDetails(timestamp: string): Promise<SessionDetails> {
 	  return BackendClient.inner_invoke("get_session_details", { timestamp }); 
 	}
 	
 
-	// Definition: /lib.rs:18
+	// Definition: /ui/sessions/mod.rs:23
 	public static getSessions(): Promise<SessionListItem[]> {
 	  return BackendClient.inner_invoke("get_sessions"); 
 	}
 	
 
-	// Definition: /lib.rs:58
+	// Definition: /ui/workouts/mod.rs:71
 	public static getWorkoutDetails(name: string): Promise<WorkoutDetails> {
 	  return BackendClient.inner_invoke("get_workout_details", { name }); 
 	}
 	
 
-	// Definition: /lib.rs:53
+	// Definition: /ui/workouts/mod.rs:16
 	public static getWorkoutList(): Promise<WorkoutListItem[]> {
 	  return BackendClient.inner_invoke("get_workout_list"); 
 	}
 	
 
-	// Definition: /lib.rs:43
-	public static importFromDevice(serial: string): Promise<number> {
+	// Definition: /ui/sessions/mod.rs:211
+	public static importFromDevice(serial: string): Promise<void> {
 	  return BackendClient.inner_invoke("import_from_device", { serial }); 
 	}
 	
 
-	// Definition: /lib.rs:38
-	public static importFromFile(): Promise<number> {
+	// Definition: /ui/sessions/mod.rs:141
+	public static importFromFile(): Promise<void> {
 	  return BackendClient.inner_invoke("import_from_file"); 
 	}
 	
 
-	// Definition: /lib.rs:48
+	// Definition: /ui/sessions/mod.rs:86
 	public static saveSessionChanges(details: SessionSeriesUpdate): Promise<void> {
 	  return BackendClient.inner_invoke("save_session_changes", { details }); 
-	}
-	
-
-	// Definition: /lib.rs:68
-	public static showNotification(notification: NotificationDefinition): Promise<void> {
-	  return BackendClient.inner_invoke("show_notification", { notification }); 
 	}
 	
 

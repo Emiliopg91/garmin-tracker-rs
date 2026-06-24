@@ -15,7 +15,8 @@
       {
         "title": "Garmin Fit Tracker",
         "width": 850,
-        "height": 750
+        "height": 750,
+        "visible": false
       }
     ],
     "security": {

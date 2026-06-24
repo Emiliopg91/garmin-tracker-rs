@@ -17,12 +17,6 @@ export function WorkoutsList() {
       .then((data) => {
         setWorkouts(data);
       })
-      .catch((e) => {
-        BackendClient.showNotification({
-          title: "Error getting workout list",
-          body: e,
-        });
-      })
       .finally(() => {
         setLoading(false);
       });

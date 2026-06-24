@@ -1,0 +1,107 @@
+pub mod models;
+
+use tauri::AppHandle;
+
+use crate::{
+    garmin::database::dao::{exercise::Exercise, serie::Serie, session::Session},
+    ui::{
+        exercises::models::{ExerciseDetails, ExerciseListItem},
+        notifications::{models::NotificationDefinition, show_notification},
+        sessions::models::SessionSerie,
+    },
+};
+
+#[tauri::command]
+pub fn get_exercises(app: AppHandle) -> Result<Vec<ExerciseListItem>, String> {
+    let res: Result<Vec<ExerciseListItem>, String> = {
+        let mut result = Vec::new();
+
+        let exercises = Exercise::load_from_db().map_err(|e| e.to_string())?;
+        for exercise in exercises {
+            let pr = Serie::get_pr_for_exercise(&exercise).map_err(|e| e.to_string())?;
+            result.push(ExerciseListItem {
+                category: exercise.category,
+                id: exercise.id,
+                name: exercise.name,
+                reps: pr.reps,
+                weight: pr.weight,
+                rm: pr.get_1rm_estimation(),
+                date: pr.format_date(),
+            });
+        }
+
+        Ok(result)
+    };
+
+    match res {
+        Ok(l) => Ok(l),
+        Err(e) => {
+            let _ = show_notification(
+                app,
+                NotificationDefinition {
+                    title: "Error getting exercises list".to_string(),
+                    body: e.to_string(),
+                },
+            );
+            Err(e)
+        }
+    }
+}
+
+#[tauri::command]
+pub fn get_exercise_details(
+    app: AppHandle,
+    category: &str,
+    id: i16,
+) -> Result<ExerciseDetails, String> {
+    let res = {
+        if let Some(exercise) =
+            Exercise::load_by_cat_and_id(category, id as u16).map_err(|e| e.to_string())?
+        {
+            let mut res = ExerciseDetails::from(&exercise);
+
+            let pr = Serie::get_pr_for_exercise(&exercise).map_err(|e| e.to_string())?;
+            res.reps = pr.reps;
+            res.weight = pr.weight;
+            res.rm = pr.get_1rm_estimation();
+            res.pr_date = pr.format_date();
+
+            let series = Serie::load_for_exercise(category, id).map_err(|e| e.to_string())?;
+            for serie in series {
+                let wk = SessionSerie::from(&serie);
+                if let Some(ses) =
+                    Session::find_by_id(serie.session.timestamp()).map_err(|e| e.to_string())?
+                {
+                    let ex_str = format!("{}\n{}", ses.workout, ses.format_date());
+
+                    if !res.workouts.contains(&ex_str) {
+                        res.workouts.push(ex_str.clone());
+                    }
+
+                    let entry = res.series.entry(ex_str).or_default();
+                    entry.push(wk);
+                } else {
+                    return Err("Could not find session".to_string());
+                }
+            }
+
+            Ok(res)
+        } else {
+            Err("Could not find exercise".to_string())
+        }
+    };
+
+    match res {
+        Ok(l) => Ok(l),
+        Err(e) => {
+            let _ = show_notification(
+                app,
+                NotificationDefinition {
+                    title: "Error getting session details".to_string(),
+                    body: e.to_string(),
+                },
+            );
+            Err(e)
+        }
+    }
+}

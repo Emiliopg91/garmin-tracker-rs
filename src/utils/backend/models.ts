@@ -1,101 +1,95 @@
-// Definition: /garmin/models/devices.rs:5
+// Definition: /ui/devices/models.rs:5
 export interface DeviceListItem {
   manufacturer: string;
   model: string;
   serial_number: string;
 }
 
-// Definition: /garmin/models/exercises.rs:33
+// Definition: /ui/exercises/models.rs:33
 export interface ExerciseDetails {
-  name: string;
-  reps: number;
-  weight: number;
-  rm: number;
   pr_date: string;
-  id: number;
+  weight: number;
   series: Record<string, SessionSerie[]>;
   workouts: string[];
-  category: string;
-}
-
-// Definition: /garmin/models/exercises.rs:8
-export interface ExerciseListItem {
-  category: string;
   rm: number;
   name: string;
-  weight: number;
-  date: string;
   id: number;
   reps: number;
+  category: string;
 }
 
-// Definition: /garmin/models/notifications.rs:4
-export interface NotificationDefinition {
-  body: string;
-  title: string;
-}
-
-// Definition: /garmin/models/sessions.rs:59
-export interface SessionDetails {
-  metabolic_calories: number;
+// Definition: /ui/exercises/models.rs:8
+export interface ExerciseListItem {
+  category: string;
+  name: string;
+  rm: number;
   date: string;
-  total_calories: number;
-  active_time: string;
+  reps: number;
+  id: number;
+  weight: number;
+}
+
+// Definition: /ui/sessions/models.rs:59
+export interface SessionDetails {
+  timestamp: string;
+  max_heart_rate: number;
   series: Record<string, SessionSerie[]>;
   exercises: string[];
+  metabolic_calories: number;
   total_elapsed_time: string;
-  max_heart_rate: number;
-  timestamp: string;
+  total_calories: number;
+  date: string;
+  active_time: string;
   avg_heart_rate: number;
   name: string;
 }
 
-// Definition: /garmin/models/sessions.rs:8
+// Definition: /ui/sessions/models.rs:8
 export interface SessionListItem {
-  name: string;
-  exercises_num: number;
-  timestamp: string;
   date: string;
   volume: number;
   series_num: number;
+  exercises_num: number;
+  name: string;
+  timestamp: string;
 }
 
-// Definition: /garmin/models/sessions.rs:42
+// Definition: /ui/sessions/models.rs:42
 export interface SessionSerie {
-  weight: number;
   idx: number;
+  weight: number;
   reps: number;
 }
 
-// Definition: /garmin/models/sessions.rs:96
+// Definition: /ui/sessions/models.rs:96
 export interface SessionSeriesUpdate {
-  timestamp: string;
   series: SessionSerie[];
+  timestamp: string;
 }
 
-// Definition: /garmin/models/workouts.rs:33
+// Definition: /ui/workouts/models.rs:33
 export interface WorkoutDetails {
-  latest_session: string;
   sessions: WorkoutSession[];
-  name: string;
-  avg_time: string;
-  avg_volume: number;
-  session_count: number;
-}
-
-// Definition: /garmin/models/workouts.rs:6
-export interface WorkoutListItem {
-  sessions: number;
-  name: string;
   latest_session: string;
+  name: string;
+  avg_time: string;
+  session_count: number;
+  avg_volume: number;
+}
+
+// Definition: /ui/workouts/models.rs:6
+export interface WorkoutListItem {
+  latest_session: string;
+  name: string;
+  sessions: number;
   avg_time: string;
 }
 
-// Definition: /garmin/models/workouts.rs:14
+// Definition: /ui/workouts/models.rs:14
 export interface WorkoutSession {
   volume: number;
-  date: string;
-  time: string;
   vol_diff: string;
+  time: string;
+  date: string;
 }
 

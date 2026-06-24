@@ -6,11 +6,10 @@ use std::{
 
 use mtp_rs::{MtpDevice, ptp::ObjectInfo};
 
-use crate::garmin::{
-    models::devices::DeviceListItem,
-    mtp::errors::{MtpError, Result},
+use crate::{
+    garmin::mtp::errors::{MtpError, Result},
+    ui::devices::models::DeviceListItem,
 };
-
 pub mod errors;
 
 pub struct MtpClient {}

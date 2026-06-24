@@ -19,12 +19,6 @@ export function SessionsList() {
       .then((data) => {
         setSessions(data);
       })
-      .catch((e) => {
-        BackendClient.showNotification({
-          title: "Error getting session list",
-          body: e,
-        });
-      })
       .finally(() => {
         setLoading(false);
       });
@@ -37,18 +31,8 @@ export function SessionsList() {
   const importFile = () => {
     setLoading(true);
     BackendClient.importFromFile()
-      .then((count) => {
-        BackendClient.showNotification({
-          title: "File imported succesfully",
-          body: "Imported " + count + " sessions from file",
-        });
+      .then(() => {
         refreshList();
-      })
-      .catch((e) => {
-        BackendClient.showNotification({
-          title: "Error on file import",
-          body: e,
-        });
       })
       .finally(() => {
         setLoading(false);
@@ -58,18 +42,8 @@ export function SessionsList() {
   const importDevice = (serial: string) => {
     setLoading(true);
     BackendClient.importFromDevice(serial)
-      .then((count) => {
+      .then(() => {
         refreshList();
-        BackendClient.showNotification({
-          title: "Imported succesfully from device",
-          body: "Imported " + count + " sessions from device",
-        });
-      })
-      .catch((e) => {
-        BackendClient.showNotification({
-          title: "Error on file import",
-          body: e,
-        });
       })
       .finally(() => {
         setLoading(false);
@@ -81,12 +55,6 @@ export function SessionsList() {
     BackendClient.getSessionDetails(timestamp)
       .then((details) => {
         setSessionDetails(details);
-      })
-      .catch((e) => {
-        BackendClient.showNotification({
-          title: "Error getting session details",
-          body: e,
-        });
       })
       .finally(() => {
         setLoading(false);

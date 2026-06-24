@@ -16,12 +16,6 @@ export function ExercisesList() {
       .then((data) => {
         setExercises(data);
       })
-      .catch((e) => {
-        BackendClient.showNotification({
-          title: "Error getting exercise list",
-          body: e,
-        });
-      })
       .finally(() => {
         setLoading(false);
       });

@@ -1,4 +1,3 @@
-import { BackendClient } from "@/utils/backend/client";
 import { AppContext } from "./AppContext";
 import { DeviceListItem } from "@/utils/backend/models";
 import { JSX } from "react/jsx-runtime";
@@ -19,10 +18,6 @@ export function AppProvider({
   const availableDevicesRef = useRef<DeviceListItem[]>([]);
 
   useEffect(() => {
-    BackendClient.getAvailableDevices().then((devices) => {
-      availableDevicesRef.current = devices;
-      setAvailableDevices(devices);
-    });
     const unregisterConnection = BackendListener.onDeviceConnected((device) => {
       const previous = availableDevicesRef.current;
       const devices = [...previous, device];

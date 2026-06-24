@@ -1,76 +1,20 @@
-use tauri::{AppHandle, Emitter};
+use tauri::Manager;
 
-use crate::garmin::{
-    database::DATABASE_INST,
-    models::{
-        devices::DeviceListItem,
-        exercises::{ExerciseDetails, ExerciseListItem},
-        notifications::NotificationDefinition,
-        sessions::{SessionDetails, SessionListItem, SessionSeriesUpdate},
-        workouts::{WorkoutDetails, WorkoutListItem},
+use crate::{
+    garmin::database::DATABASE_INST,
+    ui::{
+        devices::mtp_watcher,
+        exercises::{get_exercise_details, get_exercises},
+        sessions::{
+            get_session_details, get_sessions, import_from_device, import_from_file,
+            save_session_changes,
+        },
+        workouts::{get_workout_details, get_workout_list},
     },
-    ui,
 };
 
 mod garmin;
-
-#[tauri::command]
-fn get_sessions() -> Result<Vec<SessionListItem>, String> {
-    ui::get_session_list()
-}
-
-#[tauri::command]
-fn get_session_details(timestamp: i64) -> Result<SessionDetails, String> {
-    ui::get_session_details(timestamp)
-}
-
-#[tauri::command]
-fn get_exercises() -> Result<Vec<ExerciseListItem>, String> {
-    ui::get_exercise_list()
-}
-
-#[tauri::command]
-fn get_exercise_details(category: &str, id: i16) -> Result<ExerciseDetails, String> {
-    ui::show_exercise_details(category, id)
-}
-
-#[tauri::command]
-async fn import_from_file(app: AppHandle) -> Result<isize, String> {
-    ui::import_fit_file(app)
-}
-
-#[tauri::command]
-async fn import_from_device(serial: &str) -> Result<usize, String> {
-    ui::import_from_device(serial).await
-}
-
-#[tauri::command]
-fn save_session_changes(details: SessionSeriesUpdate) -> Result<(), String> {
-    ui::update_session_sets(details)
-}
-
-#[tauri::command]
-fn get_workout_list() -> Result<Vec<WorkoutListItem>, String> {
-    ui::get_workout_list()
-}
-
-#[tauri::command]
-fn get_workout_details(name: &str) -> Result<WorkoutDetails, String> {
-    ui::get_workout_details(name)
-}
-
-#[tauri::command]
-async fn get_available_devices() -> Result<Vec<DeviceListItem>, String> {
-    ui::get_available_devices().await
-}
-
-#[tauri::command]
-async fn show_notification(
-    app: AppHandle,
-    notification: NotificationDefinition,
-) -> Result<(), String> {
-    ui::show_notification(app, notification)
-}
+mod ui;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -90,72 +34,25 @@ pub fn run() {
 
             mtp_watcher(app.handle().clone());
 
+            let window = app.get_webview_window("main").unwrap();
+            std::thread::spawn(move || {
+                std::thread::sleep(std::time::Duration::from_millis(200));
+                let _ = window.show();
+            });
+
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
             get_sessions,
-            get_exercises,
             get_session_details,
+            save_session_changes,
+            get_exercises,
             get_exercise_details,
             import_from_file,
-            save_session_changes,
             get_workout_list,
             get_workout_details,
-            get_available_devices,
             import_from_device,
-            show_notification
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
-}
-
-fn mtp_watcher(app: AppHandle) {
-    tauri::async_runtime::spawn(async move {
-        let mut devices: Vec<DeviceListItem> = Vec::new();
-
-        loop {
-            if let Ok(cur_dev) = ui::get_available_devices().await {
-                // Nuevos dispositivos
-                for device in &cur_dev {
-                    if !devices
-                        .iter()
-                        .any(|e| e.serial_number == device.serial_number)
-                    {
-                        devices.push(device.clone());
-
-                        let payload: DeviceListItem = device.clone();
-                        let _ = app.emit("device_connected", payload);
-
-                        let notification = NotificationDefinition {
-                            title: "Device connected".to_string(),
-                            body: format!("{} {}", device.manufacturer, device.model),
-                        };
-
-                        let _ = ui::show_notification(app.clone(), notification);
-                    }
-                }
-
-                for device in &devices {
-                    if !cur_dev
-                        .iter()
-                        .any(|d| d.serial_number == device.serial_number)
-                    {
-                        let payload: DeviceListItem = device.clone();
-                        let _ = app.emit("device_disconnected", payload);
-
-                        let notification = NotificationDefinition {
-                            title: "Device disconnected".to_string(),
-                            body: format!("{} {}", device.manufacturer, device.model),
-                        };
-
-                        let _ = ui::show_notification(app.clone(), notification);
-                    }
-                }
-
-                devices.retain(|d| cur_dev.iter().any(|cd| cd.serial_number == d.serial_number));
-            }
-
-            tokio::time::sleep(std::time::Duration::from_secs(1)).await;
-        }
-    });
 }
