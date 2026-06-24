@@ -1,95 +1,95 @@
 // Definition: /ui/devices/models.rs:5
 export interface DeviceListItem {
+  serial_number: string;
   manufacturer: string;
   model: string;
-  serial_number: string;
 }
 
 // Definition: /ui/exercises/models.rs:33
 export interface ExerciseDetails {
-  pr_date: string;
-  weight: number;
-  series: Record<string, SessionSerie[]>;
-  workouts: string[];
   rm: number;
+  workouts: string[];
+  weight: number;
   name: string;
-  id: number;
   reps: number;
   category: string;
+  id: number;
+  pr_date: string;
+  series: Record<string, SessionSerie[]>;
 }
 
 // Definition: /ui/exercises/models.rs:8
 export interface ExerciseListItem {
-  category: string;
-  name: string;
-  rm: number;
   date: string;
-  reps: number;
+  category: string;
+  rm: number;
   id: number;
+  name: string;
+  reps: number;
   weight: number;
 }
 
 // Definition: /ui/sessions/models.rs:59
 export interface SessionDetails {
+  date: string;
   timestamp: string;
+  total_elapsed_time: string;
+  active_time: string;
+  name: string;
+  avg_heart_rate: number;
+  metabolic_calories: number;
   max_heart_rate: number;
   series: Record<string, SessionSerie[]>;
   exercises: string[];
-  metabolic_calories: number;
-  total_elapsed_time: string;
   total_calories: number;
-  date: string;
-  active_time: string;
-  avg_heart_rate: number;
-  name: string;
 }
 
 // Definition: /ui/sessions/models.rs:8
 export interface SessionListItem {
-  date: string;
+  name: string;
   volume: number;
   series_num: number;
   exercises_num: number;
-  name: string;
   timestamp: string;
+  date: string;
 }
 
 // Definition: /ui/sessions/models.rs:42
 export interface SessionSerie {
-  idx: number;
-  weight: number;
   reps: number;
+  weight: number;
+  idx: number;
 }
 
 // Definition: /ui/sessions/models.rs:96
 export interface SessionSeriesUpdate {
-  series: SessionSerie[];
   timestamp: string;
+  series: SessionSerie[];
 }
 
 // Definition: /ui/workouts/models.rs:33
 export interface WorkoutDetails {
-  sessions: WorkoutSession[];
   latest_session: string;
-  name: string;
   avg_time: string;
-  session_count: number;
   avg_volume: number;
+  sessions: WorkoutSession[];
+  session_count: number;
+  name: string;
 }
 
 // Definition: /ui/workouts/models.rs:6
 export interface WorkoutListItem {
-  latest_session: string;
-  name: string;
   sessions: number;
+  name: string;
   avg_time: string;
+  latest_session: string;
 }
 
 // Definition: /ui/workouts/models.rs:14
 export interface WorkoutSession {
-  volume: number;
-  vol_diff: string;
   time: string;
+  vol_diff: string;
   date: string;
+  volume: number;
 }
 
