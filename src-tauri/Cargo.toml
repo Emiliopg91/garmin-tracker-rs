@@ -16,7 +16,8 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
-tauri-rs-ts-ipc = { git = "https://github.com/Emiliopg91/tauri-rs-ts-ipc" }
+tauri-rs-ts-ipc = { version = "^0" }
+#tauri-rs-ts-ipc = { path = "../../syn-test" }
 
 [dependencies]
 tauri = { version = "2", features = [] }
