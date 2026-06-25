@@ -14,6 +14,12 @@ pub enum MtpError {
     DownloadFile(String, mtp_rs::Error),
     #[error("Cannot write data to {0}:\n  {1}")]
     WriteData(String, std::io::Error),
+    #[error("Cannot find device with serial number {0}")]
+    MissingDevice(String),
+    #[error("No storage for device with serial number {0}")]
+    NoStorageDevice(String),
+    #[error("Error creating download folder {0}:\n  {1}")]
+    ErrorCreatingDownloadFolder(String, std::io::Error),
 }
 
 pub type Result<T> = std::result::Result<T, MtpError>;

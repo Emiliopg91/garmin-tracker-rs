@@ -1,6 +1,7 @@
 pub mod models;
 
 use tauri::{AppHandle, Emitter};
+use tauri_plugin_log::log::info;
 
 use crate::{
     garmin::mtp::MtpClient,
@@ -12,8 +13,10 @@ use crate::{
 
 #[tauri::command]
 pub async fn start_device_watcher(app: AppHandle) -> Result<(), String> {
+    info!("Starting device monitor...");
     tauri::async_runtime::spawn(async move {
         let mut devices: Vec<DeviceListItem> = Vec::new();
+        info!("Monitor initialized");
 
         loop {
             if let Ok(cur_dev) = MtpClient::get_connected_devices()
@@ -30,6 +33,10 @@ pub async fn start_device_watcher(app: AppHandle) -> Result<(), String> {
                         let payload: DeviceListItem = device.clone();
                         let _ = app.emit("device_connected", payload);
 
+                        info!(
+                            "Connected {} {} ({})",
+                            device.manufacturer, device.model, device.serial_number
+                        );
                         let _ = show_notification(
                             app.clone(),
                             NotificationDefinition {
@@ -48,6 +55,10 @@ pub async fn start_device_watcher(app: AppHandle) -> Result<(), String> {
                         let payload: DeviceListItem = device.clone();
                         let _ = app.emit("device_disconnected", payload);
 
+                        info!(
+                            "Disconnected {} {} ({})",
+                            device.manufacturer, device.model, device.serial_number
+                        );
                         let _ = show_notification(
                             app.clone(),
                             NotificationDefinition {

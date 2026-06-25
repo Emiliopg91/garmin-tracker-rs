@@ -1,13 +1,13 @@
 use std::fmt::Display;
 use std::hash::Hash;
 
-use fitparser::{FitDataRecord, Value, profile};
+use fitparser::{profile, FitDataRecord, Value};
 use rusqlite::Row;
 
 use crate::garmin::database::{
-    DATABASE_INST,
     dao::errors::{self, ParseFitFileError},
     errors::{DatabaseError, Result},
+    DATABASE_INST,
 };
 
 #[derive(Clone, Debug)]
@@ -69,7 +69,9 @@ impl Exercise {
                 });
 
                 if ex_cat.is_none() {
-                    return Err(ParseFitFileError::InvalidFileFormat());
+                    return Err(ParseFitFileError::InvalidFileFormat(
+                        "Missing exercise category field".to_string(),
+                    ));
                 }
                 let ex_cat = ex_cat.unwrap();
 
@@ -86,7 +88,9 @@ impl Exercise {
                 });
 
                 if name.is_none() {
-                    return Err(ParseFitFileError::InvalidFileFormat());
+                    return Err(ParseFitFileError::InvalidFileFormat(
+                        "Missing exercise name field".to_string(),
+                    ));
                 }
                 let name = name.unwrap();
 

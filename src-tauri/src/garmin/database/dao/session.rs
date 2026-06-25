@@ -259,7 +259,7 @@ impl Session {
             .find(|r| r.kind() == profile::MesgNum::Session);
 
         if session_entry.is_none() {
-            return Err(ParseFitFileError::InvalidFileFormat());
+            return Err(ParseFitFileError::InvalidFileFormat("Missing session field".to_string()));
         }
 
         let session_entry = session_entry.unwrap();
@@ -320,7 +320,7 @@ impl Session {
                 Err(ParseFitFileError::OnlyStrengthTraining())
             }
         } else {
-            Err(ParseFitFileError::InvalidFileFormat())
+            Err(ParseFitFileError::InvalidFileFormat("Missing sub sport field".to_string()))
         }
     }
 
@@ -330,7 +330,7 @@ impl Session {
             .find(|r| r.kind() == profile::MesgNum::Workout);
 
         if wkt_entry.is_none() {
-            return Err(ParseFitFileError::InvalidFileFormat());
+            return Err(ParseFitFileError::InvalidFileFormat("Missing workout entry".to_string()));
         }
 
         let wkt_entry = wkt_entry.unwrap();
@@ -338,7 +338,7 @@ impl Session {
         let name = wkt_entry.fields().iter().find(|f| f.name() == "wkt_name");
 
         if name.is_none() {
-            return Err(ParseFitFileError::InvalidFileFormat());
+            return Err(ParseFitFileError::InvalidFileFormat("Missing name field".to_string()));
         }
 
         let name = name.unwrap();
@@ -346,7 +346,7 @@ impl Session {
         if let Value::String(name) = name.value() {
             return Ok(name.clone());
         }
-        Err(ParseFitFileError::InvalidFileFormat())
+        Err(ParseFitFileError::InvalidFileFormat("Invalid name field type".to_string()))
     }
 
     pub fn get_volume(&self) -> f64 {

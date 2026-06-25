@@ -4,15 +4,16 @@ use std::{
     sync::mpsc,
 };
 
-use chrono::{Datelike, Timelike};
+use chrono::{Datelike, Local, TimeZone, Timelike};
 use tauri::AppHandle;
 use tauri_plugin_dialog::DialogExt;
+use tauri_plugin_log::log::{error, info};
 
 use crate::{
     garmin::{
         database::{
-            DATABASE_INST,
             dao::{exercise::Exercise, serie::Serie, session::Session},
+            DATABASE_INST,
         },
         mtp::MtpClient,
     },
@@ -24,6 +25,7 @@ use crate::{
 
 #[tauri::command]
 pub fn get_sessions(app: AppHandle) -> Result<Vec<SessionListItem>, String> {
+    info!("Getting sessions list...");
     let res: Result<Vec<SessionListItem>, String> = {
         let sessions = Session::load_from_db().map_err(|e| e.to_string())?;
 
@@ -34,8 +36,12 @@ pub fn get_sessions(app: AppHandle) -> Result<Vec<SessionListItem>, String> {
     };
 
     match res {
-        Ok(l) => Ok(l),
+        Ok(l) => {
+            info!("Retreived {} sessions", l.len());
+            Ok(l)
+        }
         Err(e) => {
+            error!("Error getting sessions list: {}", e);
             let _ = show_notification(
                 app,
                 NotificationDefinition {
@@ -50,6 +56,10 @@ pub fn get_sessions(app: AppHandle) -> Result<Vec<SessionListItem>, String> {
 
 #[tauri::command]
 pub fn get_session_details(app: AppHandle, timestamp: i64) -> Result<SessionDetails, String> {
+    info!(
+        "Getting details for session {}",
+        Local.timestamp_opt(timestamp, 0).unwrap().to_rfc3339()
+    );
     let res = {
         if let Some(session) = Session::find_by_id(timestamp).map_err(|e| e.to_string())? {
             let mut details = SessionDetails::from(&session);
@@ -71,8 +81,12 @@ pub fn get_session_details(app: AppHandle, timestamp: i64) -> Result<SessionDeta
     };
 
     match res {
-        Ok(l) => Ok(l),
+        Ok(l) => {
+            info!("Found details for session {} - {}", l.name, l.date);
+            Ok(l)
+        }
         Err(e) => {
+            error!("Error getting session details: {}", e);
             let _ = show_notification(
                 app,
                 NotificationDefinition {
@@ -87,6 +101,13 @@ pub fn get_session_details(app: AppHandle, timestamp: i64) -> Result<SessionDeta
 
 #[tauri::command]
 pub fn save_session_changes(app: AppHandle, details: SessionSeriesUpdate) -> Result<(), String> {
+    info!(
+        "Saving changes on session {}...",
+        Local
+            .timestamp_opt(details.timestamp, 0)
+            .unwrap()
+            .to_rfc3339()
+    );
     let res: Result<(), String> = {
         let mut to_update = Vec::new();
         for serie in details.series {
@@ -117,6 +138,7 @@ pub fn save_session_changes(app: AppHandle, details: SessionSeriesUpdate) -> Res
 
     match res {
         Ok(l) => {
+            info!("Session updated succesfully");
             let _ = show_notification(
                 app,
                 NotificationDefinition {
@@ -128,6 +150,7 @@ pub fn save_session_changes(app: AppHandle, details: SessionSeriesUpdate) -> Res
             Ok(l)
         }
         Err(e) => {
+            error!("Error updating session: {}", e);
             let _ = show_notification(
                 app,
                 NotificationDefinition {
@@ -142,8 +165,10 @@ pub fn save_session_changes(app: AppHandle, details: SessionSeriesUpdate) -> Res
 
 #[tauri::command]
 pub async fn import_from_file(app: AppHandle) -> Result<(), String> {
+    info!("Starting import from file/s...");
     let (tx, rx) = mpsc::channel();
 
+    info!("Waiting for user to select files...");
     app.dialog()
         .file()
         .add_filter("Garmin FIT file", &["fit"])
@@ -157,19 +182,21 @@ pub async fn import_from_file(app: AppHandle) -> Result<(), String> {
         Ok(files) => {
             let files = files
                 .iter()
-                .filter_map(|f| match f.as_path() {
-                    Some(path) => Some(path.to_path_buf()),
-                    None => None,
-                })
+                .filter_map(|f| f.as_path().map(|p| p.to_path_buf()))
                 .collect::<Vec<PathBuf>>();
+            info!("Selected files: {:?}", files);
             import_file_list(&files)
         }
-        Err(_) => Ok(-1),
+        Err(_) => {
+            info!("No file was selected");
+            Ok(-1)
+        }
     };
 
     match res {
         Ok(l) => {
             if l >= 0 {
+                info!("Imported {} sessions from disk", l);
                 let _ = show_notification(
                     app,
                     NotificationDefinition {
@@ -182,6 +209,7 @@ pub async fn import_from_file(app: AppHandle) -> Result<(), String> {
             Ok(())
         }
         Err(e) => {
+            error!("Error on sessions import: {}", e);
             let _ = show_notification(
                 app,
                 NotificationDefinition {
@@ -196,6 +224,7 @@ pub async fn import_from_file(app: AppHandle) -> Result<(), String> {
 
 #[tauri::command]
 pub async fn import_from_device(app: AppHandle, serial: &str) -> Result<(), String> {
+    info!("Starting import from device with S/N {}", serial);
     let latest = Session::find_latest().map_err(|e| e.to_string())?;
     let mut latest_date = "2026-06-08-00-00-00".to_string();
     if let Some(latest) = latest {
@@ -210,23 +239,30 @@ pub async fn import_from_device(app: AppHandle, serial: &str) -> Result<(), Stri
         );
     }
 
+    info!(
+        "Fetching from device activity files after {}...",
+        latest_date
+    );
     let activities = MtpClient::download_activities_since(serial, latest_date)
         .await
         .map_err(|e| e.to_string())?;
+    info!("Fetched {} activity files", activities.len());
 
     match import_file_list(&activities) {
         Ok(l) => {
+            info!("Imported {} sessions from disk", l);
             let _ = show_notification(
                 app,
                 NotificationDefinition {
                     title: "Import succesful".to_string(),
-                    body: format!("Imported {} sessions from device", l),
+                    body: format!("Imported {} sessions from disk", l),
                 },
             );
 
             Ok(())
         }
         Err(e) => {
+            error!("Error on sessions import: {}", e);
             let _ = show_notification(
                 app,
                 NotificationDefinition {
@@ -251,6 +287,7 @@ where
             match db.run_in_transaction(|tx| {
                 let mut inner_res = Ok(());
                 for file in files {
+                    info!("Importing file {}", file.as_ref().display());
                     cur_file = Some(file);
                     match Session::load_from_file(file.as_ref()) {
                         Ok(mut session) => {

@@ -1,6 +1,7 @@
 pub mod models;
 
 use tauri::AppHandle;
+use tauri_plugin_log::log::{error, info};
 
 use crate::{
     garmin::database::dao::{exercise::Exercise, serie::Serie, session::Session},
@@ -13,6 +14,7 @@ use crate::{
 
 #[tauri::command]
 pub fn get_exercises(app: AppHandle) -> Result<Vec<ExerciseListItem>, String> {
+    info!("Getting exercises list...");
     let res: Result<Vec<ExerciseListItem>, String> = {
         let mut result = Vec::new();
 
@@ -34,8 +36,12 @@ pub fn get_exercises(app: AppHandle) -> Result<Vec<ExerciseListItem>, String> {
     };
 
     match res {
-        Ok(l) => Ok(l),
+        Ok(l) => {
+            info!("Retreived {} exercises", l.len());
+            Ok(l)
+        }
         Err(e) => {
+            error!("Error getting exercises list: {}", e);
             let _ = show_notification(
                 app,
                 NotificationDefinition {
@@ -54,6 +60,10 @@ pub fn get_exercise_details(
     category: &str,
     id: i16,
 ) -> Result<ExerciseDetails, String> {
+    info!(
+        "Getting details for exercise with category {} and id {}...",
+        category, id
+    );
     let res = {
         if let Some(exercise) =
             Exercise::load_by_cat_and_id(category, id as u16).map_err(|e| e.to_string())?
@@ -80,8 +90,6 @@ pub fn get_exercise_details(
 
                     let entry = res.series.entry(ex_str).or_default();
                     entry.push(wk);
-                } else {
-                    return Err("Could not find session".to_string());
                 }
             }
 
@@ -92,8 +100,12 @@ pub fn get_exercise_details(
     };
 
     match res {
-        Ok(l) => Ok(l),
+        Ok(l) => {
+            info!("Found details for exercise {}", l.name);
+            Ok(l)
+        }
         Err(e) => {
+            error!("Error getting session details: {}", e);
             let _ = show_notification(
                 app,
                 NotificationDefinition {

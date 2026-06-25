@@ -1,4 +1,11 @@
+use std::process::exit;
+
+use chrono::{Datelike, Local, Timelike};
 use tauri::Manager;
+use tauri_plugin_log::{
+    log::{debug, error, info},
+    Target, TargetKind,
+};
 
 use crate::{
     garmin::database::DATABASE_INST,
@@ -13,12 +20,41 @@ use crate::{
     },
 };
 
+mod constants;
 mod garmin;
 mod ui;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    tauri::Builder::default()
+    let res = tauri::Builder::default()
+        .plugin(
+            tauri_plugin_log::Builder::new()
+                .level(*constants::LOG_LEVEL)
+                .target(Target::new(TargetKind::Folder {
+                    path: constants::LOGS_DIR.clone(),
+                    file_name: None,
+                }))
+                .target(Target::new(TargetKind::Stdout))
+                .max_file_size(constants::LOG_FILE_MAX_SIZE)
+                .rotation_strategy(constants::LOG_FILE_ROTATION_STRATEGY)
+                .format(|out, message, record| {
+                    let time = Local::now();
+                    out.finish(format_args!(
+                        "[{:04}-{:02}-{:02} {:02}:{:02}:{:02}.{:03}][{}][{}] - {}",
+                        time.year(),
+                        time.month(),
+                        time.day(),
+                        time.hour(),
+                        time.minute(),
+                        time.second(),
+                        time.timestamp_subsec_millis(),
+                        record.target(),
+                        record.level(),
+                        message
+                    ))
+                })
+                .build(),
+        )
         .plugin(tauri_plugin_single_instance::init(|app, _, _| {
             let _ = app
                 .get_webview_window("main")
@@ -29,21 +65,35 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
         .setup(move |app| {
-            let config_dir = dirs::config_dir().expect("Could not get config folder");
-            let db_dir = config_dir.join("garmin-tracker-rs");
-            std::fs::create_dir_all(&db_dir).unwrap();
-            let db_path = db_dir.join("database.db");
+            info!(
+                "Starting {} v{}",
+                *constants::APP_NAME,
+                *constants::APP_VERSION
+            );
 
+            debug!("Initializing database...");
             let mut db = DATABASE_INST.lock().unwrap();
-            db.open(db_path).unwrap();
-            db.create_schema().unwrap();
+            if let Err(e) = db.open(constants::DB_FILE.clone()) {
+                error!("Could not open database: {}", e);
+                exit(constants::ExitCodes::DbError.into())
+            }
+            if let Err(e) = db.create_schema() {
+                error!("Could not initialize database: {}", e);
+                exit(constants::ExitCodes::DbError.into())
+            }
 
-            let window = app.get_webview_window("main").unwrap();
-            std::thread::spawn(move || {
-                std::thread::sleep(std::time::Duration::from_millis(200));
-                let _ = window.show();
-            });
+            debug!("Showing up main window...");
+            if let Some(window) = app.get_webview_window("main") {
+                std::thread::spawn(move || {
+                    std::thread::sleep(std::time::Duration::from_millis(200));
+                    let _ = window.show();
+                });
+            } else {
+                error!("Could not find main window instance");
+                exit(constants::ExitCodes::NoMainWindow.into())
+            }
 
+            debug!("Setup finished");
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -58,6 +108,10 @@ pub fn run() {
             import_from_device,
             start_device_watcher
         ])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .run(tauri::generate_context!());
+
+    if let Err(e) = res {
+        eprintln!("Error while running tauri application {}", e);
+        exit(constants::ExitCodes::TauriError.into())
+    }
 }

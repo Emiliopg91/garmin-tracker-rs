@@ -3,6 +3,7 @@ pub mod models;
 use std::collections::HashMap;
 
 use tauri::AppHandle;
+use tauri_plugin_log::log::{error, info};
 
 use crate::{
     garmin::database::dao::session::Session,
@@ -14,6 +15,7 @@ use crate::{
 
 #[tauri::command]
 pub fn get_workout_list(app: AppHandle) -> Result<Vec<WorkoutListItem>, String> {
+    info!("Getting workouts list...");
     let res: Result<Vec<WorkoutListItem>, String> = {
         let sessions = Session::load_from_db().map_err(|e| e.to_string())?;
 
@@ -53,8 +55,12 @@ pub fn get_workout_list(app: AppHandle) -> Result<Vec<WorkoutListItem>, String> 
     };
 
     match res {
-        Ok(l) => Ok(l),
+        Ok(l) => {
+            info!("Retreived {} workouts", l.len());
+            Ok(l)
+        }
         Err(e) => {
+            error!("Error getting workouts list: {}", e);
             let _ = show_notification(
                 app,
                 NotificationDefinition {
@@ -70,6 +76,7 @@ pub fn get_workout_list(app: AppHandle) -> Result<Vec<WorkoutListItem>, String> 
 #[tauri::command]
 pub fn get_workout_details(app: AppHandle, name: &str) -> Result<WorkoutDetails, String> {
     let res: Result<WorkoutDetails, String> = {
+        info!("Getting details for workout {}", name);
         let sessions = Session::find_by_workout(name).map_err(|e| e.to_string())?;
 
         let mut latest = sessions.first().unwrap();
@@ -111,8 +118,12 @@ pub fn get_workout_details(app: AppHandle, name: &str) -> Result<WorkoutDetails,
     };
 
     match res {
-        Ok(l) => Ok(l),
+        Ok(l) => {
+            info!("Found details for workout {}", l.name);
+            Ok(l)
+        }
         Err(e) => {
+            error!("Error getting workout details: {}", e);
             let _ = show_notification(
                 app,
                 NotificationDefinition {
