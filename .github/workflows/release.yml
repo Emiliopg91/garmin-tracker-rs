@@ -1,4 +1,4 @@
-name: Test & Release
+name: AUR release
 
 on:
   push:
@@ -26,10 +26,10 @@ jobs:
           git config user.email "actions@github.com"
 
       - name: setup node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: lts/*
-          cache: "yarn" # Set this to npm, yarn or pnpm.
+          cache: "pnpm"
 
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
