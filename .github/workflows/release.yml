@@ -2,8 +2,8 @@ name: AUR release
 
 on:
   push:
-    branches:
-      - main
+    tags:
+      - "v"
   workflow_dispatch:
 
 env:
@@ -48,32 +48,6 @@ jobs:
         run: |
           VERSION=$(sed -n 's/^version = "\(.*\)"/\1/p' src-tauri/Cargo.toml | head -n1)
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-
-      - name: Get last git tag
-        id: git_tag
-        run: |
-          git fetch --tags
-          TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "none")
-          TAG=${TAG#v}
-          echo "tag=$TAG" >> $GITHUB_OUTPUT
-
-      - name: Check version vs tag
-        id: check_version
-        run: |
-          VERSION=${{ steps.version.outputs.version }}
-          if [ "${{ steps.version.outputs.version }}" != "${{ steps.git_tag.outputs.tag }}" ]; then
-            echo "different=true" >> $GITHUB_OUTPUT
-          else
-            echo "Tag $VERSION already exists"
-            echo "different=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Create Git tag
-        if: steps.check_version.outputs.different == 'true'
-        run: |
-          VERSION=${{ steps.version.outputs.version }}
-          git tag "$VERSION"
-          git push origin "$VERSION"
 
       - name: Generate release artifacts
         if: steps.check_version.outputs.different == 'true'
