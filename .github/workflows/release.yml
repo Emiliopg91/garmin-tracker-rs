@@ -53,14 +53,8 @@ jobs:
             echo "different=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Create Git tag
-        if: steps.check_version.outputs.different == 'true'
-        run: |
-          VERSION=${{ steps.version.outputs.version }}
-          git tag "$VERSION"
-          git push origin "$VERSION"
-
       - name: Generate release artifacts
+        if: steps.check_version.outputs.different == 'true'
         run: |
           make release
 
@@ -104,3 +98,10 @@ jobs:
           else
             echo "No changes to publish"
           fi
+
+      - name: Create Git tag
+        if: steps.check_version.outputs.different == 'true'
+        run: |
+          VERSION=${{ steps.version.outputs.version }}
+          git tag "$VERSION"
+          git push origin "$VERSION"
