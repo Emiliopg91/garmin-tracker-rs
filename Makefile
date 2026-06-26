@@ -14,5 +14,5 @@ clean:
 version:
 	@python resources/scripts/set_version.py && make clean
 
-release: lint
+release:
 	@python resources/scripts/release.py

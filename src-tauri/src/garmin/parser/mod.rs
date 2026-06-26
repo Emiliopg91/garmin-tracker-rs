@@ -20,13 +20,15 @@ where
     let entries = fitparser::from_reader(&mut fp)
         .map_err(|e| ParseFitFileError::FileReading(path.as_ref().display().to_string(), e))?
         .iter()
-        .filter(|r| match r.kind() {
-            profile::MesgNum::ExerciseTitle
-            | profile::MesgNum::Session
-            | profile::MesgNum::Workout
-            | profile::MesgNum::WorkoutStep
-            | profile::MesgNum::Set => true,
-            _ => false,
+        .filter(|r| {
+            matches!(
+                r.kind(),
+                profile::MesgNum::ExerciseTitle
+                    | profile::MesgNum::Session
+                    | profile::MesgNum::Workout
+                    | profile::MesgNum::WorkoutStep
+                    | profile::MesgNum::Set
+            )
         })
         .cloned()
         .collect::<Vec<FitDataRecord>>();

@@ -38,10 +38,10 @@ pub static LOG_LEVEL: LazyLock<LevelFilter> = LazyLock::new(|| {
     #[cfg(not(debug_assertions))]
     let mut level = LevelFilter::Info;
 
-    if let Ok(level_var) = std::env::var("LOGGER_LEVEL") {
-        if let Ok(level_filter) = LevelFilter::from_str(&level_var.trim()) {
-            level = level_filter
-        }
+    if let Ok(level_var) = std::env::var("LOGGER_LEVEL")
+        && let Ok(level_filter) = LevelFilter::from_str(level_var.trim())
+    {
+        level = level_filter
     }
 
     level
