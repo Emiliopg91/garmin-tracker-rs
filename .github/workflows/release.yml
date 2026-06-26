@@ -1,10 +1,10 @@
 name: AUR release
 
 on:
-  push:
-    tags:
-      - "v"
   workflow_dispatch:
+  push:
+    branches:
+      - release
 
 env:
   CARGO_TERM_COLOR: always
@@ -25,11 +25,45 @@ jobs:
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
 
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
       - name: Extract version
         id: version
         run: |
           VERSION=$(sed -n 's/^version = "\(.*\)"/\1/p' src-tauri/Cargo.toml | head -n1)
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Get last git tag
+        id: git_tag
+        run: |
+          git fetch --tags
+          TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "none")
+          TAG=${TAG#v}
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+
+      - name: Check version vs tag
+        id: check_version
+        run: |
+          if [ "${{ steps.version.outputs.version }}" != "${{ steps.git_tag.outputs.tag }}" ]; then
+            echo "different=true" >> $GITHUB_OUTPUT
+          else
+            echo "different=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create Git tag
+        if: steps.check_version.outputs.different == 'true'
+        run: |
+          VERSION=${{ steps.version.outputs.version }}
+          git tag "$VERSION"
+          git push origin "$VERSION"
 
       - name: Generate release artifacts
         run: |
@@ -38,6 +72,7 @@ jobs:
       - name: Setup SSH for AUR
         env:
           AUR_SSH_PRIVATE_KEY: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+        if: steps.check_version.outputs.different == 'true'
         run: |
           mkdir -p ~/.ssh
 
@@ -54,6 +89,7 @@ jobs:
       - name: Publish package to AUR
         env:
           VERSION: ${{ steps.version.outputs.version }}
+        if: steps.check_version.outputs.different == 'true'
         run: |
           git clone ssh://aur@aur.archlinux.org/garmin-tracker-rs.git garmin_tracker_rs_repo
 
