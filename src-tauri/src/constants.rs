@@ -1,6 +1,6 @@
-use std::{fs, path::PathBuf, sync::LazyLock};
+use std::{fs, path::PathBuf, str::FromStr, sync::LazyLock};
 
-use tauri_plugin_log::{log::LevelFilter, RotationStrategy};
+use tauri_plugin_log::{RotationStrategy, log::LevelFilter};
 
 // App block
 pub static APP_NAME: LazyLock<String> = LazyLock::new(|| env!("CARGO_PKG_NAME").to_string());
@@ -33,11 +33,18 @@ pub static LOGS_DIR: LazyLock<PathBuf> = LazyLock::new(|| {
     dir
 });
 pub static LOG_LEVEL: LazyLock<LevelFilter> = LazyLock::new(|| {
-    if cfg!(debug_assertions) {
-        LevelFilter::Info
-    } else {
-        LevelFilter::Debug
+    #[cfg(debug_assertions)]
+    let mut level = LevelFilter::Debug;
+    #[cfg(not(debug_assertions))]
+    let mut level = LevelFilter::Info;
+
+    if let Ok(level_var) = std::env::var("LOGGER_LEVEL") {
+        if let Ok(level_filter) = LevelFilter::from_str(&level_var.trim()) {
+            level = level_filter
+        }
     }
+
+    level
 });
 pub const LOG_FILE_MAX_SIZE: u128 = 1_024 * 1_024;
 pub const LOG_FILE_ROTATION_STRATEGY: RotationStrategy = RotationStrategy::KeepSome(3);

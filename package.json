@@ -11,29 +11,29 @@
     "lint": "eslint src --ext .js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix && tsc"
   },
   "dependencies": {
-    "@tauri-apps/api": "^2",
+    "@tauri-apps/api": "^2.11.1",
     "@tauri-apps/plugin-dialog": "~2.7.1",
     "@tauri-apps/plugin-log": "~2.8.0",
     "@tauri-apps/plugin-notification": "~2.3.3",
-    "@tauri-apps/plugin-opener": "^2",
+    "@tauri-apps/plugin-opener": "^2.5.4",
     "bootstrap": "^5.3.8",
-    "react": "^19.1.0",
+    "react": "^19.2.7",
     "react-bootstrap": "^2.10.10",
-    "react-dom": "^19.1.0",
-    "recharts": "^3.8.1"
+    "react-dom": "^19.2.7",
+    "recharts": "^3.9.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@tauri-apps/cli": "^2",
-    "@types/react": "^19.1.8",
-    "@types/react-dom": "^19.1.6",
-    "@vitejs/plugin-react": "^4.6.0",
-    "eslint": "^9",
-    "eslint-plugin-react": "^7.34.3",
-    "prettier": "^3.8.3",
+    "@tauri-apps/cli": "^2.11.3",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^4.7.0",
+    "eslint": "^9.39.4",
+    "eslint-plugin-react": "^7.37.5",
+    "prettier": "^3.8.4",
     "typescript": "~5.8.3",
-    "typescript-eslint": "^8.59.4",
-    "vite": "^7.0.4",
-    "vite-plugin-checker": "^0.14.3"
+    "typescript-eslint": "^8.62.0",
+    "vite": "^7.3.6",
+    "vite-plugin-checker": "^0.14.4"
   }
 }

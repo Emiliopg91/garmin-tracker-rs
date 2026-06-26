@@ -40,18 +40,15 @@ impl MtpClient {
         let mut result = Vec::new();
 
         let devices_info = MtpDevice::list_devices().map_err(MtpError::ListDevices)?;
-        if let Some(device_info) = devices_info
-            .iter()
-            .find(|d| {
-                if let Some(serial_n) = &d.serial_number
-                    && serial_n == serial
-                {
-                    true
-                } else {
-                    false
-                }
-            })
+        if let Some(device_info) = devices_info.iter().find(|d| {
+            if let Some(serial_n) = &d.serial_number
+                && serial_n == serial
             {
+                true
+            } else {
+                false
+            }
+        }) {
             let device = MtpDevice::open_by_location(device_info.location_id)
                 .await
                 .map_err(|e| MtpError::OpenDevice(device_info.location_id, e))?;
@@ -84,8 +81,11 @@ impl MtpClient {
                 let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
                 let tmp_dir = PathBuf::from(format!("/tmp/garmin-tracker-rs-{}", now.as_millis()));
 
-                if let Err(e) = fs::create_dir_all(&tmp_dir){
-                    Err(MtpError::ErrorCreatingDownloadFolder(tmp_dir.display().to_string(), e))
+                if let Err(e) = fs::create_dir_all(&tmp_dir) {
+                    Err(MtpError::ErrorCreatingDownloadFolder(
+                        tmp_dir.display().to_string(),
+                        e,
+                    ))
                 } else {
                     for obj in objs {
                         let data = storage
@@ -98,13 +98,13 @@ impl MtpClient {
                         result.push(path);
                     }
                     let _ = device.close().await;
-        
+
                     Ok(result)
                 }
             } else {
                 Err(MtpError::NoStorageDevice(serial.to_string()))
             }
-        }else {
+        } else {
             Err(MtpError::MissingDevice(serial.to_string()))
         }
     }

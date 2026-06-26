@@ -1,13 +1,11 @@
-use std::{fmt::Display, fs::File, path::Path};
+use std::fmt::Display;
 
 use chrono::{DateTime, Datelike, Local, TimeZone, Timelike};
-use fitparser::{FitDataRecord, Value, profile};
 use indexmap::IndexMap;
 use rusqlite::Row;
 
 use crate::garmin::database::{
     DATABASE_INST,
-    dao::errors::{self, ParseFitFileError},
     errors::{DatabaseError, Result},
 };
 
@@ -230,123 +228,6 @@ impl Session {
         }
 
         Ok(())
-    }
-
-    #[allow(clippy::field_reassign_with_default)]
-    pub(crate) fn load_from_file<P>(path: P) -> errors::Result<Session>
-    where
-        P: AsRef<Path>,
-    {
-        let mut fp = File::open(path.as_ref()).unwrap();
-        let entries = fitparser::from_reader(&mut fp).unwrap();
-
-        #[cfg(debug_assertions)]
-        {
-            use std::fs;
-
-            let mut txt = vec![];
-            entries.iter().for_each(|e| {
-                txt.push(format!("{:#?}", e));
-            });
-            let _ = fs::write(
-                "/var/mnt/Datos/Desarrollo/Workspace/VSCode/taurfit/activity.txt",
-                txt.join("\n"),
-            );
-        }
-
-        let session_entry = entries
-            .iter()
-            .find(|r| r.kind() == profile::MesgNum::Session);
-
-        if session_entry.is_none() {
-            return Err(ParseFitFileError::InvalidFileFormat("Missing session field".to_string()));
-        }
-
-        let session_entry = session_entry.unwrap();
-
-        let mut session = Session::default();
-        session.workout = Self::get_workout_name(&entries)?;
-        if let Some(sub_sport) = session_entry
-            .fields()
-            .iter()
-            .find(|s| s.name() == "sub_sport")
-        {
-            if let Value::String(subsport_name) = sub_sport.value()
-                && subsport_name == "strength_training"
-            {
-                session_entry.fields().iter().for_each(|f| match f.name() {
-                    "timestamp" => {
-                        if let Value::Timestamp(val) = f.value() {
-                            session.timestamp = *val;
-                        }
-                    }
-                    "total_elapsed_time" => {
-                        if let Value::Float64(val) = f.value() {
-                            session.total_elapsed_time = *val;
-                        }
-                    }
-                    "active_time" => {
-                        if let Value::Float64(val) = f.value() {
-                            session.active_time = *val;
-                        }
-                    }
-                    "total_calories" => {
-                        if let Value::UInt16(val) = f.value() {
-                            session.total_calories = *val;
-                        }
-                    }
-                    "metabolic_calories" => {
-                        if let Value::UInt16(val) = f.value() {
-                            session.metabolic_calories = *val;
-                        }
-                    }
-                    "avg_heart_rate" => {
-                        if let Value::UInt8(val) = f.value() {
-                            session.avg_heart_rate = *val;
-                        }
-                    }
-                    "max_heart_rate" => {
-                        if let Value::UInt8(val) = f.value() {
-                            session.max_heart_rate = *val;
-                        }
-                    }
-                    _ => (),
-                });
-
-                session.series = Serie::get_sets(&entries, &session)?;
-
-                Ok(session)
-            } else {
-                Err(ParseFitFileError::OnlyStrengthTraining())
-            }
-        } else {
-            Err(ParseFitFileError::InvalidFileFormat("Missing sub sport field".to_string()))
-        }
-    }
-
-    fn get_workout_name(entries: &[FitDataRecord]) -> errors::Result<String> {
-        let wkt_entry = entries
-            .iter()
-            .find(|r| r.kind() == profile::MesgNum::Workout);
-
-        if wkt_entry.is_none() {
-            return Err(ParseFitFileError::InvalidFileFormat("Missing workout entry".to_string()));
-        }
-
-        let wkt_entry = wkt_entry.unwrap();
-
-        let name = wkt_entry.fields().iter().find(|f| f.name() == "wkt_name");
-
-        if name.is_none() {
-            return Err(ParseFitFileError::InvalidFileFormat("Missing name field".to_string()));
-        }
-
-        let name = name.unwrap();
-
-        if let Value::String(name) = name.value() {
-            return Ok(name.clone());
-        }
-        Err(ParseFitFileError::InvalidFileFormat("Invalid name field type".to_string()))
     }
 
     pub fn get_volume(&self) -> f64 {

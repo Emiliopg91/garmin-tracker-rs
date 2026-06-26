@@ -12,10 +12,11 @@ use tauri_plugin_log::log::{error, info};
 use crate::{
     garmin::{
         database::{
-            dao::{exercise::Exercise, serie::Serie, session::Session},
             DATABASE_INST,
+            dao::{exercise::Exercise, serie::Serie, session::Session},
         },
         mtp::MtpClient,
+        parser::load_from_file,
     },
     ui::{
         notifications::{models::NotificationDefinition, show_notification},
@@ -289,7 +290,7 @@ where
                 for file in files {
                     info!("Importing file {}", file.as_ref().display());
                     cur_file = Some(file);
-                    match Session::load_from_file(file.as_ref()) {
+                    match load_from_file(file.as_ref()) {
                         Ok(mut session) => {
                             session.insert(tx)?;
                         }

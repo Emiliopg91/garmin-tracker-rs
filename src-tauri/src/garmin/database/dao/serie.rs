@@ -1,17 +1,15 @@
 use std::fmt::Display;
 
 use chrono::{DateTime, Datelike, Local, TimeZone, Timelike};
-use fitparser::{FitDataRecord, Value, profile};
 use indexmap::IndexMap;
 use rusqlite::Row;
 
 use crate::garmin::database::{
     DATABASE_INST,
-    dao::errors,
     errors::{DatabaseError, Result},
 };
 
-use super::{exercise::Exercise, session::Session};
+use super::exercise::Exercise;
 
 #[derive(Debug, Default)]
 pub struct Serie {
@@ -39,140 +37,6 @@ impl Serie {
             self.session.month(),
             self.session.year()
         )
-    }
-
-    fn get_steps(entries: &[FitDataRecord], exercises: &[Exercise]) -> Vec<Option<Exercise>> {
-        let mut steps = Vec::new();
-
-        let mut idx = 0;
-        entries
-            .iter()
-            .filter(|r| r.kind() == profile::MesgNum::WorkoutStep)
-            .for_each(|reg| {
-                let mut step = None;
-
-                let ex_cat = reg.fields().iter().find_map(|r| {
-                    if r.name() == "exercise_category" {
-                        if let Value::String(val) = r.value() {
-                            Some(val)
-                        } else {
-                            None
-                        }
-                    } else {
-                        None
-                    }
-                });
-
-                if let Some(ex_cat) = ex_cat {
-                    let ex_id = reg
-                        .fields()
-                        .iter()
-                        .find_map(|r| {
-                            if r.name() == "exercise_name" {
-                                if let Value::UInt16(val) = r.value() {
-                                    Some(val)
-                                } else {
-                                    None
-                                }
-                            } else {
-                                None
-                            }
-                        })
-                        .unwrap_or(&1);
-
-                    let exercise = exercises
-                        .iter()
-                        .find(|e| e.id == *ex_id && e.category == *ex_cat)
-                        .expect("Undefined exercise from step");
-
-                    step = Some((*exercise).clone());
-                }
-
-                steps.push(step);
-                idx += 1;
-            });
-
-        steps
-    }
-
-    pub(crate) fn get_sets(
-        entries: &[FitDataRecord],
-        session: &Session,
-    ) -> errors::Result<IndexMap<Exercise, Vec<Serie>>> {
-        let exercises = Exercise::get_exercises(entries)?;
-
-        let steps = Self::get_steps(entries, &exercises);
-
-        let mut sets = IndexMap::new();
-
-        let mut idx = 0_u8;
-        entries
-            .iter()
-            .filter(|r| r.kind() == profile::MesgNum::Set)
-            .for_each(|reg| {
-                if reg.kind() == profile::MesgNum::Set {
-                    let reps = reg.fields().iter().find_map(|r| {
-                        if r.name() == "repetitions" {
-                            if let Value::UInt16(val) = r.value() {
-                                Some(val)
-                            } else {
-                                None
-                            }
-                        } else {
-                            None
-                        }
-                    });
-
-                    if let Some(reps) = reps {
-                        let weight = reg.fields().iter().find_map(|r| {
-                            if r.name() == "weight" {
-                                if let Value::Float64(val) = r.value() {
-                                    Some(val)
-                                } else {
-                                    None
-                                }
-                            } else {
-                                None
-                            }
-                        });
-
-                        if let Some(weight) = weight {
-                            let ex_idx = reg.fields().iter().find_map(|r| {
-                                if r.name() == "wkt_step_index" {
-                                    if let Value::SInt64(val) = r.value() {
-                                        Some(val)
-                                    } else {
-                                        None
-                                    }
-                                } else {
-                                    None
-                                }
-                            });
-
-                            if let Some(ex_idx) = ex_idx
-                                && let Some(exercise) = steps.get(*ex_idx as usize)
-                                && let Some(exercise) = exercise
-                            {
-                                let entry: &mut Vec<Serie> =
-                                    sets.entry(exercise.clone()).or_default();
-
-                                entry.push(Serie {
-                                    session: session.timestamp,
-                                    idx,
-                                    exercise_category: exercise.category.clone(),
-                                    exercise_id: exercise.id,
-                                    reps: *reps,
-                                    weight: *weight,
-                                    pr: false,
-                                });
-                                idx += 1;
-                            }
-                        }
-                    }
-                }
-            });
-
-        Ok(sets)
     }
 
     pub fn insert(

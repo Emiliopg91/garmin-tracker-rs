@@ -1,13 +1,11 @@
 use std::fmt::Display;
 use std::hash::Hash;
 
-use fitparser::{profile, FitDataRecord, Value};
 use rusqlite::Row;
 
 use crate::garmin::database::{
-    dao::errors::{self, ParseFitFileError},
-    errors::{DatabaseError, Result},
     DATABASE_INST,
+    errors::{DatabaseError, Result},
 };
 
 #[derive(Clone, Debug)]
@@ -35,77 +33,6 @@ impl Hash for Exercise {
 }
 
 impl Exercise {
-    pub(crate) fn get_exercises(entries: &[FitDataRecord]) -> errors::Result<Vec<Exercise>> {
-        let mut exercises = Vec::new();
-
-        entries
-            .iter()
-            .filter(|r| r.kind() == profile::MesgNum::ExerciseTitle)
-            .try_for_each(|reg| -> errors::Result<()> {
-                let ex_id = reg.fields().iter().find_map(|r| {
-                    if r.name() == "exercise_name" {
-                        if let Value::UInt16(val) = r.value() {
-                            Some(val)
-                        } else {
-                            None
-                        }
-                    } else {
-                        None
-                    }
-                });
-
-                let ex_id = ex_id.unwrap_or(&1);
-
-                let ex_cat = reg.fields().iter().find_map(|r| {
-                    if r.name() == "exercise_category" {
-                        if let Value::String(val) = r.value() {
-                            Some(val)
-                        } else {
-                            None
-                        }
-                    } else {
-                        None
-                    }
-                });
-
-                if ex_cat.is_none() {
-                    return Err(ParseFitFileError::InvalidFileFormat(
-                        "Missing exercise category field".to_string(),
-                    ));
-                }
-                let ex_cat = ex_cat.unwrap();
-
-                let name = reg.fields().iter().find_map(|r| {
-                    if r.name() == "wkt_step_name" {
-                        if let Value::String(val) = r.value() {
-                            Some(val)
-                        } else {
-                            None
-                        }
-                    } else {
-                        None
-                    }
-                });
-
-                if name.is_none() {
-                    return Err(ParseFitFileError::InvalidFileFormat(
-                        "Missing exercise name field".to_string(),
-                    ));
-                }
-                let name = name.unwrap();
-
-                exercises.push(Exercise {
-                    id: *ex_id,
-                    category: ex_cat.clone(),
-                    name: name.clone(),
-                });
-
-                Ok(())
-            })?;
-
-        Ok(exercises)
-    }
-
     pub fn insert(
         &self,
         tx: &rusqlite::Transaction,

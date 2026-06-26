@@ -3,8 +3,8 @@ use std::process::exit;
 use chrono::{Datelike, Local, Timelike};
 use tauri::Manager;
 use tauri_plugin_log::{
-    log::{debug, error, info},
     Target, TargetKind,
+    log::{LevelFilter, debug, error, info},
 };
 
 use crate::{
@@ -30,17 +30,24 @@ pub fn run() {
         .plugin(
             tauri_plugin_log::Builder::new()
                 .level(*constants::LOG_LEVEL)
+                .level_for("nusb", LevelFilter::Warn)
                 .target(Target::new(TargetKind::Folder {
                     path: constants::LOGS_DIR.clone(),
                     file_name: None,
                 }))
-                .target(Target::new(TargetKind::Stdout))
                 .max_file_size(constants::LOG_FILE_MAX_SIZE)
                 .rotation_strategy(constants::LOG_FILE_ROTATION_STRATEGY)
                 .format(|out, message, record| {
                     let time = Local::now();
+                    let mut target = record.target();
+                    target = if target.len() > 30 {
+                        &target[target.len() - 30..]
+                    } else {
+                        target
+                    };
+
                     out.finish(format_args!(
-                        "[{:04}-{:02}-{:02} {:02}:{:02}:{:02}.{:03}][{}][{}] - {}",
+                        "[{:04}-{:02}-{:02} {:02}:{:02}:{:02}.{:03}][{:<30}][{:<5.5}] {}",
                         time.year(),
                         time.month(),
                         time.day(),
@@ -48,18 +55,17 @@ pub fn run() {
                         time.minute(),
                         time.second(),
                         time.timestamp_subsec_millis(),
-                        record.target(),
-                        record.level(),
+                        target,
+                        record.level().to_string(),
                         message
                     ))
                 })
                 .build(),
         )
         .plugin(tauri_plugin_single_instance::init(|app, _, _| {
-            let _ = app
-                .get_webview_window("main")
-                .expect("no main window")
-                .set_focus();
+            let window = app.get_webview_window("main").expect("no main window");
+            let _ = window.unminimize();
+            let _ = window.set_focus();
         }))
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_dialog::init())
