@@ -4099,6 +4099,8 @@ dependencies = [
 [[package]]
 name = "tauri-rs-ts-ipc"
 version = "0.1.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "be8eae4a1d25bd0800c39ad7ffe90fef93c871dca588bee9b099d3edf84c05aa"
 dependencies = [
  "proc-macro2",
  "quote",
