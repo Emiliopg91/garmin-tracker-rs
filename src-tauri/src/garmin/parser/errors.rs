@@ -2,9 +2,9 @@ use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum ParseFitFileError {
-    #[error("Error while opening file {0}:\n  {1}")]
+    #[error("Error while opening file {0} {1}")]
     FileOpening(String, std::io::Error),
-    #[error("Error while reading file {0}:\n  {1}")]
+    #[error("Error while reading file {0} {1}")]
     FileReading(String, fitparser::Error),
     #[error("Missing {0} field")]
     MissingField(String),

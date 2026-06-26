@@ -1,5 +1,5 @@
 run:
-	@pnpm tauri dev -- --verbose
+	@pnpm tauri dev 
 
 build:
 	@pnpm tauri build

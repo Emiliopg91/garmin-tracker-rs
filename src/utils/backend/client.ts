@@ -2,7 +2,7 @@
 
 import { invoke, InvokeArgs } from "@tauri-apps/api/core";
 
-import { WorkoutDetails, ExerciseListItem, WorkoutListItem, SessionListItem, SessionSeriesUpdate, SessionDetails, ExerciseDetails } from "./models";
+import { ExerciseDetails, SessionDetails, SessionListItem, ExerciseListItem, WorkoutListItem, SessionSeriesUpdate, WorkoutDetails } from "./models";
 
 export class BackendClient {
 	// Definition: /ui/exercises/mod.rs:58
@@ -41,14 +41,14 @@ export class BackendClient {
 	}
 	
 
-	// Definition: /ui/sessions/mod.rs:227
-	public static importFromDevice(serial: string): Promise<void> {
+	// Definition: /ui/sessions/mod.rs:225
+	public static importFromDevice(serial: string): Promise<number> {
 	  return BackendClient.inner_invoke("import_from_device", { serial }); 
 	}
 	
 
 	// Definition: /ui/sessions/mod.rs:168
-	public static importFromFile(): Promise<void> {
+	public static importFromFile(): Promise<number> {
 	  return BackendClient.inner_invoke("import_from_file"); 
 	}
 	

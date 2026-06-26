@@ -4,17 +4,17 @@ use thiserror::Error;
 pub enum DatabaseError {
     #[error("Cannot operate on database. Closed connection")]
     ClosedConnection(),
-    #[error("Error while opening connection to {0}:\n  {1}")]
+    #[error("Error while opening connection to {0}: {1}")]
     Connection(String, rusqlite::Error),
-    #[error("Error while enabling foreign keys pragma:\n  {0}")]
+    #[error("Error while enabling foreign keys pragma: {0}")]
     ForeignKeysPragma(rusqlite::Error),
-    #[error("Error while creating schema:\n  {0}")]
+    #[error("Error while creating schema: {0}")]
     SchemaCreation(rusqlite::Error),
-    #[error("Error on transaction:\n  {0}")]
+    #[error("Error on transaction: {0}")]
     Transaction(rusqlite::Error),
-    #[error("Error on insert:\n  {0}")]
+    #[error("Error on insert: {0}")]
     Insert(rusqlite::Error),
-    #[error("Error on select:\n  {0}")]
+    #[error("Error on select: {0}")]
     Select(rusqlite::Error),
 }
 

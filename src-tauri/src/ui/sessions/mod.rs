@@ -165,7 +165,7 @@ pub fn save_session_changes(app: AppHandle, details: SessionSeriesUpdate) -> Res
 }
 
 #[tauri::command]
-pub async fn import_from_file(app: AppHandle) -> Result<(), String> {
+pub async fn import_from_file(app: AppHandle) -> Result<u16, String> {
     info!("Starting import from file/s...");
     let (tx, rx) = mpsc::channel();
 
@@ -190,24 +190,22 @@ pub async fn import_from_file(app: AppHandle) -> Result<(), String> {
         }
         Err(_) => {
             info!("No file was selected");
-            Ok(-1)
+            Ok((0, 0))
         }
     };
 
     match res {
         Ok(l) => {
-            if l >= 0 {
-                info!("Imported {} sessions from disk", l);
-                let _ = show_notification(
-                    app,
-                    NotificationDefinition {
-                        title: "Import succesful".to_string(),
-                        body: format!("Imported {} sessions from disk", l),
-                    },
-                );
-            }
+            info!("Import finished: {} success, {} failed", l.0, l.1);
+            let _ = show_notification(
+                app,
+                NotificationDefinition {
+                    title: "Import succesful".to_string(),
+                    body: format!("Import finished: {} success, {} failed", l.0, l.1),
+                },
+            );
 
-            Ok(())
+            Ok(l.0)
         }
         Err(e) => {
             error!("Error on sessions import: {}", e);
@@ -224,7 +222,7 @@ pub async fn import_from_file(app: AppHandle) -> Result<(), String> {
 }
 
 #[tauri::command]
-pub async fn import_from_device(app: AppHandle, serial: &str) -> Result<(), String> {
+pub async fn import_from_device(app: AppHandle, serial: &str) -> Result<u16, String> {
     info!("Starting import from device with S/N {}", serial);
     let latest = Session::find_latest().map_err(|e| e.to_string())?;
     let mut latest_date = "2026-06-08-00-00-00".to_string();
@@ -251,16 +249,16 @@ pub async fn import_from_device(app: AppHandle, serial: &str) -> Result<(), Stri
 
     match import_file_list(&activities) {
         Ok(l) => {
-            info!("Imported {} sessions from disk", l);
+            info!("Import finished: {} success, {} failed", l.0, l.1);
             let _ = show_notification(
                 app,
                 NotificationDefinition {
                     title: "Import succesful".to_string(),
-                    body: format!("Imported {} sessions from disk", l),
+                    body: format!("Import finished: {} success, {} failed", l.0, l.1),
                 },
             );
 
-            Ok(())
+            Ok(l.0)
         }
         Err(e) => {
             error!("Error on sessions import: {}", e);
@@ -276,62 +274,41 @@ pub async fn import_from_device(app: AppHandle, serial: &str) -> Result<(), Stri
     }
 }
 
-fn import_file_list<F>(files: &[F]) -> Result<isize, String>
+fn import_file_list<F>(files: &[F]) -> Result<(u16, u16), String>
 where
     F: AsRef<Path>,
 {
-    let mut res = Ok(-1);
+    let mut success = 0_u16;
+    let mut failed = 0_u16;
 
-    let mut cur_file = None;
-    match DATABASE_INST.lock() {
-        Ok(mut db) => {
-            match db.run_in_transaction(|tx| {
-                let mut inner_res = Ok(());
+    let res = match DATABASE_INST.lock() {
+        Ok(mut db) => db
+            .run_in_transaction(|tx| {
                 for file in files {
                     info!("Importing file {}", file.as_ref().display());
-                    cur_file = Some(file);
                     match load_from_file(file.as_ref()) {
                         Ok(mut session) => {
-                            session.insert(tx)?;
+                            if let Err(e) = session.insert(tx) {
+                                failed += 1;
+                                error!("Error persisting session: {}", e);
+                            } else {
+                                success += 1;
+                            }
                         }
                         Err(e) => {
-                            inner_res = Err(format!("Error parsing session: {}", e));
-                            break;
+                            failed += 1;
+                            error!("Error parsing session: {}", e);
                         }
                     }
                 }
-                match inner_res {
-                    Ok(_) => {
-                        res = Ok(files.len() as isize);
-                    }
-                    Err(e) => res = Err(e),
-                }
                 Ok(())
-            }) {
-                Ok(_) => (),
-                Err(e) => {
-                    if e.to_string().contains("UNIQUE constraint") {
-                        res = Err("Session already imported".to_string());
-                    } else {
-                        res = Err(format!("Error writing to database: {}", e));
-                    }
-                }
-            }
-        }
-        Err(e) => {
-            res = Err(format!("Error connecting to database: {}", e));
-        }
-    }
+            })
+            .map_err(|e| e.to_string()),
+        Err(e) => Err(format!("Error connecting to database: {}", e)),
+    };
 
     match res {
-        Ok(v) => Ok(v),
-        Err(e) => match cur_file {
-            Some(f) => Err(format!(
-                "{}: {}",
-                f.as_ref().file_name().unwrap().display(),
-                e
-            )),
-            None => Err(e),
-        },
+        Ok(_) => Ok((success, failed)),
+        Err(e) => Err(e),
     }
 }

@@ -31,8 +31,10 @@ export function SessionsList() {
   const importFile = () => {
     setLoading(true);
     BackendClient.importFromFile()
-      .then(() => {
-        refreshList();
+      .then((count) => {
+        if (count > 0) {
+          refreshList();
+        }
       })
       .finally(() => {
         setLoading(false);
@@ -42,8 +44,10 @@ export function SessionsList() {
   const importDevice = (serial: string) => {
     setLoading(true);
     BackendClient.importFromDevice(serial)
-      .then(() => {
-        refreshList();
+      .then((count) => {
+        if (count > 0) {
+          refreshList();
+        }
       })
       .finally(() => {
         setLoading(false);
