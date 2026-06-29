@@ -94,7 +94,7 @@ def generate_changelog():
         for typeEntry, typeEntries in entries.items():
             if msg.startswith(f"[{typeEntry}]"):
                 typeEntries.append(
-                    f'<td><a href="https://github.com/Emiliopg91/RogPerfTuner/commit/{commit_hash}">{commit_hash[0:7]}</a></td><td>{msg.replace(f"[{typeEntry}]", "").strip().capitalize()}</td>'
+                    f'<td><a href="https://github.com/Emiliopg91/garmin-tracker-rs/commit/{commit_hash}">{commit_hash[0:7]}</a></td><td>{msg.replace(f"[{typeEntry}]", "").strip().capitalize()}</td>'
                 )
 
     lines: list[str] = ["# No changelog available"]
@@ -135,4 +135,5 @@ if __name__ == "__main__":
     create_dist_dir()
     generate_pkgbuild()
     generate_srcinfo()
+    generate_changelog()
     print("Release finished")
