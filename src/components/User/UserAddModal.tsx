@@ -2,43 +2,75 @@ import { BackendClient } from "@/utils/backend/client";
 import { UserListItem } from "@/utils/backend/models";
 import { useState } from "react";
 import { Button, Modal } from "react-bootstrap";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 type Props = {
   latest: UserListItem | undefined;
   onClose: () => void;
 };
 
+type UserListItemForm = Omit<
+  UserListItem,
+  "date" | "weight" | "fat_ratio" | "lean_mass" | "water_ratio"
+> & {
+  date: Date;
+  weight: string;
+  fat_ratio: string;
+  lean_mass: string;
+  water_ratio: string;
+};
+
 export function UserAddModal({ latest, onClose }: Props) {
-  const [data, setData] = useState<UserListItem>(
+  const [data, setData] = useState<UserListItemForm>(
     latest
-      ? { ...latest }
+      ? {
+          date: new Date(),
+          weight: String(latest.weight),
+          fat_ratio: String(latest.fat_ratio),
+          lean_mass: String(latest.lean_mass),
+          water_ratio: String(latest.water_ratio),
+        }
       : {
-          date: "",
-          fat_ratio: 0,
-          lean_mass: 0,
-          water_ratio: 0,
-          weight: 0,
+          date: new Date(),
+          fat_ratio: "0",
+          lean_mass: "0",
+          water_ratio: "0",
+          weight: "0",
         },
   );
 
-  const onPropChange = <K extends keyof UserListItem>(e: string, prop: K) => {
-    setData((prev) => ({
-      ...prev,
-      [prop]: parseFloat(e.replace(",", ".")),
-    }));
+  const onPropChange = <K extends keyof UserListItemForm>(
+    e: string | Date,
+    prop: K,
+  ) => {
+    console.log(prop + " -> " + e);
+    if (prop != "date") {
+      if (typeof e !== "string") return;
+      if (!/^[0-9]*[,.]?[0-9]*$/.test(e)) return;
+
+      const str = e.replace(",", ".");
+      const normalized = parseFloat(e.replace(",", "."));
+      if (!isNaN(normalized)) {
+        setData((prev) => ({ ...prev, [prop]: str }));
+      }
+    } else {
+      setData((prev) => ({
+        ...prev,
+        date: e instanceof Date ? e : prev["date"],
+      }));
+    }
   };
 
   const onSave = () => {
-    const date = new Date();
-    const hours = date.getHours().toString().padStart(2, "0");
-    const minutes = date.getMinutes().toString().padStart(2, "0");
-    const day = date.getDate().toString().padStart(2, "0");
-    const month = (date.getMonth() + 1).toString().padStart(2, "0");
-    const year = date.getFullYear();
-
-    data.date = `${hours}:${minutes} ${day}/${month}/${year}`;
-
-    BackendClient.addUserMeasures(data).then(() => {
+    const dateStr = `00:00 ${String(data.date.getDate()).padStart(2, "0")}/${String(data.date.getMonth() + 1).padStart(2, "0")}/${data.date.getFullYear()}`;
+    BackendClient.addUserMeasures({
+      date: dateStr,
+      weight: parseFloat(data.weight),
+      fat_ratio: parseFloat(data.fat_ratio),
+      lean_mass: parseFloat(data.lean_mass),
+      water_ratio: parseFloat(data.water_ratio),
+    }).then(() => {
       onClose();
     });
   };
@@ -61,13 +93,26 @@ export function UserAddModal({ latest, onClose }: Props) {
             </colgroup>
             <tbody>
               <tr>
+                <td>Date:</td>
+                <td>
+                  <DatePicker
+                    onChange={(value: Date | null) => {
+                      if (value != null) {
+                        onPropChange(value, "date");
+                      }
+                    }}
+                    selected={data.date}
+                    dateFormat="dd/MM/yyyy"
+                  />
+                </td>
+              </tr>
+              <tr>
                 <td>Weight:</td>
                 <td>
                   <input
-                    type="number"
+                    type="text"
                     value={data.weight}
-                    min={0}
-                    step={0.1}
+                    inputMode="decimal"
                     onChange={(e) => {
                       onPropChange(e.target.value, "weight");
                     }}
@@ -78,10 +123,8 @@ export function UserAddModal({ latest, onClose }: Props) {
                 <td>Fat ratio:</td>
                 <td>
                   <input
-                    type="number"
+                    type="text"
                     value={data.fat_ratio}
-                    min={0}
-                    step={0.1}
                     onChange={(e) => {
                       onPropChange(e.target.value, "fat_ratio");
                     }}
@@ -92,10 +135,8 @@ export function UserAddModal({ latest, onClose }: Props) {
                 <td>Lean mass:</td>
                 <td>
                   <input
-                    type="number"
+                    type="text"
                     value={data.lean_mass}
-                    min={0}
-                    step={0.1}
                     onChange={(e) => {
                       onPropChange(e.target.value, "lean_mass");
                     }}
@@ -106,10 +147,8 @@ export function UserAddModal({ latest, onClose }: Props) {
                 <td>Water ratio:</td>
                 <td>
                   <input
-                    type="number"
+                    type="text"
                     value={data.water_ratio}
-                    min={0}
-                    step={0.1}
                     onChange={(e) => {
                       onPropChange(e.target.value, "water_ratio");
                     }}

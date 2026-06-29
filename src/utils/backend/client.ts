@@ -2,10 +2,10 @@
 
 import { invoke, InvokeArgs } from "@tauri-apps/api/core";
 
-import { WorkoutDetails, SessionSeriesUpdate, SessionDetails, SessionListItem, WorkoutListItem, ExerciseDetails, ExerciseListItem, UserListItem } from "./models";
+import { ExerciseDetails, SessionSeriesUpdate, SessionDetails, WorkoutDetails, UserListItem, ExerciseListItem, SessionListItem, WorkoutListItem } from "./models";
 
 export class BackendClient {
-	// Definition: /ui/user/mod.rs:44
+	// Definition: /ui/user/mod.rs:43
 	public static addUserMeasures(measures: UserListItem): Promise<void> {
 	  return BackendClient.inner_invoke("add_user_measures", { measures }); 
 	}
@@ -35,7 +35,7 @@ export class BackendClient {
 	}
 	
 
-	// Definition: /ui/user/mod.rs:16
+	// Definition: /ui/user/mod.rs:15
 	public static getUserMeasures(): Promise<UserListItem[]> {
 	  return BackendClient.inner_invoke("get_user_measures"); 
 	}

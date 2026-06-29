@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::garmin::database::dao::user::User;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct UserListItem {
     pub date: String,
     pub weight: f32,

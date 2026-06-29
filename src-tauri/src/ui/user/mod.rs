@@ -1,4 +1,3 @@
-use chrono::Local;
 use tauri::AppHandle;
 use tauri_plugin_log::log::{error, info};
 
@@ -43,10 +42,14 @@ pub fn get_user_measures(app: AppHandle) -> Result<Vec<UserListItem>, String> {
 #[tauri::command]
 pub fn add_user_measures(app: AppHandle, measures: UserListItem) -> Result<(), String> {
     info!("Adding user measures list...");
+    dbg!(&measures);
 
-    let entry = User::try_from(&measures).map_err(|e| e.to_string())?;
+    let res = match User::try_from(&measures).map_err(|e| e.to_string()) {
+        Ok(entry) => entry.insert().map_err(|e| e.to_string()),
+        Err(e) => Err(e),
+    };
 
-    match entry.insert().map_err(|e| e.to_string()) {
+    match res {
         Ok(_) => {
             info!("Measures added succesfully");
             Ok(())

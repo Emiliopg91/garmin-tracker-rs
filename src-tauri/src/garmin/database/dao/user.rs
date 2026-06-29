@@ -1,4 +1,4 @@
-use chrono::{DateTime, Datelike, Local, TimeZone, Timelike};
+use chrono::{DateTime, Datelike, Local, TimeZone};
 use rusqlite::Row;
 
 use crate::garmin::database::{DATABASE_INST, errors::DatabaseError};
@@ -53,9 +53,7 @@ impl User {
 
     pub fn format_date(&self) -> String {
         format!(
-            "{:02}:{:02} {:02}/{:02}/{:04}",
-            self.date.hour(),
-            self.date.minute(),
+            "{:02}/{:02}/{:04}",
             self.date.day(),
             self.date.month(),
             self.date.year()
