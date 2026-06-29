@@ -23,6 +23,7 @@ makedepends=(
   'rust'
   'npm'
   'pnpm'
+  'mold'
 )
 
 build() {
