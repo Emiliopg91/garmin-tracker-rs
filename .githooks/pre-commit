@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -e
+
+cargo clippy --manifest-path ./src-tauri/Cargo.toml -- -D warnings
+
+exit 0
