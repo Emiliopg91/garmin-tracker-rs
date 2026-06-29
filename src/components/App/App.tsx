@@ -8,9 +8,11 @@ import { ExercisesList } from "../Exercises/ExercisesList";
 import { UserList } from "../User/UserList";
 import { Loading } from "../Loading/Loading";
 import { WorkoutsList } from "../Workouts/WorkoutList";
+import { BackendClient } from "@/utils/backend/client";
 
 export function App(): JSX.Element {
-  const { tab, setTab, loading, appReady } = useContext(AppContext);
+  const { tab, setTab, loading, appReady, availableUpdate } =
+    useContext(AppContext);
 
   const navBarItems = [
     {
@@ -43,6 +45,10 @@ export function App(): JSX.Element {
     },
   ];
 
+  const openChangelog = () => {
+    BackendClient.openVersionChangelog(availableUpdate!);
+  };
+
   return (
     <>
       <div id="viewport">
@@ -58,6 +64,13 @@ export function App(): JSX.Element {
               {tab == Tabs.WORKOUTS && <WorkoutsList />}
               {tab == Tabs.USER && <UserList />}
             </div>
+            {availableUpdate && (
+              <div>
+                <a onClick={openChangelog}>
+                  Update {availableUpdate} available. View changes
+                </a>
+              </div>
+            )}
           </>
         )}
       </div>

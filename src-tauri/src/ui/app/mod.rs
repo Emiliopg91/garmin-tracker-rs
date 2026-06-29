@@ -1,4 +1,4 @@
-use std::{collections::HashMap, time::Duration};
+use std::{collections::HashMap, process::Command, time::Duration};
 
 use semver::Version;
 use serde_json::Value;
@@ -89,4 +89,16 @@ async fn update_watcher(app: AppHandle) {
             tokio::time::sleep(Duration::from_hours(1)).await;
         }
     });
+}
+
+#[tauri::command]
+pub fn open_version_changelog(version: &str) -> Result<(), String> {
+    Command::new("xdg-open")
+        .arg(format!(
+            "https://github.com/Emiliopg91/garmin-tracker-rs/releases/tag/{}",
+            version
+        ))
+        .output()
+        .map(|_| ())
+        .map_err(|e| e.to_string())
 }

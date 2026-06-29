@@ -9,6 +9,7 @@ interface AppContexType {
   loading: boolean;
   setLoading: (loading: boolean) => void;
   availableDevices: DeviceListItem[];
+  availableUpdate: string | undefined;
 }
 
 const defaultValue: AppContexType = {
@@ -22,6 +23,7 @@ const defaultValue: AppContexType = {
     /* empty */
   },
   availableDevices: [],
+  availableUpdate: undefined,
 };
 
 export const AppContext = createContext(defaultValue);

@@ -14,6 +14,9 @@ export function AppProvider({
   const [appReady, setAppReady] = useState(false);
   const [tab, setTab] = useState(Tabs.SESSIONS);
   const [loading, setLoading] = useState(false);
+  const [availableUpdate, setAvailableUpdate] = useState<string | undefined>(
+    undefined,
+  );
   const [availableDevices, setAvailableDevices] = useState<DeviceListItem[]>(
     [],
   );
@@ -40,6 +43,12 @@ export function AppProvider({
       },
     );
 
+    const unregisterUpdateAvailable = BackendListener.onUpdateAvailable(
+      (version) => {
+        setAvailableUpdate(version);
+      },
+    );
+
     BackendClient.notifyFrontendReady().then(() => {
       setAppReady(true);
     });
@@ -47,6 +56,7 @@ export function AppProvider({
     return () => {
       unregisterConnection();
       unregisterDisconnection();
+      unregisterUpdateAvailable();
     };
   }, []);
 
@@ -59,6 +69,7 @@ export function AppProvider({
         setLoading,
         availableDevices,
         appReady,
+        availableUpdate,
       }}
     >
       {children}
