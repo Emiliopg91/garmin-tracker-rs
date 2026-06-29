@@ -3,4 +3,12 @@ set -e
 
 cargo clippy --manifest-path ./src-tauri/Cargo.toml -- -D warnings
 
+if [ "$(git rev-parse --abbrev-ref HEAD)" = "release" ]; then
+    if grep -R -nP --exclude-dir={build,.git} '//\s*TODO:' src src-tauri/src > /tmp/todos.txt; then
+        sed 's/^\([^:]*:[^:]*\):/  \1\n    /' /tmp/todos.txt
+        echo "❌ Pending TODOs found in code"
+        exit 1
+    fi
+fi
+
 exit 0
