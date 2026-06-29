@@ -9,6 +9,7 @@ import { UserList } from "../User/UserList";
 import { Loading } from "../Loading/Loading";
 import { WorkoutsList } from "../Workouts/WorkoutList";
 import { BackendClient } from "@/utils/backend/client";
+import { Nav } from "react-bootstrap";
 
 export function App(): JSX.Element {
   const { tab, setTab, loading, appReady, availableUpdate } =
@@ -66,9 +67,9 @@ export function App(): JSX.Element {
             </div>
             {availableUpdate && (
               <div>
-                <a onClick={openChangelog}>
+                <Nav.Link onClick={openChangelog}>
                   Update {availableUpdate} available. View changes
-                </a>
+                </Nav.Link>
               </div>
             )}
           </>

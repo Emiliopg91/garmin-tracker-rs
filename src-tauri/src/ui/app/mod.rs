@@ -12,7 +12,7 @@ use crate::{
     },
 };
 use tauri_plugin_http::reqwest;
-use tauri_plugin_log::log::{debug, info};
+use tauri_plugin_log::log::{debug, error, info};
 
 #[tauri::command]
 pub async fn notify_frontend_ready(app: AppHandle) -> Result<(), String> {
@@ -58,8 +58,10 @@ async fn update_watcher(app: AppHandle) {
                                                         },
                                                     );
                                                     let version: String = version.to_string();
-                                                    let _ =
-                                                        app.emit_str("update_available", version);
+                                                    let _ = app.emit_str(
+                                                        "update_available",
+                                                        format!("\"{}\"", version),
+                                                    );
                                                     break;
                                                 }
                                             }
@@ -93,7 +95,8 @@ async fn update_watcher(app: AppHandle) {
 
 #[tauri::command]
 pub fn open_version_changelog(version: &str) -> Result<(), String> {
-    Command::new("xdg-open")
+    info!("Opening changelog for version {}...", version);
+    match Command::new("xdg-open")
         .arg(format!(
             "https://github.com/Emiliopg91/garmin-tracker-rs/releases/tag/{}",
             version
@@ -101,4 +104,14 @@ pub fn open_version_changelog(version: &str) -> Result<(), String> {
         .output()
         .map(|_| ())
         .map_err(|e| e.to_string())
+    {
+        Ok(_) => {
+            info!("Opening request succesful");
+            Ok(())
+        }
+        Err(e) => {
+            error!("Error on URL opening request: {}", e);
+            Err(e)
+        }
+    }
 }

@@ -2,7 +2,7 @@
 
 import { invoke, InvokeArgs } from "@tauri-apps/api/core";
 
-import { UserListItem, WorkoutDetails, ExerciseListItem, SessionSeriesUpdate, WorkoutListItem, ExerciseDetails, SessionListItem, SessionDetails } from "./models";
+import { SessionDetails, ExerciseListItem, SessionListItem, WorkoutListItem, ExerciseDetails, WorkoutDetails, SessionSeriesUpdate, UserListItem } from "./models";
 
 export class BackendClient {
 	// Definition: /ui/user/mod.rs:43
@@ -71,7 +71,7 @@ export class BackendClient {
 	}
 	
 
-	// Definition: /ui/app/mod.rs:95
+	// Definition: /ui/app/mod.rs:97
 	public static openVersionChangelog(version: string): Promise<void> {
 	  return BackendClient.inner_invoke("open_version_changelog", { version }); 
 	}
