@@ -10,12 +10,13 @@ use tauri_plugin_log::{
 use crate::{
     garmin::database::DATABASE_INST,
     ui::{
-        devices::start_device_watcher,
+        app::notify_frontend_ready,
         exercises::{get_exercise_details, get_exercises},
         sessions::{
             get_session_details, get_sessions, import_from_device, import_from_file,
             save_session_changes,
         },
+        user::{add_user_measures, get_user_measures},
         workouts::{get_workout_details, get_workout_list},
     },
 };
@@ -27,6 +28,7 @@ mod ui;
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let res = tauri::Builder::default()
+        .plugin(tauri_plugin_http::init())
         .plugin(
             tauri_plugin_log::Builder::new()
                 .level(*constants::LOG_LEVEL)
@@ -112,7 +114,9 @@ pub fn run() {
             get_workout_list,
             get_workout_details,
             import_from_device,
-            start_device_watcher
+            notify_frontend_ready,
+            get_user_measures,
+            add_user_measures
         ])
         .run(tauri::generate_context!());
 

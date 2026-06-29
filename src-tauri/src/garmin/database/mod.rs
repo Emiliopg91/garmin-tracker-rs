@@ -7,6 +7,7 @@ use std::{
 };
 
 use rusqlite::{Connection, Transaction};
+use tauri_plugin_log::log::debug;
 
 use self::errors::{DatabaseError, Result};
 
@@ -61,62 +62,39 @@ impl Database {
     }
 
     pub fn create_schema(&mut self) -> Result<()> {
-        let statement = r#"
-        BEGIN;
-            CREATE TABLE IF NOT EXISTS EXERCISE(
-                category TEXT NOT NULL,
-                id INTEGER NOT NULL,
-                name TEXT NOT NULL,
-        
-                PRIMARY KEY(category, id)
-            );
-            CREATE INDEX IF NOT EXISTS EXERCISE_ID_CAT ON EXERCISE(category, id);
-        
-            CREATE TABLE IF NOT EXISTS SESSION(
-                date INTEGER NOT NULL,
-                workout TEXT NOT NULL,
-                total_elapsed_time REAL NOT NULL,
-                active_time REAL NOT NULL,
-                total_calories INTEGER NOT NULL,
-                metabolic_calories INTEGER NOT NULL,
-                avg_heart_rate INTEGER NOT NULL,
-                max_heart_rate INTEGER NOT NULL,
-        
-                PRIMARY KEY(date)
-            );
-            CREATE INDEX IF NOT EXISTS SESSION_WORKOUT ON SESSION(workout);
-            CREATE INDEX IF NOT EXISTS SESSION_DATE ON SESSION(date);
-        
-            CREATE TABLE IF NOT EXISTS SERIE(
-                session INTEGER NOT NULL,
-                idx INTEGER NOT NULL,
-                exercise_category TEXT NOT NULL,
-                exercise_id INTEGER NOT NULL,
-                reps INTEGER NOT NULL,
-                weight REAL NOT NULL,
-                pr BOOLEAN NOT NULL,
-        
-                PRIMARY KEY(session, idx),
-        
-                FOREIGN KEY(session) REFERENCES SESSION(date) ON DELETE CASCADE,
-                FOREIGN KEY(exercise_category, exercise_id) REFERENCES EXERCISE(category, id) ON DELETE CASCADE
-            );
-        
-            CREATE INDEX IF NOT EXISTS SERIE_ID ON SERIE(session, idx);
-            CREATE INDEX IF NOT EXISTS SERIE_EXERCISE ON SERIE(exercise_category, exercise_id);
-            
-        COMMIT;
-    "#;
+        let ddls = [
+            (
+                "Initial scheme",
+                include_str!("../../../../resources/ddl/001_base_schema.sql"),
+            ),
+            (
+                "Adding user profile table",
+                include_str!("../../../../resources/ddl/002_user_profile.sql"),
+            ),
+        ];
 
-        if let Some(connection) = self.connection.as_mut() {
-            connection
-                .execute_batch(statement)
+        self.run_in_transaction(|tx| {
+            let current_vers: u16 = tx
+                .pragma_query_value(None, "user_version", |r| r.get(0))
                 .map_err(DatabaseError::SchemaCreation)?;
 
+            for i in 0..ddls.len() {
+                if i as u16 + 1 > current_vers {
+                    debug!(
+                        "Applying database DDL patch v{}: {}",
+                        i + 1,
+                        ddls.get(i).unwrap().0
+                    );
+                    tx.execute_batch(ddls.get(i).unwrap().1)
+                        .map_err(DatabaseError::SchemaCreation)?;
+                }
+
+                tx.execute_batch(&format!("PRAGMA user_version = {};", ddls.len()))
+                    .map_err(DatabaseError::SchemaCreation)?;
+            }
+
             Ok(())
-        } else {
-            Err(DatabaseError::ClosedConnection())
-        }
+        })
     }
 }
 

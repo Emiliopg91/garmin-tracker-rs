@@ -3,6 +3,7 @@ import { DeviceListItem } from "@/utils/backend/models";
 import { createContext } from "react";
 
 interface AppContexType {
+  appReady: boolean;
   tab: Tabs;
   setTab: (category: Tabs) => void;
   loading: boolean;
@@ -11,6 +12,7 @@ interface AppContexType {
 }
 
 const defaultValue: AppContexType = {
+  appReady: false,
   tab: Tabs.SESSIONS,
   setTab: () => {
     /* empty */

@@ -11,6 +11,7 @@ export function AppProvider({
 }: {
   children: JSX.Element;
 }): JSX.Element {
+  const [appReady, setAppReady] = useState(false);
   const [tab, setTab] = useState(Tabs.SESSIONS);
   const [loading, setLoading] = useState(false);
   const [availableDevices, setAvailableDevices] = useState<DeviceListItem[]>(
@@ -39,7 +40,9 @@ export function AppProvider({
       },
     );
 
-    BackendClient.startDeviceWatcher();
+    BackendClient.notifyFrontendReady().then(() => {
+      setAppReady(true);
+    });
 
     return () => {
       unregisterConnection();
@@ -55,6 +58,7 @@ export function AppProvider({
         loading,
         setLoading,
         availableDevices,
+        appReady,
       }}
     >
       {children}

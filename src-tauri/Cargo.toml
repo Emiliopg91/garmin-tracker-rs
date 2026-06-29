@@ -35,6 +35,9 @@ mtp-rs = "0.19.0"
 tauri-plugin-notification = "2"
 tauri-plugin-log = "2"
 tauri-rs-ts-ipc = { version = "^0" }
+serde_yaml = "0.9.34"
+semver = "1.0.28"
+tauri-plugin-http = "2"
 #tauri-rs-ts-ipc = { path = "../../syn-test" }
 
 

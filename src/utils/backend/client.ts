@@ -2,9 +2,15 @@
 
 import { invoke, InvokeArgs } from "@tauri-apps/api/core";
 
-import { ExerciseDetails, SessionDetails, SessionListItem, ExerciseListItem, WorkoutListItem, SessionSeriesUpdate, WorkoutDetails } from "./models";
+import { WorkoutDetails, SessionSeriesUpdate, SessionDetails, SessionListItem, WorkoutListItem, ExerciseDetails, ExerciseListItem, UserListItem } from "./models";
 
 export class BackendClient {
+	// Definition: /ui/user/mod.rs:44
+	public static addUserMeasures(measures: UserListItem): Promise<void> {
+	  return BackendClient.inner_invoke("add_user_measures", { measures }); 
+	}
+	
+
 	// Definition: /ui/exercises/mod.rs:58
 	public static getExerciseDetails(category: string, id: number): Promise<ExerciseDetails> {
 	  return BackendClient.inner_invoke("get_exercise_details", { category, id }); 
@@ -26,6 +32,12 @@ export class BackendClient {
 	// Definition: /ui/sessions/mod.rs:28
 	public static getSessions(): Promise<SessionListItem[]> {
 	  return BackendClient.inner_invoke("get_sessions"); 
+	}
+	
+
+	// Definition: /ui/user/mod.rs:16
+	public static getUserMeasures(): Promise<UserListItem[]> {
+	  return BackendClient.inner_invoke("get_user_measures"); 
 	}
 	
 
@@ -53,15 +65,15 @@ export class BackendClient {
 	}
 	
 
-	// Definition: /ui/sessions/mod.rs:104
-	public static saveSessionChanges(details: SessionSeriesUpdate): Promise<void> {
-	  return BackendClient.inner_invoke("save_session_changes", { details }); 
+	// Definition: /ui/app/mod.rs:7
+	public static notifyFrontendReady(): Promise<void> {
+	  return BackendClient.inner_invoke("notify_frontend_ready"); 
 	}
 	
 
-	// Definition: /ui/devices/mod.rs:15
-	public static startDeviceWatcher(): Promise<void> {
-	  return BackendClient.inner_invoke("start_device_watcher"); 
+	// Definition: /ui/sessions/mod.rs:104
+	public static saveSessionChanges(details: SessionSeriesUpdate): Promise<void> {
+	  return BackendClient.inner_invoke("save_session_changes", { details }); 
 	}
 	
 

@@ -10,6 +10,7 @@
     "opener:default",
     "dialog:default",
     "notification:default",
-    "log:default"
+    "log:default",
+    "http:default"
   ]
 }

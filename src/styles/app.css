@@ -53,4 +53,12 @@
     background-color: var(--primary-color);
     border-color: var(--primary-color);
   }
+
+  #add-measure-button {
+    background-color: var(--primary-color);
+  }
+
+  #save-measure-button {
+    background-color: var(--primary-color);
+  }
 }

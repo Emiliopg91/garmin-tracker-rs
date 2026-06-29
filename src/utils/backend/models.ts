@@ -67,6 +67,15 @@ export interface SessionSeriesUpdate {
   timestamp: string;
 }
 
+// Definition: /ui/user/models.rs:7
+export interface UserListItem {
+  date: string;
+  fat_ratio: number;
+  lean_mass: number;
+  water_ratio: number;
+  weight: number;
+}
+
 // Definition: /ui/workouts/models.rs:33
 export interface WorkoutDetails {
   avg_time: string;

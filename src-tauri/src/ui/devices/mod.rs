@@ -11,7 +11,6 @@ use crate::{
     },
 };
 
-#[tauri::command]
 pub async fn start_device_watcher(app: AppHandle) -> Result<(), String> {
     info!("Starting device monitor...");
     tauri::async_runtime::spawn(async move {

@@ -50,6 +50,7 @@ pub const LOG_FILE_MAX_SIZE: u128 = 1_024 * 1_024;
 pub const LOG_FILE_ROTATION_STRATEGY: RotationStrategy = RotationStrategy::KeepSome(3);
 
 pub enum ExitCodes {
+    SettingsError,
     DbError,
     NoMainWindow,
     TauriError,
@@ -58,9 +59,10 @@ pub enum ExitCodes {
 impl From<ExitCodes> for i32 {
     fn from(val: ExitCodes) -> Self {
         match val {
-            ExitCodes::DbError => 1,
-            ExitCodes::NoMainWindow => 2,
-            ExitCodes::TauriError => 3,
+            ExitCodes::SettingsError => 1,
+            ExitCodes::DbError => 2,
+            ExitCodes::NoMainWindow => 3,
+            ExitCodes::TauriError => 4,
         }
     }
 }

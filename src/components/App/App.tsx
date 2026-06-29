@@ -5,11 +5,12 @@ import "@/styles/app.css";
 import { Tabs } from "@/models/tabs";
 import { SessionsList } from "../Sessions/SessionList";
 import { ExercisesList } from "../Exercises/ExercisesList";
-import { WorkoutsList } from "../Workouts/WorkoutList";
+import { UserList } from "../User/UserList";
 import { Loading } from "../Loading/Loading";
+import { WorkoutsList } from "../Workouts/WorkoutList";
 
 export function App(): JSX.Element {
-  const { tab, setTab, loading } = useContext(AppContext);
+  const { tab, setTab, loading, appReady } = useContext(AppContext);
 
   const navBarItems = [
     {
@@ -33,20 +34,32 @@ export function App(): JSX.Element {
       },
       selected: tab == Tabs.EXERCISES,
     },
+    {
+      label: "User",
+      onSelected: () => {
+        setTab(Tabs.USER);
+      },
+      selected: tab == Tabs.USER,
+    },
   ];
 
   return (
     <>
       <div id="viewport">
-        {loading && <Loading />}
+        {!appReady || (loading && <Loading />)}
 
-        <NavBar items={navBarItems} />
+        {appReady && (
+          <>
+            <NavBar items={navBarItems} />
 
-        <div id="list-layer">
-          {tab == Tabs.SESSIONS && <SessionsList />}
-          {tab == Tabs.EXERCISES && <ExercisesList />}
-          {tab == Tabs.WORKOUTS && <WorkoutsList />}
-        </div>
+            <div id="list-layer">
+              {tab == Tabs.SESSIONS && <SessionsList />}
+              {tab == Tabs.EXERCISES && <ExercisesList />}
+              {tab == Tabs.WORKOUTS && <WorkoutsList />}
+              {tab == Tabs.USER && <UserList />}
+            </div>
+          </>
+        )}
       </div>
     </>
   );
