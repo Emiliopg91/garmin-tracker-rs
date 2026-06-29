@@ -16,16 +16,18 @@ use tauri_plugin_log::log::{debug, error, info};
 
 #[tauri::command]
 pub async fn notify_frontend_ready(app: AppHandle) -> Result<(), String> {
-    info!("UI readyness notification received");
+    info!("UI ready");
 
     start_device_watcher(app.clone()).await?;
     update_watcher(app.clone()).await;
 
+    info!("Full application ready");
     Ok(())
 }
 
 async fn update_watcher(app: AppHandle) {
     tauri::async_runtime::spawn(async move {
+        tokio::time::sleep(Duration::from_secs(1)).await;
         loop {
             let current_version = Version::parse(constants::APP_VERSION.as_str()).unwrap();
             debug!("Looking for updates...");
