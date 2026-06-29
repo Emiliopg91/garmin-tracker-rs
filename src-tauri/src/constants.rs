@@ -6,6 +6,14 @@ use tauri_plugin_log::{RotationStrategy, log::LevelFilter};
 pub static APP_NAME: LazyLock<String> = LazyLock::new(|| env!("CARGO_PKG_NAME").to_string());
 pub static APP_VERSION: LazyLock<String> = LazyLock::new(|| env!("CARGO_PKG_VERSION").to_string());
 
+// AUR block
+pub static AUR_RPC_URL: LazyLock<String> = LazyLock::new(|| {
+    format!(
+        "https://aur.archlinux.org/rpc/?v=5&type=info&arg={}",
+        *APP_NAME
+    )
+});
+
 // Dir block
 pub static DATA_LOCAL_DIR: LazyLock<PathBuf> = LazyLock::new(|| {
     let dir = dirs::data_local_dir()

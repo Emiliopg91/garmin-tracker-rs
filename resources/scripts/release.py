@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import shutil
 import subprocess
 from pathlib import Path
@@ -9,6 +10,7 @@ PACKAGE_JSON_PATH = PROJ_DIR / "package.json"
 PKGBUILD_PATH = PROJ_DIR / "resources" / "PKGBUILD"
 DIST_DIR = PROJ_DIR / "dist"
 PKGBUILD_DIST_PATH = PROJ_DIR / "dist" / "PKGBUILD"
+CHANGELOG_MD_FILE = PROJ_DIR / "dist" /  "changelog.md"
 
 
 def generate_srcinfo():
@@ -52,6 +54,81 @@ def create_dist_dir():
         shutil.rmtree(DIST_DIR)
     print("Creating dist folder...")
     os.makedirs(DIST_DIR)
+
+
+
+def generate_changelog():
+    print("Generating changelog...")
+    TAG_REGEX = re.compile(r"^\d+\.\d+\.\d+(-\d)?+$")
+
+    def run_git(cmd):
+        return subprocess.check_output(cmd, text=True).strip()
+
+    def get_previous_version_tag():
+        tags = run_git(["git", "tag", "--sort=-creatordate"]).splitlines()
+
+        matched_tags = [tag for tag in tags if TAG_REGEX.match(tag)]
+
+        if len(matched_tags) > 0:
+            return matched_tags[0]
+        return None
+
+    def get_commits_since_tag(tag):
+        if not tag:
+            cmd = ["git", "log", "--pretty=format:%H %s"]
+        else:
+            cmd = ["git", "log", f"{tag}..HEAD", "--pretty=format:%H----%s"]
+        print(f"Obteniendo commits desde {tag}")
+        return run_git(cmd).splitlines()
+
+    tag = get_previous_version_tag()
+    commits = get_commits_since_tag(tag)
+    commits.reverse()
+
+    entries = {"feature": [], "improve": [], "fix": []}
+
+    for c in commits:
+        commit_hash, msg = c.split("----")
+        msg = msg.replace("[ci skip]", "").strip()
+
+        for typeEntry, typeEntries in entries.items():
+            if msg.startswith(f"[{typeEntry}]"):
+                typeEntries.append(
+                    f'<td><a href="https://github.com/Emiliopg91/RogPerfTuner/commit/{commit_hash}">{commit_hash[0:7]}</a></td><td>{msg.replace(f"[{typeEntry}]", "").strip().capitalize()}</td>'
+                )
+
+    lines: list[str] = ["# No changelog available"]
+
+    if (
+        len(entries.get("feature")) > 0
+        or len(entries.get("improve")) > 0
+        or len(entries.get("fix")) > 0
+    ):
+        lines: list[str] = [
+            "# Changes for release",
+            "<table>",
+            "<tr><th>Category</th><th>Commit</th><th>Message</th></tr>",
+        ]
+
+        for category in [
+            ("feature", "New Features"),
+            ("improve", "Improvements"),
+            ("fix", "Fixes"),
+        ]:
+            entry, title = category
+            for i in range(len(entries.get(entry))):
+                line = "<tr>"
+                if i == 0:
+                    line = f'{line}<td rowspan="{len(entries.get(entry))}" style="vertical-align: top;"><b>{title}</b></td>'
+                line = f"{line}{entries.get(entry)[i]}</tr>"
+                lines.append(line)
+
+        lines.append("</table>")
+
+    if os.path.exists(CHANGELOG_MD_FILE):
+        os.unlink(CHANGELOG_MD_FILE)
+    with open(CHANGELOG_MD_FILE, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines))
 
 
 if __name__ == "__main__":

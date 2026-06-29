@@ -33,6 +33,7 @@ pub fn run() {
             tauri_plugin_log::Builder::new()
                 .level(*constants::LOG_LEVEL)
                 .level_for("nusb", LevelFilter::Warn)
+                .level_for("reqwest", LevelFilter::Warn)
                 .target(Target::new(TargetKind::Folder {
                     path: constants::LOGS_DIR.clone(),
                     file_name: None,

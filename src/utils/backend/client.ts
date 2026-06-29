@@ -2,7 +2,7 @@
 
 import { invoke, InvokeArgs } from "@tauri-apps/api/core";
 
-import { ExerciseDetails, SessionSeriesUpdate, SessionDetails, WorkoutDetails, UserListItem, ExerciseListItem, SessionListItem, WorkoutListItem } from "./models";
+import { SessionSeriesUpdate, WorkoutListItem, SessionListItem, UserListItem, ExerciseDetails, ExerciseListItem, SessionDetails, WorkoutDetails } from "./models";
 
 export class BackendClient {
 	// Definition: /ui/user/mod.rs:43
@@ -65,7 +65,7 @@ export class BackendClient {
 	}
 	
 
-	// Definition: /ui/app/mod.rs:7
+	// Definition: /ui/app/mod.rs:18
 	public static notifyFrontendReady(): Promise<void> {
 	  return BackendClient.inner_invoke("notify_frontend_ready"); 
 	}

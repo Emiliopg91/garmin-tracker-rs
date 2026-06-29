@@ -13,6 +13,10 @@ export class BackendListener {
 	  return BackendListener.inner_listen<DeviceListItem>("device_disconnected", callback);
 	}
 
+	public static onUpdateAvailable(callback: (payload: string) => void): () => void {
+	  return BackendListener.inner_listen<string>("update_available", callback);
+	}
+
   private static inner_listen<R>(event_name: string, callback: (payload: R) => void ): () => void {
     const unlisten = listen<R>(event_name, (event) => {
       callback(event.payload);
