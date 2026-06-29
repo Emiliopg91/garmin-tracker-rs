@@ -21,6 +21,7 @@ pub async fn notify_frontend_ready(app: AppHandle) -> Result<(), String> {
     start_device_watcher(app.clone()).await?;
     update_watcher(app.clone()).await;
 
+    tokio::time::sleep(Duration::from_millis(100)).await;
     info!("Full application ready");
     Ok(())
 }

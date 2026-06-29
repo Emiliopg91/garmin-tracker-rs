@@ -16,10 +16,10 @@ use crate::{
 pub async fn start_device_watcher(app: AppHandle) -> Result<(), String> {
     info!("Starting device monitor...");
     tauri::async_runtime::spawn(async move {
-        tokio::time::sleep(Duration::from_secs(1)).await;
         let mut devices: Vec<DeviceListItem> = Vec::new();
         info!("Device monitor initialized");
 
+        tokio::time::sleep(Duration::from_secs(1)).await;
         loop {
             if let Ok(cur_dev) = MtpClient::get_connected_devices()
                 .await
