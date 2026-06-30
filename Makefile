@@ -16,3 +16,6 @@ version:
 
 release:
 	@python resources/scripts/release.py 
+
+setup-toolchain:
+	@paru -S $(shell bash -c 'source resources/PKGBUILD && printf "%s " "$${makedepends[@]}" "$${depends[@]}"')
