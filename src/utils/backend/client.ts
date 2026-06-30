@@ -2,7 +2,7 @@
 
 import { invoke, InvokeArgs } from "@tauri-apps/api/core";
 
-import { SessionListItem, SessionDetails, SessionSeriesUpdate, WorkoutListItem, UserListItem, ExerciseListItem, ExerciseDetails, WorkoutDetails } from "./models";
+import { SessionDetails, WorkoutListItem, ExerciseListItem, SessionListItem, SessionSeriesUpdate, ExerciseDetails, WorkoutDetails, UserListItem } from "./models";
 
 export class BackendClient {
 	// Definition: /ui/user/mod.rs:43

@@ -95,6 +95,11 @@ pub fn run() {
             if let Some(window) = app.get_webview_window("main") {
                 std::thread::spawn(move || {
                     std::thread::sleep(std::time::Duration::from_millis(200));
+                    let _ = window.set_title(&format!(
+                        "{} v{}",
+                        window.title().unwrap(),
+                        *constants::APP_VERSION
+                    ));
                     let _ = window.show();
                 });
             } else {
