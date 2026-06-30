@@ -3,6 +3,7 @@ import os
 import re
 import shutil
 import subprocess
+import yaml
 from pathlib import Path
 
 PROJ_DIR = Path(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
@@ -11,6 +12,8 @@ PKGBUILD_PATH = PROJ_DIR / "resources" / "PKGBUILD"
 DIST_DIR = PROJ_DIR / "dist"
 PKGBUILD_DIST_PATH = PROJ_DIR / "dist" / "PKGBUILD"
 CHANGELOG_MD_FILE = PROJ_DIR / "dist" /  "changelog.md"
+CURRENT_VERSIONS_FILE = PROJ_DIR / "resources" / "versions" / "current.yaml"
+PREVIOUS_VERSIONS_FILE = PROJ_DIR / "resources" / "versions" / "previous.yaml"
 
 
 def generate_srcinfo():
@@ -78,7 +81,7 @@ def generate_changelog():
             cmd = ["git", "log", "--pretty=format:%H %s"]
         else:
             cmd = ["git", "log", f"{tag}..HEAD", "--pretty=format:%H----%s"]
-        print(f"Obteniendo commits desde {tag}")
+        print(f"Getting commits since {tag}")
         return run_git(cmd).splitlines()
 
     tag = get_previous_version_tag()
@@ -105,7 +108,7 @@ def generate_changelog():
         or len(entries.get("fix")) > 0
     ):
         lines: list[str] = [
-            "# Changes for release",
+            "<h1>Changes for release</h1>",
             "<table>",
             "<tr><th>Category</th><th>Commit</th><th>Message</th></tr>",
         ]
@@ -119,11 +122,66 @@ def generate_changelog():
             for i in range(len(entries.get(entry))):
                 line = "<tr>"
                 if i == 0:
-                    line = f'{line}<td rowspan="{len(entries.get(entry))}" style="vertical-align: top;"><b>{title}</b></td>'
+                    line = f'{line}<td  style="vertical-align: top" rowspan="{len(entries.get(entry))}" style="vertical-align: top;"><b>{title}</b></td>'
                 line = f"{line}{entries.get(entry)[i]}</tr>"
                 lines.append(line)
 
         lines.append("</table>")
+
+    with open(CURRENT_VERSIONS_FILE, "r",encoding="utf-8") as f:
+        current_versions:dict[str,str] = yaml.safe_load(f)
+    with open(PREVIOUS_VERSIONS_FILE, "r",encoding="utf-8") as f:
+        previous_versions:dict[str,str] = yaml.safe_load(f)
+
+    diff_versions={}
+    diff_found = False
+    for cat in ["node","rust"]:
+        diff_versions[cat]={}
+        for p in current_versions[cat].keys():
+            if p not in previous_versions[cat]:
+                diff_versions[cat][p] = (None,current_versions[cat])
+                diff_found=True
+            elif previous_versions[cat][p]!=current_versions[cat][p]:
+                diff_versions[cat][p] = (previous_versions[cat][p],current_versions[cat][p])
+                diff_found=True
+        for p in previous_versions[cat].keys():
+            if p not in current_versions[cat]:
+                diff_versions[cat][p] = (current_versions[cat],None)
+                diff_found=True
+
+    lines.append("<hr/>")
+
+    lines.append("<h1>Updated dependencies</h1>")
+    if diff_found:
+        lines.append("<table>")
+        lines.append("<tr><th>Language</th><th>Dependency</th><th>Action</th></tr>")
+
+        urls = {"node":"https://www.npmjs.com/package/", "rust":"https://crates.io/crates/"}
+        for cat in diff_versions.keys():
+            if diff_versions[cat]:
+                for (idx, package) in enumerate(diff_versions[cat]):
+                    line = "<tr>"
+                    if idx==0:
+                        line = f'{line}<td  style="vertical-align: top" rowspan="{len(diff_versions[cat])}"><b>{cat.capitalize()}</b></td>'
+                    line = f'{line}<td><a href="{urls[cat]+package}" target="blank">{package}</a></td>'
+                    old = diff_versions[cat][package][0]
+                    new = diff_versions[cat][package][1]
+
+                    if old:
+                        if new:
+                            line = f"{line}<td>{old} ➡️ {new}</td></tr>"
+                        else:
+                            line = f"{line}<td>🗑️ {old}</td></tr>"
+                    else:
+                        line = f"{line}<td>✨ {new}</td></tr>"
+
+
+                    lines.append(line)
+        lines.append("</table>")
+    else:
+        lines.append("No dependencies were updated")
+
+
 
     if os.path.exists(CHANGELOG_MD_FILE):
         os.unlink(CHANGELOG_MD_FILE)

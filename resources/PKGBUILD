@@ -21,9 +21,11 @@ depends=(
 )
 makedepends=(
   'rust'
+  'mold'
   'npm'
   'pnpm'
-  'mold'
+  'python-toml'
+  'python-yaml'
 )
 
 build() {
