@@ -36,6 +36,10 @@ if [[ "$FIRST_LINE" =~ ^(\[ci\ skip\]\ ?)?\[release\]\ .+ ]]; then
         exit 1
     fi
 
+    echo "CHECK: Source code quality"
+    cargo clippy --manifest-path ./src-tauri/Cargo.toml -- -D warnings
+
+
     echo "TEST: Building for release"
     make build
 else
