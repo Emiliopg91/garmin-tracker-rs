@@ -20,5 +20,5 @@ release:
 setup-toolchain:
 	@paru -S $(shell bash -c 'source resources/PKGBUILD && printf "%s " "$${makedepends[@]}" "$${depends[@]}"')
 
-update
+update:
 	@pnpm update && cd src-tauri && cargo update
