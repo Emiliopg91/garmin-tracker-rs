@@ -1,5 +1,5 @@
 import { AppContext } from "./AppContext";
-import { DeviceListItem } from "@/utils/backend/models";
+import { AppEnvironment, DeviceListItem } from "@/utils/backend/models";
 import { JSX } from "react/jsx-runtime";
 import { useEffect, useRef, useState } from "react";
 import { Tabs } from "@/models/tabs";
@@ -11,6 +11,7 @@ export function AppProvider({
 }: {
   children: JSX.Element;
 }): JSX.Element {
+  const [environment, setEnvironment] = useState(AppEnvironment.Release);
   const [appReady, setAppReady] = useState(false);
   const [tab, setTab] = useState(Tabs.SESSIONS);
   const [loading, setLoading] = useState(false);
@@ -49,6 +50,16 @@ export function AppProvider({
       },
     );
 
+    BackendClient.getEnvironment().then((env)=>{
+      setEnvironment(env);
+
+      if(env==AppEnvironment.Release) {
+        document.addEventListener("contextmenu", (e) => {
+          e.preventDefault();
+        });
+      }
+    });
+
     BackendClient.notifyFrontendReady().then(() => {
       setAppReady(true);
     });
@@ -70,6 +81,7 @@ export function AppProvider({
         availableDevices,
         appReady,
         availableUpdate,
+        environment
       }}
     >
       {children}

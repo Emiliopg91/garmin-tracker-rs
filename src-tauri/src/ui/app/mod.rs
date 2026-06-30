@@ -1,3 +1,5 @@
+pub mod models;
+
 use std::{collections::HashMap, process::Command, time::Duration};
 
 use semver::Version;
@@ -7,6 +9,7 @@ use tauri::{AppHandle, Emitter};
 use crate::{
     constants,
     ui::{
+        app::models::AppEnvironment,
         devices::start_device_watcher,
         notifications::{models::NotificationDefinition, show_notification},
     },
@@ -24,6 +27,19 @@ pub async fn notify_frontend_ready(app: AppHandle) -> Result<(), String> {
     tokio::time::sleep(Duration::from_millis(100)).await;
     info!("Full application ready");
     Ok(())
+}
+
+#[tauri::command]
+pub async fn get_environment() -> AppEnvironment {
+    let res = if cfg!(debug_assertions) {
+        AppEnvironment::Debug
+    } else {
+        AppEnvironment::Release
+    };
+
+    info!("App environment: {:?}", res);
+
+    res
 }
 
 async fn update_watcher(app: AppHandle) {

@@ -102,3 +102,9 @@ export interface WorkoutSession {
   volume: number;
 }
 
+// Definition: /ui/app/models.rs:4
+export enum AppEnvironment {
+	Debug = "Debug",
+	Release = "Release",
+}
+

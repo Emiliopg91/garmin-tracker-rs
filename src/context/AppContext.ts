@@ -1,5 +1,5 @@
 import { Tabs } from "@/models/tabs";
-import { DeviceListItem } from "@/utils/backend/models";
+import { AppEnvironment, DeviceListItem } from "@/utils/backend/models";
 import { createContext } from "react";
 
 interface AppContexType {
@@ -10,6 +10,7 @@ interface AppContexType {
   setLoading: (loading: boolean) => void;
   availableDevices: DeviceListItem[];
   availableUpdate: string | undefined;
+  environment: AppEnvironment;
 }
 
 const defaultValue: AppContexType = {
@@ -24,6 +25,7 @@ const defaultValue: AppContexType = {
   },
   availableDevices: [],
   availableUpdate: undefined,
+  environment: AppEnvironment.Release
 };
 
 export const AppContext = createContext(defaultValue);

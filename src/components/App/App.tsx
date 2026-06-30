@@ -66,11 +66,11 @@ export function App(): JSX.Element {
               {tab == Tabs.USER && <UserList />}
             </div>
             {availableUpdate && (
-              <div>
-                <Nav.Link onClick={openChangelog}>
-                  Update {availableUpdate} available. View changes
-                </Nav.Link>
-              </div>
+                <div style={{margin: "auto"}}>
+                  <Nav.Link onClick={openChangelog}>
+                    Update {availableUpdate} available. View changes
+                  </Nav.Link>
+                </div>
             )}
           </>
         )}

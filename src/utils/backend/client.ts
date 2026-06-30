@@ -2,12 +2,18 @@
 
 import { invoke, InvokeArgs } from "@tauri-apps/api/core";
 
-import { ExerciseDetails, ExerciseListItem, SessionDetails, SessionListItem, SessionSeriesUpdate, UserListItem, WorkoutDetails, WorkoutListItem } from "./models";
+import { AppEnvironment, ExerciseDetails, ExerciseListItem, SessionDetails, SessionListItem, SessionSeriesUpdate, UserListItem, WorkoutDetails, WorkoutListItem } from "./models";
 
 export class BackendClient {
 	// Definition: /ui/user/mod.rs:43
 	public static addUserMeasures(measures: UserListItem): Promise<void> {
 	  return BackendClient.inner_invoke("add_user_measures", { measures }); 
+	}
+	
+
+	// Definition: /ui/app/mod.rs:33
+	public static getEnvironment(): Promise<AppEnvironment> {
+	  return BackendClient.inner_invoke("get_environment"); 
 	}
 	
 
@@ -65,13 +71,13 @@ export class BackendClient {
 	}
 	
 
-	// Definition: /ui/app/mod.rs:18
+	// Definition: /ui/app/mod.rs:21
 	public static notifyFrontendReady(): Promise<void> {
 	  return BackendClient.inner_invoke("notify_frontend_ready"); 
 	}
 	
 
-	// Definition: /ui/app/mod.rs:100
+	// Definition: /ui/app/mod.rs:116
 	public static openVersionChangelog(version: string): Promise<void> {
 	  return BackendClient.inner_invoke("open_version_changelog", { version }); 
 	}

@@ -1340,7 +1340,7 @@ dependencies = [
 
 [[package]]
 name = "garmin-tracker-rs"
-version = "1.3.7"
+version = "1.3.8"
 dependencies = [
  "chrono",
  "dirs",
@@ -4447,9 +4447,9 @@ dependencies = [
 
 [[package]]
 name = "tauri-rs-ts-ipc"
-version = "0.1.8"
+version = "0.1.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "11794129f439e90184c03bc1a62f0160d9b71e8d9c93ce31d065e40a0c8b6ab1"
+checksum = "ec2cc1ef0375702cc34c35b326d31fe8d25fc79e4add1f937ab15f3be08701dd"
 dependencies = [
  "proc-macro2",
  "quote",

@@ -10,7 +10,7 @@ use tauri_plugin_log::{
 use crate::{
     garmin::database::DATABASE_INST,
     ui::{
-        app::{notify_frontend_ready, open_version_changelog},
+        app::{get_environment, notify_frontend_ready, open_version_changelog},
         exercises::{get_exercise_details, get_exercises},
         sessions::{
             get_session_details, get_sessions, import_from_device, import_from_file,
@@ -123,7 +123,8 @@ pub fn run() {
             notify_frontend_ready,
             get_user_measures,
             add_user_measures,
-            open_version_changelog
+            open_version_changelog,
+            get_environment
         ])
         .run(tauri::generate_context!());
 
