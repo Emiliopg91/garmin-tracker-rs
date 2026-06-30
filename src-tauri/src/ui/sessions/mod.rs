@@ -15,7 +15,7 @@ use crate::{
             DATABASE_INST,
             dao::{exercise::Exercise, serie::Serie, session::Session},
         },
-        mtp::MtpClient,
+        mtp::MTP_CLIENT_INST,
         parser::load_from_file,
     },
     ui::{
@@ -242,7 +242,10 @@ pub async fn import_from_device(app: AppHandle, serial: &str) -> Result<u16, Str
         "Fetching from device activity files after {}...",
         latest_date
     );
-    let activities = MtpClient::download_activities_since(serial, latest_date)
+    let activities = MTP_CLIENT_INST
+        .lock()
+        .await
+        .download_activities_since(serial, latest_date)
         .await
         .map_err(|e| e.to_string())?;
     info!("Fetched {} activity files", activities.len());

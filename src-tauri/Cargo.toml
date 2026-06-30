@@ -25,20 +25,20 @@ tauri-plugin-opener = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 time = "=0.3.47"
-chrono = "0.4.45"
-fitparser = "0.11.0"
+chrono = "^0"
+fitparser = "^0"
 indexmap = { version = "2.14.0", features = ["serde"] }
 rusqlite = { version = "0.40.1" }
-thiserror = "2.0.18"
+thiserror = "^2"
 tokio = { version = "1", features = ["rt-multi-thread", "macros", "time"] }
 tauri-plugin-dialog = "2"
-dirs = "6.0.0"
-mtp-rs = "0.19.0"
+dirs = "^6"
+mtp-rs = "^0"
 tauri-plugin-notification = "2"
 tauri-plugin-log = "2"
 tauri-rs-ts-ipc = { version = "^0" }
-serde_yaml = "0.9.34"
-semver = "1.0.28"
+serde_yaml = "^0"
+semver = "^1"
 tauri-plugin-http = "2"
 #tauri-rs-ts-ipc = { path = "../../syn-test" }
 

@@ -1,4 +1,4 @@
-use mtp_rs::ptp::DeviceInfo;
+use mtp_rs::DeviceInfo;
 use serde::Serialize;
 
 #[derive(Serialize, Clone)]

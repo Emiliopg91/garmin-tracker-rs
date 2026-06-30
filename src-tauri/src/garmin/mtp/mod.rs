@@ -1,10 +1,13 @@
 use std::{
     fs,
     path::PathBuf,
-    time::{SystemTime, UNIX_EPOCH},
+    sync::LazyLock,
+    thread::sleep,
+    time::{Duration, SystemTime, UNIX_EPOCH},
 };
 
-use mtp_rs::{MtpDevice, ptp::ObjectInfo};
+use mtp_rs::{MtpDevice, ObjectInfo};
+use tokio::sync::Mutex;
 
 use crate::{
     garmin::mtp::errors::{MtpError, Result},
@@ -12,10 +15,12 @@ use crate::{
 };
 pub mod errors;
 
+pub static MTP_CLIENT_INST: LazyLock<Mutex<MtpClient>> = LazyLock::new(|| Mutex::new(MtpClient {}));
+
 pub struct MtpClient {}
 
 impl MtpClient {
-    pub async fn get_connected_devices() -> Result<Vec<DeviceListItem>> {
+    pub async fn get_connected_devices(&self) -> Result<Vec<DeviceListItem>> {
         let mut res = Vec::new();
 
         let devices = MtpDevice::list_devices().map_err(MtpError::ListDevices)?;
@@ -36,7 +41,11 @@ impl MtpClient {
         Ok(res)
     }
 
-    pub async fn download_activities_since(serial: &str, date: String) -> Result<Vec<PathBuf>> {
+    pub async fn download_activities_since(
+        &self,
+        serial: &str,
+        date: String,
+    ) -> Result<Vec<PathBuf>> {
         let mut result = Vec::new();
 
         let devices_info = MtpDevice::list_devices().map_err(MtpError::ListDevices)?;
@@ -88,12 +97,19 @@ impl MtpClient {
                     ))
                 } else {
                     for obj in objs {
-                        let data = storage
-                            .download(obj.handle)
+                        sleep(Duration::from_millis(100));
+                        let mut data = storage
+                            .download(obj.handle, mtp_rs::ByteRange::Full)
                             .await
                             .map_err(|e| MtpError::DownloadFile(obj.filename.clone(), e))?;
                         let path = tmp_dir.join(obj.filename);
-                        fs::write(&path, data)
+                        let mut bytes = Vec::with_capacity(data.bytes_received() as usize);
+                        while let Some(window) = data.next_chunk().await
+                            && let Ok(rec_bytes) = window
+                        {
+                            bytes.extend_from_slice(&rec_bytes);
+                        }
+                        fs::write(&path, bytes)
                             .map_err(|e| MtpError::WriteData(path.display().to_string(), e))?;
                         result.push(path);
                     }

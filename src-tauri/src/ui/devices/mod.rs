@@ -6,7 +6,7 @@ use tauri::{AppHandle, Emitter};
 use tauri_plugin_log::log::info;
 
 use crate::{
-    garmin::mtp::MtpClient,
+    garmin::mtp::MTP_CLIENT_INST,
     ui::{
         devices::models::DeviceListItem,
         notifications::{models::NotificationDefinition, show_notification},
@@ -21,7 +21,10 @@ pub async fn start_device_watcher(app: AppHandle) -> Result<(), String> {
 
         tokio::time::sleep(Duration::from_secs(1)).await;
         loop {
-            if let Ok(cur_dev) = MtpClient::get_connected_devices()
+            if let Ok(cur_dev) = MTP_CLIENT_INST
+                .lock()
+                .await
+                .get_connected_devices()
                 .await
                 .map_err(|e| e.to_string())
             {
