@@ -20,7 +20,7 @@ node:
   react-dom: 19.2.7
   recharts: 3.9.0
   typescript: 5.8.3
-  typescript-eslint: 8.62.0
+  typescript-eslint: 8.62.1
   vite: 7.3.6
   vite-plugin-checker: 0.14.4
 rust:
@@ -28,13 +28,13 @@ rust:
   dirs: 6.0.0
   fitparser: 0.11.0
   indexmap: 2.14.0
-  mtp-rs: 0.19.0
+  mtp-rs: 0.23.0
   rusqlite: 0.40.1
   semver: 1.0.28
   serde: 1.0.228
   serde_json: 1.0.150
   serde_yaml: 0.9.34+deprecated
-  tauri: 2.11.3
+  tauri: 2.11.4
   tauri-build: 2.6.3
   tauri-plugin-dialog: 2.7.1
   tauri-plugin-http: 2.5.9
