@@ -1,7 +1,7 @@
 node:
   '@eslint/js': 9.39.4
   '@tauri-apps/api': 2.11.1
-  '@tauri-apps/cli': 2.11.3
+  '@tauri-apps/cli': 2.11.4
   '@tauri-apps/plugin-dialog': 2.7.1
   '@tauri-apps/plugin-http': 2.5.9
   '@tauri-apps/plugin-log': 2.8.0
@@ -13,14 +13,14 @@ node:
   bootstrap: 5.3.8
   eslint: 9.39.4
   eslint-plugin-react: 7.37.5
-  prettier: 3.8.4
+  prettier: 3.9.3
   react: 19.2.7
   react-bootstrap: 2.10.10
   react-datepicker: 9.1.0
   react-dom: 19.2.7
   recharts: 3.9.0
   typescript: 5.8.3
-  typescript-eslint: 8.62.0
+  typescript-eslint: 8.62.1
   vite: 7.3.6
   vite-plugin-checker: 0.14.4
 rust:
@@ -28,20 +28,20 @@ rust:
   dirs: 6.0.0
   fitparser: 0.11.0
   indexmap: 2.14.0
-  mtp-rs: 0.19.0
+  mtp-rs: 0.23.0
   rusqlite: 0.40.1
   semver: 1.0.28
   serde: 1.0.228
   serde_json: 1.0.150
   serde_yaml: 0.9.34+deprecated
-  tauri: 2.11.3
+  tauri: 2.11.4
   tauri-build: 2.6.3
   tauri-plugin-dialog: 2.7.1
   tauri-plugin-http: 2.5.9
   tauri-plugin-log: 2.8.0
   tauri-plugin-notification: 2.3.3
   tauri-plugin-opener: 2.5.4
-  tauri-rs-ts-ipc: 0.1.7
+  tauri-rs-ts-ipc: 0.1.8
   thiserror: 2.0.18
   time: 0.3.47
   tokio: 1.52.3
