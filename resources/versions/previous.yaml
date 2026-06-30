@@ -41,7 +41,6 @@ rust:
   tauri-plugin-log: 2.8.0
   tauri-plugin-notification: 2.3.3
   tauri-plugin-opener: 2.5.4
-  tauri-rs-ts-ipc: 0.1.8
+  tauri-rs-ts-ipc: 0.1.9
   thiserror: 2.0.18
-  time: 0.3.47
   tokio: 1.52.3
