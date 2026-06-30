@@ -1,16 +1,17 @@
 name: AUR release
 
+env:
+  CARGO_TERM_COLOR: always
+
 on:
   workflow_dispatch:
   push:
     branches:
-      - release
-
-env:
-  CARGO_TERM_COLOR: always
+      - main
 
 jobs:
-  publish:
+  release:
+    if: startsWith(toLower(github.event.head_commit.message), '[release]')
     runs-on: ubuntu-latest
 
     permissions:
@@ -35,7 +36,13 @@ jobs:
       - name: Extract version
         id: version
         run: |
-          VERSION=$(sed -n 's/^version = "\(.*\)"/\1/p' src-tauri/Cargo.toml | head -n1)
+          VERSION=$(echo "$COMMIT_MSG" | head -n1 | sed -n 's/^\[release\][[:space:]]*\([^[:space:]]*\).*/\1/Ip')
+
+          if [ -z "$VERSION" ]; then
+            echo "Could not extract version from commit message: $COMMIT_MSG"
+            exit 1
+          fi
+
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Get last git tag

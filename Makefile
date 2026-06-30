@@ -12,7 +12,7 @@ clean:
 	@rm -Rf node_modules dist && cd src-tauri && cargo clean
 
 version:
-	@python resources/scripts/set_version.py && make clean
+	@python resources/scripts/set_version.py $(ARGS) && make clean
 
 release:
-	@python resources/scripts/release.py
+	@python resources/scripts/release.py 
