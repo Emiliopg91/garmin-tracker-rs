@@ -1,3 +1,5 @@
+set -e
+
 COMMIT_MSG_FILE="$1"
 FIRST_LINE=$(head -n 1 "$COMMIT_MSG_FILE")
 BRANCH=$(git rev-parse --abbrev-ref HEAD)
@@ -30,6 +32,7 @@ if [[ "$FIRST_LINE" =~ ^(\[ci\ skip\]\ ?)?\[release\]\ .+ ]]; then
         exit 1
     fi
 
+    echo "CHECK: Looking for TODOs"
     if grep -R -nP --exclude-dir={build,.git} '//\s*TODO:' src src-tauri/src > /tmp/todos.txt; then
         sed 's/^\([^:]*:[^:]*\):/  \1\n    /' /tmp/todos.txt
         echo "❌ Pending TODOs found in code"
@@ -41,7 +44,7 @@ if [[ "$FIRST_LINE" =~ ^(\[ci\ skip\]\ ?)?\[release\]\ .+ ]]; then
 
 
     echo "TEST: Building for release"
-    make build
+    make build 
 else
     if [[ "$FIRST_LINE" =~ ^(\[ci\ skip\]\ ?)?\[($REQUIRED_PREFIXES)\]\ .+ ]]; then
         exit 0
