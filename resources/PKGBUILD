@@ -35,5 +35,5 @@ build() {
 
 package() {
   cd "$srcdir/${pkgname}/src-tauri/target/release/bundle/deb"
-  cp -a Garmin\ Fit\ Tracker_${pkgver}_*/data/* "${pkgdir}"
+  cp -a Garmin\ Tracker_${pkgver}_*/data/* "${pkgdir}"
 }
