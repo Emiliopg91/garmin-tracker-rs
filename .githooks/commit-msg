@@ -2,40 +2,42 @@ COMMIT_MSG_FILE="$1"
 FIRST_LINE=$(head -n 1 "$COMMIT_MSG_FILE")
 BRANCH=$(git rev-parse --abbrev-ref HEAD)
 
-REQUIRED_PREFIXES="fix|feature|docs|test|chore|improve|version|changelog|refactor"
+REQUIRED_PREFIXES="fix|feature|docs|test|chore|improve|version|changelog|refactor|release"
 
 if [[ "$FIRST_LINE" =~ ^Merge ]]; then
     exit 0
 fi
 
-if [ "$BRANCH" = "release" ]; then
-    if [[ "$FIRST_LINE" =~ ^(\[ci\ skip\]\ ?)?\[release\]\ .+ ]]; then
-        VERSION=$(echo "$FIRST_LINE" | sed -n 's/^\(\[ci skip\][[:space:]]*\)\?\[release\][[:space:]]*\([^[:space:]]*\).*/\2/Ip')
-
-        if [ -z "$VERSION" ]; then
-            echo "Could not extract version from commit message: $FIRST_LINE"
-            exit 1
-        fi
-
-        if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "Version '$VERSION' does not match X.Y.Z format"
-            exit 1
-        fi
-
-        APP_VERSION=$(jq -r .version < package.json)
-
-        if [[ "$APP_VERSION" != "$VERSION" ]]; then
-            echo "App version $APP_VERSION does not match $VERSION, specified in commit message"
-            exit 1
-        fi
-
-        exit 0
-    else
+if [[ "$FIRST_LINE" =~ ^(\[ci\ skip\]\ ?)?\[release\]\ .+ ]]; then
+    if [ "$BRANCH" != "main" ]; then
         echo "Invalid commit message"
-        echo "On the 'release' branch only [release] commits are allowed"
-        echo "Format: [release] X.Y.Z"
+        echo "[release] commits are only allowed on the 'main' branch"
         exit 1
     fi
+
+    VERSION=$(echo "$FIRST_LINE" | sed -n 's/^\(\[ci skip\][[:space:]]*\)\?\[release\][[:space:]]*\([^[:space:]]*\).*/\2/Ip')
+
+    if [ -z "$VERSION" ] || ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+        echo "Invalid version in commit message: $FIRST_LINE"
+        echo "Expected format: [release] X.Y.Z"
+        exit 1
+    fi
+
+    APP_VERSION=$(jq -r .version < package.json)
+
+    if [[ "$APP_VERSION" != "$VERSION" ]]; then
+        echo "App version $APP_VERSION does not match $VERSION, specified in commit message"
+        exit 1
+    fi
+
+    if grep -R -nP --exclude-dir={build,.git} '//\s*TODO:' src src-tauri/src > /tmp/todos.txt; then
+        sed 's/^\([^:]*:[^:]*\):/  \1\n    /' /tmp/todos.txt
+        echo "❌ Pending TODOs found in code"
+        exit 1
+    fi
+
+    echo "TEST: Building for release"
+    make build
 else
     if [[ "$FIRST_LINE" =~ ^(\[ci\ skip\]\ ?)?\[($REQUIRED_PREFIXES)\]\ .+ ]]; then
         exit 0
@@ -43,8 +45,9 @@ else
         echo "Invalid commit message"
         echo "Rules:"
         echo " - Optional [ci skip] at the beginning"
-        echo " - Mandatory prefix: [fix], [feature], [docs], [test], [chore], [improve], [version], [changelog], [refactor]"
+        echo " - Mandatory prefix: [fix], [feature], [docs], [test], [chore], [improve], [version], [changelog], [refactor], [release]"
         echo " - A space and a non-empty message after the mandatory prefix"
+        echo " - [release] is only allowed on the 'main' branch"
         echo " - Commits starting with 'Merge' are valid"
         exit 1
     fi
