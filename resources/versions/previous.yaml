@@ -13,7 +13,7 @@ node:
   bootstrap: 5.3.8
   eslint: 9.39.4
   eslint-plugin-react: 7.37.5
-  prettier: 3.9.3
+  prettier: 3.9.4
   react: 19.2.7
   react-bootstrap: 2.10.10
   react-datepicker: 9.1.0
@@ -41,6 +41,6 @@ rust:
   tauri-plugin-log: 2.8.0
   tauri-plugin-notification: 2.3.3
   tauri-plugin-opener: 2.5.4
-  tauri-rs-ts-ipc: 0.1.9
+  tauri-rs-ts-ipc: 0.1.10
   thiserror: 2.0.18
   tokio: 1.52.3
