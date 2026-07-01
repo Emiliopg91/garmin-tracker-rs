@@ -1,9 +1,15 @@
 import json
 import subprocess
+import sys
 import toml
 import yaml
 
 from commons import SRC_TAURI_DIR, PACKAGE_JSON_PATH, PNPM_LOCK_FILE, CARGO_TOML_FILE, CURRENT_VERSIONS_FILE, CARGO_LOCK_FILE
+
+
+if len(subprocess.check_output(["git", "status", "--porcelain"], text=True).strip().splitlines()) > 0:
+    print("ERROR: The repository has uncommited changes")
+    sys.exit(1)
 
 subprocess.run(["pnpm", "update"], check=True)
 subprocess.run(["cargo", "update"], check=True, cwd=SRC_TAURI_DIR)
@@ -37,3 +43,7 @@ versions = {
 }
 with open(CURRENT_VERSIONS_FILE, "w", encoding="utf-8") as f:
     yaml.safe_dump(versions,f)
+
+
+if len(subprocess.check_output(["git", "status", "--porcelain"], text=True).strip().splitlines()) > 0:
+    subprocess.check_call(["git", "commit", "-am", "[chore] Update dependencies"])

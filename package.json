@@ -22,7 +22,7 @@
     "react-bootstrap": "^2.10.10",
     "react-datepicker": "^9.1.0",
     "react-dom": "^19.2.7",
-    "recharts": "^3.9.1"
+    "recharts": "^3.9.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
