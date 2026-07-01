@@ -48,3 +48,4 @@ if __name__ == "__main__":
         version = json.load(f)["version"]
 
     subprocess.check_call(["git", "commit", "-am", f"[release] {version}"])
+    subprocess.check_call(["git", "push"])
