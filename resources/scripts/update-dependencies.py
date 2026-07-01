@@ -3,10 +3,10 @@ import subprocess
 import toml
 import yaml
 
-from commons import SRC_TAURI_FILE, PACKAGE_JSON_PATH, PNPM_LOCK_FILE, CARGO_TOML_FILE, CURRENT_VERSIONS_FILE, CARGO_LOCK_FILE
+from commons import SRC_TAURI_DIR, PACKAGE_JSON_PATH, PNPM_LOCK_FILE, CARGO_TOML_FILE, CURRENT_VERSIONS_FILE, CARGO_LOCK_FILE
 
 subprocess.run(["pnpm", "update"], check=True)
-subprocess.run(["cargo", "update"], check=True, cwd=SRC_TAURI_FILE)
+subprocess.run(["cargo", "update"], check=True, cwd=SRC_TAURI_DIR)
 
 node_packages = {}
 with open(PACKAGE_JSON_PATH, "r", encoding="utf-8") as f:
