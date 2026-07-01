@@ -22,10 +22,3 @@ update:
 
 publish:  
 	@python resources/scripts/publish.py
-
-delete:
-	@python resources/scripts/set_version.py $(ARGS) && \
-	make clean lint && \
-	git add package.json src-tauri/Cargo.lock src-tauri/Cargo.toml src-tauri/tauri.conf.json && \
-
-	

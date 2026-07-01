@@ -47,4 +47,4 @@ if __name__ == "__main__":
     with open(PACKAGE_JSON_PATH, "r", encoding="utf-8") as f:
         version = json.load(f)["version"]
 
-    subprocess.check_call(["git", "commit", "-am", "[release] version"])
+    subprocess.check_call(["git", "commit", "-am", f"[release] {version}"])
