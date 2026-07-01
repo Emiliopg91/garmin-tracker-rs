@@ -146,8 +146,6 @@ def generate_changelog():
         for p in previous_versions[cat].keys():
             if p not in current_versions[cat]:
                 diff_versions[cat][p] = (current_versions[cat],None)
-            else:
-                diff_versions[cat][p] = (current_versions[cat][p],current_versions[cat][p])
 
     lines.append("<hr/>")
 
