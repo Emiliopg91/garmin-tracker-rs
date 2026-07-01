@@ -69,3 +69,5 @@ if __name__ == "__main__":
             continue
 
         time.sleep(3)  # comprobar cada 30 segundos
+
+    subprocess.check_call(["git", "pull"])
