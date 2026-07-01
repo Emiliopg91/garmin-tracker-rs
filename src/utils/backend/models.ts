@@ -1,11 +1,19 @@
-// Definition: /ui/devices/models.rs:5
+//Auto generated file, do not edit manually
+
+// From src-tauri/src/ui/app/models.rs:4
+export enum AppEnvironment {
+	Debug = "Debug",
+	Release = "Release",
+}
+
+// From src-tauri/src/ui/devices/models.rs:5
 export interface DeviceListItem {
   manufacturer: string;
   model: string;
   serial_number: string;
 }
 
-// Definition: /ui/exercises/models.rs:33
+// From src-tauri/src/ui/exercises/models.rs:33
 export interface ExerciseDetails {
   category: string;
   id: number;
@@ -18,7 +26,7 @@ export interface ExerciseDetails {
   workouts: string[];
 }
 
-// Definition: /ui/exercises/models.rs:8
+// From src-tauri/src/ui/exercises/models.rs:8
 export interface ExerciseListItem {
   category: string;
   date: string;
@@ -29,7 +37,7 @@ export interface ExerciseListItem {
   weight: number;
 }
 
-// Definition: /ui/sessions/models.rs:59
+// From src-tauri/src/ui/sessions/models.rs:59
 export interface SessionDetails {
   active_time: string;
   avg_heart_rate: number;
@@ -44,7 +52,7 @@ export interface SessionDetails {
   total_elapsed_time: string;
 }
 
-// Definition: /ui/sessions/models.rs:8
+// From src-tauri/src/ui/sessions/models.rs:8
 export interface SessionListItem {
   date: string;
   exercises_num: number;
@@ -54,20 +62,20 @@ export interface SessionListItem {
   volume: number;
 }
 
-// Definition: /ui/sessions/models.rs:42
+// From src-tauri/src/ui/sessions/models.rs:42
 export interface SessionSerie {
   idx: number;
   reps: number;
   weight: number;
 }
 
-// Definition: /ui/sessions/models.rs:96
+// From src-tauri/src/ui/sessions/models.rs:96
 export interface SessionSeriesUpdate {
   series: SessionSerie[];
   timestamp: string;
 }
 
-// Definition: /ui/user/models.rs:7
+// From src-tauri/src/ui/user/models.rs:7
 export interface UserListItem {
   date: string;
   fat_ratio: number;
@@ -76,7 +84,7 @@ export interface UserListItem {
   weight: number;
 }
 
-// Definition: /ui/workouts/models.rs:33
+// From src-tauri/src/ui/workouts/models.rs:33
 export interface WorkoutDetails {
   avg_time: string;
   avg_volume: number;
@@ -86,7 +94,7 @@ export interface WorkoutDetails {
   sessions: WorkoutSession[];
 }
 
-// Definition: /ui/workouts/models.rs:6
+// From src-tauri/src/ui/workouts/models.rs:6
 export interface WorkoutListItem {
   avg_time: string;
   latest_session: string;
@@ -94,17 +102,11 @@ export interface WorkoutListItem {
   sessions: number;
 }
 
-// Definition: /ui/workouts/models.rs:14
+// From src-tauri/src/ui/workouts/models.rs:14
 export interface WorkoutSession {
   date: string;
   time: string;
   vol_diff: string;
   volume: number;
-}
-
-// Definition: /ui/app/models.rs:4
-export enum AppEnvironment {
-	Debug = "Debug",
-	Release = "Release",
 }
 
