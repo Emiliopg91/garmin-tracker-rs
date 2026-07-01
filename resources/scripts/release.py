@@ -134,54 +134,52 @@ def generate_changelog():
         previous_versions:dict[str,str] = yaml.safe_load(f)
 
     diff_versions={}
-    diff_found = False
     for cat in ["node","rust"]:
         diff_versions[cat]={}
         for p in current_versions[cat].keys():
             if p not in previous_versions[cat]:
                 diff_versions[cat][p] = (None,current_versions[cat])
-                diff_found=True
             elif previous_versions[cat][p]!=current_versions[cat][p]:
                 diff_versions[cat][p] = (previous_versions[cat][p],current_versions[cat][p])
-                diff_found=True
+            else:
+                diff_versions[cat][p] = (current_versions[cat][p],current_versions[cat][p])
         for p in previous_versions[cat].keys():
             if p not in current_versions[cat]:
                 diff_versions[cat][p] = (current_versions[cat],None)
-                diff_found=True
+            else:
+                diff_versions[cat][p] = (current_versions[cat][p],current_versions[cat][p])
 
     lines.append("<hr/>")
 
-    lines.append("<h1>Updated dependencies</h1>")
-    if diff_found:
-        lines.append("<table>")
-        lines.append("<tr><th>Language</th><th>Dependency</th><th>Action</th></tr>")
+    lines.append("<h1>Dependencies</h1>")
+    lines.append("<table>")
+    lines.append("<tr><th>Language</th><th>Dependency</th><th>Action</th></tr>")
 
-        urls = {"node":"https://www.npmjs.com/package/", "rust":"https://crates.io/crates/"}
-        for cat in diff_versions.keys():
-            if diff_versions[cat]:
-                for (idx, package) in enumerate(diff_versions[cat]):
-                    line = "<tr>"
-                    if idx==0:
-                        line = f'{line}<td  style="vertical-align: top" rowspan="{len(diff_versions[cat])}"><b>{cat.capitalize()}</b></td>'
-                    line = f'{line}<td><a href="{urls[cat]+package}" target="blank">{package}</a></td>'
-                    old = diff_versions[cat][package][0]
-                    new = diff_versions[cat][package][1]
+    urls = {"node":"https://www.npmjs.com/package/", "rust":"https://crates.io/crates/"}
+    for cat in diff_versions.keys():
+        if diff_versions[cat]:
+            for (idx, package) in enumerate(diff_versions[cat]):
+                line = "<tr>"
+                if idx==0:
+                    line = f'{line}<td  style="vertical-align: top" rowspan="{len(diff_versions[cat])}"><b>{cat.capitalize()}</b></td>'
+                line = f'{line}<td><a href="{urls[cat]+package}" target="blank">{package}</a></td>'
+                old = diff_versions[cat][package][0]
+                new = diff_versions[cat][package][1]
 
-                    if old:
-                        if new:
+                if old:
+                    if new:
+                        if old!=new:
                             line = f"{line}<td>{old} ➡️ {new}</td></tr>"
                         else:
-                            line = f"{line}<td>🗑️ {old}</td></tr>"
+                            line = f"{line}<td>{old}</td></tr>"
                     else:
-                        line = f"{line}<td>✨ {new}</td></tr>"
+                        line = f"{line}<td>🗑️ {old}</td></tr>"
+                else:
+                    line = f"{line}<td>✨ {new}</td></tr>"
 
 
-                    lines.append(line)
-        lines.append("</table>")
-    else:
-        lines.append("No dependencies were updated")
-
-
+                lines.append(line)
+    lines.append("</table>")
 
     if os.path.exists(CHANGELOG_MD_FILE):
         os.unlink(CHANGELOG_MD_FILE)
