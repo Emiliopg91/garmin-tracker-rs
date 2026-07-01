@@ -97,7 +97,7 @@ def generate_changelog():
                     f'<td><a href="https://github.com/Emiliopg91/garmin-tracker-rs/commit/{commit_hash}">{commit_hash[0:7]}</a></td><td>{msg.replace(f"[{typeEntry}]", "").strip().capitalize()}</td>'
                 )
 
-    lines: list[str] = ["# No changelog available"]
+    lines: list[str] = ["# Changes for release"]
 
     if (
         len(entries.get("feature")) > 0
@@ -124,6 +124,9 @@ def generate_changelog():
                 lines.append(line)
 
         lines.append("</table>")
+    else:
+        lines.append("No changelog available")
+        
 
     with open(CURRENT_VERSIONS_FILE, "r",encoding="utf-8") as f:
         current_versions:dict[str,str] = yaml.safe_load(f)
