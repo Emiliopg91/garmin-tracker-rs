@@ -7,6 +7,7 @@ use std::{
 };
 
 use mtp_rs::{MtpDevice, ObjectInfo};
+use tauri_plugin_log::log::info;
 use tokio::sync::Mutex;
 
 use crate::{
@@ -61,7 +62,14 @@ impl MtpClient {
             let device = MtpDevice::open_by_location(device_info.location_id)
                 .await
                 .map_err(|e| MtpError::OpenDevice(device_info.location_id, e))?;
+            info!(
+                "Found device {} {} with S/N {}",
+                device.device_info().manufacturer,
+                device.device_info().model,
+                serial
+            );
 
+            info!("Entering into GARMIN folder...");
             let storage = &device.storages().await.map_err(MtpError::Storage)?[0];
             if let Some(garmin_folder) = storage
                 .list_objects(None)
@@ -69,55 +77,74 @@ impl MtpClient {
                 .map_err(MtpError::ListFiles)?
                 .iter()
                 .find(|oi| oi.filename == "GARMIN")
-                && let Some(activity_folder) = storage
+            {
+                info!("Entering into GARMIN/Activity folder...");
+                if let Some(activity_folder) = storage
                     .list_objects(Some(garmin_folder.handle))
                     .await
                     .map_err(MtpError::ListFiles)?
                     .iter()
                     .find(|oi| oi.filename == "Activity")
-            {
-                let mut objs = storage
-                    .list_objects(Some(activity_folder.handle))
-                    .await
-                    .map_err(MtpError::ListFiles)?;
+                {
+                    info!("Listing files...");
+                    let mut objs = storage
+                        .list_objects(Some(activity_folder.handle))
+                        .await
+                        .map_err(MtpError::ListFiles)?;
 
-                objs = objs
-                    .iter()
-                    .filter(|f| f.filename.split('.').nth(0).unwrap() > date.as_str())
-                    .cloned()
-                    .collect::<Vec<ObjectInfo>>();
+                    info!("Found {} files", objs.len());
+                    objs = objs
+                        .iter()
+                        .filter(|f| f.filename.split('.').nth(0).unwrap() > date.as_str())
+                        .cloned()
+                        .collect::<Vec<ObjectInfo>>();
 
-                let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
-                let tmp_dir = PathBuf::from(format!("/tmp/garmin-tracker-rs-{}", now.as_millis()));
+                    if objs.is_empty() {
+                        info!("No pending files to import");
+                        Ok(result)
+                    } else {
+                        info!("Pending {} files", objs.len());
+                        let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
+                        let tmp_dir =
+                            PathBuf::from(format!("/tmp/garmin-tracker-rs-{}", now.as_millis()));
 
-                if let Err(e) = fs::create_dir_all(&tmp_dir) {
-                    Err(MtpError::ErrorCreatingDownloadFolder(
-                        tmp_dir.display().to_string(),
-                        e,
-                    ))
-                } else {
-                    for obj in objs {
-                        sleep(Duration::from_millis(100));
-                        let mut data = storage
-                            .download(obj.handle, mtp_rs::ByteRange::Full)
-                            .await
-                            .map_err(|e| MtpError::DownloadFile(obj.filename.clone(), e))?;
-                        let path = tmp_dir.join(obj.filename);
-                        let mut bytes = Vec::with_capacity(data.bytes_received() as usize);
-                        while let Some(window) = data.next_chunk().await
-                            && let Ok(rec_bytes) = window
-                        {
-                            bytes.extend_from_slice(&rec_bytes);
+                        if let Err(e) = fs::create_dir_all(&tmp_dir) {
+                            Err(MtpError::ErrorCreatingDownloadFolder(
+                                tmp_dir.display().to_string(),
+                                e,
+                            ))
+                        } else {
+                            info!("Downloading files...");
+                            for obj in objs {
+                                sleep(Duration::from_millis(100));
+                                let mut data = storage
+                                    .download(obj.handle, mtp_rs::ByteRange::Full)
+                                    .await
+                                    .map_err(|e| MtpError::DownloadFile(obj.filename.clone(), e))?;
+                                let path = tmp_dir.join(obj.filename);
+                                let mut bytes = Vec::with_capacity(data.bytes_received() as usize);
+                                while let Some(window) = data.next_chunk().await
+                                    && let Ok(rec_bytes) = window
+                                {
+                                    bytes.extend_from_slice(&rec_bytes);
+                                }
+                                fs::write(&path, bytes).map_err(|e| {
+                                    MtpError::WriteData(path.display().to_string(), e)
+                                })?;
+                                result.push(path);
+                            }
+                            let _ = device.close().await;
+
+                            info!("Files downloaded");
+                            Ok(result)
                         }
-                        fs::write(&path, bytes)
-                            .map_err(|e| MtpError::WriteData(path.display().to_string(), e))?;
-                        result.push(path);
                     }
+                } else {
                     let _ = device.close().await;
-
-                    Ok(result)
+                    Err(MtpError::NoStorageDevice(serial.to_string()))
                 }
             } else {
+                let _ = device.close().await;
                 Err(MtpError::NoStorageDevice(serial.to_string()))
             }
         } else {

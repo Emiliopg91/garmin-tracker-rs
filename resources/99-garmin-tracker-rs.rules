@@ -1,0 +1,2 @@
+SUBSYSTEM=="usb", ATTR{idVendor}=="091e",  MODE="0666"
+SUBSYSTEM=="usb", ATTR{idVendor}=="091e", ENV{ID_MTP_DEVICE}="0"
