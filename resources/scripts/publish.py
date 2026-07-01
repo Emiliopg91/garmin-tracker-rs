@@ -1,6 +1,8 @@
 import json
+import requests
 import subprocess
 import sys
+import time
 
 from commons import SET_VERSION_SCRIPT, PACKAGE_JSON_PATH, CARGO_TOML_FILE, PROJ_DIR, SRC_DIR, SRC_TAURI_SRC_DIR
 
@@ -49,3 +51,21 @@ if __name__ == "__main__":
 
     subprocess.check_call(["git", "commit", "-am", f"[release] {version}"])
     subprocess.check_call(["git", "push"])
+
+    print("Waiting for github release to be published...")
+    URL = f"https://api.github.com/repos/Emiliopg91/garmin-tracker-rs/releases/tags/{version}"
+    while True:
+        try:
+            r = requests.get(
+                URL,
+                timeout=3,
+            )
+
+            if r.status_code == 200:
+                print(f"✅ {version} published!")
+                break
+
+        except requests.RequestException as e:
+            continue
+
+        time.sleep(3)  # comprobar cada 30 segundos
