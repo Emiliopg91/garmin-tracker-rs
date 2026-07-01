@@ -4,16 +4,8 @@ import re
 import shutil
 import subprocess
 import yaml
-from pathlib import Path
 
-PROJ_DIR = Path(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
-PACKAGE_JSON_PATH = PROJ_DIR / "package.json"
-PKGBUILD_PATH = PROJ_DIR / "resources" / "PKGBUILD"
-DIST_DIR = PROJ_DIR / "dist"
-PKGBUILD_DIST_PATH = PROJ_DIR / "dist" / "PKGBUILD"
-CHANGELOG_MD_FILE = PROJ_DIR / "dist" /  "changelog.md"
-CURRENT_VERSIONS_FILE = PROJ_DIR / "resources" / "versions" / "current.yaml"
-PREVIOUS_VERSIONS_FILE = PROJ_DIR / "resources" / "versions" / "previous.yaml"
+from commons import DIST_DIR, PACKAGE_JSON_PATH, PKGBUILD_PATH, PKGBUILD_DIST_PATH, PREVIOUS_VERSIONS_FILE, CURRENT_VERSIONS_FILE, CHANGELOG_MD_FILE
 
 
 def generate_srcinfo():

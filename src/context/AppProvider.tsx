@@ -50,10 +50,10 @@ export function AppProvider({
       },
     );
 
-    BackendClient.getEnvironment().then((env)=>{
+    BackendClient.getEnvironment().then((env) => {
       setEnvironment(env);
 
-      if(env==AppEnvironment.Release) {
+      if (env == AppEnvironment.Release) {
         document.addEventListener("contextmenu", (e) => {
           e.preventDefault();
         });
@@ -81,7 +81,7 @@ export function AppProvider({
         availableDevices,
         appReady,
         availableUpdate,
-        environment
+        environment,
       }}
     >
       {children}

@@ -5,17 +5,10 @@ Requiere: pacman-contrib (para pactree)
 Calcula el conjunto mínimo de paquetes pacman necesarios como
 dependencia de un binario, a partir de sus librerías compartidas (ldd).
 """
-import os
 import subprocess
 from concurrent.futures import ThreadPoolExecutor
-from pathlib import Path
 
-ROOT_DIR = Path(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
-BIN_FILE = ROOT_DIR / "src-tauri" / "target" / "release" / "garmin-tracker-rs"
-
-# Entorno con LANG=C para salidas consistentes, sin perder PATH y demás.
-ENV_C = {**os.environ, "LANG": "C"}
-
+from commons import BIN_FILE, ENV_C
 
 def get_direct_deps(package: str) -> set[str]:
     """

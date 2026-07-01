@@ -1,9 +1,9 @@
 // eslint.config.js
 
-import js from '@eslint/js';
-import reactPlugin from 'eslint-plugin-react';
-import reactJsxRuntime from 'eslint-plugin-react/configs/jsx-runtime.js';
-import tseslint from 'typescript-eslint';
+import js from "@eslint/js";
+import reactPlugin from "eslint-plugin-react";
+import reactJsxRuntime from "eslint-plugin-react/configs/jsx-runtime.js";
+import tseslint from "typescript-eslint";
 
 export default tseslint.config(
   js.configs.recommended,
@@ -13,40 +13,39 @@ export default tseslint.config(
   reactPlugin.configs.flat.recommended,
   reactJsxRuntime,
 
-
   {
     settings: {
       react: {
-        version: 'detect'
-      }
+        version: "detect",
+      },
     },
 
     rules: {
-      '@typescript-eslint/no-empty-function': [
-        'error',
+      "@typescript-eslint/no-empty-function": [
+        "error",
         {
-          allow: ['private-constructors']
-        }
+          allow: ["private-constructors"],
+        },
       ],
 
-      '@typescript-eslint/no-unused-vars': 'warn',
+      "@typescript-eslint/no-unused-vars": "warn",
 
-      semi: 'error',
+      semi: "error",
 
-      'no-global-assign': 'off',
+      "no-global-assign": "off",
 
-      'prefer-const': 'warn',
+      "prefer-const": "warn",
 
-      'sort-imports': [
-        'off',
+      "sort-imports": [
+        "off",
         {
           ignoreCase: false,
           ignoreDeclarationSort: true,
           ignoreMemberSort: false,
-          memberSyntaxSortOrder: ['none', 'all', 'multiple', 'single'],
-          allowSeparatedGroups: true
-        }
-      ]
-    }
-  }
+          memberSyntaxSortOrder: ["none", "all", "multiple", "single"],
+          allowSeparatedGroups: true,
+        },
+      ],
+    },
+  },
 );

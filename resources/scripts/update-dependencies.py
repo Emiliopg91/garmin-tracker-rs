@@ -1,24 +1,15 @@
 import json
-import os
 import subprocess
 import toml
 import yaml
 
-from pathlib import Path
-
-ROOT_DIR = Path(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
-PACKAGE_JSON_FILE = ROOT_DIR / "package.json"
-PNPM_LOCK_FILE = ROOT_DIR / "pnpm-lock.yaml"
-SRC_TAURI_DIR = ROOT_DIR / "src-tauri"
-CARGO_LOCK_FILE = SRC_TAURI_DIR / "Cargo.lock"
-CARGO_TOML_FILE = SRC_TAURI_DIR / "Cargo.toml"
-CURRENT_VERSIONS_FILE = ROOT_DIR / "resources" / "versions" / "current.yaml"
+from commons import SRC_TAURI_FILE, PACKAGE_JSON_PATH, PNPM_LOCK_FILE, CARGO_TOML_FILE, CURRENT_VERSIONS_FILE, CARGO_LOCK_FILE
 
 subprocess.run(["pnpm", "update"], check=True)
-subprocess.run(["cargo", "update"], check=True, cwd=SRC_TAURI_DIR)
+subprocess.run(["cargo", "update"], check=True, cwd=SRC_TAURI_FILE)
 
 node_packages = {}
-with open(PACKAGE_JSON_FILE, "r", encoding="utf-8") as f:
+with open(PACKAGE_JSON_PATH, "r", encoding="utf-8") as f:
     package_json = json.load(f)
 with open(PNPM_LOCK_FILE, "r", encoding="utf-8") as f:
     content = yaml.safe_load(f)

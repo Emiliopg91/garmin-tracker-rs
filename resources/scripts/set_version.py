@@ -1,17 +1,12 @@
-import os
 import re
 import json
 import sys
 import subprocess
-from pathlib import Path
 
-PROJ_DIR = Path(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
-PACKAGE_JSON_FILE = PROJ_DIR / "package.json"
-CARGO_TOML_FILE = PROJ_DIR / "src-tauri" / "Cargo.toml"
-TAURI_CONF_FILE = PROJ_DIR / "src-tauri" / "tauri.conf.json"
+from commons import PACKAGE_JSON_PATH, TAURI_CONF_FILE, CARGO_TOML_FILE
 
 def get_current_version():
-    with open(PACKAGE_JSON_FILE, "r",encoding="utf-8") as f:
+    with open(PACKAGE_JSON_PATH, "r",encoding="utf-8") as f:
         pkg_json_content = json.load(f)
     return pkg_json_content["version"]
 
@@ -64,6 +59,6 @@ if __name__ == "__main__":
     version_re_json = re.compile(r'^(\s*"version"\s*:\s*")[^"]*(".*)$')
     version_re_toml = re.compile(r'^(\s*version\s*=\s*")[^"]*(".*)$')
 
-    replace_version(PACKAGE_JSON_FILE, version_re_json, new_version)
+    replace_version(PACKAGE_JSON_PATH, version_re_json, new_version)
     replace_version(CARGO_TOML_FILE, version_re_toml, new_version)
     replace_version(TAURI_CONF_FILE, version_re_json, new_version)

@@ -25,7 +25,7 @@ const defaultValue: AppContexType = {
   },
   availableDevices: [],
   availableUpdate: undefined,
-  environment: AppEnvironment.Release
+  environment: AppEnvironment.Release,
 };
 
 export const AppContext = createContext(defaultValue);
