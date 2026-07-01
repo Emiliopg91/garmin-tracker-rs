@@ -1,15 +1,15 @@
 node:
-  "@eslint/js": 9.39.4
-  "@tauri-apps/api": 2.11.1
-  "@tauri-apps/cli": 2.11.4
-  "@tauri-apps/plugin-dialog": 2.7.1
-  "@tauri-apps/plugin-http": 2.5.9
-  "@tauri-apps/plugin-log": 2.8.0
-  "@tauri-apps/plugin-notification": 2.3.3
-  "@tauri-apps/plugin-opener": 2.5.4
-  "@types/react": 19.2.17
-  "@types/react-dom": 19.2.3
-  "@vitejs/plugin-react": 4.7.0
+  '@eslint/js': 9.39.4
+  '@tauri-apps/api': 2.11.1
+  '@tauri-apps/cli': 2.11.4
+  '@tauri-apps/plugin-dialog': 2.7.1
+  '@tauri-apps/plugin-http': 2.5.9
+  '@tauri-apps/plugin-log': 2.8.0
+  '@tauri-apps/plugin-notification': 2.3.3
+  '@tauri-apps/plugin-opener': 2.5.4
+  '@types/react': 19.2.17
+  '@types/react-dom': 19.2.3
+  '@vitejs/plugin-react': 4.7.0
   bootstrap: 5.3.8
   eslint: 9.39.4
   eslint-plugin-react: 7.37.5
@@ -18,7 +18,7 @@ node:
   react-bootstrap: 2.10.10
   react-datepicker: 9.1.0
   react-dom: 19.2.7
-  recharts: 3.9.0
+  recharts: 3.9.1
   typescript: 5.8.3
   typescript-eslint: 8.62.1
   vite: 7.3.6
@@ -34,7 +34,7 @@ rust:
   serde: 1.0.228
   serde_json: 1.0.150
   serde_yaml: 0.9.34+deprecated
-  tauri: 2.11.4
+  tauri: 2.11.5
   tauri-build: 2.6.3
   tauri-plugin-dialog: 2.7.1
   tauri-plugin-http: 2.5.9
