@@ -22,6 +22,7 @@ PNPM_LOCK_FILE = PROJ_DIR / "pnpm-lock.yaml"
 # --- Resources ---
 RESOURCES_DIR = PROJ_DIR / "resources"
 PKGBUILD_PATH = RESOURCES_DIR / "PKGBUILD"
+INSTALL_PATH = RESOURCES_DIR / "garmin-tracker-rs.sh"
 
 SCRIPTS_DIR = RESOURCES_DIR / "scripts"
 SET_VERSION_SCRIPT = SCRIPTS_DIR / "set_version.py"
@@ -33,6 +34,7 @@ PREVIOUS_VERSIONS_FILE = VERSIONS_DIR / "previous.yaml"
 # --- Dist ---
 DIST_DIR = PROJ_DIR / "dist"
 PKGBUILD_DIST_PATH = DIST_DIR / "PKGBUILD"
+INSTALL_DIST_FILE = DIST_DIR / "garmin-tracker-rs.install"
 CHANGELOG_MD_FILE = DIST_DIR / "changelog.md"
 
 # --- Environment ---

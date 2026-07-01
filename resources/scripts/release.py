@@ -5,7 +5,12 @@ import shutil
 import subprocess
 import yaml
 
-from commons import DIST_DIR, PACKAGE_JSON_PATH, PKGBUILD_PATH, PKGBUILD_DIST_PATH, PREVIOUS_VERSIONS_FILE, CURRENT_VERSIONS_FILE, CHANGELOG_MD_FILE
+from commons import DIST_DIR, PACKAGE_JSON_PATH, PKGBUILD_PATH, PKGBUILD_DIST_PATH, PREVIOUS_VERSIONS_FILE, CURRENT_VERSIONS_FILE, CHANGELOG_MD_FILE, INSTALL_DIST_FILE, INSTALL_PATH
+
+
+def generate_install():
+    print("Generating install file...")
+    shutil.copy2(INSTALL_PATH, INSTALL_DIST_FILE)
 
 
 def generate_srcinfo():
@@ -184,6 +189,7 @@ def generate_changelog():
 if __name__ == "__main__":
     create_dist_dir()
     generate_pkgbuild()
+    generate_install()
     generate_srcinfo()
     generate_changelog()
     print("Release finished")

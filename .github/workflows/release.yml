@@ -92,8 +92,9 @@ jobs:
 
           cp ../dist/PKGBUILD .
           cp ../dist/.SRCINFO .
+          cp ../dist/garmin-tracker-rs.install .
 
-          git add PKGBUILD .SRCINFO 
+          git add PKGBUILD .SRCINFO garmin-tracker-rs.install
 
           if ! git diff --cached --quiet; then
             git commit -m "Release ${VERSION}-1"

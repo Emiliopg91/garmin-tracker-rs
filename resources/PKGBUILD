@@ -28,6 +28,8 @@ makedepends=(
   'python-yaml'
 )
 
+install=${pkgname}.install
+
 build() {
   cd "$srcdir/${pkgname}"
   make build
