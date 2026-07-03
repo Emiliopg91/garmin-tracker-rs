@@ -1,14 +1,14 @@
 node:
-  "@eslint/js": 9.39.4
-  "@tauri-apps/api": 2.11.1
-  "@tauri-apps/cli": 2.11.4
-  "@tauri-apps/plugin-dialog": 2.7.1
-  "@tauri-apps/plugin-log": 2.8.0
-  "@tauri-apps/plugin-notification": 2.3.3
-  "@tauri-apps/plugin-opener": 2.5.4
-  "@types/react": 19.2.17
-  "@types/react-dom": 19.2.3
-  "@vitejs/plugin-react": 4.7.0
+  '@eslint/js': 9.39.4
+  '@tauri-apps/api': 2.11.1
+  '@tauri-apps/cli': 2.11.4
+  '@tauri-apps/plugin-dialog': 2.7.1
+  '@tauri-apps/plugin-log': 2.8.0
+  '@tauri-apps/plugin-notification': 2.3.3
+  '@tauri-apps/plugin-opener': 2.5.4
+  '@types/react': 19.2.17
+  '@types/react-dom': 19.2.3
+  '@vitejs/plugin-react': 4.7.0
   bootstrap: 5.3.8
   eslint: 9.39.4
   eslint-plugin-react: 7.37.5
@@ -39,7 +39,7 @@ rust:
   tauri-plugin-log: 2.8.0
   tauri-plugin-notification: 2.3.3
   tauri-plugin-opener: 2.5.4
-  tauri-rs-ts-ipc: 0.1.11
+  tauri-rs-ts-ipc: 0.1.12
   thiserror: 2.0.18
   tokio: 1.52.3
   ureq: 3.3.0
