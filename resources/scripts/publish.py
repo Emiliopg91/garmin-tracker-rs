@@ -4,7 +4,7 @@ import subprocess
 import sys
 import time
 
-from commons import SET_VERSION_SCRIPT, PACKAGE_JSON_PATH, CARGO_TOML_FILE, PROJ_DIR, SRC_DIR, SRC_TAURI_SRC_DIR
+from commons import SET_VERSION_SCRIPT, PACKAGE_JSON_PATH, CARGO_TOML_FILE, PROJ_DIR, SRC_DIR, SRC_TAURI_SRC_DIR, PKGBUILD_PATH
 from extract_dependencies import do_extract
 
 if __name__ == "__main__":
@@ -42,3 +42,15 @@ if __name__ == "__main__":
         subprocess.check_call(["git", "commit", "-am", "[chore] Check and format before release"])
 
     dependencies = do_extract()
+    with open(PKGBUILD_PATH, "r", encoding="utf-8") as f:
+        lines = f.readline()
+    for idx,line in enumerate(lines):
+        if line.startswith("depends=("):
+            deps_str = ""
+            for dep in dependencies:
+                deps_str = deps_str + f"'{dep}' "
+            if deps_str.endswith(" "):
+                deps_str = deps_str[0:-1]
+            lines[idx] = f"depends=({deps_str})"
+    with open(PKGBUILD_PATH, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines))
