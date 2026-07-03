@@ -43,7 +43,7 @@ if __name__ == "__main__":
 
     dependencies = do_extract()
     with open(PKGBUILD_PATH, "r", encoding="utf-8") as f:
-        lines = f.readline()
+        lines = f.readlines()
     for idx,line in enumerate(lines):
         if line.startswith("depends=("):
             deps_str = ""
