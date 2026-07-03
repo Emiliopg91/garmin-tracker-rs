@@ -11,7 +11,7 @@ export class BackendClient {
 	}
 	
 
-	// From src-tauri/src/ui/app/mod.rs:33
+	// From src-tauri/src/ui/app/mod.rs:32
 	public static getEnvironment(): Promise<AppEnvironment> {
 	  return BackendClient.inner_invoke("get_environment"); 
 	}
@@ -71,13 +71,13 @@ export class BackendClient {
 	}
 	
 
-	// From src-tauri/src/ui/app/mod.rs:21
+	// From src-tauri/src/ui/app/mod.rs:20
 	public static notifyFrontendReady(): Promise<void> {
 	  return BackendClient.inner_invoke("notify_frontend_ready"); 
 	}
 	
 
-	// From src-tauri/src/ui/app/mod.rs:116
+	// From src-tauri/src/ui/app/mod.rs:115
 	public static openVersionChangelog(version: string): Promise<void> {
 	  return BackendClient.inner_invoke("open_version_changelog", { version }); 
 	}

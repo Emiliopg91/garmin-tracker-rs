@@ -14,7 +14,6 @@ use crate::{
         notifications::{models::NotificationDefinition, show_notification},
     },
 };
-use tauri_plugin_http::reqwest;
 use tauri_plugin_log::log::{debug, error, info};
 
 #[tauri::command]
@@ -49,8 +48,8 @@ async fn update_watcher(app: AppHandle) {
             let current_version = Version::parse(constants::APP_VERSION.as_str()).unwrap();
             debug!("Looking for updates...");
 
-            match reqwest::get(constants::AUR_RPC_URL.clone()).await {
-                Ok(response) => match response.text().await {
+            match ureq::get(constants::AUR_RPC_URL.clone()).call() {
+                Ok(response) => match response.into_body().read_to_string() {
                     Ok(response_body) => {
                         match serde_json::from_str::<HashMap<String, Value>>(&response_body) {
                             Ok(parsed_response) => {
