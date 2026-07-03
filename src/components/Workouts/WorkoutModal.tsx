@@ -37,7 +37,6 @@ export function WorkoutModal({ workout, onClose }: Props) {
     });
     setMinVol(Math.min(...volumes));
     setMaxVol(Math.max(...volumes));
-    console.table(data);
   }, []);
 
   return (

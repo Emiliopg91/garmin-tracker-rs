@@ -4,17 +4,38 @@ use std::{collections::HashMap, process::Command, time::Duration};
 
 use semver::Version;
 use serde_json::Value;
-use tauri::{AppHandle, Emitter};
+use tauri::{AppHandle, Emitter, WebviewWindow};
 
 use crate::{
     constants,
     ui::{
-        app::models::AppEnvironment,
+        app::models::{AppEnvironment, LogLevel},
         devices::start_device_watcher,
         notifications::{models::NotificationDefinition, show_notification},
     },
 };
-use tauri_plugin_log::log::{debug, error, info};
+use tauri_plugin_log::log::{debug, error, info, warn};
+
+/// @dont_log
+#[tauri::command]
+pub fn log_from_frontend(webview_window: WebviewWindow, level: LogLevel, message: &str) {
+    let target_string = format!("frontend::{}", webview_window.label());
+    let target_str = target_string.as_str();
+    match level {
+        LogLevel::Debug => {
+            debug!(target: target_str, "{}", message)
+        }
+        LogLevel::Info => {
+            info!(target: target_str, "{}", message)
+        }
+        LogLevel::Warn => {
+            warn!(target: target_str, "{}", message)
+        }
+        LogLevel::Error => {
+            error!(target: target_str, "{}", message)
+        }
+    }
+}
 
 #[tauri::command]
 pub async fn notify_frontend_ready(app: AppHandle) -> Result<(), String> {

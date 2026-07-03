@@ -10,7 +10,7 @@ use tauri_plugin_log::{
 use crate::{
     garmin::database::DATABASE_INST,
     ui::{
-        app::{get_environment, notify_frontend_ready, open_version_changelog},
+        app::{get_environment, log_from_frontend, notify_frontend_ready, open_version_changelog},
         exercises::{get_exercise_details, get_exercises},
         sessions::{
             get_session_details, get_sessions, import_from_device, import_from_file,
@@ -32,6 +32,7 @@ pub fn run() {
             tauri_plugin_log::Builder::new()
                 .level(LevelFilter::Warn)
                 .level_for(constants::LIB_NAME.clone(), *constants::LOG_LEVEL)
+                .level_for("frontend", *constants::LOG_LEVEL)
                 .target(Target::new(TargetKind::Folder {
                     path: constants::LOGS_DIR.clone(),
                     file_name: None,
@@ -122,7 +123,8 @@ pub fn run() {
             get_user_measures,
             add_user_measures,
             open_version_changelog,
-            get_environment
+            get_environment,
+            log_from_frontend
         ])
         .run(tauri::generate_context!());
 

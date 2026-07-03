@@ -87,7 +87,6 @@ export function UserList() {
           setMaxFat(lMaxFat);
           setMinFat(lMinFat);
         });
-        console.table(newChartData);
         setChartData(newChartData);
       })
       .finally(() => {

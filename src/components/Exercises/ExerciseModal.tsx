@@ -39,7 +39,6 @@ export function ExerciseModal({ exercise, onClose }: Props) {
       });
     });
     data.sort((a, b) => a.id - b.id);
-    console.table(data);
     setChartData(data);
 
     const volumes = data.map(({ volume }) => {

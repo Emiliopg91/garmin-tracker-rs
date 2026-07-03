@@ -37,6 +37,14 @@ export interface ExerciseListItem {
   weight: number;
 }
 
+// From src-tauri/src/ui/app/models.rs:10
+export enum LogLevel {
+	Debug = "Debug",
+	Info = "Info",
+	Warn = "Warn",
+	Error = "Error",
+}
+
 // From src-tauri/src/ui/sessions/models.rs:59
 export interface SessionDetails {
   active_time: string;

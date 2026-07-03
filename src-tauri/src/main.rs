@@ -16,7 +16,9 @@ fn main() {
     }
 
     #[cfg(debug_assertions)]
-    tauri_rs_ts_ipc::build();
+    if std::env::var("IN_DEBUG").is_err() {
+        tauri_rs_ts_ipc::build();
+    }
 
     garmin_tracker_rs_lib::run();
 }

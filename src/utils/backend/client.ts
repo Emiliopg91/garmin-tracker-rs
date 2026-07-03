@@ -2,16 +2,19 @@
 
 import { invoke, InvokeArgs } from "@tauri-apps/api/core";
 
-import { AppEnvironment, ExerciseDetails, ExerciseListItem, SessionDetails, SessionListItem, SessionSeriesUpdate, UserListItem, WorkoutDetails, WorkoutListItem } from "./models";
+import { AppEnvironment, ExerciseDetails, ExerciseListItem, LogLevel, SessionDetails, SessionListItem, SessionSeriesUpdate, UserListItem, WorkoutDetails, WorkoutListItem } from "./models";
 
 export class BackendClient {
+
+    private static DONT_LOG_COMMANDS: string[] = ["log_from_frontend"];
+
 	// From src-tauri/src/ui/user/mod.rs:43
 	public static addUserMeasures(measures: UserListItem): Promise<void> {
 	  return BackendClient.inner_invoke("add_user_measures", { measures }); 
 	}
 	
 
-	// From src-tauri/src/ui/app/mod.rs:32
+	// From src-tauri/src/ui/app/mod.rs:53
 	public static getEnvironment(): Promise<AppEnvironment> {
 	  return BackendClient.inner_invoke("get_environment"); 
 	}
@@ -71,13 +74,19 @@ export class BackendClient {
 	}
 	
 
-	// From src-tauri/src/ui/app/mod.rs:20
+	// From src-tauri/src/ui/app/mod.rs:21
+	public static logFromFrontend(level: LogLevel, message: string): Promise<void> {
+	  return BackendClient.inner_invoke("log_from_frontend", { level, message }); 
+	}
+	
+
+	// From src-tauri/src/ui/app/mod.rs:41
 	public static notifyFrontendReady(): Promise<void> {
 	  return BackendClient.inner_invoke("notify_frontend_ready"); 
 	}
 	
 
-	// From src-tauri/src/ui/app/mod.rs:115
+	// From src-tauri/src/ui/app/mod.rs:136
 	public static openVersionChangelog(version: string): Promise<void> {
 	  return BackendClient.inner_invoke("open_version_changelog", { version }); 
 	}
@@ -89,7 +98,24 @@ export class BackendClient {
 	}
 	
 
+  
 	private static inner_invoke<R>(method: string, payload?: InvokeArgs): Promise<R> {
-		return invoke(method, payload);
+		return new Promise<R>((resolve,reject)=>{
+			const do_log = !BackendClient.DONT_LOG_COMMANDS.includes(method);
+			if(do_log) {
+				console.debug("Invoking command '"+method+"', payload: ", payload);
+			}
+			invoke<R>(method, payload).then((response)=>{
+				if(do_log) {
+					console.debug("Finished command '"+method+"', response: ", response);
+				}
+				resolve(response);
+			}).catch((err) =>{
+				if(do_log) {
+					console.debug("Failed command '"+method+"', reason: ", err);
+				}
+				reject(err);
+			});
+		});
 	}
 }

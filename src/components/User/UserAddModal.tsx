@@ -44,7 +44,6 @@ export function UserAddModal({ latest, onClose }: Props) {
     e: string | Date,
     prop: K,
   ) => {
-    console.log(prop + " -> " + e);
     if (prop != "date") {
       if (typeof e !== "string") return;
       if (!/^[0-9]*[,.]?[0-9]*$/.test(e)) return;
