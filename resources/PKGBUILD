@@ -15,7 +15,7 @@ sha256sums=(
   'SKIP'
 )
 
-depends=()
+depends=('webkit2gtk-4.1' 'zlib-ng-compat')
 makedepends=(
   'rust'
   'mold'
