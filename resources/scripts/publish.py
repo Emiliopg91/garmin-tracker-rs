@@ -53,4 +53,4 @@ if __name__ == "__main__":
                 deps_str = deps_str[0:-1]
             lines[idx] = f"depends=({deps_str})"
     with open(PKGBUILD_PATH, "w", encoding="utf-8") as f:
-        f.write("\n".join(lines))
+        f.write("".join(lines))
