@@ -35,8 +35,7 @@ dirs = "^6"
 mtp-rs = "^0"
 tauri-plugin-notification = "2"
 tauri-plugin-log = "2"
-#tauri-rs-ts-ipc = { version = "^0" }
-tauri-rs-ts-ipc = { path = "../../syn-test" }
+tauri-rs-ts-ipc = { version = "^0" }
 serde_yaml = "^0"
 semver = "^1"
 tauri-plugin-http = "2"
