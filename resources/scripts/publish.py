@@ -12,6 +12,10 @@ if __name__ == "__main__":
         print("ERROR: Releases are only allowed in main branch")
         sys.exit(1)
 
+    if len(subprocess.check_output(["git", "status", "--porcelain"], text=True).strip().splitlines()) > 0:
+        print("ERROR: The repository has uncommited changes")
+        sys.exit(1)
+
     todos = {}
     for file in [*SRC_TAURI_SRC_DIR.rglob("*.rs"), *SRC_DIR.rglob("*.ts"), *SRC_DIR.rglob("*.tsx")]:
         with open(file, "r", encoding="utf-8") as f:
@@ -36,7 +40,7 @@ if __name__ == "__main__":
     subprocess.check_call(["pnpm", "prettier", "--write", SRC_DIR])
     subprocess.check_call(["cargo", "fmt"], cwd=SRC_TAURI_SRC_DIR)
 
-    #subprocess.check_call(["make", "clean", "build"])
+    subprocess.check_call(["make", "clean", "build"])
 
     if len(subprocess.check_output(["git", "status", "--porcelain"], text=True).strip().splitlines()) > 0:
         subprocess.check_call(["git", "commit", "-am", "[chore] Check and format before release"])
@@ -54,3 +58,34 @@ if __name__ == "__main__":
             lines[idx] = f"depends=({deps_str})\n"
     with open(PKGBUILD_PATH, "w", encoding="utf-8") as f:
         f.write("".join(lines))
+
+    if len(subprocess.check_output(["git", "status", "--porcelain"], text=True).strip().splitlines()) > 0:
+        subprocess.check_call(["git", "commit", "-am", "[chore] Update PKGBUILD"])
+
+    subprocess.check_call(["python", SET_VERSION_SCRIPT])
+
+    with open(PACKAGE_JSON_PATH, "r", encoding="utf-8") as f:
+        version = json.load(f)["version"]
+
+    subprocess.check_call(["git", "commit", "-am", f"[release] {version}"])
+    subprocess.check_call(["git", "push"])
+
+    print("Waiting for github release to be published...")
+    URL = f"https://api.github.com/repos/Emiliopg91/garmin-tracker-rs/releases/tags/{version}"
+    while True:
+        try:
+            r = requests.get(
+                URL,
+                timeout=3,
+            )
+
+            if r.status_code == 200:
+                print(f"✅ {version} published!")
+                break
+
+        except requests.RequestException as e:
+            continue
+
+        time.sleep(3)  # comprobar cada 30 segundos
+
+    subprocess.check_call(["git", "pull"])
