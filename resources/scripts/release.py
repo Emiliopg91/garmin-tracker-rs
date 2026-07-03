@@ -138,14 +138,14 @@ def generate_changelog():
         diff_versions[cat]={}
         for p in current_versions[cat].keys():
             if p not in previous_versions[cat]:
-                diff_versions[cat][p] = (None,current_versions[cat])
+                diff_versions[cat][p] = (None,current_versions[cat][p])
             elif previous_versions[cat][p]!=current_versions[cat][p]:
                 diff_versions[cat][p] = (previous_versions[cat][p],current_versions[cat][p])
             else:
                 diff_versions[cat][p] = (current_versions[cat][p],current_versions[cat][p])
         for p in previous_versions[cat].keys():
             if p not in current_versions[cat]:
-                diff_versions[cat][p] = (current_versions[cat],None)
+                diff_versions[cat][p] = (previous_versions[cat][p],None)
 
     lines.append("<hr/>")
 
