@@ -1,6 +1,5 @@
 use std::process::exit;
 
-use chrono::{Datelike, Local, Timelike};
 use tauri::Manager;
 use tauri_plugin_log::{
     Target, TargetKind,
@@ -40,7 +39,6 @@ pub fn run() {
                 .max_file_size(constants::LOG_FILE_MAX_SIZE)
                 .rotation_strategy(constants::LOG_FILE_ROTATION_STRATEGY)
                 .format(|out, message, record| {
-                    let time = Local::now();
                     let mut target = record.target();
                     target = if target.len() > 30 {
                         &target[target.len() - 30..]
@@ -49,14 +47,8 @@ pub fn run() {
                     };
 
                     out.finish(format_args!(
-                        "[{:04}-{:02}-{:02} {:02}:{:02}:{:02}.{:03}][{:<30}][{:<5.5}] {}",
-                        time.year(),
-                        time.month(),
-                        time.day(),
-                        time.hour(),
-                        time.minute(),
-                        time.second(),
-                        time.timestamp_subsec_millis(),
+                        "[{}][{:<30}][{:<5.5}] {}",
+                        chrono::Local::now().format("%Y-%m-%d %H:%M:%S%.3f"),
                         target,
                         record.level().to_string(),
                         message

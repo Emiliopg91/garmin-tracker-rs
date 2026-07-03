@@ -27,9 +27,7 @@ for (const level of levels) {
     BackendClient.logFromFrontend(
       backendLevel[level],
       args
-        .map((arg) =>
-          typeof arg === "string" ? arg : JSON.stringify(arg, null, 2),
-        )
+        .map((arg) => (typeof arg === "string" ? arg : JSON.stringify(arg)))
         .join(" "),
     );
   };
