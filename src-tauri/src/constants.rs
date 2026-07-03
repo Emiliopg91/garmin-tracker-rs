@@ -5,6 +5,8 @@ use tauri_plugin_log::{RotationStrategy, log::LevelFilter};
 // App block
 pub static APP_NAME: LazyLock<String> = LazyLock::new(|| env!("CARGO_PKG_NAME").to_string());
 pub static APP_VERSION: LazyLock<String> = LazyLock::new(|| env!("CARGO_PKG_VERSION").to_string());
+pub static LIB_NAME: LazyLock<String> =
+    LazyLock::new(|| format!("{}_lib", APP_NAME.replace("-", "_")));
 
 // AUR block
 pub static AUR_RPC_URL: LazyLock<String> = LazyLock::new(|| {
