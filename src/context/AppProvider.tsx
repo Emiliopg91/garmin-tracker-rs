@@ -50,19 +50,21 @@ export function AppProvider({
       },
     );
 
-    BackendClient.getEnvironment().then((env) => {
-      setEnvironment(env);
+    BackendClient.getEnvironment()
+      .then((env) => {
+        setEnvironment(env);
 
-      if (env == AppEnvironment.Release) {
-        document.addEventListener("contextmenu", (e) => {
-          e.preventDefault();
+        if (env == AppEnvironment.Release) {
+          document.addEventListener("contextmenu", (e) => {
+            e.preventDefault();
+          });
+        }
+      })
+      .finally(() => {
+        BackendClient.notifyFrontendReady().then(() => {
+          setAppReady(true);
         });
-      }
-    });
-
-    BackendClient.notifyFrontendReady().then(() => {
-      setAppReady(true);
-    });
+      });
 
     return () => {
       unregisterConnection();

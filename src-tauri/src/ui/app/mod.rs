@@ -1,10 +1,15 @@
 pub mod models;
 
-use std::{collections::HashMap, process::Command, time::Duration};
+use std::{
+    collections::HashMap,
+    process::Command,
+    sync::{LazyLock, Mutex},
+    time::Duration,
+};
 
 use semver::Version;
 use serde_json::Value;
-use tauri::{AppHandle, Emitter, WebviewWindow};
+use tauri::{AppHandle, Emitter, WebviewWindow, async_runtime::JoinHandle};
 
 use crate::{
     constants,
@@ -15,6 +20,8 @@ use crate::{
     },
 };
 use tauri_plugin_log::log::{debug, error, info, warn};
+
+static UPDATE_WATCHER: LazyLock<Mutex<Option<JoinHandle<()>>>> = LazyLock::new(|| Mutex::new(None));
 
 /// @dont_log
 #[tauri::command]
@@ -41,8 +48,8 @@ pub fn log_from_frontend(webview_window: WebviewWindow, level: LogLevel, message
 pub async fn notify_frontend_ready(app: AppHandle) -> Result<(), String> {
     info!("UI ready");
 
-    start_device_watcher(app.clone()).await?;
     update_watcher(app.clone()).await;
+    start_device_watcher(app.clone()).await?;
 
     tokio::time::sleep(Duration::from_millis(100)).await;
     info!("Full application ready");
@@ -63,73 +70,85 @@ pub async fn get_environment() -> AppEnvironment {
 }
 
 async fn update_watcher(app: AppHandle) {
-    tauri::async_runtime::spawn(async move {
-        tokio::time::sleep(Duration::from_secs(1)).await;
-        loop {
-            let current_version = Version::parse(constants::APP_VERSION.as_str()).unwrap();
-            debug!("Looking for updates...");
+    let mut watcher = UPDATE_WATCHER.lock().unwrap();
+    if watcher.is_some() {
+        warn!("Update watcher already running")
+    } else {
+        info!("Starting update watcher...");
+        *watcher = Some(tauri::async_runtime::spawn(async move {
+            info!("Update watcher initialized");
+            tokio::time::sleep(Duration::from_secs(1)).await;
+            loop {
+                let current_version = Version::parse(constants::APP_VERSION.as_str()).unwrap();
+                debug!("Looking for updates...");
 
-            match ureq::get(constants::AUR_RPC_URL.clone()).call() {
-                Ok(response) => match response.into_body().read_to_string() {
-                    Ok(response_body) => {
-                        match serde_json::from_str::<HashMap<String, Value>>(&response_body) {
-                            Ok(parsed_response) => {
-                                if let Some(Value::Array(results)) = parsed_response.get("results")
-                                    && let Some(Value::Object(result)) = results.first()
-                                {
-                                    if let Some(Value::String(version)) = result.get("Version") {
-                                        let version = version.split("-").next().unwrap();
+                match ureq::get(constants::AUR_RPC_URL.clone()).call() {
+                    Ok(response) => match response.into_body().read_to_string() {
+                        Ok(response_body) => {
+                            match serde_json::from_str::<HashMap<String, Value>>(&response_body) {
+                                Ok(parsed_response) => {
+                                    if let Some(Value::Array(results)) =
+                                        parsed_response.get("results")
+                                        && let Some(Value::Object(result)) = results.first()
+                                    {
+                                        if let Some(Value::String(version)) = result.get("Version")
+                                        {
+                                            let version = version.split("-").next().unwrap();
 
-                                        match Version::parse(version) {
-                                            Ok(latest_version) => {
-                                                debug!("Latest version: {}", latest_version);
-                                                if latest_version > current_version {
-                                                    info!("New update found: {}", latest_version);
-                                                    let _ = show_notification(
-                                                        app.clone(),
-                                                        NotificationDefinition {
-                                                            title: "New update available"
-                                                                .to_string(),
-                                                            body: format!(
-                                                                "v{} available, update the application to get latests features and improvements",
-                                                                version
-                                                            ),
-                                                        },
-                                                    );
-                                                    let version: String = version.to_string();
-                                                    let _ = app.emit_str(
-                                                        "update_available",
-                                                        format!("\"{}\"", version),
-                                                    );
-                                                    break;
+                                            match Version::parse(version) {
+                                                Ok(latest_version) => {
+                                                    debug!("Latest version: {}", latest_version);
+                                                    if latest_version > current_version {
+                                                        info!(
+                                                            "New update found: {}",
+                                                            latest_version
+                                                        );
+                                                        let _ = show_notification(
+                                                            app.clone(),
+                                                            NotificationDefinition {
+                                                                title: "New update available"
+                                                                    .to_string(),
+                                                                body: format!(
+                                                                    "v{} available, update the application to get latests features and improvements",
+                                                                    version
+                                                                ),
+                                                            },
+                                                        );
+                                                        let version: String = version.to_string();
+                                                        let _ = app.emit_str(
+                                                            "update_available",
+                                                            format!("\"{}\"", version),
+                                                        );
+                                                        break;
+                                                    }
+                                                }
+                                                Err(e) => {
+                                                    debug!("Error parsing version from AUR: {}", e)
                                                 }
                                             }
-                                            Err(e) => {
-                                                debug!("Error parsing version from AUR: {}", e)
-                                            }
+                                        } else {
+                                            debug!("No version found from AUR RPC")
                                         }
                                     } else {
-                                        debug!("No version found from AUR RPC")
+                                        debug!("No results found from AUR RPC")
                                     }
-                                } else {
-                                    debug!("No results found from AUR RPC")
+                                }
+                                Err(e) => {
+                                    debug!("Error parsing response from AUR: {}", e)
                                 }
                             }
-                            Err(e) => {
-                                debug!("Error parsing response from AUR: {}", e)
-                            }
                         }
+                        Err(e) => debug!("{}", e),
+                    },
+                    Err(e) => {
+                        debug!("{}", e)
                     }
-                    Err(e) => debug!("{}", e),
-                },
-                Err(e) => {
-                    debug!("{}", e)
                 }
+                debug!("No updates found");
+                tokio::time::sleep(Duration::from_hours(1)).await;
             }
-            debug!("No updates found");
-            tokio::time::sleep(Duration::from_hours(1)).await;
-        }
-    });
+        }));
+    }
 }
 
 #[tauri::command]
