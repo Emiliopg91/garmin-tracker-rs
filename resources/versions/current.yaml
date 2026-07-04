@@ -24,6 +24,7 @@ node:
   vite-plugin-checker: 0.14.4
 rust:
   chrono: 0.4.45
+  clap: 4.6.1
   dirs: 6.0.0
   fitparser: 0.11.0
   indexmap: 2.14.0
