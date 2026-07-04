@@ -2,8 +2,8 @@
 
 // From src-tauri/src/ui/app/models.rs:4
 export enum AppEnvironment {
-	Debug = "Debug",
-	Release = "Release",
+  Debug = "Debug",
+  Release = "Release",
 }
 
 // From src-tauri/src/ui/devices/models.rs:5
@@ -39,10 +39,10 @@ export interface ExerciseListItem {
 
 // From src-tauri/src/ui/app/models.rs:10
 export enum LogLevel {
-	Debug = "Debug",
-	Info = "Info",
-	Warn = "Warn",
-	Error = "Error",
+  Debug = "Debug",
+  Info = "Info",
+  Warn = "Warn",
+  Error = "Error",
 }
 
 // From src-tauri/src/ui/sessions/models.rs:59
@@ -117,4 +117,3 @@ export interface WorkoutSession {
   vol_diff: string;
   volume: number;
 }
-
