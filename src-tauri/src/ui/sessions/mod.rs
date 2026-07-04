@@ -290,8 +290,8 @@ where
                 for file in files {
                     info!("Importing file {}", file.as_ref().display());
                     match load_from_file(file.as_ref()) {
-                        Ok(opt_session) => match opt_session {
-                            Some(mut session) => {
+                        Ok(opt_session) => {
+                            if let Some(mut session) = opt_session {
                                 if let Err(e) = session.insert(tx) {
                                     failed += 1;
                                     error!("Error persisting session: {}", e);
@@ -299,8 +299,7 @@ where
                                     success += 1;
                                 }
                             }
-                            None => {}
-                        },
+                        }
                         Err(e) => {
                             failed += 1;
                             error!("Error parsing session: {}", e);
