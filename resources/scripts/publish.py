@@ -101,6 +101,7 @@ if __name__ == "__main__":
                 response = r.json()
                 if response["results"][0]["Version"].startswith(f"{version}-1"):
                     print(f"✅ {version} published!")
+                    break
 
         except requests.RequestException as e:
             continue
