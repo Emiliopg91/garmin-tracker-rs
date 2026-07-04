@@ -10,16 +10,16 @@ struct Cli {
     #[arg(short, long)]
     verbose: bool,
 
-    /// Force usage of X11
+    /// Force usage of Wayland
     #[arg(short, long)]
-    x11: bool,
+    wayland: bool,
 }
 
 fn main() {
     let cli = Cli::parse();
 
     unsafe {
-        if cli.x11 {
+        if !cli.wayland {
             std::env::set_var("GDK_BACKEND", "x11");
         }
         std::env::set_var("LOGGER_LEVEL", if cli.verbose { "Debug" } else { "" });
