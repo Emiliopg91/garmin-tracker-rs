@@ -86,6 +86,25 @@ if __name__ == "__main__":
         except requests.RequestException as e:
             continue
 
-        time.sleep(3)  # comprobar cada 30 segundos
+        time.sleep(3)
+
+    print("Waiting for AUR to be published...")
+    URL = "https://aur.archlinux.org/rpc/?v=5&type=info&arg=garmin-tracker-rs"
+    while True:
+        try:
+            r = requests.get(
+                URL,
+                timeout=3,
+            )
+
+            if r.status_code == 200:
+                response = r.json()
+                if response["results"][0]["Version"].startswith(f"{version}-1"):
+                    print(f"✅ {version} published!")
+
+        except requests.RequestException as e:
+            continue
+
+        time.sleep(3)
 
     subprocess.check_call(["git", "pull"])
