@@ -1,5 +1,5 @@
 run:
-	@mold --run pnpm tauri dev 
+	@mold --run pnpm tauri dev -- -- -v
 
 build:
 	@mold --run pnpm tauri build

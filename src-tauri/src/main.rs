@@ -1,18 +1,28 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+use clap::Parser;
+
+#[derive(Parser, Debug)]
+#[command()]
+struct Cli {
+    /// Enable verbose mode to log extended information
+    #[arg(short, long)]
+    verbose: bool,
+
+    /// Force usage of X11
+    #[arg(short, long)]
+    x11: bool,
+}
+
 fn main() {
-    let mut level = "";
-    if std::env::args()
-        .collect::<Vec<String>>()
-        .contains(&"--verbose".to_string())
-    {
-        level = "Debug"
-    }
+    let cli = Cli::parse();
 
     unsafe {
-        std::env::set_var("GDK_BACKEND", "x11");
-        std::env::set_var("LOGGER_LEVEL", level);
+        if cli.x11 {
+            std::env::set_var("GDK_BACKEND", "x11");
+        }
+        std::env::set_var("LOGGER_LEVEL", if cli.verbose { "Debug" } else { "" });
     }
 
     #[cfg(debug_assertions)]

@@ -40,6 +40,7 @@ tauri-rs-ts-ipc = { version = ">=0" }
 serde_yaml = ">=0"
 semver = ">=1"
 ureq = { version = ">=3", features = ["json"] }
+clap = { version = "4.6.1", features = ["derive"] }
 
 
 [profile.release]

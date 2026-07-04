@@ -43,9 +43,6 @@ pub static LOGS_DIR: LazyLock<PathBuf> = LazyLock::new(|| {
     dir
 });
 pub static LOG_LEVEL: LazyLock<LevelFilter> = LazyLock::new(|| {
-    #[cfg(debug_assertions)]
-    let mut level = LevelFilter::Debug;
-    #[cfg(not(debug_assertions))]
     let mut level = LevelFilter::Info;
 
     if let Ok(level_var) = std::env::var("LOGGER_LEVEL")
