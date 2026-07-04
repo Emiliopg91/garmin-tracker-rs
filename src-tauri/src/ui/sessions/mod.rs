@@ -290,14 +290,17 @@ where
                 for file in files {
                     info!("Importing file {}", file.as_ref().display());
                     match load_from_file(file.as_ref()) {
-                        Ok(mut session) => {
-                            if let Err(e) = session.insert(tx) {
-                                failed += 1;
-                                error!("Error persisting session: {}", e);
-                            } else {
-                                success += 1;
+                        Ok(opt_session) => match opt_session {
+                            Some(mut session) => {
+                                if let Err(e) = session.insert(tx) {
+                                    failed += 1;
+                                    error!("Error persisting session: {}", e);
+                                } else {
+                                    success += 1;
+                                }
                             }
-                        }
+                            None => {}
+                        },
                         Err(e) => {
                             failed += 1;
                             error!("Error parsing session: {}", e);

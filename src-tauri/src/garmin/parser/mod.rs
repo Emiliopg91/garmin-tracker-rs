@@ -3,6 +3,7 @@ use std::{fs::File, path::Path};
 use chrono::{DateTime, Local};
 use fitparser::{FitDataField, FitDataRecord, Value, profile};
 use indexmap::IndexMap;
+use tauri_plugin_log::log::warn;
 
 use self::errors::ParseFitFileError;
 
@@ -11,7 +12,7 @@ use super::database::dao::{exercise::Exercise, serie::Serie, session::Session};
 pub mod errors;
 
 #[allow(clippy::field_reassign_with_default)]
-pub(crate) fn load_from_file<P>(path: P) -> errors::Result<Session>
+pub(crate) fn load_from_file<P>(path: P) -> errors::Result<Option<Session>>
 where
     P: AsRef<Path>,
 {
@@ -71,7 +72,7 @@ where
                             get_u8("max_heart_rate", session_entry.fields()).unwrap_or(0);
                         let series = get_sets(&entries, &timestamp)?;
 
-                        Ok(Session {
+                        Ok(Some(Session {
                             workout,
                             timestamp,
                             total_elapsed_time,
@@ -81,12 +82,13 @@ where
                             avg_heart_rate,
                             max_heart_rate,
                             series,
-                        })
+                        }))
                     }
                     Err(e) => Err(e),
                 }
             } else {
-                Err(ParseFitFileError::OnlyStrengthTraining())
+                warn!("{}", ParseFitFileError::OnlyStrengthTraining());
+                Ok(None)
             }
         } else {
             Err(ParseFitFileError::MissingField("sub_sport".to_string()))
