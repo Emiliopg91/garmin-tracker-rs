@@ -85,7 +85,7 @@ pub fn run() {
             debug!("Showing up main window...");
             if let Some(window) = app.get_webview_window("main") {
                 std::thread::spawn(move || {
-                    std::thread::sleep(std::time::Duration::from_millis(200));
+                    std::thread::sleep(tokio::time::Duration::from_millis(200));
                     let _ = window.set_title(&format!(
                         "{} v{}",
                         window.title().unwrap(),
