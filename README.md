@@ -64,6 +64,10 @@ Other useful commands (see the `Makefile`):
 ## Project structure
 
 ```
+resources/
+  ddl/                    Versioned SQL schema migrations
+  scripts/                Python helper scripts (release/versioning/dependency management)
+  PKGBUILD, *.rules       Linux packaging assets
 src/                    React + TypeScript frontend
 src-tauri/               Rust backend (Tauri application)
   src/garmin/
@@ -72,10 +76,6 @@ src-tauri/               Rust backend (Tauri application)
     parser/               .FIT file parsing
   src/ui/                 Tauri commands exposed to the frontend (app, devices, exercises,
                           notifications, sessions, user, workouts)
-resources/
-  ddl/                    Versioned SQL schema migrations
-  scripts/                Python helper scripts (release/versioning/dependency management)
-  PKGBUILD, *.rules       Linux packaging assets
 ```
 
 ## License
