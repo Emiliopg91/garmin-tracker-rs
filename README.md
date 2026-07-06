@@ -1,5 +1,7 @@
 # Garmin Tracker
 
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Emiliopg91/garmin-tracker-rs)
+
 **Sync your Garmin devices and track your strength training — all in one desktop app.**
 
 Garmin Tracker is a cross-platform desktop application built with [Tauri](https://tauri.app/), combining a Rust backend with a React + TypeScript frontend. It connects to Garmin watches over USB (MTP), imports your activity `.FIT` files, and stores your sessions, exercises, and body measurements in a local SQLite database — no cloud account required.
