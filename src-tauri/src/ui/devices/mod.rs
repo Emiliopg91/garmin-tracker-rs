@@ -21,7 +21,7 @@ use crate::{
 
 static DEVICE_WATCHER: LazyLock<Mutex<Option<JoinHandle<()>>>> = LazyLock::new(|| Mutex::new(None));
 
-pub async fn start_device_watcher(app: AppHandle) -> Result<(), String> {
+pub async fn start_device_watcher(app: AppHandle) {
     let mut watcher = DEVICE_WATCHER.lock().unwrap();
     if watcher.is_some() {
         warn!("Device monitor already running")
@@ -93,6 +93,4 @@ pub async fn start_device_watcher(app: AppHandle) -> Result<(), String> {
             }
         }));
     }
-
-    Ok(())
 }

@@ -48,15 +48,14 @@ pub fn log_from_frontend(webview_window: WebviewWindow, level: LogLevel, message
 }
 
 #[tauri::command]
-pub async fn notify_frontend_ready(app: AppHandle) -> Result<(), String> {
+pub async fn notify_frontend_ready(app: AppHandle) {
     info!("UI ready");
 
     update_watcher(app.clone()).await;
-    start_device_watcher(app.clone()).await?;
+    start_device_watcher(app.clone()).await;
 
     tokio::time::sleep(Duration::from_millis(100)).await;
     info!("Full application ready");
-    Ok(())
 }
 
 #[tauri::command]
@@ -169,7 +168,7 @@ pub fn open_version_changelog(version: &str) -> Result<(), String> {
             Ok(())
         }
         Err(e) => {
-            error!("Error on URL opening request: {}", e);
+            error!("Error opening URL: {}", e);
             Err(e)
         }
     }
