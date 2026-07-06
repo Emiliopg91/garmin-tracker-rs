@@ -224,7 +224,7 @@ pub async fn import_from_device(serial: &str) -> Result<u16, String> {
         .await
         .map_err(|e| e.to_string())?;
 
-    if activities.len() > 0 {
+    if !activities.is_empty() {
         info!("Fetched {} activity files", activities.len());
 
         match import_file_list(&activities) {
