@@ -104,36 +104,6 @@ impl Session {
         })
     }
 
-    pub fn find_latest() -> Result<Option<Session>> {
-        let opt_sess = {
-            let mut db = DATABASE_INST.lock().unwrap();
-            let conn = db.get_connection()?;
-
-            let result = conn.query_row(
-                &format!(
-                    "SELECT {} FROM SESSION ORDER BY DATE DESC LIMIT 1",
-                    Self::FIELD_LIST
-                ),
-                [],
-                Self::map_from_row,
-            );
-
-            match result {
-                Ok(session) => Some(session),
-                Err(rusqlite::Error::QueryReturnedNoRows) => None,
-                Err(e) => return Err(DatabaseError::Select(e)),
-            }
-        };
-
-        Ok(match opt_sess {
-            Some(mut session) => {
-                session.series = Serie::load_for_session(session.timestamp)?;
-                Some(session)
-            }
-            None => None,
-        })
-    }
-
     pub fn find_by_workout(workout: &str) -> Result<Vec<Session>> {
         let mut res = Vec::new();
 

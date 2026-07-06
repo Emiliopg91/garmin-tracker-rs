@@ -7,7 +7,7 @@ use std::{
 };
 
 use mtp_rs::{MtpDevice, ObjectInfo};
-use tauri_plugin_log::log::info;
+use tauri_plugin_log::log::{debug, info};
 use tokio::sync::Mutex;
 
 use crate::{
@@ -69,7 +69,7 @@ impl MtpClient {
                 serial
             );
 
-            info!("Entering into GARMIN folder...");
+            debug!("Entering into GARMIN folder...");
             let storage = &device.storages().await.map_err(MtpError::Storage)?[0];
             if let Some(garmin_folder) = storage
                 .list_objects(None)
@@ -78,7 +78,7 @@ impl MtpClient {
                 .iter()
                 .find(|oi| oi.filename == "GARMIN")
             {
-                info!("Entering into GARMIN/Activity folder...");
+                debug!("Entering into GARMIN/Activity folder...");
                 if let Some(activity_folder) = storage
                     .list_objects(Some(garmin_folder.handle))
                     .await

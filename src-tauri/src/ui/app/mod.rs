@@ -16,7 +16,10 @@ use crate::{
     ui::{
         app::models::{AppEnvironment, LogLevel},
         devices::start_device_watcher,
-        notifications::{models::NotificationDefinition, show_notification},
+        notifications::{
+            models::{NotificationDefinition, NotificationKind},
+            show_notification,
+        },
     },
 };
 use tauri_plugin_log::log::{debug, error, info, warn};
@@ -103,17 +106,15 @@ async fn update_watcher(app: AppHandle) {
                                                             "New update found: {}",
                                                             latest_version
                                                         );
-                                                        let _ = show_notification(
-                                                            app.clone(),
-                                                            NotificationDefinition {
-                                                                title: "New update available"
-                                                                    .to_string(),
-                                                                body: format!(
-                                                                    "v{} available, update the application to get latests features and improvements",
-                                                                    version
-                                                                ),
-                                                            },
-                                                        );
+                                                        show_notification(NotificationDefinition {
+                                                            title: "New update available"
+                                                                .to_string(),
+                                                            body: format!(
+                                                                "v{} available, update the application to get latests features and improvements",
+                                                                version
+                                                            ),
+                                                            kind: NotificationKind::Temporal,
+                                                        });
                                                         let version: String = version.to_string();
                                                         let _ = app.emit_str(
                                                             "update_available",

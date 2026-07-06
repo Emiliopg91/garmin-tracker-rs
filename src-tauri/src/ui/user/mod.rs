@@ -1,10 +1,12 @@
-use tauri::AppHandle;
 use tauri_plugin_log::log::{error, info};
 
 use crate::{
     garmin::database::dao::user::User,
     ui::{
-        notifications::{models::NotificationDefinition, show_notification},
+        notifications::{
+            models::{NotificationDefinition, NotificationKind},
+            show_notification,
+        },
         user::models::UserListItem,
     },
 };
@@ -12,7 +14,7 @@ use crate::{
 pub mod models;
 
 #[tauri::command]
-pub fn get_user_measures(app: AppHandle) -> Result<Vec<UserListItem>, String> {
+pub fn get_user_measures() -> Result<Vec<UserListItem>, String> {
     info!("Getting user measures list...");
 
     match User::select_all().map_err(|e| e.to_string()) {
@@ -27,20 +29,18 @@ pub fn get_user_measures(app: AppHandle) -> Result<Vec<UserListItem>, String> {
         }
         Err(e) => {
             error!("Error getting measures list: {}", e);
-            let _ = show_notification(
-                app,
-                NotificationDefinition {
-                    title: "Error getting measures list".to_string(),
-                    body: e.clone(),
-                },
-            );
+            show_notification(NotificationDefinition {
+                title: "Error getting measures list".to_string(),
+                body: e.clone(),
+                kind: NotificationKind::Persistant,
+            });
             Err(e)
         }
     }
 }
 
 #[tauri::command]
-pub fn add_user_measures(app: AppHandle, measures: UserListItem) -> Result<(), String> {
+pub fn add_user_measures(measures: UserListItem) -> Result<(), String> {
     info!("Adding user measures list...");
     dbg!(&measures);
 
@@ -56,13 +56,11 @@ pub fn add_user_measures(app: AppHandle, measures: UserListItem) -> Result<(), S
         }
         Err(e) => {
             error!("Error adding measures: {}", e);
-            let _ = show_notification(
-                app,
-                NotificationDefinition {
-                    title: "Error adding measures".to_string(),
-                    body: e.clone(),
-                },
-            );
+            show_notification(NotificationDefinition {
+                title: "Error adding measures".to_string(),
+                body: e.clone(),
+                kind: NotificationKind::Persistant,
+            });
             Err(e)
         }
     }

@@ -2,19 +2,21 @@ pub mod models;
 
 use std::collections::HashMap;
 
-use tauri::AppHandle;
 use tauri_plugin_log::log::{error, info};
 
 use crate::{
     garmin::database::dao::session::Session,
     ui::{
-        notifications::{models::NotificationDefinition, show_notification},
+        notifications::{
+            models::{NotificationDefinition, NotificationKind},
+            show_notification,
+        },
         workouts::models::{WorkoutDetails, WorkoutListItem, WorkoutSession},
     },
 };
 
 #[tauri::command]
-pub fn get_workout_list(app: AppHandle) -> Result<Vec<WorkoutListItem>, String> {
+pub fn get_workout_list() -> Result<Vec<WorkoutListItem>, String> {
     info!("Getting workouts list...");
     let res: Result<Vec<WorkoutListItem>, String> = {
         let sessions = Session::load_from_db(false).map_err(|e| e.to_string())?;
@@ -61,20 +63,18 @@ pub fn get_workout_list(app: AppHandle) -> Result<Vec<WorkoutListItem>, String> 
         }
         Err(e) => {
             error!("Error getting workouts list: {}", e);
-            let _ = show_notification(
-                app,
-                NotificationDefinition {
-                    title: "Error getting workouts list".to_string(),
-                    body: e.to_string(),
-                },
-            );
+            show_notification(NotificationDefinition {
+                title: "Error getting workouts list".to_string(),
+                body: e.to_string(),
+                kind: NotificationKind::Persistant,
+            });
             Err(e)
         }
     }
 }
 
 #[tauri::command]
-pub fn get_workout_details(app: AppHandle, name: &str) -> Result<WorkoutDetails, String> {
+pub fn get_workout_details(name: &str) -> Result<WorkoutDetails, String> {
     let res: Result<WorkoutDetails, String> = {
         info!("Getting details for workout {}", name);
         let sessions = Session::find_by_workout(name).map_err(|e| e.to_string())?;
@@ -124,13 +124,11 @@ pub fn get_workout_details(app: AppHandle, name: &str) -> Result<WorkoutDetails,
         }
         Err(e) => {
             error!("Error getting workout details: {}", e);
-            let _ = show_notification(
-                app,
-                NotificationDefinition {
-                    title: "Error getting workout details".to_string(),
-                    body: e.clone(),
-                },
-            );
+            show_notification(NotificationDefinition {
+                title: "Error getting workout details".to_string(),
+                body: e.clone(),
+                kind: NotificationKind::Persistant,
+            });
             Err(e)
         }
     }

@@ -4,7 +4,7 @@ use std::{
     sync::mpsc,
 };
 
-use chrono::{Datelike, Local, TimeZone, Timelike};
+use chrono::{DateTime, Datelike, Local, TimeZone, Timelike};
 use tauri::AppHandle;
 use tauri_plugin_dialog::DialogExt;
 use tauri_plugin_log::log::{error, info};
@@ -13,19 +13,22 @@ use crate::{
     garmin::{
         database::{
             DATABASE_INST,
-            dao::{exercise::Exercise, serie::Serie, session::Session},
+            dao::{device::Device, exercise::Exercise, serie::Serie, session::Session},
         },
         mtp::MTP_CLIENT_INST,
         parser::load_from_file,
     },
     ui::{
-        notifications::{models::NotificationDefinition, show_notification},
+        notifications::{
+            models::{NotificationDefinition, NotificationKind},
+            show_notification,
+        },
         sessions::models::{SessionDetails, SessionListItem, SessionSerie, SessionSeriesUpdate},
     },
 };
 
 #[tauri::command]
-pub fn get_sessions(app: AppHandle) -> Result<Vec<SessionListItem>, String> {
+pub fn get_sessions() -> Result<Vec<SessionListItem>, String> {
     info!("Getting sessions list...");
     let res: Result<Vec<SessionListItem>, String> = {
         let sessions = Session::load_from_db(true).map_err(|e| e.to_string())?;
@@ -43,20 +46,18 @@ pub fn get_sessions(app: AppHandle) -> Result<Vec<SessionListItem>, String> {
         }
         Err(e) => {
             error!("Error getting sessions list: {}", e);
-            let _ = show_notification(
-                app,
-                NotificationDefinition {
-                    title: "Error getting sessions list".to_string(),
-                    body: e.clone(),
-                },
-            );
+            show_notification(NotificationDefinition {
+                title: "Error getting sessions list".to_string(),
+                body: e.clone(),
+                kind: NotificationKind::Persistant,
+            });
             Err(e)
         }
     }
 }
 
 #[tauri::command]
-pub fn get_session_details(app: AppHandle, timestamp: i64) -> Result<SessionDetails, String> {
+pub fn get_session_details(timestamp: i64) -> Result<SessionDetails, String> {
     info!(
         "Getting details for session {}",
         Local.timestamp_opt(timestamp, 0).unwrap().to_rfc3339()
@@ -88,20 +89,18 @@ pub fn get_session_details(app: AppHandle, timestamp: i64) -> Result<SessionDeta
         }
         Err(e) => {
             error!("Error getting session details: {}", e);
-            let _ = show_notification(
-                app,
-                NotificationDefinition {
-                    title: "Error getting session details".to_string(),
-                    body: e.clone(),
-                },
-            );
+            show_notification(NotificationDefinition {
+                title: "Error getting session details".to_string(),
+                body: e.clone(),
+                kind: NotificationKind::Persistant,
+            });
             Err(e)
         }
     }
 }
 
 #[tauri::command]
-pub fn save_session_changes(app: AppHandle, details: SessionSeriesUpdate) -> Result<(), String> {
+pub fn save_session_changes(details: SessionSeriesUpdate) -> Result<(), String> {
     info!(
         "Saving changes on session {}...",
         Local
@@ -140,25 +139,21 @@ pub fn save_session_changes(app: AppHandle, details: SessionSeriesUpdate) -> Res
     match res {
         Ok(l) => {
             info!("Session updated succesfully");
-            let _ = show_notification(
-                app,
-                NotificationDefinition {
-                    title: "Session updated succesfully".to_string(),
-                    body: "".to_string(),
-                },
-            );
+            show_notification(NotificationDefinition {
+                title: "Session updated succesfully".to_string(),
+                body: "".to_string(),
+                kind: NotificationKind::Temporal,
+            });
 
             Ok(l)
         }
         Err(e) => {
             error!("Error updating session: {}", e);
-            let _ = show_notification(
-                app,
-                NotificationDefinition {
-                    title: "Error updating session".to_string(),
-                    body: e.clone(),
-                },
-            );
+            show_notification(NotificationDefinition {
+                title: "Error updating session".to_string(),
+                body: e.clone(),
+                kind: NotificationKind::Persistant,
+            });
             Err(e)
         }
     }
@@ -190,51 +185,31 @@ pub async fn import_from_file(app: AppHandle) -> Result<u16, String> {
         }
         Err(_) => {
             info!("No file was selected");
-            Ok((0, 0))
+            Ok((0, None))
         }
     };
 
     match res {
-        Ok(l) => {
-            info!("Import finished: {} success, {} failed", l.0, l.1);
-            let _ = show_notification(
-                app,
-                NotificationDefinition {
-                    title: "Import succesful".to_string(),
-                    body: format!("Import finished: {} success, {} failed", l.0, l.1),
-                },
-            );
-
-            Ok(l.0)
-        }
-        Err(e) => {
-            error!("Error on sessions import: {}", e);
-            let _ = show_notification(
-                app,
-                NotificationDefinition {
-                    title: "Error on sessions import".to_string(),
-                    body: e.to_string(),
-                },
-            );
-            Err(e)
-        }
+        Ok((inserted, _)) => Ok(inserted),
+        Err(e) => Err(e),
     }
 }
 
 #[tauri::command]
-pub async fn import_from_device(app: AppHandle, serial: &str) -> Result<u16, String> {
+pub async fn import_from_device(serial: &str) -> Result<u16, String> {
     info!("Starting import from device with S/N {}", serial);
-    let latest = Session::find_latest().map_err(|e| e.to_string())?;
     let mut latest_date = "2026-06-08-00-00-00".to_string();
-    if let Some(latest) = latest {
+    if let Ok(Some(device)) = Device::find_by_id(serial)
+        && let Some(latest) = device.last_sync
+    {
         latest_date = format!(
             "{:04}-{:02}-{:02}-{:02}-{:02}-{:02}",
-            latest.timestamp.year(),
-            latest.timestamp.month(),
-            latest.timestamp.day(),
-            latest.timestamp.hour(),
-            latest.timestamp.minute(),
-            latest.timestamp.second(),
+            latest.year(),
+            latest.month(),
+            latest.day(),
+            latest.hour(),
+            latest.minute(),
+            latest.second(),
         );
     }
 
@@ -248,61 +223,88 @@ pub async fn import_from_device(app: AppHandle, serial: &str) -> Result<u16, Str
         .download_activities_since(serial, latest_date)
         .await
         .map_err(|e| e.to_string())?;
-    info!("Fetched {} activity files", activities.len());
 
-    match import_file_list(&activities) {
-        Ok(l) => {
-            info!("Import finished: {} success, {} failed", l.0, l.1);
-            let _ = show_notification(
-                app,
-                NotificationDefinition {
-                    title: "Import succesful".to_string(),
-                    body: format!("Import finished: {} success, {} failed", l.0, l.1),
-                },
-            );
+    if activities.len() > 0 {
+        info!("Fetched {} activity files", activities.len());
 
-            Ok(l.0)
+        match import_file_list(&activities) {
+            Ok((inserted, latest)) => {
+                let mut new_latest = Local::now();
+                if let Some(latest) = latest {
+                    new_latest = latest;
+                }
+                let _ = Device::update_latest_sync(serial, new_latest);
+                Ok(inserted)
+            }
+            Err(e) => Err(e),
         }
-        Err(e) => {
-            error!("Error on sessions import: {}", e);
-            let _ = show_notification(
-                app,
-                NotificationDefinition {
-                    title: "Error on sessions import".to_string(),
-                    body: e.to_string(),
-                },
-            );
-            Err(e)
-        }
+    } else {
+        Ok(0)
     }
 }
 
-fn import_file_list<F>(files: &[F]) -> Result<(u16, u16), String>
+fn import_file_list<F>(files: &[F]) -> Result<(u16, Option<DateTime<Local>>), String>
 where
     F: AsRef<Path>,
 {
     let mut success = 0_u16;
-    let mut failed = 0_u16;
 
+    let mut latest: Option<DateTime<Local>> = None;
     for file in files {
         info!("Importing file {}", file.as_ref().display());
-        match load_from_file(file.as_ref()) {
-            Ok(opt_session) => {
-                if let Some(mut session) = opt_session {
+        let res = match load_from_file(file.as_ref()) {
+            Ok(mut session) => {
+                let found = Session::find_by_id(session.timestamp.timestamp(), false)
+                    .map(|opt| opt.is_some())
+                    .unwrap_or(false);
+
+                if !found {
                     if let Err(e) = session.insert() {
-                        failed += 1;
-                        error!("Error persisting session: {}", e);
+                        Err(format!("Error persisting session: {}", e))
                     } else {
                         success += 1;
+                        latest = if let Some(latest_v) = latest {
+                            if session.timestamp.timestamp() > latest_v.timestamp() {
+                                Some(session.timestamp)
+                            } else {
+                                latest
+                            }
+                        } else {
+                            Some(session.timestamp)
+                        };
+                        Ok("Session imported succesfully".to_string())
                     }
+                } else {
+                    Err(format!(
+                        "Session with date {} already exists",
+                        session.format_date()
+                    ))
                 }
             }
+            Err(e) => Err(format!("Error parsing session: {}", e)),
+        };
+
+        match res {
+            Ok(msg) => {
+                info!("  {}", msg);
+
+                show_notification(NotificationDefinition {
+                    title: format!("{}", file.as_ref().file_name().unwrap().display()),
+                    body: msg,
+                    kind: NotificationKind::Temporal,
+                });
+            }
             Err(e) => {
-                failed += 1;
-                error!("Error parsing session: {}", e);
+                error!("  {}", e);
+
+                show_notification(NotificationDefinition {
+                    title: format!("{}", file.as_ref().file_name().unwrap().display()),
+                    body: e,
+                    kind: NotificationKind::Persistant,
+                });
             }
         }
     }
 
-    Ok((success, failed))
+    Ok((success, latest))
 }

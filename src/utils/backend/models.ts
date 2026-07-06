@@ -6,7 +6,7 @@ export enum AppEnvironment {
 	Release = "Release",
 }
 
-// From src-tauri/src/ui/devices/models.rs:5
+// From src-tauri/src/ui/devices/models.rs:7
 export interface DeviceListItem {
   manufacturer: string;
   model: string;
@@ -43,6 +43,12 @@ export enum LogLevel {
 	Info = "Info",
 	Warn = "Warn",
 	Error = "Error",
+}
+
+// From src-tauri/src/ui/notifications/models.rs:4
+export enum NotificationKind {
+	Temporal = "Temporal",
+	Persistant = "Persistant",
 }
 
 // From src-tauri/src/ui/sessions/models.rs:59

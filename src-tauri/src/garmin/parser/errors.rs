@@ -10,7 +10,7 @@ pub enum ParseFitFileError {
     MissingField(String),
     #[error("Invalid {0} field format: expected {1}")]
     InvalidFieldValue(String, String),
-    #[error("Only strength training supported")]
+    #[error("Only strength training is supported")]
     OnlyStrengthTraining(),
     #[error("{0}")]
     GenericError(String),

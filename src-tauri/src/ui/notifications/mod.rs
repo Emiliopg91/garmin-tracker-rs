@@ -1,25 +1,38 @@
 pub mod models;
 
-use tauri::AppHandle;
+use std::process::Command;
+
 use tauri_plugin_log::log::error;
-use tauri_plugin_notification::NotificationExt;
 
-use crate::{constants::ICON_PATH, ui::notifications::models::NotificationDefinition};
+use crate::{
+    constants::{APP_TITLE, ICON_PATH},
+    ui::notifications::models::NotificationDefinition,
+};
 
-pub fn show_notification(
-    app: AppHandle,
-    notification: NotificationDefinition,
-) -> Result<(), String> {
-    app.notification()
-        .builder()
-        .title(&notification.title)
-        .body(&notification.body)
-        .icon(ICON_PATH.as_str())
-        .show()
-        .map_err(|e| {
-            error!("Could not send notification: {}", e);
-            e.to_string()
-        })?;
+pub fn show_notification(notification: NotificationDefinition) {
+    let icon_param = &format!("--icon={}", *ICON_PATH);
+    let expire_param = &format!("--expire-time={}", notification.kind.get_timeout());
+    let app_name_param = &format!("--app-name={}", APP_TITLE);
 
-    Ok(())
+    let args = vec![
+        notification.title.as_str(),
+        notification.body.as_str(),
+        icon_param,
+        expire_param,
+        app_name_param,
+    ];
+
+    match Command::new("notify-send").args(args).status() {
+        Ok(status) => {
+            if !status.success() {
+                error!(
+                    "Error while showing notification, exit code: {:?}",
+                    status.code()
+                );
+            }
+        }
+        Err(e) => {
+            error!("Error while showing notification: {}", e);
+        }
+    }
 }

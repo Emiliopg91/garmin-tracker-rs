@@ -71,6 +71,10 @@ impl Database {
                 "Adding user profile table",
                 include_str!("../../../../resources/ddl/002_user_profile.sql"),
             ),
+            (
+                "Adding device table",
+                include_str!("../../../../resources/ddl/003_devices.sql"),
+            ),
         ];
 
         self.run_in_transaction(|tx| {

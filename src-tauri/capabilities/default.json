@@ -9,7 +9,6 @@
     "core:default",
     "opener:default",
     "dialog:default",
-    "notification:default",
     "log:default"
   ]
 }

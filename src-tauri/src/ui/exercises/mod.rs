@@ -1,19 +1,21 @@
 pub mod models;
 
-use tauri::AppHandle;
 use tauri_plugin_log::log::{error, info};
 
 use crate::{
     garmin::database::dao::{exercise::Exercise, serie::Serie, session::Session},
     ui::{
         exercises::models::{ExerciseDetails, ExerciseListItem},
-        notifications::{models::NotificationDefinition, show_notification},
+        notifications::{
+            models::{NotificationDefinition, NotificationKind},
+            show_notification,
+        },
         sessions::models::SessionSerie,
     },
 };
 
 #[tauri::command]
-pub fn get_exercises(app: AppHandle) -> Result<Vec<ExerciseListItem>, String> {
+pub fn get_exercises() -> Result<Vec<ExerciseListItem>, String> {
     info!("Getting exercises list...");
     let res: Result<Vec<ExerciseListItem>, String> = {
         let mut result = Vec::new();
@@ -42,24 +44,18 @@ pub fn get_exercises(app: AppHandle) -> Result<Vec<ExerciseListItem>, String> {
         }
         Err(e) => {
             error!("Error getting exercises list: {}", e);
-            let _ = show_notification(
-                app,
-                NotificationDefinition {
-                    title: "Error getting exercises list".to_string(),
-                    body: e.to_string(),
-                },
-            );
+            show_notification(NotificationDefinition {
+                title: "Error getting exercises list".to_string(),
+                body: e.to_string(),
+                kind: NotificationKind::Persistant,
+            });
             Err(e)
         }
     }
 }
 
 #[tauri::command]
-pub fn get_exercise_details(
-    app: AppHandle,
-    category: &str,
-    id: i16,
-) -> Result<ExerciseDetails, String> {
+pub fn get_exercise_details(category: &str, id: i16) -> Result<ExerciseDetails, String> {
     info!(
         "Getting details for exercise with category {} and id {}...",
         category, id
@@ -106,13 +102,11 @@ pub fn get_exercise_details(
         }
         Err(e) => {
             error!("Error getting session details: {}", e);
-            let _ = show_notification(
-                app,
-                NotificationDefinition {
-                    title: "Error getting session details".to_string(),
-                    body: e.to_string(),
-                },
-            );
+            show_notification(NotificationDefinition {
+                title: "Error getting session details".to_string(),
+                body: e.to_string(),
+                kind: NotificationKind::Persistant,
+            });
             Err(e)
         }
     }

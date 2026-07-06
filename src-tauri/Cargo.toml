@@ -33,7 +33,6 @@ tokio = { version = ">=1", features = ["rt-multi-thread", "macros", "time"] }
 tauri-plugin-dialog = ">=2"
 dirs = ">=6"
 mtp-rs = ">=0"
-tauri-plugin-notification = ">=2"
 tauri-plugin-log = ">=2"
 tauri-rs-ts-ipc = { version = ">=0" }
 #tauri-rs-ts-ipc = { path = "../../syn-test" }

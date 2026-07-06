@@ -9,10 +9,13 @@ use tauri::{AppHandle, Emitter, async_runtime::JoinHandle};
 use tauri_plugin_log::log::{info, warn};
 
 use crate::{
-    garmin::mtp::MTP_CLIENT_INST,
+    garmin::{database::dao::device::Device, mtp::MTP_CLIENT_INST},
     ui::{
         devices::models::DeviceListItem,
-        notifications::{models::NotificationDefinition, show_notification},
+        notifications::{
+            models::{NotificationDefinition, NotificationKind},
+            show_notification,
+        },
     },
 };
 
@@ -44,6 +47,9 @@ pub async fn start_device_watcher(app: AppHandle) -> Result<(), String> {
                         {
                             devices.push(device.clone());
 
+                            let device_dao = Device::from(device);
+                            let _ = device_dao.insert();
+
                             let payload: DeviceListItem = device.clone();
                             let _ = app.emit("device_connected", payload);
 
@@ -51,13 +57,11 @@ pub async fn start_device_watcher(app: AppHandle) -> Result<(), String> {
                                 "Connected {} {} ({})",
                                 device.manufacturer, device.model, device.serial_number
                             );
-                            let _ = show_notification(
-                                app.clone(),
-                                NotificationDefinition {
-                                    title: "Device connected".to_string(),
-                                    body: format!("{} {}", device.manufacturer, device.model),
-                                },
-                            );
+                            show_notification(NotificationDefinition {
+                                title: "Device connected".to_string(),
+                                body: format!("{} {}", device.manufacturer, device.model),
+                                kind: NotificationKind::Temporal,
+                            });
                         }
                     }
 
@@ -73,13 +77,11 @@ pub async fn start_device_watcher(app: AppHandle) -> Result<(), String> {
                                 "Disconnected {} {} ({})",
                                 device.manufacturer, device.model, device.serial_number
                             );
-                            let _ = show_notification(
-                                app.clone(),
-                                NotificationDefinition {
-                                    title: "Device disconnected".to_string(),
-                                    body: format!("{} {}", device.manufacturer, device.model),
-                                },
-                            );
+                            show_notification(NotificationDefinition {
+                                title: "Device disconnected".to_string(),
+                                body: format!("{} {}", device.manufacturer, device.model),
+                                kind: NotificationKind::Temporal,
+                            });
                         }
                     }
 

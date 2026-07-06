@@ -14,7 +14,7 @@ export class BackendClient {
 	}
 	
 
-	// From src-tauri/src/ui/app/mod.rs:60
+	// From src-tauri/src/ui/app/mod.rs:63
 	public static getEnvironment(): Promise<AppEnvironment> {
 	  return BackendClient.inner_invoke("get_environment"); 
 	}
@@ -26,25 +26,25 @@ export class BackendClient {
 	}
 	
 
-	// From src-tauri/src/ui/exercises/mod.rs:16
+	// From src-tauri/src/ui/exercises/mod.rs:18
 	public static getExercises(): Promise<ExerciseListItem[]> {
 	  return BackendClient.inner_invoke("get_exercises"); 
 	}
 	
 
-	// From src-tauri/src/ui/sessions/mod.rs:59
+	// From src-tauri/src/ui/sessions/mod.rs:60
 	public static getSessionDetails(timestamp: string): Promise<SessionDetails> {
 	  return BackendClient.inner_invoke("get_session_details", { timestamp }); 
 	}
 	
 
-	// From src-tauri/src/ui/sessions/mod.rs:28
+	// From src-tauri/src/ui/sessions/mod.rs:31
 	public static getSessions(): Promise<SessionListItem[]> {
 	  return BackendClient.inner_invoke("get_sessions"); 
 	}
 	
 
-	// From src-tauri/src/ui/user/mod.rs:15
+	// From src-tauri/src/ui/user/mod.rs:17
 	public static getUserMeasures(): Promise<UserListItem[]> {
 	  return BackendClient.inner_invoke("get_user_measures"); 
 	}
@@ -56,43 +56,43 @@ export class BackendClient {
 	}
 	
 
-	// From src-tauri/src/ui/workouts/mod.rs:17
+	// From src-tauri/src/ui/workouts/mod.rs:19
 	public static getWorkoutList(): Promise<WorkoutListItem[]> {
 	  return BackendClient.inner_invoke("get_workout_list"); 
 	}
 	
 
-	// From src-tauri/src/ui/sessions/mod.rs:225
+	// From src-tauri/src/ui/sessions/mod.rs:199
 	public static importFromDevice(serial: string): Promise<number> {
 	  return BackendClient.inner_invoke("import_from_device", { serial }); 
 	}
 	
 
-	// From src-tauri/src/ui/sessions/mod.rs:168
+	// From src-tauri/src/ui/sessions/mod.rs:163
 	public static importFromFile(): Promise<number> {
 	  return BackendClient.inner_invoke("import_from_file"); 
 	}
 	
 
-	// From src-tauri/src/ui/app/mod.rs:28
+	// From src-tauri/src/ui/app/mod.rs:31
 	public static logFromFrontend(level: LogLevel, message: string): Promise<void> {
 	  return BackendClient.inner_invoke("log_from_frontend", { level, message }); 
 	}
 	
 
-	// From src-tauri/src/ui/app/mod.rs:48
+	// From src-tauri/src/ui/app/mod.rs:51
 	public static notifyFrontendReady(): Promise<void> {
 	  return BackendClient.inner_invoke("notify_frontend_ready"); 
 	}
 	
 
-	// From src-tauri/src/ui/app/mod.rs:155
+	// From src-tauri/src/ui/app/mod.rs:156
 	public static openVersionChangelog(version: string): Promise<void> {
 	  return BackendClient.inner_invoke("open_version_changelog", { version }); 
 	}
 	
 
-	// From src-tauri/src/ui/sessions/mod.rs:104
+	// From src-tauri/src/ui/sessions/mod.rs:103
 	public static saveSessionChanges(details: SessionSeriesUpdate): Promise<void> {
 	  return BackendClient.inner_invoke("save_session_changes", { details }); 
 	}
