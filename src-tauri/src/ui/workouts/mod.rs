@@ -17,7 +17,7 @@ use crate::{
 pub fn get_workout_list(app: AppHandle) -> Result<Vec<WorkoutListItem>, String> {
     info!("Getting workouts list...");
     let res: Result<Vec<WorkoutListItem>, String> = {
-        let sessions = Session::load_from_db().map_err(|e| e.to_string())?;
+        let sessions = Session::load_from_db(false).map_err(|e| e.to_string())?;
 
         let mut count = HashMap::new();
         let mut latest = HashMap::new();

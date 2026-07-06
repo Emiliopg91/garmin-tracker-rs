@@ -34,6 +34,8 @@ impl Display for Session {
     }
 }
 impl Session {
+    const FIELD_LIST: &str = "date, workout, total_elapsed_time, active_time, total_calories, metabolic_calories, avg_heart_rate, max_heart_rate";
+
     pub fn format_date(&self) -> String {
         format!(
             "{:02}:{:02} {:02}/{:02}/{:04}",
@@ -73,13 +75,13 @@ impl Session {
         res
     }
 
-    pub fn find_by_id(timestamp: i64) -> Result<Option<Session>> {
+    pub fn find_by_id(timestamp: i64, with_series: bool) -> Result<Option<Session>> {
         let opt_sess = {
             let mut db = DATABASE_INST.lock().unwrap();
             let conn = db.get_connection()?;
 
             let result = conn.query_row(
-                "SELECT * FROM SESSION WHERE date=?",
+                &format!("SELECT {} FROM SESSION WHERE date=?", Self::FIELD_LIST),
                 [timestamp],
                 Self::map_from_row,
             );
@@ -93,7 +95,9 @@ impl Session {
 
         Ok(match opt_sess {
             Some(mut session) => {
-                session.series = Serie::load_for_session(session.timestamp)?;
+                if with_series {
+                    session.series = Serie::load_for_session(session.timestamp)?;
+                }
                 Some(session)
             }
             None => None,
@@ -106,7 +110,10 @@ impl Session {
             let conn = db.get_connection()?;
 
             let result = conn.query_row(
-                "SELECT * FROM SESSION ORDER BY DATE DESC LIMIT 1",
+                &format!(
+                    "SELECT {} FROM SESSION ORDER BY DATE DESC LIMIT 1",
+                    Self::FIELD_LIST
+                ),
                 [],
                 Self::map_from_row,
             );
@@ -135,7 +142,10 @@ impl Session {
             let conn = db.get_connection()?;
 
             let mut stmt = conn
-                .prepare("SELECT * FROM SESSION WHERE workout=? ORDER BY date DESC")
+                .prepare(&format!(
+                    "SELECT {} FROM SESSION WHERE workout=? ORDER BY date DESC",
+                    Self::FIELD_LIST
+                ))
                 .map_err(DatabaseError::Select)?;
 
             let rows = stmt
@@ -156,7 +166,7 @@ impl Session {
         Ok(res)
     }
 
-    pub fn load_from_db() -> Result<Vec<Session>> {
+    pub fn load_from_db(with_series: bool) -> Result<Vec<Session>> {
         let mut res = Vec::new();
 
         {
@@ -164,7 +174,10 @@ impl Session {
             let conn = db.get_connection()?;
 
             let mut stmt = conn
-                .prepare("SELECT * FROM SESSION ORDER BY date DESC")
+                .prepare(&format!(
+                    "SELECT {} FROM SESSION ORDER BY date DESC",
+                    Self::FIELD_LIST
+                ))
                 .map_err(DatabaseError::Select)?;
 
             let rows = stmt
@@ -178,8 +191,10 @@ impl Session {
             });
         }
 
-        for r in &mut res {
-            r.series = Serie::load_for_session(r.timestamp)?;
+        if with_series {
+            for r in &mut res {
+                r.series = Serie::load_for_session(r.timestamp)?;
+            }
         }
 
         Ok(res)
@@ -187,44 +202,50 @@ impl Session {
 
     fn map_from_row(row: &Row) -> std::result::Result<Self, rusqlite::Error> {
         Ok(Session {
-            timestamp: Local.timestamp_opt(row.get::<_, i64>(0)?, 0).unwrap(),
-            workout: row.get::<_, String>(1)?,
-            total_elapsed_time: row.get::<_, f64>(2)?,
-            active_time: row.get::<_, f64>(3)?,
-            total_calories: row.get::<_, u16>(4)?,
-            metabolic_calories: row.get::<_, u16>(5)?,
-            avg_heart_rate: row.get::<_, u8>(6)?,
-            max_heart_rate: row.get::<_, u8>(7)?,
+            timestamp: Local.timestamp_opt(row.get::<_, i64>("date")?, 0).unwrap(),
+            workout: row.get::<_, String>("workout")?,
+            total_elapsed_time: row.get::<_, f64>("total_elapsed_time")?,
+            active_time: row.get::<_, f64>("active_time")?,
+            total_calories: row.get::<_, u16>("total_calories")?,
+            metabolic_calories: row.get::<_, u16>("metabolic_calories")?,
+            avg_heart_rate: row.get::<_, u8>("avg_heart_rate")?,
+            max_heart_rate: row.get::<_, u8>("max_heart_rate")?,
             series: IndexMap::new(),
         })
     }
 
-    pub fn insert(
-        &mut self,
-        tx: &rusqlite::Transaction,
-    ) -> crate::garmin::database::errors::Result<()> {
-        tx.execute(
-            "INSERT INTO SESSION VALUES(?,?,?,?,?,?,?,?)",
-            (
-                self.timestamp.timestamp(),
-                &self.workout,
-                self.total_elapsed_time,
-                self.active_time,
-                self.total_calories,
-                self.metabolic_calories,
-                self.avg_heart_rate,
-                self.max_heart_rate,
-            ),
-        )
-        .map_err(DatabaseError::Insert)
-        .map(|_| ())?;
+    pub fn insert(&mut self) -> crate::garmin::database::errors::Result<()> {
+        if let Ok(mut db) = DATABASE_INST.lock() {
+            db.run_in_transaction(|tx| {
+                tx.execute(
+                    &format!(
+                        "INSERT INTO SESSION({}) VALUES(?,?,?,?,?,?,?,?)",
+                        Self::FIELD_LIST
+                    ),
+                    (
+                        self.timestamp.timestamp(),
+                        &self.workout,
+                        self.total_elapsed_time,
+                        self.active_time,
+                        self.total_calories,
+                        self.metabolic_calories,
+                        self.avg_heart_rate,
+                        self.max_heart_rate,
+                    ),
+                )
+                .map_err(DatabaseError::Insert)
+                .map(|_| ())?;
 
-        for (exercise, series) in &mut self.series {
-            exercise.insert(tx)?;
-            for serie in series.iter_mut() {
-                serie.insert(tx)?;
-            }
-            Serie::update_pr(tx, &exercise.category.to_string(), exercise.id);
+                for (exercise, series) in &mut self.series {
+                    exercise.insert(tx)?;
+                    for serie in series.iter_mut() {
+                        serie.insert(tx)?;
+                    }
+                    Serie::update_pr(tx, &exercise.category.to_string(), exercise.id);
+                }
+
+                Ok(())
+            })?
         }
 
         Ok(())

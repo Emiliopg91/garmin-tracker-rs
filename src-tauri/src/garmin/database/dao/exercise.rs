@@ -33,12 +33,17 @@ impl Hash for Exercise {
 }
 
 impl Exercise {
+    const FIELD_LIST: &str = "category, id, name";
+
     pub fn insert(
         &self,
         tx: &rusqlite::Transaction,
     ) -> crate::garmin::database::errors::Result<()> {
         tx.execute(
-            "INSERT OR IGNORE INTO EXERCISE VALUES(?,?,?)",
+            &format!(
+                "INSERT OR IGNORE INTO EXERCISE({}) VALUES(?,?,?)",
+                Self::FIELD_LIST
+            ),
             (&self.category, self.id, &self.name),
         )
         .map_err(DatabaseError::Insert)?;
@@ -50,7 +55,10 @@ impl Exercise {
         let mut db = DATABASE_INST.lock().unwrap();
         let conn = db.get_connection()?;
         let mut stmt = conn
-            .prepare("SELECT * FROM EXERCISE WHERE category=? AND id=?")
+            .prepare(&format!(
+                "SELECT {} FROM EXERCISE WHERE category=? AND id=?",
+                Self::FIELD_LIST
+            ))
             .unwrap();
 
         let rows = stmt
@@ -69,9 +77,9 @@ impl Exercise {
 
     fn map_from_row(row: &Row) -> std::result::Result<Self, rusqlite::Error> {
         Ok(Self {
-            category: row.get::<_, String>(0)?,
-            id: row.get::<_, u16>(1)?,
-            name: row.get::<_, String>(2)?,
+            category: row.get::<_, String>("category")?,
+            id: row.get::<_, u16>("id")?,
+            name: row.get::<_, String>("name")?,
         })
     }
 
@@ -80,7 +88,10 @@ impl Exercise {
         let conn = db.get_connection()?;
 
         let mut stmt = conn
-            .prepare("SELECT * FROM EXERCISE ORDER BY name ASC")
+            .prepare(&format!(
+                "SELECT {} FROM EXERCISE ORDER BY name ASC",
+                Self::FIELD_LIST
+            ))
             .unwrap();
         let rows = stmt.query_map((), Self::map_from_row).unwrap();
 

@@ -28,7 +28,7 @@ use crate::{
 pub fn get_sessions(app: AppHandle) -> Result<Vec<SessionListItem>, String> {
     info!("Getting sessions list...");
     let res: Result<Vec<SessionListItem>, String> = {
-        let sessions = Session::load_from_db().map_err(|e| e.to_string())?;
+        let sessions = Session::load_from_db(true).map_err(|e| e.to_string())?;
 
         Ok(sessions
             .into_iter()
@@ -62,7 +62,7 @@ pub fn get_session_details(app: AppHandle, timestamp: i64) -> Result<SessionDeta
         Local.timestamp_opt(timestamp, 0).unwrap().to_rfc3339()
     );
     let res = {
-        if let Some(session) = Session::find_by_id(timestamp).map_err(|e| e.to_string())? {
+        if let Some(session) = Session::find_by_id(timestamp, true).map_err(|e| e.to_string())? {
             let mut details = SessionDetails::from(&session);
 
             for (exercise, series) in &session.series {
@@ -284,36 +284,25 @@ where
     let mut success = 0_u16;
     let mut failed = 0_u16;
 
-    let res = match DATABASE_INST.lock() {
-        Ok(mut db) => db
-            .run_in_transaction(|tx| {
-                for file in files {
-                    info!("Importing file {}", file.as_ref().display());
-                    match load_from_file(file.as_ref()) {
-                        Ok(opt_session) => {
-                            if let Some(mut session) = opt_session {
-                                if let Err(e) = session.insert(tx) {
-                                    failed += 1;
-                                    error!("Error persisting session: {}", e);
-                                } else {
-                                    success += 1;
-                                }
-                            }
-                        }
-                        Err(e) => {
-                            failed += 1;
-                            error!("Error parsing session: {}", e);
-                        }
+    for file in files {
+        info!("Importing file {}", file.as_ref().display());
+        match load_from_file(file.as_ref()) {
+            Ok(opt_session) => {
+                if let Some(mut session) = opt_session {
+                    if let Err(e) = session.insert() {
+                        failed += 1;
+                        error!("Error persisting session: {}", e);
+                    } else {
+                        success += 1;
                     }
                 }
-                Ok(())
-            })
-            .map_err(|e| e.to_string()),
-        Err(e) => Err(format!("Error connecting to database: {}", e)),
-    };
-
-    match res {
-        Ok(_) => Ok((success, failed)),
-        Err(e) => Err(e),
+            }
+            Err(e) => {
+                failed += 1;
+                error!("Error parsing session: {}", e);
+            }
+        }
     }
+
+    Ok((success, failed))
 }

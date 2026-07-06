@@ -79,8 +79,8 @@ pub fn get_exercise_details(
             let series = Serie::load_for_exercise(category, id).map_err(|e| e.to_string())?;
             for serie in series {
                 let wk = SessionSerie::from(&serie);
-                if let Some(ses) =
-                    Session::find_by_id(serie.session.timestamp()).map_err(|e| e.to_string())?
+                if let Some(ses) = Session::find_by_id(serie.session.timestamp(), false)
+                    .map_err(|e| e.to_string())?
                 {
                     let ex_str = format!("{}\n{}", ses.workout, ses.format_date());
 

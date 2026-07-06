@@ -28,6 +28,8 @@ impl Display for Serie {
 }
 
 impl Serie {
+    const FIELD_LIST: &str = "session, idx, exercise_category, exercise_id, reps, weight, pr";
+
     pub fn format_date(&self) -> String {
         format!(
             "{}:{} {}/{}/{}",
@@ -44,7 +46,10 @@ impl Serie {
         tx: &rusqlite::Transaction,
     ) -> crate::garmin::database::errors::Result<()> {
         tx.execute(
-            "INSERT INTO SERIE VALUES(?,?,?,?,?,?,?)",
+            &format!(
+                "INSERT INTO SERIE({}) VALUES(?,?,?,?,?,?,?)",
+                Self::FIELD_LIST
+            ),
             (
                 self.session.timestamp(),
                 self.idx,
@@ -62,7 +67,7 @@ impl Serie {
 
     pub fn update_pr(tx: &rusqlite::Transaction, category: &str, id: u16) {
         let result = tx.query_one(
-            "SELECT * FROM SERIE WHERE exercise_category=? AND exercise_id=? ORDER BY weight DESC, reps DESC LIMIT 1",
+            &format!("SELECT {} FROM SERIE WHERE exercise_category=? AND exercise_id=? ORDER BY weight DESC, reps DESC LIMIT 1", Self::FIELD_LIST),
             (&category, id),
             Self::map_from_row,
         );
@@ -94,7 +99,10 @@ impl Serie {
             let conn = db.get_connection()?;
 
             let mut stmt = conn
-                .prepare("SELECT * FROM SERIE WHERE session=? ORDER BY idx")
+                .prepare(&format!(
+                    "SELECT {} FROM SERIE WHERE session=? ORDER BY idx",
+                    Self::FIELD_LIST
+                ))
                 .map_err(DatabaseError::Select)?;
             let rows = stmt
                 .query_map([session.timestamp()], Self::map_from_row)
@@ -128,7 +136,10 @@ impl Serie {
         let conn = db.get_connection()?;
 
         let mut stmt = conn
-            .prepare("SELECT * FROM SERIE WHERE session=? AND idx=?")
+            .prepare(&format!(
+                "SELECT {} FROM SERIE WHERE session=? AND idx=?",
+                Self::FIELD_LIST
+            ))
             .map_err(DatabaseError::Select)?;
         let rows = stmt
             .query_map((session, idx), Self::map_from_row)
@@ -145,7 +156,7 @@ impl Serie {
         let conn = db.get_connection()?;
 
         let mut stmt = conn
-                .prepare("SELECT * FROM SERIE WHERE exercise_category=? and exercise_id=? ORDER BY session DESC")
+                .prepare(&format!("SELECT {} FROM SERIE WHERE exercise_category=? and exercise_id=? ORDER BY session DESC", Self::FIELD_LIST))
                 .map_err(DatabaseError::Select)?;
         let rows = stmt
             .query_map((category, id), Self::map_from_row)
@@ -156,13 +167,15 @@ impl Serie {
 
     fn map_from_row(row: &Row) -> std::result::Result<Self, rusqlite::Error> {
         Ok(Self {
-            session: Local.timestamp_opt(row.get::<_, i64>(0)?, 0).unwrap(),
-            idx: row.get::<_, u8>(1)?,
-            exercise_category: row.get::<_, String>(2)?,
-            exercise_id: row.get::<_, u16>(3)?,
-            reps: row.get::<_, u16>(4)?,
-            weight: row.get::<_, f64>(5)?,
-            pr: row.get::<_, bool>(6)?,
+            session: Local
+                .timestamp_opt(row.get::<_, i64>("session")?, 0)
+                .unwrap(),
+            idx: row.get::<_, u8>("idx")?,
+            exercise_category: row.get::<_, String>("exercise_category")?,
+            exercise_id: row.get::<_, u16>("exercise_id")?,
+            reps: row.get::<_, u16>("reps")?,
+            weight: row.get::<_, f64>("weight")?,
+            pr: row.get::<_, bool>("pr")?,
         })
     }
 
@@ -171,7 +184,10 @@ impl Serie {
         let conn = db.get_connection()?;
 
         let mut stmt = conn
-            .prepare("SELECT * FROM SERIE WHERE exercise_category=? AND exercise_id=? AND pr=TRUE")
+            .prepare(&format!(
+                "SELECT {} FROM SERIE WHERE exercise_category=? AND exercise_id=? AND pr=TRUE",
+                Self::FIELD_LIST
+            ))
             .unwrap();
         let rows = stmt
             .query_map((&exercise.category, &exercise.id), Self::map_from_row)

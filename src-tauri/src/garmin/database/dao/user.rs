@@ -12,13 +12,19 @@ pub struct User {
 }
 
 impl User {
+    const FIELD_LIST: &str = "date, weight, fat_ratio, lean_mass, water_ratio";
+    const INSERT_MARKS: &str = "?, ?, ?, ?, ?";
+
     pub fn select_all() -> crate::garmin::database::errors::Result<Vec<User>> {
         let mut res = Vec::new();
 
         let mut db = DATABASE_INST.lock().unwrap();
         let conn = db.get_connection()?;
         let mut stmt = conn
-            .prepare("SELECT * FROM USER ORDER BY date DESC")
+            .prepare(&format!(
+                "SELECT {} FROM USER ORDER BY date DESC",
+                Self::FIELD_LIST
+            ))
             .map_err(DatabaseError::Select)?;
 
         let rows = stmt
@@ -38,7 +44,11 @@ impl User {
         let mut db = DATABASE_INST.lock().unwrap();
         let conn = db.get_connection()?;
         conn.execute(
-            "INSERT INTO USER VALUES(?,?,?,?,?)",
+            &format!(
+                "INSERT INTO USER({}) VALUES({})",
+                Self::FIELD_LIST,
+                Self::INSERT_MARKS
+            ),
             (
                 self.date.timestamp(),
                 self.weight,
@@ -62,11 +72,11 @@ impl User {
 
     fn map_from_row(row: &Row) -> Result<Self, rusqlite::Error> {
         Ok(Self {
-            date: Local.timestamp_opt(row.get::<_, i64>(0)?, 0).unwrap(),
-            weight: row.get::<_, f32>(1)?,
-            fat_ratio: row.get::<_, f32>(2)?,
-            lean_mass: row.get::<_, f32>(3)?,
-            water_ratio: row.get::<_, f32>(4)?,
+            date: Local.timestamp_opt(row.get::<_, i64>("date")?, 0).unwrap(),
+            weight: row.get::<_, f32>("weight")?,
+            fat_ratio: row.get::<_, f32>("fat_ratio")?,
+            lean_mass: row.get::<_, f32>("lean_mass")?,
+            water_ratio: row.get::<_, f32>("water_ratio")?,
         })
     }
 }
