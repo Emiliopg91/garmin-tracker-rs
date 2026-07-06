@@ -4,7 +4,6 @@ node:
   '@tauri-apps/cli': 2.11.4
   '@tauri-apps/plugin-dialog': 2.7.1
   '@tauri-apps/plugin-log': 2.8.0
-  '@tauri-apps/plugin-notification': 2.3.3
   '@tauri-apps/plugin-opener': 2.5.4
   '@types/react': 19.2.17
   '@types/react-dom': 19.2.3
@@ -17,7 +16,7 @@ node:
   react-bootstrap: 2.10.10
   react-datepicker: 9.1.0
   react-dom: 19.2.7
-  recharts: 3.9.1
+  recharts: 3.9.2
   typescript: 5.8.3
   typescript-eslint: 8.62.1
   vite: 7.3.6
@@ -38,7 +37,6 @@ rust:
   tauri-build: 2.6.3
   tauri-plugin-dialog: 2.7.1
   tauri-plugin-log: 2.8.0
-  tauri-plugin-notification: 2.3.3
   tauri-plugin-opener: 2.5.4
   tauri-rs-ts-ipc: 0.1.14
   thiserror: 2.0.18
