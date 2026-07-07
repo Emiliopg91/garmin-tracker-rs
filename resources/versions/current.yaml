@@ -18,7 +18,7 @@ node:
   react-dom: 19.2.7
   recharts: 3.9.2
   typescript: 5.8.3
-  typescript-eslint: 8.62.1
+  typescript-eslint: 8.63.0
   vite: 7.3.6
   vite-plugin-checker: 0.14.4
 rust:
