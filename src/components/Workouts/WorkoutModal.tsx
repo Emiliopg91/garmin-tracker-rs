@@ -19,19 +19,28 @@ type Props = {
 
 export function WorkoutModal({ workout, onClose }: Props) {
   const [chartData, setChartData] = useState<
-    { date: string; volume: number }[]
+    { date: number; volume: number }[]
   >([]);
   const [minVol, setMinVol] = useState(99999);
   const [maxVol, setMaxVol] = useState(0);
+  const [minDate, setMinDate] = useState(99999);
+  const [maxDate, setMaxDate] = useState(0);
 
   useEffect(() => {
     const data = [...workout.sessions].reverse().map((ws) => {
+      const [dd, mm, yyyy] = ws.date.split(" ")[1].split("/").map(Number);
+      const date = new Date(yyyy, mm - 1, dd);
       return {
-        date: ws.date.split(" ")[1],
+        date: date.getTime(),
         volume: ws.volume,
       };
     });
     setChartData(data);
+    const dates = [...data].map(({ date }) => {
+      return date;
+    });
+    setMinDate(Math.min(...dates));
+    setMaxDate(Math.max(...dates));
     const volumes = [...data].map(({ volume }) => {
       return volume;
     });
@@ -88,6 +97,8 @@ export function WorkoutModal({ workout, onClose }: Props) {
                     <XAxis
                       dataKey="date"
                       stroke="#fff"
+                      type="number"
+                      domain={[minDate, maxDate]}
                       tick={false}
                       height={0}
                     />

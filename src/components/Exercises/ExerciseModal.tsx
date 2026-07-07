@@ -18,14 +18,23 @@ type Props = {
 
 export function ExerciseModal({ exercise, onClose }: Props) {
   const [chartData, setChartData] = useState<
-    { id: number; volume: number; reps: number }[]
+    { date: number; volume: number; reps: number }[]
   >([]);
   const [minVol, setMinVol] = useState(99999);
   const [maxVol, setMaxVol] = useState(0);
+  const [minDate, setMinDate] = useState(99999);
+  const [maxDate, setMaxDate] = useState(0);
 
   useEffect(() => {
-    const data: { id: number; volume: number; reps: number }[] = [];
-    Object.keys(exercise.series).forEach((k, idx) => {
+    const data: { date: number; volume: number; reps: number }[] = [];
+    Object.keys(exercise.series).forEach((k) => {
+      const [dd, mm, yyyy] = k
+        .split("\n")[1]
+        .split(" ")[1]
+        .split("/")
+        .map(Number);
+      const date = new Date(yyyy, mm - 1, dd);
+
       let count = 0;
       let weight = 0;
       exercise.series[k].forEach((s) => {
@@ -33,14 +42,18 @@ export function ExerciseModal({ exercise, onClose }: Props) {
         weight += s.reps * s.weight;
       });
       data.push({
-        id: Object.keys(exercise.series).length - idx,
+        date: date.getTime(),
         volume: weight,
         reps: count,
       });
     });
-    data.sort((a, b) => a.id - b.id);
+    data.sort((a, b) => a.date - b.date);
     setChartData(data);
-
+    const dates = [...data].map(({ date }) => {
+      return date;
+    });
+    setMinDate(Math.min(...dates));
+    setMaxDate(Math.max(...dates));
     const volumes = data.map(({ volume }) => {
       return volume;
     });
@@ -90,7 +103,14 @@ export function ExerciseModal({ exercise, onClose }: Props) {
                     margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
                   >
                     <CartesianGrid stroke="#80808000" strokeDasharray="5 5" />
-                    <XAxis dataKey="id" stroke="#fff" tick={false} height={0} />
+                    <XAxis
+                      dataKey="date"
+                      type="number"
+                      domain={[minDate, maxDate]}
+                      stroke="#fff"
+                      tick={false}
+                      height={0}
+                    />
                     <YAxis
                       yAxisId="left"
                       stroke="#fff"

@@ -16,7 +16,7 @@ import {
 } from "recharts";
 
 type ChartDataType = {
-  idx: number;
+  date: number;
   fat: number;
   lean: number;
   weight: number;
@@ -42,6 +42,9 @@ export function UserList() {
   const [minFat, setMinFat] = useState(0);
   const [maxFat, setMaxFat] = useState(100);
 
+  const [minDate, setMinDate] = useState(99999);
+  const [maxDate, setMaxDate] = useState(0);
+
   const refreshList = () => {
     BackendClient.getUserMeasures()
       .then((data) => {
@@ -49,9 +52,11 @@ export function UserList() {
         const newChartData: ChartDataType = [];
         const data_c = [...data];
         data_c.reverse();
-        data_c.forEach((data, idx) => {
+        data_c.forEach((data) => {
+          const [dd, mm, yyyy] = data.date.split("/").map(Number);
+          const date = new Date(yyyy, mm - 1, dd);
           newChartData.push({
-            idx: idx,
+            date: date.getTime(),
             fat: data.fat_ratio,
             lean: data.lean_mass,
             weight: data.weight,
@@ -87,6 +92,11 @@ export function UserList() {
           setMaxFat(lMaxFat);
           setMinFat(lMinFat);
         });
+        const dates = [...newChartData].map(({ date }) => {
+          return date;
+        });
+        setMinDate(Math.min(...dates));
+        setMaxDate(Math.max(...dates));
         setChartData(newChartData);
       })
       .finally(() => {
@@ -113,7 +123,14 @@ export function UserList() {
                 margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
               >
                 <CartesianGrid stroke="#80808000" strokeDasharray="5 5" />
-                <XAxis dataKey="idx" stroke="#fff" tick={false} height={0} />
+                <XAxis
+                  dataKey="date"
+                  type="number"
+                  domain={[minDate, maxDate]}
+                  stroke="#fff"
+                  tick={false}
+                  height={0}
+                />
                 <YAxis
                   yAxisId="fat"
                   stroke="#fff"
