@@ -82,8 +82,8 @@ export function SessionsList() {
               filtered_28.map((s) => s.volume).reduce((acc, n) => acc + n, 0) /
               filtered_28.length;
 
-            const ot = avg_28 * 1.5;
-            const ut = avg_28 * 0.8;
+            const ot = avg_28 * 1.3;
+            const ut = avg_28 * 0.6;
 
             if (ot > max_ot) {
               max_ot = ot;
@@ -191,6 +191,7 @@ export function SessionsList() {
                   dataKey="lower"
                   stackId="1"
                   stroke="none"
+                  type="monotone"
                   legendType="none"
                   fill="transparent"
                   dot={false}
@@ -199,22 +200,21 @@ export function SessionsList() {
                 />
                 <Area
                   dataKey="upper"
-                  legendType="none"
                   stackId="1"
                   stroke="none"
+                  type="monotone"
                   fill="lightgreen"
+                  legendType="none"
                   fillOpacity={0.2}
                   dot={false}
                   isAnimationActive={false}
                   activeDot={false}
                 />
                 <Line
-                  yAxisId="left"
                   type="monotone"
                   name="Workload"
                   dataKey="current"
                   stroke="cyan"
-                  dot={{ fill: "cyan" }}
                   isAnimationActive={false}
                   activeDot={false}
                 />

@@ -52,6 +52,12 @@ export function UserList() {
         const newChartData: ChartDataType = [];
         const data_c = [...data];
         data_c.reverse();
+        let lMinKg = 99999;
+        let lMaxKg = 0;
+        let lMinFat = 99999;
+        let lMaxFat = 0;
+        let lMinLean = 99999;
+        let lMaxLean = 0;
         data_c.forEach((data) => {
           const [dd, mm, yyyy] = data.date.split("/").map(Number);
           const date = new Date(yyyy, mm - 1, dd);
@@ -62,41 +68,35 @@ export function UserList() {
             weight: data.weight,
           });
 
-          let lMinKg = 99999;
-          let lMaxKg = 0;
           if (lMinKg > data.weight) {
             lMinKg = data.weight;
           } else if (lMaxKg < data.weight) {
             lMaxKg = data.weight;
           }
-          setMaxWeight(lMaxKg);
-          setMinWeight(lMinKg);
 
-          lMinKg = 99999;
-          lMaxKg = 0;
-          if (lMinKg > data.lean_mass) {
-            lMinKg = data.lean_mass;
-          } else if (lMaxKg < data.lean_mass) {
-            lMaxKg = data.lean_mass;
+          if (lMinLean > data.lean_mass) {
+            lMinLean = data.lean_mass;
+          } else if (lMaxLean < data.lean_mass) {
+            lMaxLean = data.lean_mass;
           }
-          setMaxLean(lMaxKg);
-          setMinLean(lMinKg);
 
-          let lMinFat = 99999;
-          let lMaxFat = 0;
           if (lMinFat > data.fat_ratio) {
             lMinFat = data.fat_ratio;
           } else if (lMaxFat < data.fat_ratio) {
             lMaxFat = data.fat_ratio;
           }
-          setMaxFat(lMaxFat);
-          setMinFat(lMinFat);
         });
         const dates = [...newChartData].map(({ date }) => {
           return date;
         });
         setMinDate(Math.min(...dates));
         setMaxDate(Math.max(...dates));
+        setMaxWeight(lMaxKg);
+        setMinWeight(lMinKg);
+        setMaxLean(lMaxLean);
+        setMinLean(lMinLean);
+        setMaxFat(lMaxFat);
+        setMinFat(lMinFat);
         setChartData(newChartData);
       })
       .finally(() => {
