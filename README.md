@@ -6,6 +6,13 @@
 
 Garmin Tracker is a cross-platform desktop application built with [Tauri](https://tauri.app/), combining a Rust backend with a React + TypeScript frontend. It connects to Garmin watches over USB (MTP), imports your activity `.FIT` files, and stores your sessions, exercises, and body measurements in a local SQLite database — no cloud account required.
 
+## Screenshots
+
+| ![Screenshot 1](resources/screenshots/screenshot1.png) | ![Screenshot 2](resources/screenshots/screenshot2.png) |
+| :----------------------------------------------------: | :----------------------------------------------------: |
+| ![Screenshot 3](resources/screenshots/screenshot3.png) | ![Screenshot 4](resources/screenshots/screenshot4.png) |
+| ![Screenshot 5](resources/screenshots/screenshot5.png) |
+
 ## Features
 
 - **Device sync over USB (MTP)** — Detects connected Garmin devices and downloads new activities directly from the watch's storage.
