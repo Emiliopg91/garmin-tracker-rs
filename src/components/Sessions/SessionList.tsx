@@ -19,6 +19,7 @@ type WorkoutLoad = {
   date: number;
   upper: number;
   current: number;
+  reference: number;
   lower: number;
 };
 
@@ -38,81 +39,100 @@ export function SessionsList() {
       .then((data) => {
         setSessions(data);
 
-        if (data.length == 0) {
+        if (data.length === 0) {
           setWorkload([]);
         } else {
-          let now = new Date();
-          now = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
           const ONE_DAY_MS = 24 * 60 * 60 * 1000;
-          const SEVEN_DAYS_MS = 7 * ONE_DAY_MS;
-          const FOUR_WEEKS_MS = 4 * SEVEN_DAYS_MS;
-          let max_ot = 0;
+          const DAYS = 28;
+          const AVG_HR_WEIGHT = 0.7;
+          const MAX_HR_WEIGHT = 0.3;
+          const HR_FACTOR_MIN = 0.6;
+          const HR_FACTOR_MAX = 1.2;
+          const ACWR_UPPER_RATIO = 1;
+          const ACWR_LOWER_RATIO = 0.7;
 
-          const mod_data = data.map((s) => {
-            const [dd, mm, yyyy] = s.date.split(" ")[1].split("/").map(Number);
-            const cur_date = new Date(yyyy, mm - 1, dd);
-            return { date: cur_date.getTime(), volume: s.volume };
-          });
+          const clamp = (v: number, min: number, max: number) =>
+            Math.max(min, Math.min(v, max));
+          const startOfDay = (d: Date) =>
+            new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
 
-          for (let i = 0; i < 28; i++) {
-            const f_day = now.getTime() - i * ONE_DAY_MS;
-            if (mod_data.filter(({ date }) => f_day == date).length == 0) {
-              mod_data.push({ date: f_day, volume: 0 });
-            }
+          const now = startOfDay(new Date());
+
+          let estimatedMaxHr = 180;
+          for (const s of data) {
+            if (s.max_heart_rate > estimatedMaxHr)
+              estimatedMaxHr = s.max_heart_rate;
           }
 
-          let workoutData: WorkoutLoad[] = [];
-          mod_data.map((session) => {
-            const filtered_7 = mod_data.filter((s) => {
-              return (
-                session.date >= s.date && session.date - s.date < SEVEN_DAYS_MS
-              );
-            });
-            const avg_7 =
-              filtered_7.map((s) => s.volume).reduce((acc, n) => acc + n, 0) /
-              filtered_7.length;
+          const calculateLoad = (
+            volume: number,
+            avgHr: number,
+            maxHr: number,
+          ) => {
+            const hrFactor = clamp(
+              AVG_HR_WEIGHT * (avgHr / estimatedMaxHr) +
+                MAX_HR_WEIGHT * (maxHr / estimatedMaxHr),
+              HR_FACTOR_MIN,
+              HR_FACTOR_MAX,
+            );
+            return volume * hrFactor;
+          };
 
-            const filtered_28 = mod_data.filter((s) => {
-              return (
-                session.date >= s.date && session.date - s.date < FOUR_WEEKS_MS
-              );
-            });
-            const avg_28 =
-              filtered_28.map((s) => s.volume).reduce((acc, n) => acc + n, 0) /
-              filtered_28.length;
+          const dailyMap = new Map<number, number>();
+          for (const s of data) {
+            const [dd, mm, yyyy] = s.date.split(" ")[1].split("/").map(Number);
+            const date = new Date(yyyy, mm - 1, dd).getTime();
+            dailyMap.set(
+              date,
+              (dailyMap.get(date) ?? 0) +
+                calculateLoad(s.volume, s.avg_heart_rate, s.max_heart_rate),
+            );
+          }
 
-            const ot = avg_28 * 1.3;
-            const ut = avg_28 * 0.6;
+          const lambda7 = 2 / 8;
+          const lambda28 = 2 / 29;
 
-            if (ot > max_ot) {
-              max_ot = ot;
+          let acute = 0;
+          let chronic = 0;
+          let max = 0;
+
+          const workoutData: WorkoutLoad[] = new Array(DAYS);
+
+          for (let i = 0; i < DAYS; i++) {
+            const date = now - (DAYS - 1 - i) * ONE_DAY_MS;
+            const load = dailyMap.get(date) ?? 0;
+
+            if (i === 0) {
+              acute = load;
+              chronic = load;
+            } else {
+              acute = lambda7 * load + (1 - lambda7) * acute;
+              chronic = lambda28 * load + (1 - lambda28) * chronic;
             }
-            workoutData.push({
-              date: session.date,
-              upper: ot,
-              current: avg_7,
-              lower: ut,
-            });
-          });
-          workoutData = workoutData
-            .filter((wl) => {
-              return now.getTime() - wl.date < FOUR_WEEKS_MS;
-            })
-            .map((wl) => ({
-              date: wl.date,
-              current: (wl.current ? wl.current : 0) / max_ot,
-              upper: wl.upper / max_ot,
-              lower: wl.lower / max_ot,
-            }));
 
-          workoutData = workoutData.filter(
-            (s) => s.date >= now.getTime() - FOUR_WEEKS_MS,
-          );
-          workoutData = workoutData.sort((a, b) => a.date - b.date);
+            const upper = chronic * ACWR_UPPER_RATIO;
+            const lower = chronic * ACWR_LOWER_RATIO;
+            if (upper > max) max = upper;
 
-          setMinDate(Math.min(...workoutData.map((s) => s.date)));
-          setWorkload(workoutData);
+            workoutData[i] = {
+              date,
+              current: acute,
+              reference: chronic,
+              upper,
+              lower,
+            };
+          }
+
+          const normalized = workoutData.map((d) => ({
+            date: d.date,
+            current: d.current / max,
+            reference: d.reference / max,
+            upper: d.upper / max,
+            lower: d.lower / max,
+          }));
+
+          setMinDate(normalized[0].date);
+          setWorkload(normalized);
         }
       })
       .finally(() => {
@@ -205,7 +225,7 @@ export function SessionsList() {
                   type="monotone"
                   fill="lightgreen"
                   legendType="none"
-                  fillOpacity={0.2}
+                  fillOpacity={0.1}
                   dot={false}
                   isAnimationActive={false}
                   activeDot={false}
@@ -214,7 +234,18 @@ export function SessionsList() {
                   type="monotone"
                   name="Workload"
                   dataKey="current"
-                  stroke="cyan"
+                  stroke="green"
+                  dot={{ fill: "green" }}
+                  isAnimationActive={false}
+                  activeDot={false}
+                />
+                <Line
+                  type="monotone"
+                  name="Reference"
+                  legendType="line"
+                  dataKey="reference"
+                  stroke="#ffffff40"
+                  dot={false}
                   isAnimationActive={false}
                   activeDot={false}
                 />

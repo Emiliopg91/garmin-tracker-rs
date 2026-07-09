@@ -2,8 +2,8 @@
 
 // From src-tauri/src/ui/app/models.rs:4
 export enum AppEnvironment {
-  Debug = "Debug",
-  Release = "Release",
+	Debug = "Debug",
+	Release = "Release",
 }
 
 // From src-tauri/src/ui/devices/models.rs:7
@@ -39,19 +39,19 @@ export interface ExerciseListItem {
 
 // From src-tauri/src/ui/app/models.rs:10
 export enum LogLevel {
-  Debug = "Debug",
-  Info = "Info",
-  Warn = "Warn",
-  Error = "Error",
+	Debug = "Debug",
+	Info = "Info",
+	Warn = "Warn",
+	Error = "Error",
 }
 
 // From src-tauri/src/ui/notifications/models.rs:4
 export enum NotificationKind {
-  Temporal = "Temporal",
-  Persistant = "Persistant",
+	Temporal = "Temporal",
+	Persistant = "Persistant",
 }
 
-// From src-tauri/src/ui/sessions/models.rs:59
+// From src-tauri/src/ui/sessions/models.rs:63
 export interface SessionDetails {
   active_time: string;
   avg_heart_rate: number;
@@ -68,22 +68,24 @@ export interface SessionDetails {
 
 // From src-tauri/src/ui/sessions/models.rs:8
 export interface SessionListItem {
+  avg_heart_rate: number;
   date: string;
   exercises_num: number;
+  max_heart_rate: number;
   name: string;
   series_num: number;
   timestamp: string;
   volume: number;
 }
 
-// From src-tauri/src/ui/sessions/models.rs:42
+// From src-tauri/src/ui/sessions/models.rs:46
 export interface SessionSerie {
   idx: number;
   reps: number;
   weight: number;
 }
 
-// From src-tauri/src/ui/sessions/models.rs:96
+// From src-tauri/src/ui/sessions/models.rs:100
 export interface SessionSeriesUpdate {
   series: SessionSerie[];
   timestamp: string;
@@ -123,3 +125,4 @@ export interface WorkoutSession {
   vol_diff: string;
   volume: number;
 }
+
