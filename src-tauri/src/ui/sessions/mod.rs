@@ -1,12 +1,8 @@
 pub mod models;
-use std::{
-    path::{Path, PathBuf},
-    sync::mpsc,
-};
+use std::path::{Path, PathBuf};
 
 use chrono::{DateTime, Datelike, Local, TimeZone, Timelike};
-use tauri::AppHandle;
-use tauri_plugin_dialog::DialogExt;
+use rfd::AsyncFileDialog;
 use tauri_plugin_log::log::{error, info};
 
 use crate::{
@@ -161,30 +157,27 @@ pub fn save_session_changes(details: SessionSeriesUpdate) -> Result<(), String> 
 }
 
 #[tauri::command]
-pub async fn import_from_file(app: AppHandle) -> Result<u16, String> {
+pub async fn import_from_file() -> Result<u16, String> {
     info!("Starting import from file/s...");
-    let (tx, rx) = mpsc::channel();
 
     info!("Waiting for user to select files...");
-    app.dialog()
-        .file()
+    let selection = AsyncFileDialog::new()
+        .set_directory(std::env::current_dir().unwrap())
+        .set_can_create_directories(false)
         .add_filter("Garmin FIT file", &["fit"])
-        .pick_files(move |file| {
-            if let Some(file) = file {
-                let _ = tx.send(file);
-            }
-        });
+        .pick_files()
+        .await;
 
-    let res = match rx.recv() {
-        Ok(files) => {
+    let res = match selection {
+        Some(files) => {
             let files = files
                 .iter()
-                .filter_map(|f| f.as_path().map(|p| p.to_path_buf()))
+                .map(|f| f.path().to_path_buf())
                 .collect::<Vec<PathBuf>>();
             info!("Selected files: {:?}", files);
             import_file_list(&files)
         }
-        Err(_) => {
+        None => {
             info!("No file was selected");
             Ok((0, None))
         }

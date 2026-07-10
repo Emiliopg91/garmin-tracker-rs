@@ -62,9 +62,8 @@ pub fn run() {
             let _ = window.unminimize();
             let _ = window.set_focus();
         }))
-        .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
-        .setup(move |app| {
+        .setup(move |_| {
             info!(
                 "Starting {} v{}",
                 *constants::APP_NAME,
@@ -80,22 +79,6 @@ pub fn run() {
             if let Err(e) = db.create_schema() {
                 error!("Could not initialize database: {}", e);
                 exit(constants::ExitCodes::DbError.into())
-            }
-
-            debug!("Showing up main window...");
-            if let Some(window) = app.get_webview_window("main") {
-                std::thread::spawn(move || {
-                    std::thread::sleep(tokio::time::Duration::from_millis(200));
-                    let _ = window.set_title(&format!(
-                        "{} v{}",
-                        window.title().unwrap(),
-                        *constants::APP_VERSION
-                    ));
-                    let _ = window.show();
-                });
-            } else {
-                error!("Could not find main window instance");
-                exit(constants::ExitCodes::NoMainWindow.into())
             }
 
             debug!("Setup finished");

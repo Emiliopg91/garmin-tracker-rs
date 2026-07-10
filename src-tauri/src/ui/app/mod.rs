@@ -49,7 +49,7 @@ pub fn log_from_frontend(webview_window: WebviewWindow, level: LogLevel, message
 }
 
 #[tauri::command]
-pub async fn notify_frontend_ready(app: AppHandle) {
+pub async fn notify_frontend_ready(app: AppHandle, webview_window: WebviewWindow) {
     info!("UI ready");
 
     update_watcher(app.clone()).await;
@@ -57,6 +57,17 @@ pub async fn notify_frontend_ready(app: AppHandle) {
 
     tokio::time::sleep(Duration::from_millis(100)).await;
     info!("Full application ready");
+
+    info!("Showing up main window...");
+    std::thread::spawn(move || {
+        std::thread::sleep(tokio::time::Duration::from_millis(200));
+        let _ = webview_window.set_title(&format!(
+            "{} v{}",
+            webview_window.title().unwrap(),
+            *constants::APP_VERSION
+        ));
+        let _ = webview_window.show();
+    });
 }
 
 #[tauri::command]

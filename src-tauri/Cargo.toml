@@ -31,7 +31,6 @@ indexmap = { version = "^2", features = ["serde"] }
 rusqlite = { version = "^0" }
 thiserror = "^2"
 tokio = { version = "^1", features = ["rt-multi-thread", "macros", "time"] }
-tauri-plugin-dialog = "^2"
 dirs = "^6"
 mtp-rs = "^0"
 tauri-plugin-log = "^2"
@@ -41,6 +40,7 @@ serde_yaml = "^0"
 semver = "^1"
 ureq = { version = "^3", features = ["json"] }
 clap = { version = "^4", features = ["derive"] }
+rfd = "0.17.2"
 
 
 [profile.release]

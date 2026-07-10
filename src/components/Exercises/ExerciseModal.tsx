@@ -22,7 +22,6 @@ export function ExerciseModal({ exercise, onClose }: Props) {
   const [chartData, setChartData] = useState<
     { date: number; volume: number; reps: number }[]
   >([]);
-  const [minVol, setMinVol] = useState(99999);
   const [maxVol, setMaxVol] = useState(0);
   const [minDate, setMinDate] = useState(99999);
   const [maxDate, setMaxDate] = useState(0);
@@ -59,7 +58,6 @@ export function ExerciseModal({ exercise, onClose }: Props) {
     const volumes = data.map(({ volume }) => {
       return volume;
     });
-    setMinVol(Math.min(...volumes));
     setMaxVol(Math.max(...volumes));
   }, []);
 
@@ -117,7 +115,7 @@ export function ExerciseModal({ exercise, onClose }: Props) {
                       yAxisId="left"
                       stroke="#fff"
                       width={0}
-                      domain={[minVol * 0.9, maxVol * 1.1]}
+                      domain={[0, maxVol]}
                       tick={false}
                     />{" "}
                     <YAxis
