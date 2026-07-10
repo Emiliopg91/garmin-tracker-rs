@@ -4,7 +4,7 @@ pub mod translation_keys {
     include!(concat!(env!("OUT_DIR"), "/translation_keys.rs"));
 }
 
-pub static TRANSLATOR_INST: LazyLock<Translator> = LazyLock::new(|| Translator::new());
+pub static TRANSLATOR_INST: LazyLock<Translator> = LazyLock::new(Translator::new);
 
 pub struct Translator {
     translations: BTreeMap<String, String>,
@@ -21,7 +21,7 @@ impl Translator {
         if lang_var.contains("_") {
             lang_var = lang_var.split("_").next().unwrap().into();
         }
-        lang_var = lang_var.to_lowercase().into();
+        lang_var = lang_var.to_lowercase();
         if lang_var == "C" {
             lang_var = "en".into();
         }
@@ -70,5 +70,5 @@ impl Translator {
 
 #[tauri::command]
 pub fn get_translations() -> BTreeMap<String, String> {
-    return TRANSLATOR_INST.translations.clone();
+    TRANSLATOR_INST.translations.clone()
 }

@@ -113,7 +113,7 @@ async fn update_watcher(app: AppHandle) {
                                                             body: TRANSLATOR_INST
                                                                 .translate_and_replace(
                                                                 TranslationKeys::NEW_UPDATE_BODY,
-                                                                &vec![version],
+                                                                &[version],
                                                             ),
                                                             kind: NotificationKind::Temporal,
                                                         });
