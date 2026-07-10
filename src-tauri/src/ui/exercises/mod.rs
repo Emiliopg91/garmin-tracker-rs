@@ -11,6 +11,7 @@ use crate::{
             show_notification,
         },
         sessions::models::SessionSerie,
+        translations::{TRANSLATOR_INST, translation_keys::TranslationKeys},
     },
 };
 
@@ -45,7 +46,7 @@ pub fn get_exercises() -> Result<Vec<ExerciseListItem>, String> {
         Err(e) => {
             error!("Error getting exercises list: {}", e);
             show_notification(NotificationDefinition {
-                title: "Error getting exercises list".to_string(),
+                title: TRANSLATOR_INST.translate(TranslationKeys::ERROR_EXERCISE_LIST),
                 body: e.to_string(),
                 kind: NotificationKind::Persistant,
             });
@@ -101,9 +102,9 @@ pub fn get_exercise_details(category: &str, id: i16) -> Result<ExerciseDetails, 
             Ok(l)
         }
         Err(e) => {
-            error!("Error getting session details: {}", e);
+            error!("Error getting exercise details: {}", e);
             show_notification(NotificationDefinition {
-                title: "Error getting session details".to_string(),
+                title: TRANSLATOR_INST.translate(TranslationKeys::ERROR_EXERCISE_DETAILS),
                 body: e.to_string(),
                 kind: NotificationKind::Persistant,
             });

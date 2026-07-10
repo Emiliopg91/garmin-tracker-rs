@@ -1,0 +1,165 @@
+new_update_title:
+  en: New update available
+  es: Actualización disponible
+new_update_body:
+  en: v{} available, update the application to get latests features and improvements
+  es: v{} disponible, actualiza la aplicacion para obtener las ultimas novedades y mejoras
+device_connected:
+  en: Device connected
+  es: Dispositivo conectado
+device_disconnected:
+  en: Device disconnected
+  es: Dispositivo desconectado
+error_exercise_details:
+  en: Error getting exercise details
+  es: Error obteniendo detalles del ejercicio
+error_exercise_list:
+  en: Error getting exercises list
+  es: Error obteniendo lista de ejercicios
+error_session_details:
+  en: Error getting session details
+  es: Error obteniendo detalles de la sesion
+error_session_list:
+  en: Error getting sessions list
+  es: Error obteniendo lista de sesiones
+ok_update_session:
+  en: Session updated succesfully
+  es: Sesión actualizada correctamente
+error_update_session:
+  en: Error updating session
+  es: Error actualizando sesión
+error_measures_list:
+  en: Error getting measures list
+  es: Error obteniendo lista de mediciones
+error_adding_measures:
+  en: Error adding measures
+  es: Error añadiendo mediciones
+error_workout_details:
+  en: Error getting workout details
+  es: Error obteniendo detalles del entrenamiento
+error_workout_list:
+  en: Error getting workouts list
+  es: Error obteniendo lista de entrenamientos
+sessions:
+  en: Sessions
+  en: Sesiones
+workouts:
+  en: Workouts
+  en: Entrenamientos
+user:
+  en: User
+  en: Usuario
+workload:
+  en: Workload
+  es: Carga
+reference:
+  en: Reference
+  es: Referencia
+workout:
+  en: Workout
+  es: Entrenamiento
+date:
+  en: Date
+  es: Fecha
+exercises:
+  en: Exercises
+  es: Ejercicios
+series:
+  en: Series
+  es: Series
+volume:
+  en: Volume
+  es: Volumen
+import_sessions:
+  en: Import sessions
+  es: Importar sesiones
+import_from:
+  en: From
+  es: Desde
+loading:
+  en: Loading...
+  es: Cargando...
+total_time:
+  en: Total time
+  es: Tiempo total
+active_time:
+  en: Active time
+  es: Tiempo activo
+total_calories:
+  en: Total calories
+  es: Calorias totales
+active_calories:
+  en: Active calories
+  es: Calorias activas
+avg_heart_rate:
+  en: Average heart rate
+  es: Frecuencia cardiaca media
+max_heart_rate:
+  en: Max heart rate
+  es: Frecuencia cardiaca maxima
+exercise:
+  en: Exercise
+  es: Ejercicio
+update_sets:
+  en: Update sets
+  es: Actualizar series
+latest_session:
+  en: Latest session
+  es: Última sesión
+session_count:
+  en: Session count
+  es: Número de sesiones
+average_duration:
+  en: Average duration
+  es: Duración media
+average_time:
+  en: Average time
+  es: Tiempo medio
+average_volume:
+  en: Average volume
+  es: Volumen medio
+time:
+  en: Time
+  es: Tiempo
+rm:
+  en: 1 RM
+  es: 1 RM
+pr:
+  en: PR
+  es: PR
+personal_record:
+  en: Personal record
+  es: Record personal
+record_date:
+  en: Record date
+  es: Fecha del record
+repetitions:
+  en: Repetitions
+  es: Repeticiones
+fat_ratio:
+  en: Fat %
+  es: "% grasa"
+body_weight:
+  en: Body weight
+  es: Masa coporal
+lean_mass:
+  en: Lean mass
+  es: Masa magra
+weight:
+  en: Weight
+  es: Peso
+water_ratio:
+  en: Water %
+  es: "% agua"
+fat_mass:
+  en: Fat mass
+  es: Masa grasa
+water_mass:
+  en: Water mass
+  es: Masa de agua
+add_entry:
+  en: Add entry
+  es: Añadir entrada
+save:
+  en: Save
+  es: Guardar

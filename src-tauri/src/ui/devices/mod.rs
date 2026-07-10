@@ -16,6 +16,7 @@ use crate::{
             models::{NotificationDefinition, NotificationKind},
             show_notification,
         },
+        translations::{TRANSLATOR_INST, translation_keys::TranslationKeys},
     },
 };
 
@@ -58,7 +59,7 @@ pub async fn start_device_watcher(app: AppHandle) {
                                 device.manufacturer, device.model, device.serial_number
                             );
                             show_notification(NotificationDefinition {
-                                title: "Device connected".to_string(),
+                                title: TRANSLATOR_INST.translate(TranslationKeys::DEVICE_CONNECTED),
                                 body: format!("{} {}", device.manufacturer, device.model),
                                 kind: NotificationKind::Temporal,
                             });
@@ -78,7 +79,8 @@ pub async fn start_device_watcher(app: AppHandle) {
                                 device.manufacturer, device.model, device.serial_number
                             );
                             show_notification(NotificationDefinition {
-                                title: "Device disconnected".to_string(),
+                                title: TRANSLATOR_INST
+                                    .translate(TranslationKeys::DEVICE_DISCONNECTED),
                                 body: format!("{} {}", device.manufacturer, device.model),
                                 kind: NotificationKind::Temporal,
                             });

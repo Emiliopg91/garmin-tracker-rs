@@ -11,6 +11,7 @@ interface AppContexType {
   availableDevices: DeviceListItem[];
   availableUpdate: string | undefined;
   environment: AppEnvironment;
+  translate: (key: string) => string;
 }
 
 const defaultValue: AppContexType = {
@@ -26,6 +27,9 @@ const defaultValue: AppContexType = {
   availableDevices: [],
   availableUpdate: undefined,
   environment: AppEnvironment.Release,
+  translate: () => {
+    return "";
+  },
 };
 
 export const AppContext = createContext(defaultValue);

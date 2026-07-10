@@ -15,6 +15,7 @@ export function AppProvider({
   const [appReady, setAppReady] = useState(false);
   const [tab, setTab] = useState(Tabs.SESSIONS);
   const [loading, setLoading] = useState(false);
+  const [translations, setTranslations] = useState<Record<string, string>>({});
   const [availableUpdate, setAvailableUpdate] = useState<string | undefined>(
     undefined,
   );
@@ -61,9 +62,15 @@ export function AppProvider({
         }
       })
       .finally(() => {
-        BackendClient.notifyFrontendReady().then(() => {
-          setAppReady(true);
-        });
+        BackendClient.getTranslations()
+          .then((translations) => {
+            setTranslations(translations);
+          })
+          .finally(() => {
+            BackendClient.notifyFrontendReady().then(() => {
+              setAppReady(true);
+            });
+          });
       });
 
     return () => {
@@ -72,6 +79,15 @@ export function AppProvider({
       unregisterUpdateAvailable();
     };
   }, []);
+
+  const translate = (key: string) => {
+    if (translations[key]) {
+      return translations[key];
+    } else {
+      console.warn("Missing translation", key);
+      return key;
+    }
+  };
 
   return (
     <AppContext.Provider
@@ -84,6 +100,7 @@ export function AppProvider({
         appReady,
         availableUpdate,
         environment,
+        translate,
       }}
     >
       {children}

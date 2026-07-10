@@ -11,6 +11,7 @@ use crate::{
             models::{NotificationDefinition, NotificationKind},
             show_notification,
         },
+        translations::{TRANSLATOR_INST, translation_keys::TranslationKeys},
         workouts::models::{WorkoutDetails, WorkoutListItem, WorkoutSession},
     },
 };
@@ -64,7 +65,7 @@ pub fn get_workout_list() -> Result<Vec<WorkoutListItem>, String> {
         Err(e) => {
             error!("Error getting workouts list: {}", e);
             show_notification(NotificationDefinition {
-                title: "Error getting workouts list".to_string(),
+                title: TRANSLATOR_INST.translate(TranslationKeys::ERROR_WORKOUT_LIST),
                 body: e.to_string(),
                 kind: NotificationKind::Persistant,
             });
@@ -125,7 +126,7 @@ pub fn get_workout_details(name: &str) -> Result<WorkoutDetails, String> {
         Err(e) => {
             error!("Error getting workout details: {}", e);
             show_notification(NotificationDefinition {
-                title: "Error getting workout details".to_string(),
+                title: TRANSLATOR_INST.translate(TranslationKeys::ERROR_WORKOUT_DETAILS),
                 body: e.clone(),
                 kind: NotificationKind::Persistant,
             });

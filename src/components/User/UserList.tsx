@@ -23,7 +23,7 @@ type ChartDataType = {
 }[];
 
 export function UserList() {
-  const { setLoading } = useContext(AppContext);
+  const { setLoading, translate } = useContext(AppContext);
 
   const [userMeasures, setUserMeasures] = useState<UserListItem[]>([]);
   const [addingNew, setAddingNew] = useState(false);
@@ -154,7 +154,7 @@ export function UserList() {
                 />
                 <Line
                   yAxisId="fat"
-                  name="Fat %"
+                  name={translate("fat_ratio")}
                   type="monotone"
                   dataKey="fat"
                   stroke="#f00"
@@ -164,7 +164,7 @@ export function UserList() {
                 />
                 <Line
                   yAxisId="weight"
-                  name="Body weight"
+                  name={translate("body_weight")}
                   type="monotone"
                   dataKey="weight"
                   stroke="cyan"
@@ -174,7 +174,7 @@ export function UserList() {
                 />
                 <Line
                   yAxisId="lean"
-                  name="Lean mass"
+                  name={translate("lean_mass")}
                   type="monotone"
                   dataKey="lean"
                   stroke="green"
@@ -192,11 +192,11 @@ export function UserList() {
       <table>
         <thead>
           <tr>
-            <th style={{ textAlign: "center" }}>Date</th>
-            <th style={{ textAlign: "center" }}>Weight</th>
-            <th style={{ textAlign: "center" }}>Fat ratio</th>
-            <th style={{ textAlign: "center" }}>Lean mass</th>
-            <th style={{ textAlign: "center" }}>Water ratio</th>
+            <th style={{ textAlign: "center" }}>{translate("date")}</th>
+            <th style={{ textAlign: "center" }}>{translate("weight")}</th>
+            <th style={{ textAlign: "center" }}>{translate("fat_ratio")}</th>
+            <th style={{ textAlign: "center" }}>{translate("lean_mass")}</th>
+            <th style={{ textAlign: "center" }}>{translate("water_ratio")}</th>
           </tr>
         </thead>
         <tbody>
@@ -241,7 +241,7 @@ export function UserList() {
             setAddingNew(true);
           }}
         >
-          Add entry
+          {translate("add_entry")}
         </Button>
       </div>
     </>

@@ -15,6 +15,7 @@ use crate::{
             get_session_details, get_sessions, import_from_device, import_from_file,
             save_session_changes,
         },
+        translations::get_translations,
         user::{add_user_measures, get_user_measures},
         workouts::{get_workout_details, get_workout_list},
     },
@@ -115,7 +116,8 @@ pub fn run() {
             add_user_measures,
             open_version_changelog,
             get_environment,
-            log_from_frontend
+            log_from_frontend,
+            get_translations
         ])
         .run(tauri::generate_context!());
 

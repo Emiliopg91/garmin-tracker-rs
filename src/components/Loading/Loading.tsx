@@ -1,4 +1,9 @@
+import { AppContext } from "@/context/AppContext";
+import { useContext } from "react";
+
 export function Loading() {
+  const { translate } = useContext(AppContext);
+
   return (
     <div
       style={{
@@ -14,7 +19,7 @@ export function Loading() {
         alignItems: "center",
       }}
     >
-      <h1>Loading...</h1>
+      <h1>{translate("loading")}</h1>
     </div>
   );
 }

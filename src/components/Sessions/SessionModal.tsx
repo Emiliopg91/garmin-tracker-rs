@@ -11,7 +11,7 @@ type Props = {
 };
 
 export function SessionModal({ session, onClose, onUpdate }: Props) {
-  const { setLoading } = useContext(AppContext);
+  const { setLoading, translate } = useContext(AppContext);
   const [localSession, setLocalSession] = useState({ ...session });
   const [changed, setChanged] = useState(false);
 
@@ -101,25 +101,25 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
         <Modal.Body>
           <table id="session-details-table">
             <colgroup>
-              <col style={{ width: "200px" }} />
+              <col style={{ width: "250px" }} />
               <col style={{ width: "150px" }} />
               <col />
             </colgroup>
             <tbody>
               <tr>
-                <td>Total time:</td>
+                <td>{translate("total_time")}:</td>
                 <td>{localSession.total_elapsed_time}</td>
               </tr>
               <tr>
-                <td>Active time:</td>
+                <td>{translate("active_time")}:</td>
                 <td>{localSession.active_time}</td>
               </tr>
               <tr>
-                <td>Total calories:</td>
+                <td>{translate("total_calories")}:</td>
                 <td>{localSession.total_calories} Kcal</td>
               </tr>
               <tr>
-                <td>Active calories:</td>
+                <td>{translate("active_calories")}:</td>
                 <td>
                   {localSession.total_calories -
                     localSession.metabolic_calories}{" "}
@@ -127,15 +127,15 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                 </td>
               </tr>
               <tr>
-                <td>Average heart rate:</td>
+                <td>{translate("avg_heart_rate")}:</td>
                 <td> {localSession.avg_heart_rate} BPM</td>
               </tr>
               <tr>
-                <td>Max heart rate:</td>
+                <td>{translate("max_heart_rate")}:</td>
                 <td>{localSession.max_heart_rate} BPM</td>
               </tr>
               <tr>
-                <td>Volume:</td>
+                <td>{translate("volume")}:</td>
                 <td>{getVolume()} Kg</td>
               </tr>
             </tbody>
@@ -151,8 +151,8 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
 
                 <thead>
                   <tr>
-                    <th>Exercise</th>
-                    <th>Series</th>
+                    <th>{translate("exercise")}:</th>
+                    <th>{translate("series")}:</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -219,7 +219,7 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                   style={{ width: "100%" }}
                   onClick={saveChanges}
                 >
-                  Update sets
+                  {translate("update_sets")}
                 </Button>
               </div>
             </>

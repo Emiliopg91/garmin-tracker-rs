@@ -1,4 +1,6 @@
+import { AppContext } from "@/context/AppContext";
 import { UserListItem } from "@/utils/backend/models";
+import { useContext } from "react";
 import { Modal } from "react-bootstrap";
 
 type Props = {
@@ -7,6 +9,7 @@ type Props = {
 };
 
 export function UserDetailsModal({ measures, onClose }: Props) {
+  const { translate } = useContext(AppContext);
   return (
     <div
       className="modal show"
@@ -26,29 +29,29 @@ export function UserDetailsModal({ measures, onClose }: Props) {
             </colgroup>
             <tbody>
               <tr>
-                <td>Weight:</td>
+                <td>{translate("weight")}:</td>
                 <td>{measures.weight} Kg</td>
               </tr>
               <tr>
-                <td>Fat ratio:</td>
+                <td>{translate("fat_ratio")}:</td>
                 <td>{measures.fat_ratio}%</td>
               </tr>
               <tr>
-                <td>Fat mass:</td>
+                <td>{translate("fat_mass")}:</td>
                 <td>
                   {(measures.weight * (measures.fat_ratio / 100)).toFixed(1)} Kg
                 </td>
               </tr>
               <tr>
-                <td>Lean mass:</td>
+                <td>{translate("lean_mass")}:</td>
                 <td>{measures.lean_mass} Kg</td>
               </tr>
               <tr>
-                <td>Water ratio:</td>
+                <td>{translate("water_ratio")}:</td>
                 <td>{measures.water_ratio}%</td>
               </tr>
               <tr>
-                <td>Water mass:</td>
+                <td>{translate("water_mass")}:</td>
                 <td>
                   {(measures.weight * (measures.water_ratio / 100)).toFixed(1)}{" "}
                   Kg

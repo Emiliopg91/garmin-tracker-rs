@@ -1,6 +1,7 @@
+import { AppContext } from "@/context/AppContext";
 import { BackendClient } from "@/utils/backend/client";
 import { UserListItem } from "@/utils/backend/models";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { Button, Modal } from "react-bootstrap";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -22,6 +23,7 @@ type UserListItemForm = Omit<
 };
 
 export function UserAddModal({ latest, onClose }: Props) {
+  const { translate } = useContext(AppContext);
   const [data, setData] = useState<UserListItemForm>(
     latest
       ? {
@@ -81,7 +83,7 @@ export function UserAddModal({ latest, onClose }: Props) {
     >
       <Modal show={true} onHide={onClose} data-bs-theme="dark">
         <Modal.Header closeButton>
-          <Modal.Title>Add entry</Modal.Title>
+          <Modal.Title>{translate("add_entry")}</Modal.Title>
         </Modal.Header>
 
         <Modal.Body>
@@ -92,7 +94,7 @@ export function UserAddModal({ latest, onClose }: Props) {
             </colgroup>
             <tbody>
               <tr>
-                <td>Date:</td>
+                <td>{translate("date")}:</td>
                 <td>
                   <DatePicker
                     onChange={(value: Date | null) => {
@@ -106,7 +108,7 @@ export function UserAddModal({ latest, onClose }: Props) {
                 </td>
               </tr>
               <tr>
-                <td>Weight:</td>
+                <td>{translate("weight")}:</td>
                 <td>
                   <input
                     type="text"
@@ -119,7 +121,7 @@ export function UserAddModal({ latest, onClose }: Props) {
                 </td>
               </tr>
               <tr>
-                <td>Fat ratio:</td>
+                <td>{translate("fat_ratio")}:</td>
                 <td>
                   <input
                     type="text"
@@ -131,7 +133,7 @@ export function UserAddModal({ latest, onClose }: Props) {
                 </td>
               </tr>
               <tr>
-                <td>Lean mass:</td>
+                <td>{translate("lean_mass")}:</td>
                 <td>
                   <input
                     type="text"
@@ -143,7 +145,7 @@ export function UserAddModal({ latest, onClose }: Props) {
                 </td>
               </tr>
               <tr>
-                <td>Water ratio:</td>
+                <td>{translate("water_ratio")}:</td>
                 <td>
                   <input
                     type="text"
@@ -163,7 +165,7 @@ export function UserAddModal({ latest, onClose }: Props) {
               style={{ width: "100%" }}
               onClick={onSave}
             >
-              Save
+              {translate("save")}
             </Button>
           </div>
         </Modal.Body>

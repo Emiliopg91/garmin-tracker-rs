@@ -12,33 +12,33 @@ import { BackendClient } from "@/utils/backend/client";
 import { Nav } from "react-bootstrap";
 
 export function App(): JSX.Element {
-  const { tab, setTab, loading, appReady, availableUpdate } =
+  const { tab, setTab, loading, appReady, availableUpdate, translate } =
     useContext(AppContext);
 
   const navBarItems = [
     {
-      label: "Sessions",
+      label: translate("sessions"),
       onSelected: () => {
         setTab(Tabs.SESSIONS);
       },
       selected: tab == Tabs.SESSIONS,
     },
     {
-      label: "Workouts",
+      label: translate("workouts"),
       onSelected: () => {
         setTab(Tabs.WORKOUTS);
       },
       selected: tab == Tabs.WORKOUTS,
     },
     {
-      label: "Exercises",
+      label: translate("exercises"),
       onSelected: () => {
         setTab(Tabs.EXERCISES);
       },
       selected: tab == Tabs.EXERCISES,
     },
     {
-      label: "User",
+      label: translate("user"),
       onSelected: () => {
         setTab(Tabs.USER);
       },

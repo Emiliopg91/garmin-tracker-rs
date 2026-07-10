@@ -20,6 +20,7 @@ use crate::{
             models::{NotificationDefinition, NotificationKind},
             show_notification,
         },
+        translations::{TRANSLATOR_INST, translation_keys::TranslationKeys},
     },
 };
 use tauri_plugin_log::log::{debug, error, info, warn};
@@ -106,11 +107,13 @@ async fn update_watcher(app: AppHandle) {
                                                             latest_version
                                                         );
                                                         show_notification(NotificationDefinition {
-                                                            title: "New update available"
-                                                                .to_string(),
-                                                            body: format!(
-                                                                "v{} available, update the application to get latests features and improvements",
-                                                                version
+                                                            title: TRANSLATOR_INST.translate(
+                                                                TranslationKeys::NEW_UPDATE_TITLE,
+                                                            ),
+                                                            body: TRANSLATOR_INST
+                                                                .translate_and_replace(
+                                                                TranslationKeys::NEW_UPDATE_BODY,
+                                                                &vec![version],
                                                             ),
                                                             kind: NotificationKind::Temporal,
                                                         });

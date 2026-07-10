@@ -24,7 +24,7 @@ type WorkoutLoad = {
 };
 
 export function SessionsList() {
-  const { setLoading, availableDevices } = useContext(AppContext);
+  const { setLoading, availableDevices, translate } = useContext(AppContext);
 
   const [minDate, setMinDate] = useState(0);
   const [workload, setWorkload] = useState<WorkoutLoad[]>([]);
@@ -232,7 +232,7 @@ export function SessionsList() {
                 />
                 <Line
                   type="monotone"
-                  name="Workload"
+                  name={translate("workload")}
                   dataKey="current"
                   stroke="green"
                   dot={{ fill: "green" }}
@@ -241,7 +241,7 @@ export function SessionsList() {
                 />
                 <Line
                   type="monotone"
-                  name="Reference"
+                  name={translate("reference")}
                   legendType="line"
                   dataKey="reference"
                   stroke="#ffffff40"
@@ -258,11 +258,11 @@ export function SessionsList() {
         <table>
           <thead>
             <tr>
-              <th style={{ textAlign: "center" }}>Workout</th>
-              <th style={{ textAlign: "center" }}>Date</th>
-              <th style={{ textAlign: "center" }}>Exercises</th>
-              <th style={{ textAlign: "center" }}>Sets</th>
-              <th style={{ textAlign: "center" }}>Volume</th>
+              <th style={{ textAlign: "center" }}>{translate("workout")}</th>
+              <th style={{ textAlign: "center" }}>{translate("date")}</th>
+              <th style={{ textAlign: "center" }}>{translate("exercises")}</th>
+              <th style={{ textAlign: "center" }}>{translate("series")}</th>
+              <th style={{ textAlign: "center" }}>{translate("volume")}</th>
             </tr>
           </thead>
 
@@ -296,12 +296,12 @@ export function SessionsList() {
       <div style={{ padding: "5px", width: "100%", marginTop: "auto" }}>
         <Dropdown id="import-file-dropdown" className="w-100">
           <Dropdown.Toggle id="import-file-toggle">
-            Import sessions
+            {translate("import_sessions")}
           </Dropdown.Toggle>
 
           <Dropdown.Menu id="import-file-menu">
             <Dropdown.Item key={"file"} onClick={importFile}>
-              From file
+              {translate("import_from")} file
             </Dropdown.Item>
             {availableDevices.length > 0 &&
               availableDevices.map((device, idx) => (
@@ -311,7 +311,8 @@ export function SessionsList() {
                     importDevice(device.serial_number);
                   }}
                 >
-                  From {device.manufacturer + " " + device.model}
+                  {translate("import_from")}{" "}
+                  {device.manufacturer + " " + device.model}
                 </Dropdown.Item>
               ))}
             {availableDevices.length == 0 && (

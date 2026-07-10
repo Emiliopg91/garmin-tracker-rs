@@ -1,5 +1,6 @@
+import { AppContext } from "@/context/AppContext";
 import { ExerciseDetails } from "@/utils/backend/models";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Modal } from "react-bootstrap";
 import {
   CartesianGrid,
@@ -17,6 +18,7 @@ type Props = {
 };
 
 export function ExerciseModal({ exercise, onClose }: Props) {
+  const { translate } = useContext(AppContext);
   const [chartData, setChartData] = useState<
     { date: number; volume: number; reps: number }[]
   >([]);
@@ -80,15 +82,15 @@ export function ExerciseModal({ exercise, onClose }: Props) {
             </colgroup>
             <tbody>
               <tr>
-                <td>Personal record:</td>
+                <td>{translate("personal_record")}:</td>
                 <td>{exercise.reps + "x" + exercise.weight + " Kg"}</td>
               </tr>
               <tr>
-                <td>Record date:</td>
+                <td>{translate("record_date")}:</td>
                 <td>{exercise.pr_date}</td>
               </tr>
               <tr>
-                <td>1 RM:</td>
+                <td>{translate("rm")}:</td>
                 <td>{Math.floor(exercise.rm!) + " Kg"}</td>
               </tr>
             </tbody>
@@ -127,7 +129,7 @@ export function ExerciseModal({ exercise, onClose }: Props) {
                     <Line
                       yAxisId="left"
                       type="monotone"
-                      name="Volume"
+                      name={translate("volume")}
                       dataKey="volume"
                       stroke="#0f0"
                       dot={{ fill: "#0f0" }}
@@ -137,7 +139,7 @@ export function ExerciseModal({ exercise, onClose }: Props) {
                     <Line
                       yAxisId="right"
                       type="monotone"
-                      name="Repetitions"
+                      name={translate("repetitions")}
                       dataKey="reps"
                       stroke="#f00"
                       dot={{ fill: "#f00" }}
@@ -158,8 +160,8 @@ export function ExerciseModal({ exercise, onClose }: Props) {
 
                 <thead>
                   <tr>
-                    <th>Workout</th>
-                    <th>Series</th>
+                    <th>{translate("workout")}</th>
+                    <th>{translate("series")}</th>
                   </tr>
                 </thead>
                 <tbody>

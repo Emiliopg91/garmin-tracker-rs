@@ -5,7 +5,7 @@ import { useContext, useEffect, useState } from "react";
 import { AppContext } from "@/context/AppContext";
 
 export function WorkoutsList() {
-  const { setLoading } = useContext(AppContext);
+  const { setLoading, translate } = useContext(AppContext);
 
   const [workouts, setWorkouts] = useState<WorkoutListItem[]>([]);
   const [workoutDetails, setWorkoutDetails] = useState<
@@ -36,10 +36,16 @@ export function WorkoutsList() {
       <table>
         <thead>
           <tr>
-            <th style={{ textAlign: "center" }}>Workout</th>
-            <th style={{ textAlign: "center" }}>Latest session</th>
-            <th style={{ textAlign: "center" }}>Session count</th>
-            <th style={{ textAlign: "center" }}>Average duration</th>
+            <th style={{ textAlign: "center" }}>{translate("workout")}</th>
+            <th style={{ textAlign: "center" }}>
+              {translate("latest_session")}
+            </th>
+            <th style={{ textAlign: "center" }}>
+              {translate("session_count")}
+            </th>
+            <th style={{ textAlign: "center" }}>
+              {translate("average_duration")}
+            </th>
           </tr>
         </thead>
         <tbody>

@@ -5,7 +5,7 @@ import { BackendClient } from "@/utils/backend/client";
 import { AppContext } from "@/context/AppContext";
 
 export function ExercisesList() {
-  const { setLoading } = useContext(AppContext);
+  const { setLoading, translate } = useContext(AppContext);
   const [exercises, setExercises] = useState<ExerciseListItem[]>([]);
   const [exerciseDetails, setExerciseDetails] = useState<
     ExerciseDetails | undefined
@@ -42,10 +42,10 @@ export function ExercisesList() {
         </colgroup>
         <thead>
           <tr>
-            <th style={{ textAlign: "center" }}>Exercise</th>
-            <th style={{ textAlign: "center" }}>PR</th>
-            <th style={{ textAlign: "center" }}>1RM</th>
-            <th style={{ textAlign: "center" }}>Date</th>
+            <th style={{ textAlign: "center" }}>{translate("exercise")}</th>
+            <th style={{ textAlign: "center" }}>{translate("pr")}</th>
+            <th style={{ textAlign: "center" }}>{translate("rm")}</th>
+            <th style={{ textAlign: "center" }}>{translate("date")}</th>
           </tr>
         </thead>
         <tbody>

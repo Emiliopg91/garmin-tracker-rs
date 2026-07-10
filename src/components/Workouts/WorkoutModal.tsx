@@ -1,5 +1,6 @@
+import { AppContext } from "@/context/AppContext";
 import { WorkoutDetails } from "@/utils/backend/models";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Modal } from "react-bootstrap";
 import {
   CartesianGrid,
@@ -18,6 +19,7 @@ type Props = {
 };
 
 export function WorkoutModal({ workout, onClose }: Props) {
+  const { translate } = useContext(AppContext);
   const [chartData, setChartData] = useState<
     { date: number; volume: number }[]
   >([]);
@@ -67,19 +69,19 @@ export function WorkoutModal({ workout, onClose }: Props) {
             </colgroup>
             <tbody>
               <tr>
-                <td>Sessions:</td>
+                <td>{translate("sessions")}:</td>
                 <td>{workout.session_count}</td>
               </tr>
               <tr>
-                <td>Latest session:</td>
+                <td>{translate("latest_session")}</td>
                 <td>{workout.latest_session}</td>
               </tr>
               <tr>
-                <td>Average time:</td>
+                <td>{translate("average_time")}</td>
                 <td>{workout.avg_time}</td>
               </tr>
               <tr>
-                <td>Average volume:</td>
+                <td>{translate("average_volume")}:</td>
                 <td>{Math.floor(workout.avg_volume)} Kg</td>
               </tr>
             </tbody>
@@ -110,7 +112,7 @@ export function WorkoutModal({ workout, onClose }: Props) {
                     />{" "}
                     {/* ← número, no "auto" */}
                     <Line
-                      name="Volume"
+                      name={translate("volume")}
                       type="monotone"
                       dataKey="volume"
                       stroke="#0f0"
@@ -129,7 +131,7 @@ export function WorkoutModal({ workout, onClose }: Props) {
               </div>
               <br />
               <hr />
-              <h5 style={{ textAlign: "center" }}>Sessions</h5>
+              <h5 style={{ textAlign: "center" }}>{translate("sessions")}</h5>
               <table>
                 <colgroup>
                   <col style={{ width: "230px" }} />
@@ -138,9 +140,9 @@ export function WorkoutModal({ workout, onClose }: Props) {
                 </colgroup>
                 <thead>
                   <tr>
-                    <th>Date</th>
-                    <th>Time</th>
-                    <th>Volume</th>
+                    <th>{translate("date")}</th>
+                    <th>{translate("time")}</th>
+                    <th>{translate("volume")}</th>
                   </tr>
                 </thead>
                 <tbody>
