@@ -31,7 +31,7 @@ fn generate_translations_file() {
             key
         ))
     });
-    content.push_str("}");
+    content.push('}');
 
     let out_dir = env::var("OUT_DIR").unwrap();
     let dest_path = Path::new(&out_dir).join("translation_keys.rs");
