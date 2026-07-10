@@ -23,7 +23,7 @@ fn generate_translations_file() {
 
     let mut content = "".to_string();
     content.push_str("pub struct TranslationKeys {}\n\n");
-    content.push_str("impl TranslationKeys {\n");
+    content.push_str("#[allow(dead_code, unused)]\nimpl TranslationKeys {\n");
     data.keys().for_each(|key| {
         content.push_str(&format!(
             "    pub const {} : &str = \"{}\";\n",
