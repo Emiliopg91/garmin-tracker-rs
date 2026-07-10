@@ -42,97 +42,112 @@ export function SessionsList() {
         if (data.length === 0) {
           setWorkload([]);
         } else {
-          const ONE_DAY_MS = 24 * 60 * 60 * 1000;
-          const DAYS = 28;
-          const AVG_HR_WEIGHT = 0.7;
-          const MAX_HR_WEIGHT = 0.3;
-          const HR_FACTOR_MIN = 0.6;
-          const HR_FACTOR_MAX = 1.2;
-          const ACWR_UPPER_RATIO = 1;
-          const ACWR_LOWER_RATIO = 0.7;
-
-          const clamp = (v: number, min: number, max: number) =>
-            Math.max(min, Math.min(v, max));
           const startOfDay = (d: Date) =>
             new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
 
-          const now = startOfDay(new Date());
-
-          let estimatedMaxHr = 180;
-          for (const s of data) {
-            if (s.max_heart_rate > estimatedMaxHr)
-              estimatedMaxHr = s.max_heart_rate;
-          }
-
-          const calculateLoad = (
-            volume: number,
-            avgHr: number,
-            maxHr: number,
-          ) => {
-            const hrFactor = clamp(
-              AVG_HR_WEIGHT * (avgHr / estimatedMaxHr) +
-                MAX_HR_WEIGHT * (maxHr / estimatedMaxHr),
-              HR_FACTOR_MIN,
-              HR_FACTOR_MAX,
-            );
-            return volume * hrFactor;
+          const addDays = (ts: number, n: number) => {
+            const d = new Date(ts);
+            d.setDate(d.getDate() + n);
+            return d.getTime();
           };
 
-          const dailyMap = new Map<number, number>();
-          for (const s of data) {
-            const [dd, mm, yyyy] = s.date.split(" ")[1].split("/").map(Number);
-            const date = new Date(yyyy, mm - 1, dd).getTime();
-            dailyMap.set(
-              date,
-              (dailyMap.get(date) ?? 0) +
-                calculateLoad(s.volume, s.avg_heart_rate, s.max_heart_rate),
+          const CHRONIC_DAYS = 28;
+          const ACUTE_DAYS = 7;
+          const ACWR_UPPER_RATIO = 1;
+          const ACWR_LOWER_RATIO = 0.7;
+          const TODAY = startOfDay(new Date());
+
+          const LAMBDA_ACUTE = 2 / (ACUTE_DAYS + 1); // ~0.25
+          const LAMBDA_CHRONIC = 2 / (CHRONIC_DAYS + 1); // ~0.069
+
+          let working_data = data
+            .map((s) => {
+              const [dd, mm, yyyy] = s.date
+                .split(" ")[1]
+                .split("/")
+                .map(Number);
+              const date = new Date(yyyy, mm - 1, dd).getTime();
+
+              return { date: date, volume: s.volume };
+            })
+            .filter(
+              (s) => TODAY - 2 * CHRONIC_DAYS * 24 * 60 * 60 * 1000 <= s.date,
             );
+
+          for (
+            let dat = addDays(TODAY, -2 * CHRONIC_DAYS + 1);
+            dat <= TODAY;
+            dat = addDays(dat, 1)
+          ) {
+            if (!working_data.find(({ date }) => date === dat)) {
+              working_data.push({ date: dat, volume: 0 });
+            }
           }
 
-          const lambda7 = 2 / 8;
-          const lambda28 = 2 / 29;
+          working_data = working_data.sort((a, b) => a.date - b.date);
 
-          let acute = 0;
-          let chronic = 0;
-          let max = 0;
+          if (working_data.length === 0) {
+            setWorkload([]);
+          } else {
+            let ewmaAcute = working_data[0].volume;
+            let ewmaChronic = working_data[0].volume;
 
-          const workoutData: WorkoutLoad[] = new Array(DAYS);
+            const ewmaSeries: {
+              date: number;
+              acute: number;
+              chronic: number;
+            }[] = [
+              {
+                date: working_data[0].date,
+                acute: ewmaAcute,
+                chronic: ewmaChronic,
+              },
+            ];
 
-          for (let i = 0; i < DAYS; i++) {
-            const date = now - (DAYS - 1 - i) * ONE_DAY_MS;
-            const load = dailyMap.get(date) ?? 0;
+            for (let i = 1; i < working_data.length; i++) {
+              const v = working_data[i].volume;
+              ewmaAcute = v * LAMBDA_ACUTE + ewmaAcute * (1 - LAMBDA_ACUTE);
+              ewmaChronic =
+                v * LAMBDA_CHRONIC + ewmaChronic * (1 - LAMBDA_CHRONIC);
 
-            if (i === 0) {
-              acute = load;
-              chronic = load;
-            } else {
-              acute = lambda7 * load + (1 - lambda7) * acute;
-              chronic = lambda28 * load + (1 - lambda28) * chronic;
+              ewmaSeries.push({
+                date: working_data[i].date,
+                acute: ewmaAcute,
+                chronic: ewmaChronic,
+              });
             }
 
-            const upper = chronic * ACWR_UPPER_RATIO;
-            const lower = chronic * ACWR_LOWER_RATIO;
-            if (upper > max) max = upper;
+            let load_data = ewmaSeries
+              .filter((_, idx) => idx >= CHRONIC_DAYS)
+              .map((e) => ({
+                date: e.date,
+                upper: e.chronic * ACWR_UPPER_RATIO,
+                lower: e.chronic * ACWR_LOWER_RATIO,
+                current: e.acute,
+                reference: e.chronic,
+              }));
 
-            workoutData[i] = {
-              date,
-              current: acute,
-              reference: chronic,
-              upper,
-              lower,
-            };
+            if (load_data.length === 0) {
+              setWorkload([]);
+            } else {
+              const max_load = load_data.reduce(
+                (max, e) => Math.max(max, e.upper),
+                0,
+              );
+              const safeMaxLoad = max_load > 0 ? max_load : 1;
+
+              load_data = load_data.map((e) => ({
+                ...e,
+                current: e.current / safeMaxLoad,
+                upper: e.upper / safeMaxLoad,
+                lower: e.lower / safeMaxLoad,
+                reference: e.reference / safeMaxLoad,
+              }));
+
+              setMinDate(load_data[0].date);
+              setWorkload(load_data);
+            }
           }
-
-          const normalized = workoutData.map((d) => ({
-            date: d.date,
-            current: d.current / max,
-            reference: d.reference / max,
-            upper: d.upper / max,
-            lower: d.lower / max,
-          }));
-
-          setMinDate(normalized[0].date);
-          setWorkload(normalized);
         }
       })
       .finally(() => {

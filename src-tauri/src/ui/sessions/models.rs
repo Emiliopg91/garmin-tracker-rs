@@ -10,8 +10,6 @@ pub struct SessionListItem {
     pub date: String,
     pub timestamp: i64,
     pub volume: f64,
-    pub avg_heart_rate: u8,
-    pub max_heart_rate: u8,
     pub exercises_num: u8,
     pub series_num: u8,
 }
@@ -24,8 +22,6 @@ impl From<&Session> for SessionListItem {
             timestamp: value.timestamp.timestamp(),
             exercises_num: value.get_exercises_num(),
             series_num: value.get_series_num(),
-            avg_heart_rate: value.avg_heart_rate,
-            max_heart_rate: value.max_heart_rate,
             volume: value.get_volume(),
         }
     }
