@@ -2,7 +2,6 @@ node:
   '@eslint/js': 9.39.4
   '@tauri-apps/api': 2.11.1
   '@tauri-apps/cli': 2.11.4
-  '@tauri-apps/plugin-dialog': 2.7.1
   '@tauri-apps/plugin-log': 2.8.0
   '@tauri-apps/plugin-opener': 2.5.4
   '@types/react': 19.2.17
@@ -11,13 +10,13 @@ node:
   bootstrap: 5.3.8
   eslint: 9.39.4
   eslint-plugin-react: 7.37.5
-  prettier: 3.9.4
+  prettier: 3.9.5
   react: 19.2.7
   react-bootstrap: 2.10.10
   react-datepicker: 9.1.0
   react-dom: 19.2.7
   recharts: 3.9.2
-  typescript: 5.8.3
+  typescript: 7.0.2
   typescript-eslint: 8.63.0
   vite: 7.3.6
   vite-plugin-checker: 0.14.4
@@ -28,6 +27,7 @@ rust:
   fitparser: 0.11.0
   indexmap: 2.14.0
   mtp-rs: 0.23.0
+  rfd: 0.17.2
   rusqlite: 0.40.1
   semver: 1.0.28
   serde: 1.0.228
@@ -35,7 +35,6 @@ rust:
   serde_yaml: 0.9.34+deprecated
   tauri: 2.11.5
   tauri-build: 2.6.3
-  tauri-plugin-dialog: 2.7.1
   tauri-plugin-log: 2.8.0
   tauri-plugin-opener: 2.5.4
   tauri-rs-ts-ipc: 0.1.14
