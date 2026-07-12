@@ -179,12 +179,12 @@ pub async fn import_from_file() -> Result<u16, String> {
         }
         None => {
             info!("No file was selected");
-            Ok((0, None))
+            Ok(0)
         }
     };
 
     match res {
-        Ok((inserted, _)) => Ok(inserted),
+        Ok(inserted) => Ok(inserted),
         Err(e) => Err(e),
     }
 }
@@ -222,12 +222,8 @@ pub async fn import_from_device(serial: &str) -> Result<u16, String> {
         info!("Fetched {} activity files", activities.len());
 
         match import_file_list(&activities) {
-            Ok((inserted, latest)) => {
-                let mut new_latest = Local::now();
-                if let Some(latest) = latest {
-                    new_latest = latest;
-                }
-                let _ = Device::update_latest_sync(serial, new_latest);
+            Ok(inserted) => {
+                let _ = Device::update_latest_sync(serial, Local::now());
                 Ok(inserted)
             }
             Err(e) => Err(e),
@@ -237,7 +233,7 @@ pub async fn import_from_device(serial: &str) -> Result<u16, String> {
     }
 }
 
-fn import_file_list<F>(files: &[F]) -> Result<(u16, Option<DateTime<Local>>), String>
+fn import_file_list<F>(files: &[F]) -> Result<u16, String>
 where
     F: AsRef<Path>,
 {
@@ -300,5 +296,5 @@ where
         }
     }
 
-    Ok((success, latest))
+    Ok(success)
 }

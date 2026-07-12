@@ -316,7 +316,7 @@ export function SessionsList() {
 
           <Dropdown.Menu id="import-file-menu">
             <Dropdown.Item key={"file"} onClick={importFile}>
-              {translate("import_from")} file
+              {translate("import_from_file")}
             </Dropdown.Item>
             {availableDevices.length > 0 &&
               availableDevices.map((device, idx) => (
@@ -326,12 +326,15 @@ export function SessionsList() {
                     importDevice(device.serial_number);
                   }}
                 >
-                  {translate("import_from")}{" "}
-                  {device.manufacturer + " " + device.model}
+                  {translate("import_from_device", [
+                    device.manufacturer + " " + device.model,
+                  ])}
                 </Dropdown.Item>
               ))}
             {availableDevices.length == 0 && (
-              <Dropdown.Item disabled={true}>No device found</Dropdown.Item>
+              <Dropdown.Item disabled={true}>
+                {translate("no_device_found")}
+              </Dropdown.Item>
             )}
           </Dropdown.Menu>
         </Dropdown>

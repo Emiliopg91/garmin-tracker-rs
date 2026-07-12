@@ -73,9 +73,15 @@ volume:
 import_sessions:
   en: Import sessions
   es: Importar sesiones
-import_from:
-  en: From
-  es: Desde
+import_from_file:
+  en: From file
+  es: Desde archivo
+import_from_device:
+  en: From {}
+  es: Desde {}
+no_device_found:
+  en: No device found
+  es: No se detectó dispositivo
 loading:
   en: Loading...
   es: Cargando...

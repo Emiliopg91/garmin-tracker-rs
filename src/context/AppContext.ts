@@ -11,7 +11,7 @@ interface AppContexType {
   availableDevices: DeviceListItem[];
   availableUpdate: string | undefined;
   environment: AppEnvironment;
-  translate: (key: string) => string;
+  translate: (key: string, replacements?: any[]) => string;
 }
 
 const defaultValue: AppContexType = {
