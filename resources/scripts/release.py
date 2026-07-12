@@ -156,7 +156,7 @@ def generate_changelog():
     urls = {"node":"https://www.npmjs.com/package/", "rust":"https://crates.io/crates/"}
     for cat in diff_versions.keys():
         if diff_versions[cat]:
-            for (idx, package) in enumerate(diff_versions[cat]):
+            for (idx, package) in enumerate(sorted(diff_versions[cat])):
                 line = "<tr>"
                 if idx==0:
                     line = f'{line}<td  style="vertical-align: top" rowspan="{len(diff_versions[cat])}"><b>{cat.capitalize()}</b></td>'
