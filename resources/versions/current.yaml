@@ -1,5 +1,5 @@
 node:
-  '@eslint/js': 9.39.4
+  '@eslint/js': 9.39.5
   '@tauri-apps/api': 2.11.1
   '@tauri-apps/cli': 2.11.4
   '@tauri-apps/plugin-log': 2.8.0
@@ -8,7 +8,7 @@ node:
   '@types/react-dom': 19.2.3
   '@vitejs/plugin-react': 4.7.0
   bootstrap: 5.3.8
-  eslint: 9.39.4
+  eslint: 9.39.5
   eslint-plugin-react: 7.37.5
   prettier: 3.9.5
   react: 19.2.7
