@@ -10,7 +10,7 @@ struct Cli {
     #[arg(short, long)]
     verbose: bool,
 
-    /// Force usage of Wayland
+    /// Force usage of X11 instead of wayland
     #[arg(short, long, default_value_t = true)]
     x11: bool,
 }
