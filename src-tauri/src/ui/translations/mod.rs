@@ -26,7 +26,7 @@ impl Translator {
             lang_var = "en".into();
         }
 
-        let yaml_str = include_str!("../../../resources/translations.yaml");
+        let yaml_str = include_str!("../../../../resources/translations.yaml");
         let yaml_obj: BTreeMap<String, BTreeMap<String, String>> =
             serde_yaml::from_str(yaml_str).unwrap();
 
