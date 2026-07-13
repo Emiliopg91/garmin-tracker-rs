@@ -26,6 +26,8 @@ pub struct Session {
     pub avg_heart_rate: u8,
     pub max_heart_rate: u8,
 
+    pub training_load: f64,
+
     pub series: IndexMap<Exercise, Vec<Serie>>,
 }
 impl Display for Session {
@@ -34,7 +36,7 @@ impl Display for Session {
     }
 }
 impl Session {
-    const FIELD_LIST: &str = "date, workout, total_elapsed_time, active_time, total_calories, metabolic_calories, avg_heart_rate, max_heart_rate";
+    const FIELD_LIST: &str = "date, workout, total_elapsed_time, active_time, total_calories, metabolic_calories, avg_heart_rate, max_heart_rate, training_load";
 
     pub fn format_date(&self) -> String {
         format!(
@@ -180,6 +182,7 @@ impl Session {
             metabolic_calories: row.get::<_, u16>("metabolic_calories")?,
             avg_heart_rate: row.get::<_, u8>("avg_heart_rate")?,
             max_heart_rate: row.get::<_, u8>("max_heart_rate")?,
+            training_load: row.get::<_, f64>("training_load")?,
             series: IndexMap::new(),
         })
     }
@@ -189,7 +192,7 @@ impl Session {
             db.run_in_transaction(|tx| {
                 tx.execute(
                     &format!(
-                        "INSERT INTO SESSION({}) VALUES(?,?,?,?,?,?,?,?)",
+                        "INSERT INTO SESSION({}) VALUES(?,?,?,?,?,?,?,?,?)",
                         Self::FIELD_LIST
                     ),
                     (
@@ -201,6 +204,7 @@ impl Session {
                         self.metabolic_calories,
                         self.avg_heart_rate,
                         self.max_heart_rate,
+                        self.training_load,
                     ),
                 )
                 .map_err(DatabaseError::Insert)

@@ -44,7 +44,7 @@ export class BackendClient {
 	}
 	
 
-	// From src-tauri/src/ui/translations.rs:72
+	// From src-tauri/src/ui/translations/mod.rs:72
 	public static getTranslations(): Promise<Record<string, string>> {
 	  return BackendClient.inner_invoke("get_translations"); 
 	}

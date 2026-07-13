@@ -169,3 +169,6 @@ add_entry:
 save:
   en: Save
   es: Guardar
+workout_load:
+  en: Load
+  es: Carga

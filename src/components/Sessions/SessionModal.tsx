@@ -135,6 +135,10 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                 <td>{localSession.max_heart_rate} BPM</td>
               </tr>
               <tr>
+                <td>{translate("workout_load")}:</td>
+                <td>{Math.floor(localSession.training_load)}</td>
+              </tr>
+              <tr>
                 <td>{translate("volume")}:</td>
                 <td>{getVolume()} Kg</td>
               </tr>

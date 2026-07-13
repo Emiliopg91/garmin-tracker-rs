@@ -75,6 +75,10 @@ impl Database {
                 "Adding device table",
                 include_str!("../../../../resources/ddl/003_devices.sql"),
             ),
+            (
+                "Training load support",
+                include_str!("../../../../resources/ddl/004_training_load.sql"),
+            ),
         ];
 
         self.run_in_transaction(|tx| {

@@ -51,7 +51,7 @@ export enum NotificationKind {
 	Persistant = "Persistant",
 }
 
-// From src-tauri/src/ui/sessions/models.rs:59
+// From src-tauri/src/ui/sessions/models.rs:61
 export interface SessionDetails {
   active_time: string;
   avg_heart_rate: number;
@@ -64,6 +64,7 @@ export interface SessionDetails {
   timestamp: string;
   total_calories: number;
   total_elapsed_time: string;
+  training_load: number;
 }
 
 // From src-tauri/src/ui/sessions/models.rs:8
@@ -73,17 +74,18 @@ export interface SessionListItem {
   name: string;
   series_num: number;
   timestamp: string;
+  training_load: number;
   volume: number;
 }
 
-// From src-tauri/src/ui/sessions/models.rs:42
+// From src-tauri/src/ui/sessions/models.rs:44
 export interface SessionSerie {
   idx: number;
   reps: number;
   weight: number;
 }
 
-// From src-tauri/src/ui/sessions/models.rs:96
+// From src-tauri/src/ui/sessions/models.rs:101
 export interface SessionSeriesUpdate {
   series: SessionSerie[];
   timestamp: string;

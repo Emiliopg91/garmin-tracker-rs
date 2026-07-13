@@ -68,7 +68,7 @@ export function SessionsList() {
                 .map(Number);
               const date = new Date(yyyy, mm - 1, dd).getTime();
 
-              return { date: date, volume: s.volume };
+              return { date: date, load: s.training_load };
             })
             .filter(
               (s) => TODAY - 2 * CHRONIC_DAYS * 24 * 60 * 60 * 1000 <= s.date,
@@ -80,7 +80,7 @@ export function SessionsList() {
             dat = addDays(dat, 1)
           ) {
             if (!working_data.find(({ date }) => date === dat)) {
-              working_data.push({ date: dat, volume: 0 });
+              working_data.push({ date: dat, load: 0 });
             }
           }
 
@@ -89,8 +89,8 @@ export function SessionsList() {
           if (working_data.length === 0) {
             setWorkload([]);
           } else {
-            let ewmaAcute = working_data[0].volume;
-            let ewmaChronic = working_data[0].volume;
+            let ewmaAcute = working_data[0].load;
+            let ewmaChronic = working_data[0].load;
 
             const ewmaSeries: {
               date: number;
@@ -105,7 +105,7 @@ export function SessionsList() {
             ];
 
             for (let i = 1; i < working_data.length; i++) {
-              const v = working_data[i].volume;
+              const v = working_data[i].load;
               ewmaAcute = v * LAMBDA_ACUTE + ewmaAcute * (1 - LAMBDA_ACUTE);
               ewmaChronic =
                 v * LAMBDA_CHRONIC + ewmaChronic * (1 - LAMBDA_CHRONIC);
@@ -130,18 +130,12 @@ export function SessionsList() {
             if (load_data.length === 0) {
               setWorkload([]);
             } else {
-              const max_load = load_data.reduce(
-                (max, e) => Math.max(max, e.upper),
-                0,
-              );
-              const safeMaxLoad = max_load > 0 ? max_load : 1;
-
               load_data = load_data.map((e) => ({
                 ...e,
-                current: e.current / safeMaxLoad,
-                upper: e.upper / safeMaxLoad,
-                lower: e.lower / safeMaxLoad,
-                reference: e.reference / safeMaxLoad,
+                current: e.current,
+                upper: e.upper,
+                lower: e.lower,
+                reference: e.reference,
               }));
 
               setMinDate(load_data[0].date);
@@ -278,6 +272,9 @@ export function SessionsList() {
               <th style={{ textAlign: "center" }}>{translate("exercises")}</th>
               <th style={{ textAlign: "center" }}>{translate("series")}</th>
               <th style={{ textAlign: "center" }}>{translate("volume")}</th>
+              <th style={{ textAlign: "center" }}>
+                {translate("workout_load")}
+              </th>
             </tr>
           </thead>
 
@@ -293,6 +290,7 @@ export function SessionsList() {
                 <td>{session.exercises_num}</td>
                 <td>{session.series_num}</td>
                 <td>{session.volume} Kg</td>
+                <td>{Math.floor(session.training_load)}</td>
               </tr>
             ))}
           </tbody>

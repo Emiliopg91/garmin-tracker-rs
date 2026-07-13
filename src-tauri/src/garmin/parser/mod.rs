@@ -54,6 +54,7 @@ where
     let workout = get_workout_name(&entries)?;
     let total_elapsed_time = get_f64("total_elapsed_time", session_entry.fields()).unwrap_or(0.0);
     let active_time = get_f64("active_time", session_entry.fields()).unwrap_or(0.0);
+    let training_load = get_f64("training_load_peak", session_entry.fields()).unwrap_or(0.0);
     let total_calories = get_u16("total_calories", session_entry.fields()).unwrap_or(0);
     let metabolic_calories = get_u16("metabolic_calories", session_entry.fields()).unwrap_or(0);
     let avg_heart_rate = get_u8("avg_heart_rate", session_entry.fields()).unwrap_or(0);
@@ -70,6 +71,7 @@ where
         avg_heart_rate,
         max_heart_rate,
         series,
+        training_load,
     })
 }
 
