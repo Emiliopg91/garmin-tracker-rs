@@ -1,3 +1,5 @@
+-- Adding user profile table
+
 CREATE TABLE IF NOT EXISTS USER(
     date INTEGER NOT NULL,
     weight REAL NOT NULL,

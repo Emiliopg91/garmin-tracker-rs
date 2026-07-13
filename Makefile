@@ -1,3 +1,5 @@
+export RUSTC_WRAPPER := sccache
+
 run:
 	@mold --run pnpm tauri dev -- -- -v
 

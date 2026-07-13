@@ -1,3 +1,5 @@
+-- Initial scheme
+
 CREATE TABLE IF NOT EXISTS EXERCISE(
     category TEXT NOT NULL,
     id INTEGER NOT NULL,

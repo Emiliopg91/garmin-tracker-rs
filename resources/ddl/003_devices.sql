@@ -1,3 +1,5 @@
+-- Adding device table
+
 CREATE TABLE IF NOT EXISTS DEVICE(
     serial TEXT NOT NULL,
     model REAL NOT NULL,

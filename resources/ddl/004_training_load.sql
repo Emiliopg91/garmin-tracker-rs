@@ -1,1 +1,3 @@
+-- Training load support
+
 ALTER TABLE SESSION ADD COLUMN training_load REAL NOT NULL DEFAULT 0;

@@ -1,6 +1,8 @@
 pub mod dao;
 pub mod errors;
 
+include!(concat!(env!("OUT_DIR"), "/database_versions.rs"));
+
 use std::{
     path::Path,
     sync::{LazyLock, Mutex},
@@ -62,43 +64,24 @@ impl Database {
     }
 
     pub fn create_schema(&mut self) -> Result<()> {
-        let ddls = [
-            (
-                "Initial scheme",
-                include_str!("../../../../resources/ddl/001_base_schema.sql"),
-            ),
-            (
-                "Adding user profile table",
-                include_str!("../../../../resources/ddl/002_user_profile.sql"),
-            ),
-            (
-                "Adding device table",
-                include_str!("../../../../resources/ddl/003_devices.sql"),
-            ),
-            (
-                "Training load support",
-                include_str!("../../../../resources/ddl/004_training_load.sql"),
-            ),
-        ];
-
         self.run_in_transaction(|tx| {
             let current_vers: u16 = tx
                 .pragma_query_value(None, "user_version", |r| r.get(0))
                 .map_err(DatabaseError::SchemaCreation)?;
 
-            for i in 0..ddls.len() {
-                if i as u16 + 1 > current_vers {
-                    debug!(
-                        "Applying database DDL patch v{}: {}",
-                        i + 1,
-                        ddls.get(i).unwrap().0
-                    );
-                    tx.execute_batch(ddls.get(i).unwrap().1)
-                        .map_err(DatabaseError::SchemaCreation)?;
-                }
+            let updates = DDLS
+                .iter()
+                .filter(|v| v.0 > current_vers)
+                .collect::<Vec<&(u16, &str, &str)>>();
 
-                tx.execute_batch(&format!("PRAGMA user_version = {};", ddls.len()))
+            for (version, description, sql) in &updates {
+                debug!("Applying database DDL patch v{}: {}", version, description);
+                tx.execute_batch(sql)
                     .map_err(DatabaseError::SchemaCreation)?;
+            }
+
+            if !updates.is_empty() {
+                debug!("Database updated succesfully")
             }
 
             Ok(())

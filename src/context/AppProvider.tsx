@@ -80,7 +80,7 @@ export function AppProvider({
     };
   }, []);
 
-  const translate = (key: string, replacements?: any[]) => {
+  const translate = (key: string, replacements?: string[]) => {
     if (!translations[key]) {
       console.warn("Missing translation", key);
       return key;
