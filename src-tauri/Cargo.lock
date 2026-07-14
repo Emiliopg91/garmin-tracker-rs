@@ -1434,6 +1434,8 @@ dependencies = [
  "fitparser",
  "indexmap 2.14.0",
  "mtp-rs",
+ "phf",
+ "phf_codegen",
  "rfd",
  "rusqlite",
  "semver",

@@ -19,6 +19,7 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 [build-dependencies]
 tauri-build = { version = "^2", features = [] }
 serde_yaml = "^0"
+phf_codegen = "^0"
 
 [dependencies]
 tauri = { version = "^2", features = [] }
@@ -40,8 +41,8 @@ serde_yaml = "^0"
 semver = "^1"
 ureq = { version = "^3", features = ["json"] }
 clap = { version = "^4", features = ["derive"] }
-rfd = "0.17.2"
-
+rfd = "^0"
+phf = { version = "^0", features = ["macros"] }
 
 [profile.release]
 lto = "fat"
