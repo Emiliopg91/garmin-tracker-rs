@@ -1,9 +1,5 @@
 use std::{collections::BTreeMap, sync::LazyLock};
 
-pub mod translation_keys {
-    include!(concat!(env!("OUT_DIR"), "/translation_keys.rs"));
-}
-
 pub static TRANSLATOR_INST: LazyLock<Translator> = LazyLock::new(Translator::new);
 
 pub struct Translator {

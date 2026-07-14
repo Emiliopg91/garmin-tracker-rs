@@ -20,7 +20,7 @@ use crate::{
             models::{NotificationDefinition, NotificationKind},
             show_notification,
         },
-        translations::{TRANSLATOR_INST, translation_keys::TranslationKeys},
+        translations::TRANSLATOR_INST,
     },
 };
 use tauri_plugin_log::log::{debug, error, info, warn};
@@ -118,14 +118,13 @@ async fn update_watcher(app: AppHandle) {
                                                             latest_version
                                                         );
                                                         show_notification(NotificationDefinition {
-                                                            title: TRANSLATOR_INST.translate(
-                                                                TranslationKeys::NEW_UPDATE_TITLE,
-                                                            ),
+                                                            title: TRANSLATOR_INST
+                                                                .translate("new_update_title"),
                                                             body: TRANSLATOR_INST
                                                                 .translate_and_replace(
-                                                                TranslationKeys::NEW_UPDATE_BODY,
-                                                                &[version],
-                                                            ),
+                                                                    "new_update_body",
+                                                                    &[version],
+                                                                ),
                                                             kind: NotificationKind::Temporal,
                                                         });
                                                         let version: String = version.to_string();

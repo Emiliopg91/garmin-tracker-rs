@@ -71,12 +71,16 @@ impl Database {
 
             let updates = DDLS
                 .iter()
-                .filter(|v| v.0 > current_vers)
-                .collect::<Vec<&(u16, &str, &str)>>();
+                .filter(|update| update.version > current_vers)
+                .cloned()
+                .collect::<Vec<DdlVersion>>();
 
-            for (version, description, sql) in &updates {
-                debug!("Applying database DDL patch v{}: {}", version, description);
-                tx.execute_batch(sql)
+            for update in &updates {
+                debug!(
+                    "Applying database DDL patch v{}: {}",
+                    update.version, update.description
+                );
+                tx.execute_batch(update.sql)
                     .map_err(DatabaseError::SchemaCreation)?;
             }
 

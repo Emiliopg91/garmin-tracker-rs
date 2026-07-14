@@ -7,7 +7,7 @@ use crate::{
             models::{NotificationDefinition, NotificationKind},
             show_notification,
         },
-        translations::{TRANSLATOR_INST, translation_keys::TranslationKeys},
+        translations::TRANSLATOR_INST,
         user::models::UserListItem,
     },
 };
@@ -31,7 +31,7 @@ pub fn get_user_measures() -> Result<Vec<UserListItem>, String> {
         Err(e) => {
             error!("Error getting measures list: {}", e);
             show_notification(NotificationDefinition {
-                title: TRANSLATOR_INST.translate(TranslationKeys::ERROR_MEASURES_LIST),
+                title: TRANSLATOR_INST.translate("error_measures_list"),
                 body: e.clone(),
                 kind: NotificationKind::Persistant,
             });
@@ -58,7 +58,7 @@ pub fn add_user_measures(measures: UserListItem) -> Result<(), String> {
         Err(e) => {
             error!("Error adding measures: {}", e);
             show_notification(NotificationDefinition {
-                title: TRANSLATOR_INST.translate(TranslationKeys::ERROR_ADDING_MEASURES),
+                title: TRANSLATOR_INST.translate("error_adding_measures"),
                 body: e.clone(),
                 kind: NotificationKind::Persistant,
             });
