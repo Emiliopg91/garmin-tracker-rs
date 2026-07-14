@@ -1,7 +1,6 @@
-export RUSTC_WRAPPER := sccache
 
 run:
-	@mold --run pnpm tauri dev -- -- -v
+	@RUSTC_WRAPPER=sccache mold --run pnpm tauri dev -- -- -v
 
 build:
 	@mold --run pnpm tauri build
@@ -23,4 +22,4 @@ update:
 	@python resources/scripts/update-dependencies.py
 
 publish:  
-	@python resources/scripts/publish.py
+	@RUSTC_WRAPPER=sccache python resources/scripts/publish.py
