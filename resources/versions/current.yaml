@@ -17,7 +17,7 @@ node:
   react-dom: 19.2.7
   recharts: 3.9.2
   typescript: 5.8.3
-  typescript-eslint: 8.63.0
+  typescript-eslint: 8.64.0
   vite: 7.3.6
   vite-plugin-checker: 0.14.4
 rust:
@@ -27,6 +27,8 @@ rust:
   fitparser: 0.11.0
   indexmap: 2.14.0
   mtp-rs: 0.23.0
+  phf: 0.14.0
+  phf_codegen: 0.14.0
   rfd: 0.17.2
   rusqlite: 0.40.1
   semver: 1.0.28
@@ -35,7 +37,7 @@ rust:
   serde_yaml: 0.9.34+deprecated
   tauri: 2.11.5
   tauri-build: 2.6.3
-  tauri-plugin-log: 2.8.0
+  tauri-plugin-log: 2.9.0
   tauri-plugin-opener: 2.5.4
   tauri-rs-ts-ipc: 0.1.14
   thiserror: 2.0.18
