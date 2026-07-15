@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@tauri-apps/api": "^2.11.1",
-    "@tauri-apps/plugin-log": "^2.8.0",
+    "@tauri-apps/plugin-log": "^2.9.0",
     "@tauri-apps/plugin-opener": "^2.5.4",
     "bootstrap": "^5.3.8",
     "react": "^19.2.7",
