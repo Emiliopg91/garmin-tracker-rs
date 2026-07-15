@@ -1432,6 +1432,7 @@ dependencies = [
  "clap",
  "dirs",
  "fitparser",
+ "garmin-tracker-rs-macros",
  "indexmap 2.14.0",
  "mtp-rs",
  "phf",
@@ -1451,6 +1452,15 @@ dependencies = [
  "thiserror 2.0.18",
  "tokio",
  "ureq",
+]
+
+[[package]]
+name = "garmin-tracker-rs-macros"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.118",
 ]
 
 [[package]]

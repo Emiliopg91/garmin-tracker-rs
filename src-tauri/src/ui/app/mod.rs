@@ -7,6 +7,7 @@ use std::{
     time::Duration,
 };
 
+use garmin_tracker_rs_macros::traced_command;
 use semver::Version;
 use serde_json::Value;
 use tauri::{AppHandle, Emitter, WebviewWindow, async_runtime::JoinHandle};
@@ -14,7 +15,7 @@ use tauri::{AppHandle, Emitter, WebviewWindow, async_runtime::JoinHandle};
 use crate::{
     constants,
     ui::{
-        app::models::{AppEnvironment, LogLevel},
+        app::models::AppEnvironment,
         devices::start_device_watcher,
         notifications::{
             models::{NotificationDefinition, NotificationKind},
@@ -27,27 +28,7 @@ use tauri_plugin_log::log::{debug, error, info, warn};
 
 static UPDATE_WATCHER: LazyLock<Mutex<Option<JoinHandle<()>>>> = LazyLock::new(|| Mutex::new(None));
 
-/// @dont_log
-#[tauri::command]
-pub fn log_from_frontend(webview_window: WebviewWindow, level: LogLevel, message: &str) {
-    let target_string = format!("frontend::{}", webview_window.label());
-    let target_str = target_string.as_str();
-    match level {
-        LogLevel::Debug => {
-            debug!(target: target_str, "{}", message)
-        }
-        LogLevel::Info => {
-            info!(target: target_str, "{}", message)
-        }
-        LogLevel::Warn => {
-            warn!(target: target_str, "{}", message)
-        }
-        LogLevel::Error => {
-            error!(target: target_str, "{}", message)
-        }
-    }
-}
-
+#[traced_command]
 #[tauri::command]
 pub async fn notify_frontend_ready(app: AppHandle, webview_window: WebviewWindow) {
     info!("UI ready");
@@ -70,6 +51,7 @@ pub async fn notify_frontend_ready(app: AppHandle, webview_window: WebviewWindow
     });
 }
 
+#[traced_command]
 #[tauri::command]
 pub async fn get_environment() -> AppEnvironment {
     let res = if cfg!(debug_assertions) {
@@ -164,6 +146,7 @@ async fn update_watcher(app: AppHandle) {
     }
 }
 
+#[traced_command]
 #[tauri::command]
 pub fn open_version_changelog(version: &str) -> Result<(), String> {
     info!("Opening changelog for version {}...", version);

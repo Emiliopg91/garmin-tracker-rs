@@ -2,6 +2,7 @@ pub mod models;
 
 use std::collections::HashMap;
 
+use garmin_tracker_rs_macros::traced_command;
 use tauri_plugin_log::log::{error, info};
 
 use crate::{
@@ -16,7 +17,7 @@ use crate::{
     },
 };
 
-#[tauri::command]
+#[traced_command]#[tauri::command]
 pub fn get_workout_list() -> Result<Vec<WorkoutListItem>, String> {
     info!("Getting workouts list...");
     let res: Result<Vec<WorkoutListItem>, String> = {
@@ -74,7 +75,7 @@ pub fn get_workout_list() -> Result<Vec<WorkoutListItem>, String> {
     }
 }
 
-#[tauri::command]
+#[traced_command]#[tauri::command]
 pub fn get_workout_details(name: &str) -> Result<WorkoutDetails, String> {
     let res: Result<WorkoutDetails, String> = {
         info!("Getting details for workout {}", name);

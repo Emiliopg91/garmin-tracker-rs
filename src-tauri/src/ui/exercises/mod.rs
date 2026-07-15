@@ -1,5 +1,6 @@
 pub mod models;
 
+use garmin_tracker_rs_macros::traced_command;
 use tauri_plugin_log::log::{error, info};
 
 use crate::{
@@ -15,6 +16,7 @@ use crate::{
     },
 };
 
+#[traced_command]
 #[tauri::command]
 pub fn get_exercises() -> Result<Vec<ExerciseListItem>, String> {
     info!("Getting exercises list...");
@@ -55,6 +57,7 @@ pub fn get_exercises() -> Result<Vec<ExerciseListItem>, String> {
     }
 }
 
+#[traced_command]
 #[tauri::command]
 pub fn get_exercise_details(category: &str, id: i16) -> Result<ExerciseDetails, String> {
     info!(

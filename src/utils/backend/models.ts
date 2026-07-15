@@ -37,14 +37,6 @@ export interface ExerciseListItem {
   weight: number;
 }
 
-// From src-tauri/src/ui/app/models.rs:10
-export enum LogLevel {
-	Debug = "Debug",
-	Info = "Info",
-	Warn = "Warn",
-	Error = "Error",
-}
-
 // From src-tauri/src/ui/notifications/models.rs:4
 export enum NotificationKind {
 	Temporal = "Temporal",

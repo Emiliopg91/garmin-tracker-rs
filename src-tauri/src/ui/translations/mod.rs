@@ -1,5 +1,7 @@
 use std::{collections::BTreeMap, sync::LazyLock};
 
+use garmin_tracker_rs_macros::traced_command;
+
 include!(concat!(env!("OUT_DIR"), "/translations.rs"));
 
 pub static TRANSLATOR_INST: LazyLock<Translator> = LazyLock::new(Translator::new);
@@ -35,6 +37,7 @@ impl Translator {
     }
 }
 
+#[traced_command]
 #[tauri::command]
 pub fn get_translations() -> BTreeMap<String, String> {
     let mut res = BTreeMap::new();

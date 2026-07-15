@@ -2,6 +2,7 @@ pub mod models;
 use std::path::{Path, PathBuf};
 
 use chrono::{DateTime, Datelike, Local, TimeZone, Timelike};
+use garmin_tracker_rs_macros::traced_command;
 use rfd::AsyncFileDialog;
 use tauri_plugin_log::log::{error, info};
 
@@ -24,6 +25,7 @@ use crate::{
     },
 };
 
+#[traced_command]
 #[tauri::command]
 pub fn get_sessions() -> Result<Vec<SessionListItem>, String> {
     info!("Getting sessions list...");
@@ -53,6 +55,7 @@ pub fn get_sessions() -> Result<Vec<SessionListItem>, String> {
     }
 }
 
+#[traced_command]
 #[tauri::command]
 pub fn get_session_details(timestamp: i64) -> Result<SessionDetails, String> {
     info!(
@@ -96,6 +99,7 @@ pub fn get_session_details(timestamp: i64) -> Result<SessionDetails, String> {
     }
 }
 
+#[traced_command]
 #[tauri::command]
 pub fn save_session_changes(details: SessionSeriesUpdate) -> Result<(), String> {
     info!(
@@ -156,6 +160,7 @@ pub fn save_session_changes(details: SessionSeriesUpdate) -> Result<(), String> 
     }
 }
 
+#[traced_command]
 #[tauri::command]
 pub async fn import_from_file() -> Result<u16, String> {
     info!("Starting import from file/s...");
@@ -168,7 +173,7 @@ pub async fn import_from_file() -> Result<u16, String> {
         .pick_files()
         .await;
 
-    let res = match selection {
+    match selection {
         Some(files) => {
             let files = files
                 .iter()
@@ -181,14 +186,10 @@ pub async fn import_from_file() -> Result<u16, String> {
             info!("No file was selected");
             Ok(0)
         }
-    };
-
-    match res {
-        Ok(inserted) => Ok(inserted),
-        Err(e) => Err(e),
     }
 }
 
+#[traced_command]
 #[tauri::command]
 pub async fn import_from_device(serial: &str) -> Result<u16, String> {
     info!("Starting import from device with S/N {}", serial);
