@@ -26,4 +26,4 @@ dist-ssr
 activity.txt
 aur
 
-src-tauri-macros/.gitignore
+src-tauri-macros/target
