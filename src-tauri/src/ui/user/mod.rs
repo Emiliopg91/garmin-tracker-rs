@@ -15,7 +15,8 @@ use crate::{
 
 pub mod models;
 
-#[traced_command]#[tauri::command]
+#[traced_command]
+#[tauri::command]
 pub fn get_user_measures() -> Result<Vec<UserListItem>, String> {
     info!("Getting user measures list...");
 
@@ -41,7 +42,8 @@ pub fn get_user_measures() -> Result<Vec<UserListItem>, String> {
     }
 }
 
-#[traced_command]#[tauri::command]
+#[traced_command]
+#[tauri::command]
 pub fn add_user_measures(measures: UserListItem) -> Result<(), String> {
     info!("Adding user measures list...");
     dbg!(&measures);

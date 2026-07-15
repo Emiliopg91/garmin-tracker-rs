@@ -17,7 +17,8 @@ use crate::{
     },
 };
 
-#[traced_command]#[tauri::command]
+#[traced_command]
+#[tauri::command]
 pub fn get_workout_list() -> Result<Vec<WorkoutListItem>, String> {
     info!("Getting workouts list...");
     let res: Result<Vec<WorkoutListItem>, String> = {
@@ -75,7 +76,8 @@ pub fn get_workout_list() -> Result<Vec<WorkoutListItem>, String> {
     }
 }
 
-#[traced_command]#[tauri::command]
+#[traced_command]
+#[tauri::command]
 pub fn get_workout_details(name: &str) -> Result<WorkoutDetails, String> {
     let res: Result<WorkoutDetails, String> = {
         info!("Getting details for workout {}", name);
