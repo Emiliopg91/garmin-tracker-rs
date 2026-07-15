@@ -136,7 +136,7 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
               </tr>
               <tr>
                 <td>{translate("workout_load")}:</td>
-                <td>{Math.floor(localSession.training_load)}</td>
+                <td>{localSession.training_load}</td>
               </tr>
               <tr>
                 <td>{translate("volume")}:</td>

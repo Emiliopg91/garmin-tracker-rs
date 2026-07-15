@@ -290,7 +290,7 @@ export function SessionsList() {
                 <td>{session.exercises_num}</td>
                 <td>{session.series_num}</td>
                 <td>{session.volume} Kg</td>
-                <td>{Math.floor(session.training_load)}</td>
+                <td>{session.training_load}</td>
               </tr>
             ))}
           </tbody>

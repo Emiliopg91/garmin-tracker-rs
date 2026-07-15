@@ -12,7 +12,7 @@ pub struct SessionListItem {
     pub volume: f64,
     pub exercises_num: u8,
     pub series_num: u8,
-    pub training_load: f64,
+    pub training_load: u16,
 }
 
 impl From<&Session> for SessionListItem {
@@ -24,7 +24,7 @@ impl From<&Session> for SessionListItem {
             exercises_num: value.get_exercises_num(),
             series_num: value.get_series_num(),
             volume: value.get_volume(),
-            training_load: value.training_load,
+            training_load: value.training_load.round() as u16,
         }
     }
 }
@@ -70,7 +70,7 @@ pub struct SessionDetails {
     pub total_calories: u16,
     pub metabolic_calories: u16,
 
-    pub training_load: f64,
+    pub training_load: u16,
 
     pub avg_heart_rate: u8,
     pub max_heart_rate: u8,
@@ -90,7 +90,7 @@ impl From<&Session> for SessionDetails {
             metabolic_calories: value.metabolic_calories,
             total_calories: value.total_calories,
             total_elapsed_time: value.format_total_time(),
-            training_load: value.training_load,
+            training_load: value.training_load.round() as u16,
             exercises: Vec::new(),
             series: HashMap::new(),
         }
