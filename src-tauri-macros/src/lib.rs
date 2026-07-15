@@ -26,7 +26,7 @@ pub fn traced_command(_attrs: TokenStream, item: TokenStream) -> TokenStream {
             let t0 = std::time::Instant::now();
             tauri_plugin_log::log::debug!("Invoking command {}...", #name);
             let result = #call;
-            tauri_plugin_log::log::debug!("Command {} finished after {:.3}s", #name, t0.elapsed().as_secs_f64());
+            tauri_plugin_log::log::debug!("Command {} finished after {:.3}", #name, t0.elapsed().as_secs_f64());
             result
         }
     };
