@@ -1,6 +1,6 @@
 [package]
 name = "garmin-tracker-rs"
-version = "1.4.9"
+version = "1.4.10"
 description = "Sync your devices and track your strength training"
 authors = ["Emiliopg91 <ojosdeserbio@gmail.com>"]
 edition = "2024"
