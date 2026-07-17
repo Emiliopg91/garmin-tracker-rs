@@ -1,13 +1,13 @@
 pub mod models;
 
 use std::{
-    collections::HashMap,
+    collections::HashMap, 
     process::Command,
     sync::{LazyLock, Mutex},
     time::Duration,
 };
 
-use garmin_tracker_rs_macros::traced_command;
+use garmin_tracker_rs_macros::{traced_command, translate};
 use semver::Version;
 use serde_json::Value;
 use tauri::{AppHandle, Emitter, WebviewWindow, async_runtime::JoinHandle};
@@ -21,7 +21,6 @@ use crate::{
             models::{NotificationDefinition, NotificationKind},
             show_notification,
         },
-        translations::TRANSLATOR_INST,
     },
 };
 use tauri_plugin_log::log::{debug, error, info, warn};
@@ -54,15 +53,11 @@ pub async fn notify_frontend_ready(app: AppHandle, webview_window: WebviewWindow
 #[traced_command]
 #[tauri::command]
 pub async fn get_environment() -> AppEnvironment {
-    let res = if cfg!(debug_assertions) {
+    if cfg!(debug_assertions) {
         AppEnvironment::Debug
     } else {
         AppEnvironment::Release
-    };
-
-    info!("App environment: {:?}", res);
-
-    res
+    }
 }
 
 async fn update_watcher(app: AppHandle) {
@@ -100,12 +95,10 @@ async fn update_watcher(app: AppHandle) {
                                                             latest_version
                                                         );
                                                         show_notification(NotificationDefinition {
-                                                            title: TRANSLATOR_INST
-                                                                .translate("new_update_title"),
-                                                            body: TRANSLATOR_INST
-                                                                .translate_and_replace(
+                                                            title: translate!("new_update_title"),
+                                                            body: translate!(
                                                                     "new_update_body",
-                                                                    &[version],
+                                                                    version,
                                                                 ),
                                                             kind: NotificationKind::Temporal,
                                                         });

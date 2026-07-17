@@ -15,7 +15,6 @@ use crate::{
             get_session_details, get_sessions, import_from_device, import_from_file,
             save_session_changes,
         },
-        translations::get_translations,
         user::{add_user_measures, get_user_measures},
         workouts::{get_workout_details, get_workout_list},
     },
@@ -32,7 +31,7 @@ pub fn run() {
             tauri_plugin_log::Builder::new()
                 .level(LevelFilter::Warn)
                 .level_for(constants::LIB_NAME.clone(), *constants::LOG_LEVEL)
-                .level_for("frontend", *constants::LOG_LEVEL)
+                .level_for("command", *constants::LOG_LEVEL)
                 .target(Target::new(TargetKind::Folder {
                     path: constants::LOGS_DIR.clone(),
                     file_name: None,
@@ -99,7 +98,6 @@ pub fn run() {
             add_user_measures,
             open_version_changelog,
             get_environment,
-            get_translations
         ])
         .run(tauri::generate_context!());
 

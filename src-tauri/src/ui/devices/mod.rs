@@ -1,11 +1,12 @@
 pub mod models;
 
+use garmin_tracker_rs_macros::translate;
 use std::{
     sync::{LazyLock, Mutex},
     time::Duration,
 };
 
-use tauri::{AppHandle, Emitter, async_runtime::JoinHandle};
+use tauri::{async_runtime::JoinHandle, AppHandle, Emitter};
 use tauri_plugin_log::log::{info, warn};
 
 use crate::{
@@ -16,7 +17,6 @@ use crate::{
             models::{NotificationDefinition, NotificationKind},
             show_notification,
         },
-        translations::TRANSLATOR_INST,
     },
 };
 
@@ -59,7 +59,7 @@ pub async fn start_device_watcher(app: AppHandle) {
                                 device.manufacturer, device.model, device.serial_number
                             );
                             show_notification(NotificationDefinition {
-                                title: TRANSLATOR_INST.translate("device_connected"),
+                                title: translate!("device_connected"),
                                 body: format!("{} {}", device.manufacturer, device.model),
                                 kind: NotificationKind::Temporal,
                             });
@@ -79,7 +79,7 @@ pub async fn start_device_watcher(app: AppHandle) {
                                 device.manufacturer, device.model, device.serial_number
                             );
                             show_notification(NotificationDefinition {
-                                title: TRANSLATOR_INST.translate("device_disconnected"),
+                                title: translate!("device_disconnected"),
                                 body: format!("{} {}", device.manufacturer, device.model),
                                 kind: NotificationKind::Temporal,
                             });

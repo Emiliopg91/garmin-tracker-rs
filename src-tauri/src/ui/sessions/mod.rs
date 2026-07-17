@@ -2,7 +2,7 @@ pub mod models;
 use std::path::{Path, PathBuf};
 
 use chrono::{DateTime, Datelike, Local, TimeZone, Timelike};
-use garmin_tracker_rs_macros::traced_command;
+use garmin_tracker_rs_macros::{traced_command, translate};
 use rfd::AsyncFileDialog;
 use tauri_plugin_log::log::{error, info};
 
@@ -21,7 +21,6 @@ use crate::{
             show_notification,
         },
         sessions::models::{SessionDetails, SessionListItem, SessionSerie, SessionSeriesUpdate},
-        translations::TRANSLATOR_INST,
     },
 };
 
@@ -46,7 +45,7 @@ pub fn get_sessions() -> Result<Vec<SessionListItem>, String> {
         Err(e) => {
             error!("Error getting sessions list: {}", e);
             show_notification(NotificationDefinition {
-                title: TRANSLATOR_INST.translate("error_session_list"),
+                title: translate!("error_session_list"),
                 body: e.clone(),
                 kind: NotificationKind::Persistant,
             });
@@ -90,7 +89,7 @@ pub fn get_session_details(timestamp: i64) -> Result<SessionDetails, String> {
         Err(e) => {
             error!("Error getting session details: {}", e);
             show_notification(NotificationDefinition {
-                title: TRANSLATOR_INST.translate("error_session_details"),
+                title: translate!("error_session_details"),
                 body: e.clone(),
                 kind: NotificationKind::Persistant,
             });
@@ -141,7 +140,7 @@ pub fn save_session_changes(details: SessionSeriesUpdate) -> Result<(), String> 
         Ok(l) => {
             info!("Session updated succesfully");
             show_notification(NotificationDefinition {
-                title: TRANSLATOR_INST.translate("ok_update_session"),
+                title: translate!("ok_update_session"),
                 body: "".to_string(),
                 kind: NotificationKind::Temporal,
             });
@@ -151,7 +150,7 @@ pub fn save_session_changes(details: SessionSeriesUpdate) -> Result<(), String> 
         Err(e) => {
             error!("Error updating session: {}", e);
             show_notification(NotificationDefinition {
-                title: TRANSLATOR_INST.translate("error_update_session"),
+                title: translate!("error_update_session"),
                 body: e.clone(),
                 kind: NotificationKind::Persistant,
             });

@@ -2,7 +2,7 @@ pub mod models;
 
 use std::collections::HashMap;
 
-use garmin_tracker_rs_macros::traced_command;
+use garmin_tracker_rs_macros::{traced_command, translate};
 use tauri_plugin_log::log::{error, info};
 
 use crate::{
@@ -12,7 +12,6 @@ use crate::{
             models::{NotificationDefinition, NotificationKind},
             show_notification,
         },
-        translations::TRANSLATOR_INST,
         workouts::models::{WorkoutDetails, WorkoutListItem, WorkoutSession},
     },
 };
@@ -67,7 +66,7 @@ pub fn get_workout_list() -> Result<Vec<WorkoutListItem>, String> {
         Err(e) => {
             error!("Error getting workouts list: {}", e);
             show_notification(NotificationDefinition {
-                title: TRANSLATOR_INST.translate("error_workout_list"),
+                title: translate!("error_workout_list"),
                 body: e.to_string(),
                 kind: NotificationKind::Persistant,
             });
@@ -129,7 +128,7 @@ pub fn get_workout_details(name: &str) -> Result<WorkoutDetails, String> {
         Err(e) => {
             error!("Error getting workout details: {}", e);
             show_notification(NotificationDefinition {
-                title: TRANSLATOR_INST.translate("error_workout_details"),
+                title: translate!("error_workout_details"),
                 body: e.clone(),
                 kind: NotificationKind::Persistant,
             });

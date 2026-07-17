@@ -20,6 +20,12 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 tauri-build = { version = "^2", features = [] }
 serde_yaml = "^0"
 phf_codegen = "^0"
+syn = { version = "^2", features = ["visit"] }
+swc_ecma_ast = "*"
+swc_ecma_parser = "*"
+swc_ecma_visit = "*"
+swc_common = "*"
+walkdir = "*"
 
 [dependencies]
 tauri = { version = "^2", features = [] }

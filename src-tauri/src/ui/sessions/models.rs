@@ -97,7 +97,7 @@ impl From<&Session> for SessionDetails {
     }
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 pub struct SessionSeriesUpdate {
     pub timestamp: i64,
     pub series: Vec<SessionSerie>,

@@ -1,6 +1,6 @@
 pub mod models;
 
-use garmin_tracker_rs_macros::traced_command;
+use garmin_tracker_rs_macros::{traced_command, translate};
 use tauri_plugin_log::log::{error, info};
 
 use crate::{
@@ -12,7 +12,6 @@ use crate::{
             show_notification,
         },
         sessions::models::SessionSerie,
-        translations::TRANSLATOR_INST,
     },
 };
 
@@ -48,7 +47,7 @@ pub fn get_exercises() -> Result<Vec<ExerciseListItem>, String> {
         Err(e) => {
             error!("Error getting exercises list: {}", e);
             show_notification(NotificationDefinition {
-                title: TRANSLATOR_INST.translate("error_exercise_list"),
+                title: translate!("error_exercise_list"),
                 body: e.to_string(),
                 kind: NotificationKind::Persistant,
             });
@@ -107,7 +106,7 @@ pub fn get_exercise_details(category: &str, id: i16) -> Result<ExerciseDetails, 
         Err(e) => {
             error!("Error getting exercise details: {}", e);
             show_notification(NotificationDefinition {
-                title: TRANSLATOR_INST.translate("error_exercise_details"),
+                title: translate!("error_exercise_details"),
                 body: e.to_string(),
                 kind: NotificationKind::Persistant,
             });
