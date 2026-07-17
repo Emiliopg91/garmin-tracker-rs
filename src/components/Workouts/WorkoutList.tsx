@@ -15,6 +15,17 @@ export function WorkoutsList() {
   const refreshList = () => {
     BackendClient.getWorkoutList()
       .then((data) => {
+        data.sort((a, b) => {
+          if (a.name.length > 0 && b.name.length > 0) {
+            return a.name.localeCompare(b.name);
+          } else {
+            if (a.name.length == 0) {
+              return 1;
+            } else {
+              return -1;
+            }
+          }
+        });
         setWorkouts(data);
       })
       .finally(() => {
@@ -55,7 +66,10 @@ export function WorkoutsList() {
               style={{ cursor: "pointer" }}
               onClick={() => getWorkoutDetails(workout.name)}
             >
-              <td style={{ textAlign: "left" }}>{workout.name}</td>
+              <td style={{ textAlign: "left" }}>
+                {workout.name.length > 0 && <span>{workout.name}</span>}
+                {workout.name.length == 0 && <span>{translate("other")}</span>}
+              </td>
               <td>{workout.latest_session}</td>
               <td>{workout.sessions}</td>
               <td>{workout.avg_time}</td>

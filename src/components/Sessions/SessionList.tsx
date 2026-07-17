@@ -53,26 +53,33 @@ export function SessionsList() {
 
           const CHRONIC_DAYS = 28;
           const ACUTE_DAYS = 7;
-          const ACWR_UPPER_RATIO = 1;
-          const ACWR_LOWER_RATIO = 0.7;
+          const ACWR_UPPER_RATIO = 1.4;
+          const ACWR_LOWER_RATIO = 0.9;
           const TODAY = startOfDay(new Date());
 
           const LAMBDA_ACUTE = 2 / (ACUTE_DAYS + 1); // ~0.25
           const LAMBDA_CHRONIC = 2 / (CHRONIC_DAYS + 1); // ~0.069
 
-          let working_data = data
-            .map((s) => {
-              const [dd, mm, yyyy] = s.date
-                .split(" ")[1]
-                .split("/")
-                .map(Number);
-              const date = new Date(yyyy, mm - 1, dd).getTime();
+          let working_data = Array.from(
+            data
+              .map((s) => {
+                const [dd, mm, yyyy] = s.date
+                  .split(" ")[1]
+                  .split("/")
+                  .map(Number);
+                const date = new Date(yyyy, mm - 1, dd).getTime();
 
-              return { date: date, load: s.training_load };
-            })
-            .filter(
-              (s) => TODAY - 2 * CHRONIC_DAYS * 24 * 60 * 60 * 1000 <= s.date,
-            );
+                return { date, load: s.training_load };
+              })
+              .filter(
+                (s) => TODAY - 2 * CHRONIC_DAYS * 24 * 60 * 60 * 1000 <= s.date,
+              )
+              .reduce((map, s) => {
+                map.set(s.date, (map.get(s.date) ?? 0) + s.load);
+                return map;
+              }, new Map<number, number>()),
+            ([date, load]) => ({ date, load }),
+          );
 
           for (
             let dat = addDays(TODAY, -2 * CHRONIC_DAYS + 1);
@@ -121,7 +128,7 @@ export function SessionsList() {
               .filter((_, idx) => idx >= CHRONIC_DAYS)
               .map((e) => ({
                 date: e.date,
-                upper: e.chronic * ACWR_UPPER_RATIO,
+                upper: e.chronic * (ACWR_UPPER_RATIO - ACWR_LOWER_RATIO),
                 lower: e.chronic * ACWR_LOWER_RATIO,
                 current: e.acute,
                 reference: e.chronic,
@@ -267,11 +274,12 @@ export function SessionsList() {
         <table>
           <thead>
             <tr>
-              <th style={{ textAlign: "center" }}>{translate("workout")}</th>
               <th style={{ textAlign: "center" }}>{translate("date")}</th>
-              <th style={{ textAlign: "center" }}>{translate("exercises")}</th>
-              <th style={{ textAlign: "center" }}>{translate("series")}</th>
+              <th style={{ textAlign: "center" }}>{translate("workout")}</th>
               <th style={{ textAlign: "center" }}>{translate("volume")}</th>
+              <th style={{ textAlign: "center" }}>
+                {translate("active_calories")}
+              </th>
               <th style={{ textAlign: "center" }}>
                 {translate("workout_load")}
               </th>
@@ -285,11 +293,21 @@ export function SessionsList() {
                 onClick={() => getSessionDetails(session.timestamp)}
                 style={{ cursor: "pointer" }}
               >
-                <td>{session.name}</td>
                 <td>{session.date}</td>
-                <td>{session.exercises_num}</td>
-                <td>{session.series_num}</td>
-                <td>{session.volume} Kg</td>
+                <td>
+                  {session.sub_sport == "strength_training" && (
+                    <span>{session.name}</span>
+                  )}
+                  {session.sub_sport != "strength_training" && (
+                    <span>{translate("other")}</span>
+                  )}
+                </td>
+                <td>
+                  {session.sub_sport == "strength_training" && (
+                    <span>{session.volume} Kg</span>
+                  )}
+                </td>
+                <td>{session.active_calories}</td>
                 <td>{session.training_load}</td>
               </tr>
             ))}

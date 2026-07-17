@@ -20,6 +20,7 @@ export const TRANSLATIONS: Record<string, string> = {
 	"loading": "Cargando...",
 	"max_heart_rate": "Frecuencia cardiaca maxima",
 	"no_device_found": "No se detectó dispositivo",
+	"other": "Otro",
 	"personal_record": "Record personal",
 	"pr": "PR",
 	"record_date": "Fecha del record",

@@ -42,24 +42,25 @@ where
         .find(|r| r.kind() == profile::MesgNum::Session)
         .ok_or_else(|| ParseFitFileError::MissingField("session".to_string()))?;
 
-    let sub_sport_value = get_field("sub_sport", session_entry.fields())
-        .map_err(|_| ParseFitFileError::MissingField("sub_sport".to_string()))?;
-
-    match sub_sport_value {
-        Value::String(s) if s == "strength_training" => {}
-        _ => return Err(ParseFitFileError::OnlyStrengthTraining()),
-    }
-
     let timestamp = get_timestamp("timestamp", session_entry.fields())?;
-    let workout = get_workout_name(&entries)?;
-    let total_elapsed_time = get_f64("total_elapsed_time", session_entry.fields()).unwrap_or(0.0);
+    let sub_sport = get_string("sub_sport", session_entry.fields())?;
+    let workout = if sub_sport == "strength_training" {
+        get_workout_name(&entries)?
+    } else {
+        "".to_string()
+    };
+    let total_elapsed_time = get_f64("total_elapsed_time", session_entry.fields())?;
     let active_time = get_f64("active_time", session_entry.fields()).unwrap_or(0.0);
-    let training_load = get_f64("training_load_peak", session_entry.fields()).unwrap_or(0.0);
-    let total_calories = get_u16("total_calories", session_entry.fields()).unwrap_or(0);
-    let metabolic_calories = get_u16("metabolic_calories", session_entry.fields()).unwrap_or(0);
-    let avg_heart_rate = get_u8("avg_heart_rate", session_entry.fields()).unwrap_or(0);
-    let max_heart_rate = get_u8("max_heart_rate", session_entry.fields()).unwrap_or(0);
-    let series = get_sets(&entries, &timestamp)?;
+    let training_load = get_f64("training_load_peak", session_entry.fields())?;
+    let total_calories = get_u16("total_calories", session_entry.fields())?;
+    let metabolic_calories = get_u16("metabolic_calories", session_entry.fields())?;
+    let avg_heart_rate = get_u8("avg_heart_rate", session_entry.fields())?;
+    let max_heart_rate = get_u8("max_heart_rate", session_entry.fields())?;
+    let series = if sub_sport == "strength_training" {
+        get_sets(&entries, &timestamp)?
+    } else {
+        IndexMap::new()
+    };
 
     Ok(Session {
         workout,
@@ -72,6 +73,7 @@ where
         max_heart_rate,
         series,
         training_load,
+        sub_sport,
     })
 }
 

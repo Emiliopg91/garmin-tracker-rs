@@ -57,7 +57,10 @@ export function WorkoutModal({ workout, onClose }: Props) {
     >
       <Modal show={true} onHide={onClose} data-bs-theme="dark">
         <Modal.Header closeButton>
-          <Modal.Title>{workout.name}</Modal.Title>
+          <Modal.Title>
+            {workout.name.length > 0 && <span>{workout.name}</span>}
+            {workout.name.length == 0 && <span>{translate("other")}</span>}
+          </Modal.Title>
         </Modal.Header>
 
         <Modal.Body>
@@ -80,69 +83,88 @@ export function WorkoutModal({ workout, onClose }: Props) {
                 <td>{translate("average_time")}</td>
                 <td>{workout.avg_time}</td>
               </tr>
-              <tr>
-                <td>{translate("average_volume")}:</td>
-                <td>{Math.floor(workout.avg_volume)} Kg</td>
-              </tr>
+              {workout.name.length > 0 && (
+                <tr>
+                  <td>{translate("average_volume")}:</td>
+                  <td>{Math.floor(workout.avg_volume)} Kg</td>
+                </tr>
+              )}
             </tbody>
           </table>
           {workout.sessions.length > 0 && (
             <>
               <hr />
-              <div style={{ width: "100%", height: 200 }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart
-                    data={chartData}
-                    margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
-                  >
-                    <CartesianGrid stroke="#80808000" strokeDasharray="5 5" />
-                    <XAxis
-                      dataKey="date"
-                      stroke="#fff"
-                      type="number"
-                      domain={[minDate, maxDate]}
-                      tick={false}
-                      height={0}
-                    />
-                    <YAxis
-                      stroke="#fff"
-                      width={0}
-                      domain={[minVol * 0.9, maxVol * 1.1]}
-                      tick={false}
-                    />{" "}
-                    {/* ← número, no "auto" */}
-                    <Line
-                      name={translate("volume")}
-                      type="monotone"
-                      dataKey="volume"
-                      stroke="#0f0"
-                      dot={{ fill: "#0f0" }}
-                      activeDot={{ stroke: "#00ff0000" }}
-                      isAnimationActive={false}
-                    />
-                    <ReferenceLine
-                      y={(minVol + maxVol) / 2}
-                      stroke="#808080"
-                      strokeDasharray="10 5"
-                    />
-                    <Legend />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-              <br />
-              <hr />
+              {workout.name.length > 0 && (
+                <>
+                  <div style={{ width: "100%", height: 200 }}>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart
+                        data={chartData}
+                        margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
+                      >
+                        <CartesianGrid
+                          stroke="#80808000"
+                          strokeDasharray="5 5"
+                        />
+                        <XAxis
+                          dataKey="date"
+                          stroke="#fff"
+                          type="number"
+                          domain={[minDate, maxDate]}
+                          tick={false}
+                          height={0}
+                        />
+                        <YAxis
+                          stroke="#fff"
+                          width={0}
+                          domain={[minVol * 0.9, maxVol * 1.1]}
+                          tick={false}
+                        />{" "}
+                        {/* ← número, no "auto" */}
+                        <Line
+                          name={translate("volume")}
+                          type="monotone"
+                          dataKey="volume"
+                          stroke="#0f0"
+                          dot={{ fill: "#0f0" }}
+                          activeDot={{ stroke: "#00ff0000" }}
+                          isAnimationActive={false}
+                        />
+                        <ReferenceLine
+                          y={(minVol + maxVol) / 2}
+                          stroke="#808080"
+                          strokeDasharray="10 5"
+                        />
+                        <Legend />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <br />
+                  <hr />
+                </>
+              )}
               <h5 style={{ textAlign: "center" }}>{translate("sessions")}</h5>
               <table>
                 <colgroup>
-                  <col style={{ width: "230px" }} />
-                  <col style={{ width: "120px" }} />
-                  <col style={{ width: "280px" }} />
+                  <col
+                    style={{
+                      width: workout.name.length > 0 ? "230px" : "370px",
+                    }}
+                  />
+                  <col
+                    style={{
+                      width: workout.name.length > 0 ? "120px" : "260px",
+                    }}
+                  />
+                  {workout.name.length > 0 && (
+                    <col style={{ width: "280px" }} />
+                  )}
                 </colgroup>
                 <thead>
                   <tr>
                     <th>{translate("date")}</th>
                     <th>{translate("time")}</th>
-                    <th>{translate("volume")}</th>
+                    {workout.name.length > 0 && <th>{translate("volume")}</th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -155,11 +177,13 @@ export function WorkoutModal({ workout, onClose }: Props) {
                     >
                       <td>{session.date}</td>
                       <td>{session.time}</td>
-                      <td>
-                        {session.volume} Kg{" "}
-                        {session.vol_diff != "-" &&
-                          "(" + session.vol_diff + ")"}
-                      </td>
+                      {workout.name.length > 0 && (
+                        <td>
+                          {session.volume} Kg{" "}
+                          {session.vol_diff != "-" &&
+                            "(" + session.vol_diff + ")"}
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>

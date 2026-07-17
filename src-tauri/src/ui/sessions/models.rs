@@ -10,9 +10,9 @@ pub struct SessionListItem {
     pub date: String,
     pub timestamp: i64,
     pub volume: f64,
-    pub exercises_num: u8,
-    pub series_num: u8,
+    pub active_calories: u16,
     pub training_load: u16,
+    pub sub_sport: String,
 }
 
 impl From<&Session> for SessionListItem {
@@ -21,10 +21,10 @@ impl From<&Session> for SessionListItem {
             name: value.workout.clone(),
             date: value.format_date(),
             timestamp: value.timestamp.timestamp(),
-            exercises_num: value.get_exercises_num(),
-            series_num: value.get_series_num(),
+            active_calories: value.total_calories - value.metabolic_calories,
             volume: value.get_volume(),
             training_load: value.training_load.round() as u16,
+            sub_sport: value.sub_sport.clone(),
         }
     }
 }
@@ -74,6 +74,8 @@ pub struct SessionDetails {
 
     pub avg_heart_rate: u8,
     pub max_heart_rate: u8,
+    pub sub_sport: String,
+
     pub exercises: Vec<String>,
     pub series: HashMap<String, Vec<SessionSerie>>,
 }
@@ -91,6 +93,7 @@ impl From<&Session> for SessionDetails {
             total_calories: value.total_calories,
             total_elapsed_time: value.format_total_time(),
             training_load: value.training_load.round() as u16,
+            sub_sport: value.sub_sport.clone(),
             exercises: Vec::new(),
             series: HashMap::new(),
         }

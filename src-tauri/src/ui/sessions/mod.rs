@@ -267,14 +267,14 @@ where
                 } else {
                     let msg = format!("Session with date {} already exists", session.format_date());
                     if error_on_duplicate {
-                        return Err(format!(
+                        Err(format!(
                             "Session with date {} already exists",
                             session.format_date()
-                        ));
+                        ))
                     } else {
                         warn!("{}", msg);
-                        return Err("".to_string());
-                    };
+                        Err("".to_string())
+                    }
                 }
             }
             Err(e) => Err(format!("Error parsing session: {}", e)),

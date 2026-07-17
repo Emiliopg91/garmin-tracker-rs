@@ -91,7 +91,9 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
       <Modal show={true} onHide={onClose} data-bs-theme="dark">
         <Modal.Header closeButton>
           <Modal.Title>
-            {localSession.name}
+            {session.sub_sport == "strength_training"
+              ? localSession.name
+              : translate("other")}
             <small style={{ fontSize: "17px", marginLeft: "30px" }}>
               {localSession.date}
             </small>
@@ -110,10 +112,12 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                 <td>{translate("total_time")}:</td>
                 <td>{localSession.total_elapsed_time}</td>
               </tr>
-              <tr>
-                <td>{translate("active_time")}:</td>
-                <td>{localSession.active_time}</td>
-              </tr>
+              {session.sub_sport == "strength_training" && (
+                <tr>
+                  <td>{translate("active_time")}:</td>
+                  <td>{localSession.active_time}</td>
+                </tr>
+              )}
               <tr>
                 <td>{translate("total_calories")}:</td>
                 <td>{localSession.total_calories} Kcal</td>
@@ -138,96 +142,103 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                 <td>{translate("workout_load")}:</td>
                 <td>{localSession.training_load}</td>
               </tr>
-              <tr>
-                <td>{translate("volume")}:</td>
-                <td>{getVolume()} Kg</td>
-              </tr>
+              {session.sub_sport == "strength_training" && (
+                <tr>
+                  <td>{translate("volume")}:</td>
+                  <td>{getVolume()} Kg</td>
+                </tr>
+              )}
             </tbody>
           </table>
-          {Object.keys(localSession.series).length > 0 && (
-            <>
-              <hr />
-              <table>
-                <colgroup>
-                  <col style={{ width: "350px" }} />
-                  <col style={{ width: "150px" }} />
-                </colgroup>
+          {session.sub_sport == "strength_training" &&
+            Object.keys(localSession.series).length > 0 && (
+              <>
+                <hr />
+                <table>
+                  <colgroup>
+                    <col style={{ width: "350px" }} />
+                    <col style={{ width: "150px" }} />
+                  </colgroup>
 
-                <thead>
-                  <tr>
-                    <th>{translate("exercise")}:</th>
-                    <th>{translate("series")}:</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {localSession.exercises.map((exercise) =>
-                    localSession.series[exercise].map((serie, idx) => (
-                      <tr key={`${exercise}-${idx}`}>
-                        {idx === 0 && (
+                  <thead>
+                    <tr>
+                      <th>{translate("exercise")}:</th>
+                      <th>{translate("series")}:</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {localSession.exercises.map((exercise) =>
+                      localSession.series[exercise].map((serie, idx) => (
+                        <tr key={`${exercise}-${idx}`}>
+                          {idx === 0 && (
+                            <td
+                              style={{
+                                borderBottom:
+                                  idx === 0 ? "1px solid #e4e4e430" : "",
+                              }}
+                              rowSpan={localSession.series[exercise].length}
+                            >
+                              {exercise}
+                            </td>
+                          )}
+
                           <td
                             style={{
                               borderBottom:
-                                idx === 0 ? "1px solid #e4e4e430" : "",
+                                idx === localSession.series[exercise].length - 1
+                                  ? "1px solid #e4e4e430"
+                                  : "",
+                              paddingBottom:
+                                idx === localSession.series[exercise].length - 1
+                                  ? "5px"
+                                  : "",
+                              paddingTop: idx === 0 ? "5px" : "",
                             }}
-                            rowSpan={localSession.series[exercise].length}
                           >
-                            {exercise}
+                            <input
+                              type="number"
+                              value={serie.reps}
+                              className="no-spinner"
+                              min={0}
+                              style={{ width: "2em", textAlign: "center" }}
+                              onChange={(e) => {
+                                updateSerieReps(exercise, idx, e.target.value);
+                              }}
+                            />{" "}
+                            x{" "}
+                            <input
+                              type="number"
+                              value={serie.weight?.toString()}
+                              className="no-spinner"
+                              min={0}
+                              style={{ width: "3em", textAlign: "center" }}
+                              onChange={(e) => {
+                                updateSerieWeight(
+                                  exercise,
+                                  idx,
+                                  e.target.value,
+                                );
+                              }}
+                            />
+                            Kg
                           </td>
-                        )}
-
-                        <td
-                          style={{
-                            borderBottom:
-                              idx === localSession.series[exercise].length - 1
-                                ? "1px solid #e4e4e430"
-                                : "",
-                            paddingBottom:
-                              idx === localSession.series[exercise].length - 1
-                                ? "5px"
-                                : "",
-                            paddingTop: idx === 0 ? "5px" : "",
-                          }}
-                        >
-                          <input
-                            type="number"
-                            value={serie.reps}
-                            className="no-spinner"
-                            min={0}
-                            style={{ width: "2em", textAlign: "center" }}
-                            onChange={(e) => {
-                              updateSerieReps(exercise, idx, e.target.value);
-                            }}
-                          />{" "}
-                          x{" "}
-                          <input
-                            type="number"
-                            value={serie.weight?.toString()}
-                            className="no-spinner"
-                            min={0}
-                            style={{ width: "3em", textAlign: "center" }}
-                            onChange={(e) => {
-                              updateSerieWeight(exercise, idx, e.target.value);
-                            }}
-                          />
-                          Kg
-                        </td>
-                      </tr>
-                    )),
-                  )}
-                </tbody>
-              </table>
-              <div style={{ padding: "5px" }}>
-                <Button
-                  id="import-button"
-                  disabled={!changed}
-                  style={{ width: "100%" }}
-                  onClick={saveChanges}
-                >
-                  {translate("update_sets")}
-                </Button>
-              </div>
-            </>
-          )}
+                        </tr>
+                      )),
+                    )}
+                  </tbody>
+                </table>
+                <div style={{ padding: "5px" }}>
+                  <Button
+                    id="import-button"
+                    disabled={!changed}
+                    style={{ width: "100%" }}
+                    onClick={saveChanges}
+                  >
+                    {translate("update_sets")}
+                  </Button>
+                </div>
+              </>
+            )}
         </Modal.Body>
       </Modal>
     </div>

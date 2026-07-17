@@ -172,3 +172,6 @@ save:
 workout_load:
   en: Load
   es: Carga
+other:
+  en: Other
+  es: Otro

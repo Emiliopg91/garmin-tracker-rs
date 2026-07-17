@@ -2,8 +2,8 @@
 
 // From src-tauri/src/ui/app/models.rs:4
 export enum AppEnvironment {
-  Debug = "Debug",
-  Release = "Release",
+	Debug = "Debug",
+	Release = "Release",
 }
 
 // From src-tauri/src/ui/devices/models.rs:7
@@ -39,8 +39,8 @@ export interface ExerciseListItem {
 
 // From src-tauri/src/ui/notifications/models.rs:4
 export enum NotificationKind {
-  Temporal = "Temporal",
-  Persistant = "Persistant",
+	Temporal = "Temporal",
+	Persistant = "Persistant",
 }
 
 // From src-tauri/src/ui/sessions/models.rs:61
@@ -53,6 +53,7 @@ export interface SessionDetails {
   metabolic_calories: number;
   name: string;
   series: Record<string, SessionSerie[]>;
+  sub_sport: string;
   timestamp: string;
   total_calories: number;
   total_elapsed_time: string;
@@ -61,10 +62,10 @@ export interface SessionDetails {
 
 // From src-tauri/src/ui/sessions/models.rs:8
 export interface SessionListItem {
+  active_calories: number;
   date: string;
-  exercises_num: number;
   name: string;
-  series_num: number;
+  sub_sport: string;
   timestamp: string;
   training_load: number;
   volume: number;
@@ -77,7 +78,7 @@ export interface SessionSerie {
   weight: number;
 }
 
-// From src-tauri/src/ui/sessions/models.rs:101
+// From src-tauri/src/ui/sessions/models.rs:104
 export interface SessionSeriesUpdate {
   series: SessionSerie[];
   timestamp: string;
@@ -117,3 +118,4 @@ export interface WorkoutSession {
   vol_diff: string;
   volume: number;
 }
+

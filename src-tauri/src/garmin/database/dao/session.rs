@@ -28,6 +28,8 @@ pub struct Session {
 
     pub training_load: f64,
 
+    pub sub_sport: String,
+
     pub series: IndexMap<Exercise, Vec<Serie>>,
 }
 impl Display for Session {
@@ -36,7 +38,7 @@ impl Display for Session {
     }
 }
 impl Session {
-    const FIELD_LIST: &str = "date, workout, total_elapsed_time, active_time, total_calories, metabolic_calories, avg_heart_rate, max_heart_rate, training_load";
+    const FIELD_LIST: &str = "date, workout, total_elapsed_time, active_time, total_calories, metabolic_calories, avg_heart_rate, max_heart_rate, training_load, sub_sport";
 
     pub fn format_date(&self) -> String {
         format!(
@@ -165,7 +167,11 @@ impl Session {
 
         if with_series {
             for r in &mut res {
-                r.series = Serie::load_for_session(r.timestamp)?;
+                r.series = if r.sub_sport == "strength_training" {
+                    Serie::load_for_session(r.timestamp)?
+                } else {
+                    IndexMap::new()
+                };
             }
         }
 
@@ -183,6 +189,7 @@ impl Session {
             avg_heart_rate: row.get::<_, u8>("avg_heart_rate")?,
             max_heart_rate: row.get::<_, u8>("max_heart_rate")?,
             training_load: row.get::<_, f64>("training_load")?,
+            sub_sport: row.get::<_, String>("sub_sport")?,
             series: IndexMap::new(),
         })
     }
@@ -192,7 +199,7 @@ impl Session {
             db.run_in_transaction(|tx| {
                 tx.execute(
                     &format!(
-                        "INSERT INTO SESSION({}) VALUES(?,?,?,?,?,?,?,?,?)",
+                        "INSERT INTO SESSION({}) VALUES(?,?,?,?,?,?,?,?,?,?)",
                         Self::FIELD_LIST
                     ),
                     (
@@ -205,6 +212,7 @@ impl Session {
                         self.avg_heart_rate,
                         self.max_heart_rate,
                         self.training_load,
+                        &self.sub_sport,
                     ),
                 )
                 .map_err(DatabaseError::Insert)
@@ -235,25 +243,5 @@ impl Session {
         }
 
         volume
-    }
-
-    pub fn get_exercises_num(&self) -> u8 {
-        let mut exercises = 0_u8;
-
-        for (_, _) in &self.series {
-            exercises += 1;
-        }
-
-        exercises
-    }
-
-    pub fn get_series_num(&self) -> u8 {
-        let mut series = 0_u8;
-
-        for (_, series_arr) in &self.series {
-            series += series_arr.len() as u8;
-        }
-
-        series
     }
 }
