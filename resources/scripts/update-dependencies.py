@@ -44,6 +44,3 @@ versions = {
 with open(CURRENT_VERSIONS_FILE, "w", encoding="utf-8") as f:
     yaml.safe_dump(versions,f)
 
-
-if len(subprocess.check_output(["git", "status", "--porcelain"], text=True).strip().splitlines()) > 0:
-    subprocess.check_call(["git", "commit", "-am", "[chore] Update dependencies"])
