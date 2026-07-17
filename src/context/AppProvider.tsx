@@ -1,10 +1,11 @@
-import { AppContext } from "./AppContext";
-import { AppEnvironment, DeviceListItem } from "@/utils/backend/models";
-import { JSX } from "react/jsx-runtime";
-import { useEffect, useRef, useState } from "react";
 import { Tabs } from "@/models/tabs";
-import { BackendListener } from "@/utils/backend/listener";
 import { BackendClient } from "@/utils/backend/client";
+import { BackendListener } from "@/utils/backend/listener";
+import { AppEnvironment, DeviceListItem } from "@/utils/backend/models";
+import { TRANSLATIONS } from "@/utils/translations";
+import { useEffect, useRef, useState } from "react";
+import { JSX } from "react/jsx-runtime";
+import { AppContext } from "./AppContext";
 
 export function AppProvider({
   children,
@@ -15,7 +16,6 @@ export function AppProvider({
   const [appReady, setAppReady] = useState(false);
   const [tab, setTab] = useState(Tabs.SESSIONS);
   const [loading, setLoading] = useState(false);
-  const [translations, setTranslations] = useState<Record<string, string>>({});
   const [availableUpdate, setAvailableUpdate] = useState<string | undefined>(
     undefined,
   );
@@ -62,15 +62,9 @@ export function AppProvider({
         }
       })
       .finally(() => {
-        BackendClient.getTranslations()
-          .then((translations) => {
-            setTranslations(translations);
-          })
-          .finally(() => {
-            BackendClient.notifyFrontendReady().then(() => {
-              setAppReady(true);
-            });
-          });
+        BackendClient.notifyFrontendReady().then(() => {
+          setAppReady(true);
+        });
       });
 
     return () => {
@@ -81,11 +75,11 @@ export function AppProvider({
   }, []);
 
   const translate = (key: string, replacements?: string[]) => {
-    if (!translations[key]) {
+    if (!TRANSLATIONS[key]) {
       console.warn("Missing translation", key);
       return key;
     }
-    let translation = translations[key];
+    let translation = TRANSLATIONS[key];
     if (replacements) {
       replacements.forEach((r) => {
         translation = translation.replace("{}", r);
