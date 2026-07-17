@@ -14,7 +14,8 @@ use walkdir::WalkDir;
 fn main() {
     tauri_build::build();
     generate_ddl_file();
-    generate_translations_file();
+    let translations_file = generate_translations_file();
+    generate_translations_typescript(translations_file);
 }
 
 fn generate_ddl_file() {
@@ -24,9 +25,6 @@ fn generate_ddl_file() {
         .join("resources")
         .join("ddl");
     println!("cargo:rerun-if-changed={}", ddls_dir.display());
-
-    let out_dir = env::var("OUT_DIR").unwrap();
-    let dest_path = PathBuf::from(&out_dir).join("database_versions.rs");
 
     let files = fs::read_dir(ddls_dir)
         .unwrap()
@@ -65,10 +63,12 @@ fn generate_ddl_file() {
     }
     output.push_str("];");
 
+    let out_dir = env::var("OUT_DIR").unwrap();
+    let dest_path = PathBuf::from(&out_dir).join("database_versions.rs");
     fs::write(&dest_path, output).unwrap();
 }
 
-fn generate_translations_file() {
+fn generate_translations_file() -> HashMap<String, String> {
     let translations_file = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap())
         .parent()
         .unwrap()
@@ -84,8 +84,8 @@ fn generate_translations_file() {
 
     let mut lang_var = std::env::var("LANG").unwrap_or("C".to_string());
     lang_var = lang_var.to_lowercase();
-    if lang_var == "C" {
-        lang_var = "en".into();
+    if lang_var == "c" {
+        lang_var = default_lang.to_string();
     }
     if lang_var.contains(".") {
         lang_var = lang_var.split(".").next().unwrap().into();
@@ -105,6 +105,16 @@ fn generate_translations_file() {
         );
     }
 
+    let out_dir = env::var("OUT_DIR").unwrap();
+    let dest_path = PathBuf::from(&out_dir).join("translations.yaml");
+    fs::write(&dest_path, serde_yaml::to_string(&translations).unwrap()).unwrap();
+
+    println!("cargo:rustc-env=TRANSLATIONS_YAML={}", dest_path.display());
+
+    translations
+}
+
+fn generate_translations_typescript(translations: HashMap<String, String>) {
     struct TsTranslationVisitor {
         pub translation_keys: HashSet<String>,
     }
