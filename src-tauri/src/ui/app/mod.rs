@@ -1,7 +1,7 @@
 pub mod models;
 
 use std::{
-    collections::HashMap, 
+    collections::HashMap,
     process::Command,
     sync::{LazyLock, Mutex},
     time::Duration,
@@ -97,9 +97,9 @@ async fn update_watcher(app: AppHandle) {
                                                         show_notification(NotificationDefinition {
                                                             title: translate!("new_update_title"),
                                                             body: translate!(
-                                                                    "new_update_body",
-                                                                    version,
-                                                                ),
+                                                                "new_update_body",
+                                                                version,
+                                                            ),
                                                             kind: NotificationKind::Temporal,
                                                         });
                                                         let version: String = version.to_string();

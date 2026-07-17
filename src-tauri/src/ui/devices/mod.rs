@@ -6,7 +6,7 @@ use std::{
     time::Duration,
 };
 
-use tauri::{async_runtime::JoinHandle, AppHandle, Emitter};
+use tauri::{AppHandle, Emitter, async_runtime::JoinHandle};
 use tauri_plugin_log::log::{info, warn};
 
 use crate::{
