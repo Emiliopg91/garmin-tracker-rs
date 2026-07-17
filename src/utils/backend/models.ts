@@ -2,8 +2,8 @@
 
 // From src-tauri/src/ui/app/models.rs:4
 export enum AppEnvironment {
-  Debug = "Debug",
-  Release = "Release",
+	Debug = "Debug",
+	Release = "Release",
 }
 
 // From src-tauri/src/ui/devices/models.rs:7
@@ -39,8 +39,8 @@ export interface ExerciseListItem {
 
 // From src-tauri/src/ui/notifications/models.rs:4
 export enum NotificationKind {
-  Temporal = "Temporal",
-  Persistant = "Persistant",
+	Temporal = "Temporal",
+	Persistant = "Persistant",
 }
 
 // From src-tauri/src/ui/sessions/models.rs:61
@@ -117,3 +117,4 @@ export interface WorkoutSession {
   vol_diff: string;
   volume: number;
 }
+

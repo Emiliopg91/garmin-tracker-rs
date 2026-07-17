@@ -130,6 +130,7 @@ fn generate_translations_typescript(translations: HashMap<String, String>) {
                 self.translation_keys
                     .insert(str_lit.value.to_string_lossy().to_string());
             }
+            node.visit_children_with(self);
         }
     }
 

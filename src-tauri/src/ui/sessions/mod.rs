@@ -4,7 +4,7 @@ use std::path::{Path, PathBuf};
 use chrono::{DateTime, Datelike, Local, TimeZone, Timelike};
 use garmin_tracker_rs_macros::{traced_command, translate};
 use rfd::AsyncFileDialog;
-use tauri_plugin_log::log::{error, info};
+use tauri_plugin_log::log::{error, info, warn};
 
 use crate::{
     garmin::{
@@ -179,7 +179,7 @@ pub async fn import_from_file() -> Result<u16, String> {
                 .map(|f| f.path().to_path_buf())
                 .collect::<Vec<PathBuf>>();
             info!("Selected files: {:?}", files);
-            import_file_list(&files)
+            import_file_list(&files, true)
         }
         None => {
             info!("No file was selected");
@@ -221,7 +221,7 @@ pub async fn import_from_device(serial: &str) -> Result<u16, String> {
     if !activities.is_empty() {
         info!("Fetched {} activity files", activities.len());
 
-        match import_file_list(&activities) {
+        match import_file_list(&activities, false) {
             Ok(inserted) => {
                 let _ = Device::update_latest_sync(serial, Local::now());
                 Ok(inserted)
@@ -233,7 +233,7 @@ pub async fn import_from_device(serial: &str) -> Result<u16, String> {
     }
 }
 
-fn import_file_list<F>(files: &[F]) -> Result<u16, String>
+fn import_file_list<F>(files: &[F], error_on_duplicate: bool) -> Result<u16, String>
 where
     F: AsRef<Path>,
 {
@@ -265,10 +265,16 @@ where
                         Ok("Session imported succesfully".to_string())
                     }
                 } else {
-                    Err(format!(
-                        "Session with date {} already exists",
-                        session.format_date()
-                    ))
+                    let msg = format!("Session with date {} already exists", session.format_date());
+                    if error_on_duplicate {
+                        return Err(format!(
+                            "Session with date {} already exists",
+                            session.format_date()
+                        ));
+                    } else {
+                        warn!("{}", msg);
+                        return Err("".to_string());
+                    };
                 }
             }
             Err(e) => Err(format!("Error parsing session: {}", e)),
@@ -284,7 +290,7 @@ where
                     kind: NotificationKind::Temporal,
                 });
             }
-            Err(e) => {
+            Err(e) if !e.is_empty() => {
                 error!("  {}", e);
 
                 show_notification(NotificationDefinition {
@@ -293,6 +299,7 @@ where
                     kind: NotificationKind::Persistant,
                 });
             }
+            _ => {}
         }
     }
 
