@@ -1,17 +1,18 @@
 pub mod dao;
 pub mod errors;
 
-include!(concat!(env!("OUT_DIR"), "/database_versions.rs"));
-
 use std::{
     path::Path,
     sync::{LazyLock, Mutex},
 };
 
+use garmin_tracker_rs_macros::dlls;
 use rusqlite::{Connection, Transaction};
 use tauri_plugin_log::log::debug;
 
 use self::errors::{DatabaseError, Result};
+
+dlls!();
 
 pub struct Database {
     connection: Option<Connection>,
