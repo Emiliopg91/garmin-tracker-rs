@@ -194,5 +194,9 @@ fn generate_translations_typescript(translations: HashMap<String, String>) {
     }
     content.push_str("};");
 
-    fs::write(front_src_dir.join("utils").join("translations.ts"), content).unwrap();
+    let utils_dir = front_src_dir.join("utils");
+    if !fs::exists(&utils_dir).unwrap() {
+        fs::create_dir_all(&utils_dir).unwrap();
+    }
+    fs::write(utils_dir.join("translations.ts"), content).unwrap();
 }
