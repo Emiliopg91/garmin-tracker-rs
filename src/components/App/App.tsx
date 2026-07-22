@@ -15,7 +15,7 @@ export function App(): JSX.Element {
   const { tab, setTab, loading, appReady, availableUpdate, translate } =
     useContext(AppContext);
 
-  const navBarItems = [
+  const leftNavBarItems = [
     {
       label: translate("sessions"),
       onSelected: () => {
@@ -57,7 +57,7 @@ export function App(): JSX.Element {
 
         {appReady && (
           <>
-            <NavBar items={navBarItems} />
+            <NavBar leftItems={leftNavBarItems} rightItems={[]} />
 
             <div id="list-layer">
               {tab == Tabs.SESSIONS && <SessionsList />}

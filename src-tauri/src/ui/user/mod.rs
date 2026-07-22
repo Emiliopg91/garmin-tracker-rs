@@ -2,7 +2,7 @@ use garmin_tracker_rs_macros::{traced_command, translate};
 use tauri_plugin_log::log::{error, info};
 
 use crate::{
-    garmin::database::dao::user::User,
+    garmin::database::dao::{Entity, helpers::types::order_by::OrderBy, user::User},
     ui::{
         notifications::{
             models::{NotificationDefinition, NotificationKind},
@@ -19,7 +19,11 @@ pub mod models;
 pub fn get_user_measures() -> Result<Vec<UserListItem>, String> {
     info!("Getting user measures list...");
 
-    match User::select_all().map_err(|e| e.to_string()) {
+    match User::select()
+        .order_by(OrderBy::Desc("date"))
+        .fetch()
+        .map_err(|e| e.to_string())
+    {
         Ok(regs) => {
             let res = regs
                 .iter()
@@ -45,10 +49,12 @@ pub fn get_user_measures() -> Result<Vec<UserListItem>, String> {
 #[tauri::command]
 pub fn add_user_measures(measures: UserListItem) -> Result<(), String> {
     info!("Adding user measures list...");
-    dbg!(&measures);
 
     let res = match User::try_from(&measures).map_err(|e| e.to_string()) {
-        Ok(entry) => entry.insert().map_err(|e| e.to_string()),
+        Ok(entry) => User::insert()
+            .item(entry)
+            .execute()
+            .map_err(|e| e.to_string()),
         Err(e) => Err(e),
     };
 

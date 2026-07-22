@@ -34,11 +34,7 @@ pub fn get_workout_list() -> Result<Vec<WorkoutListItem>, String> {
             *entry += s.total_elapsed_time;
 
             let entry = latest.entry(s.workout.clone()).or_insert(s);
-            *entry = if s.timestamp.timestamp() > entry.timestamp.timestamp() {
-                s
-            } else {
-                entry
-            }
+            *entry = if s.date > entry.date { s } else { entry }
         });
 
         let mut res = count
@@ -88,7 +84,7 @@ pub fn get_workout_details(name: &str) -> Result<WorkoutDetails, String> {
         let mut volume = 0_f64;
 
         sessions.iter().for_each(|s| {
-            if s.timestamp.timestamp() > latest.timestamp.timestamp() {
+            if s.date > latest.date {
                 latest = s;
             }
             count += 1;

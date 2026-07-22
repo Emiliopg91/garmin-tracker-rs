@@ -20,7 +20,7 @@ impl From<&Session> for SessionListItem {
         Self {
             name: value.workout.clone(),
             date: value.format_date(),
-            timestamp: value.timestamp.timestamp(),
+            timestamp: value.date,
             active_calories: value.total_calories - value.metabolic_calories,
             volume: value.get_volume(),
             training_load: value.training_load.round() as u16,
@@ -85,7 +85,7 @@ impl From<&Session> for SessionDetails {
         Self {
             name: value.workout.clone(),
             date: value.format_date(),
-            timestamp: value.timestamp.timestamp(),
+            timestamp: value.date,
             active_time: value.format_active_time(),
             avg_heart_rate: value.avg_heart_rate,
             max_heart_rate: value.max_heart_rate,

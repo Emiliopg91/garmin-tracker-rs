@@ -23,14 +23,6 @@ impl Database {
         Self { connection: None }
     }
 
-    pub fn get_connection(&mut self) -> Result<&mut Connection> {
-        if let Some(conn) = self.connection.as_mut() {
-            Ok(conn)
-        } else {
-            Err(DatabaseError::ClosedConnection())
-        }
-    }
-
     pub fn open<P>(&mut self, path: P) -> Result<()>
     where
         P: AsRef<Path>,

@@ -3,4 +3,5 @@ export enum Tabs {
   WORKOUTS,
   EXERCISES,
   USER,
+  OPTIONS,
 }

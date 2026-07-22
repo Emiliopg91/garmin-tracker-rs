@@ -4,7 +4,15 @@ use garmin_tracker_rs_macros::{traced_command, translate};
 use tauri_plugin_log::log::{error, info};
 
 use crate::{
-    garmin::database::dao::{exercise::Exercise, serie::Serie, session::Session},
+    garmin::database::dao::{
+        Entity,
+        exercise::{EXERCISE_COLUMN_NAME, Exercise},
+        helpers::types::{order_by::OrderBy, where_clause::Where},
+        serie::{
+            SERIE_COLUMN_EXERCISE_CATEGORY, SERIE_COLUMN_EXERCISE_ID, SERIE_COLUMN_SESSION, Serie,
+        },
+        session::Session,
+    },
     ui::{
         exercises::models::{ExerciseDetails, ExerciseListItem},
         notifications::{
@@ -22,7 +30,10 @@ pub fn get_exercises() -> Result<Vec<ExerciseListItem>, String> {
     let res: Result<Vec<ExerciseListItem>, String> = {
         let mut result = Vec::new();
 
-        let exercises = Exercise::load_from_db().map_err(|e| e.to_string())?;
+        let exercises = Exercise::select()
+            .order_by(OrderBy::Asc(EXERCISE_COLUMN_NAME))
+            .fetch()
+            .map_err(|e| e.to_string())?;
         for exercise in exercises {
             let pr = Serie::get_pr_for_exercise(&exercise).map_err(|e| e.to_string())?;
             result.push(ExerciseListItem {
@@ -65,7 +76,8 @@ pub fn get_exercise_details(category: &str, id: i16) -> Result<ExerciseDetails, 
     );
     let res = {
         if let Some(exercise) =
-            Exercise::load_by_cat_and_id(category, id as u16).map_err(|e| e.to_string())?
+            Exercise::select_one(vec![Box::new(id as u16), Box::new(category.to_string())])
+                .map_err(|e| e.to_string())?
         {
             let mut res = ExerciseDetails::from(&exercise);
 
@@ -75,11 +87,21 @@ pub fn get_exercise_details(category: &str, id: i16) -> Result<ExerciseDetails, 
             res.rm = pr.get_1rm_estimation();
             res.pr_date = pr.format_date();
 
-            let series = Serie::load_for_exercise(category, id).map_err(|e| e.to_string())?;
+            let series = Serie::select()
+                .where_(Where::And(
+                    Box::new(Where::Eq(
+                        SERIE_COLUMN_EXERCISE_CATEGORY,
+                        Box::new(category.to_string()),
+                    )),
+                    Box::new(Where::Eq(SERIE_COLUMN_EXERCISE_ID, Box::new(id))),
+                ))
+                .order_by(OrderBy::Desc(SERIE_COLUMN_SESSION))
+                .fetch()
+                .map_err(|e| e.to_string())?;
             for serie in series {
                 let wk = SessionSerie::from(&serie);
-                if let Some(ses) = Session::find_by_id(serie.session.timestamp(), false)
-                    .map_err(|e| e.to_string())?
+                if let Some(ses) =
+                    Session::find_by_id(serie.session, false).map_err(|e| e.to_string())?
                 {
                     let ex_str = format!("{}\n{}", ses.workout, ses.format_date());
 

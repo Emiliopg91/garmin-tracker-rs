@@ -10,7 +10,10 @@ use tauri::{AppHandle, Emitter, async_runtime::JoinHandle};
 use tauri_plugin_log::log::{info, warn};
 
 use crate::{
-    garmin::{database::dao::device::Device, mtp::MTP_CLIENT_INST},
+    garmin::{
+        database::dao::{Entity, device::Device},
+        mtp::MTP_CLIENT_INST,
+    },
     ui::{
         devices::models::DeviceListItem,
         notifications::{
@@ -49,7 +52,7 @@ pub async fn start_device_watcher(app: AppHandle) {
                             devices.push(device.clone());
 
                             let device_dao = Device::from(device);
-                            let _ = device_dao.insert();
+                            let _ = Device::insert().item(device_dao).execute();
 
                             let payload: DeviceListItem = device.clone();
                             let _ = app.emit("device_connected", payload);

@@ -1,7 +1,10 @@
 pub mod models;
-use std::path::{Path, PathBuf};
+use std::{
+    collections::HashSet,
+    path::{Path, PathBuf},
+};
 
-use chrono::{DateTime, Datelike, Local, TimeZone, Timelike};
+use chrono::{Datelike, Local, TimeZone, Timelike};
 use garmin_tracker_rs_macros::{traced_command, translate};
 use rfd::AsyncFileDialog;
 use tauri_plugin_log::log::{error, info, warn};
@@ -10,7 +13,14 @@ use crate::{
     garmin::{
         database::{
             DATABASE_INST,
-            dao::{device::Device, exercise::Exercise, serie::Serie, session::Session},
+            dao::{
+                Entity,
+                device::Device,
+                exercise::{EXERCISE_COLUMN_NAME, Exercise},
+                helpers::types::order_by::OrderBy,
+                serie::Serie,
+                session::Session,
+            },
         },
         mtp::MTP_CLIENT_INST,
         parser::load_from_file,
@@ -111,20 +121,24 @@ pub fn save_session_changes(details: SessionSeriesUpdate) -> Result<(), String> 
     let res: Result<(), String> = {
         let mut to_update = Vec::new();
         for serie in details.series {
-            let db_serie = Serie::load_for_session_and_idx(details.timestamp, serie.idx)
-                .map_err(|e| e.to_string())?;
+            let db_serie =
+                Serie::select_one(vec![Box::new(details.timestamp), Box::new(serie.idx)])
+                    .map_err(|e| e.to_string())?;
             if let Some(mut db_serie) = db_serie {
                 db_serie.reps = serie.reps;
                 db_serie.weight = serie.weight;
                 to_update.push(db_serie);
             }
         }
-        let exercises = Exercise::load_from_db().map_err(|e| e.to_string())?;
+        let exercises = Exercise::select()
+            .order_by(OrderBy::Asc(EXERCISE_COLUMN_NAME))
+            .fetch()
+            .map_err(|e| e.to_string())?;
 
         let mut db = DATABASE_INST.lock().map_err(|e| e.to_string())?;
         db.run_in_transaction(move |tx| {
             for to_upd in &to_update {
-                to_upd.update_serie(tx);
+                to_upd.update_one_in_transaction(tx)?;
             }
             for exer in &exercises {
                 Serie::update_pr(tx, &exer.category, exer.id);
@@ -193,9 +207,10 @@ pub async fn import_from_file() -> Result<u16, String> {
 pub async fn import_from_device(serial: &str) -> Result<u16, String> {
     info!("Starting import from device with S/N {}", serial);
     let mut latest_date = "2026-06-08-00-00-00".to_string();
-    if let Ok(Some(device)) = Device::find_by_id(serial)
-        && let Some(latest) = device.last_sync
+    if let Ok(Some(dev)) = Device::select_one(vec![Box::new(serial.to_owned())])
+        && let Some(latest) = dev.last_sync
     {
+        let latest = Local.timestamp_opt(latest, 0).unwrap();
         latest_date = format!(
             "{:04}-{:02}-{:02}-{:02}-{:02}-{:02}",
             latest.year(),
@@ -223,7 +238,10 @@ pub async fn import_from_device(serial: &str) -> Result<u16, String> {
 
         match import_file_list(&activities, false) {
             Ok(inserted) => {
-                let _ = Device::update_latest_sync(serial, Local::now());
+                if let Ok(Some(mut dev)) = Device::select_one(vec![Box::new(serial.to_owned())]) {
+                    dev.last_sync = Some(Local::now().timestamp());
+                    let _ = dev.update_one();
+                }
                 Ok(inserted)
             }
             Err(e) => Err(e),
@@ -239,28 +257,52 @@ where
 {
     let mut success = 0_u16;
 
-    let mut latest: Option<DateTime<Local>> = None;
+    let mut latest: Option<i64> = None;
     for file in files {
         info!("Importing file {}", file.as_ref().display());
         let res = match load_from_file(file.as_ref()) {
-            Ok(mut session) => {
-                let found = Session::find_by_id(session.timestamp.timestamp(), false)
+            Ok(session) => {
+                let found = Session::find_by_id(session.date, false)
                     .map(|opt| opt.is_some())
                     .unwrap_or(false);
 
                 if !found {
-                    if let Err(e) = session.insert() {
+                    let mut db = DATABASE_INST.lock().unwrap();
+                    if let Err(e) = db.run_in_transaction(|tx| {
+                        Session::insert()
+                            .item(session.clone())
+                            .execute_in_transaction(tx)?;
+
+                        let mut insert = Exercise::insert().or_ignore(true);
+                        let mut seen = HashSet::new();
+                        for exercise in session.series.iter().map(|e| e.0) {
+                            if seen.insert(exercise.clone()) {
+                                insert = insert.item(exercise.clone());
+                            }
+                        }
+                        insert.execute_in_transaction(tx)?;
+
+                        let mut insert = Serie::insert().or_ignore(true);
+                        for series in session.series.iter().map(|e| e.1) {
+                            for serie in series {
+                                insert = insert.item(serie.clone());
+                            }
+                        }
+                        insert.execute_in_transaction(tx)?;
+
+                        Ok(())
+                    }) {
                         Err(format!("Error persisting session: {}", e))
                     } else {
                         success += 1;
                         latest = if let Some(latest_v) = latest {
-                            if session.timestamp.timestamp() > latest_v.timestamp() {
-                                Some(session.timestamp)
+                            if session.date > latest_v {
+                                Some(session.date)
                             } else {
                                 latest
                             }
                         } else {
-                            Some(session.timestamp)
+                            Some(session.date)
                         };
                         Ok("Session imported succesfully".to_string())
                     }

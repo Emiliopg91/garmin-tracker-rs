@@ -14,6 +14,8 @@ pub enum DatabaseError {
     Transaction(rusqlite::Error),
     #[error("Error on insert: {0}")]
     Insert(rusqlite::Error),
+    #[error("Error on update: {0}")]
+    Update(rusqlite::Error),
     #[error("Error on select: {0}")]
     Select(rusqlite::Error),
 }

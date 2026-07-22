@@ -35,7 +35,7 @@ impl TryFrom<&UserListItem> for User {
             .ok_or("Fecha/hora ambigua o inexistente")?;
 
         Ok(Self {
-            date: local,
+            date: local.timestamp(),
             weight: value.weight,
             fat_ratio: value.fat_ratio,
             lean_mass: value.lean_mass,

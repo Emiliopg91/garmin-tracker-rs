@@ -18,3 +18,8 @@ pub fn translate(item: TokenStream) -> TokenStream {
 pub fn dlls(item: TokenStream) -> TokenStream {
     database::dlls(item)
 }
+
+#[proc_macro_derive(Entity, attributes(id, no_field))]
+pub fn derive_entity(input: TokenStream) -> TokenStream {
+    database::derive_entity(input)
+}

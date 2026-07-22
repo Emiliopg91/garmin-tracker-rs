@@ -1,0 +1,133 @@
+use std::fmt::Display;
+
+use chrono::{Datelike, Local, TimeZone, Timelike};
+use garmin_tracker_rs_macros::Entity;
+use indexmap::IndexMap;
+
+use crate::garmin::database::dao::{
+    Entity,
+    helpers::types::{order_by::OrderBy, where_clause::Where},
+};
+
+use super::exercise::Exercise;
+
+#[derive(Debug, Default, Entity, Clone)]
+pub struct Serie {
+    #[id]
+    pub session: i64,
+    #[id]
+    pub idx: u8,
+    pub exercise_category: String,
+    pub exercise_id: u16,
+    pub reps: u16,
+    pub weight: f64,
+    pub pr: bool,
+}
+impl Display for Serie {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}x{}Kg", self.reps, self.weight)
+    }
+}
+
+impl Serie {
+    pub fn get_1rm_estimation(&self) -> f64 {
+        self.weight * (self.reps as f64).powf(0.1)
+    }
+
+    pub fn format_date(&self) -> String {
+        let datetime = Local.timestamp_opt(self.session, 0).unwrap();
+        format!(
+            "{}:{} {}/{}/{}",
+            datetime.hour(),
+            datetime.minute(),
+            datetime.day(),
+            datetime.month(),
+            datetime.year()
+        )
+    }
+
+    pub fn update_pr(tx: &rusqlite::Transaction, category: &str, id: u16) {
+        let result = Serie::select()
+            .where_(Where::And(
+                Box::new(Where::Eq(
+                    SERIE_COLUMN_EXERCISE_CATEGORY,
+                    Box::new(category.to_string()),
+                )),
+                Box::new(Where::Eq(SERIE_COLUMN_EXERCISE_ID, Box::new(id))),
+            ))
+            .order_by(OrderBy::Desc(SERIE_COLUMN_WEIGHT))
+            .order_by(OrderBy::Desc(SERIE_COLUMN_REPS))
+            .limit(1)
+            .fetch_in_transaction(tx)
+            .map(|v| v.first().unwrap().clone());
+
+        if let Ok(serie) = result {
+            let _ = Serie::update()
+                .set(SERIE_COLUMN_PR, false)
+                .where_(Where::And(
+                    Box::new(Where::Eq(
+                        SERIE_COLUMN_EXERCISE_CATEGORY,
+                        Box::new(category.to_string()),
+                    )),
+                    Box::new(Where::Eq(SERIE_COLUMN_EXERCISE_ID, Box::new(id))),
+                ))
+                .execute_in_transaction(tx);
+
+            let _ = Serie::update()
+                .set(SERIE_COLUMN_PR, true)
+                .where_(Where::And(
+                    Box::new(Where::Eq(SERIE_COLUMN_SESSION, Box::new(serie.session))),
+                    Box::new(Where::Eq(SERIE_COLUMN_IDX, Box::new(serie.idx))),
+                ))
+                .execute_in_transaction(tx);
+        }
+    }
+
+    pub fn load_for_session(
+        session: i64,
+    ) -> crate::garmin::database::errors::Result<IndexMap<Exercise, Vec<Serie>>> {
+        let mut res = IndexMap::new();
+        let tuple_rows = Serie::select()
+            .where_(Where::Eq(SERIE_COLUMN_SESSION, Box::new(session)))
+            .order_by(OrderBy::Asc(SERIE_COLUMN_IDX))
+            .fetch()?;
+
+        for r in tuple_rows {
+            let ex = Exercise {
+                category: r.exercise_category.clone(),
+                id: r.exercise_id,
+                name: "".to_string(),
+            };
+            if !res.contains_key(&ex) {
+                if let Some(ex) =
+                    Exercise::select_one(vec![Box::new(ex.id), Box::new(ex.category.clone())])?
+                {
+                    res.insert(ex, Vec::new());
+                } else {
+                    continue;
+                }
+            }
+            res.get_mut(&ex).unwrap().push(r);
+        }
+
+        Ok(res)
+    }
+
+    pub fn get_pr_for_exercise(
+        exercise: &Exercise,
+    ) -> crate::garmin::database::errors::Result<Serie> {
+        Ok(Serie::select()
+            .where_(Where::And(
+                Box::new(Where::Eq(
+                    SERIE_COLUMN_EXERCISE_CATEGORY,
+                    Box::new(exercise.category.clone()),
+                )),
+                Box::new(Where::Eq(SERIE_COLUMN_EXERCISE_ID, Box::new(exercise.id))),
+            ))
+            .limit(1)
+            .fetch()?
+            .first()
+            .unwrap()
+            .clone())
+    }
+}

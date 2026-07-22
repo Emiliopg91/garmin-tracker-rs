@@ -15,3 +15,7 @@
 #navbar > .navbar-item:hover {
   cursor: pointer;
 }
+
+#navbar > .navbar-separator {
+  flex: 1;
+}

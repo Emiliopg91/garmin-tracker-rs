@@ -64,7 +64,7 @@ where
 
     Ok(Session {
         workout,
-        timestamp,
+        date: timestamp.timestamp(),
         total_elapsed_time,
         active_time,
         total_calories,
@@ -117,7 +117,7 @@ fn get_sets(
 
     for (idx, (exercise, reps, weight)) in valid_sets.enumerate() {
         sets.entry(exercise.clone()).or_default().push(Serie {
-            session: *timestamp,
+            session: timestamp.timestamp(),
             idx: idx as u8,
             exercise_category: exercise.category.clone(),
             exercise_id: exercise.id,
