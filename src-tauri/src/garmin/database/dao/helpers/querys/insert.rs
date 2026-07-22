@@ -67,7 +67,7 @@ where
         let values = self
             .items
             .iter()
-            .flat_map(|item| T::get_values(item).into_iter().map(|v| v.clone()))
+            .flat_map(|item| T::get_values(item).into_iter())
             .collect::<Vec<Box<dyn ToSqlStr>>>();
 
         debug!("Running SQL sentence {}", sentence);
