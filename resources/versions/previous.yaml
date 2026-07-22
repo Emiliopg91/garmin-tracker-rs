@@ -10,43 +10,43 @@ node:
   bootstrap: 5.3.8
   eslint: 9.39.5
   eslint-plugin-react: 7.37.5
-  prettier: 3.9.5
+  prettier: 3.9.6
   react: 19.2.7
   react-bootstrap: 2.10.10
   react-datepicker: 9.1.0
   react-dom: 19.2.7
-  recharts: 3.9.2
+  recharts: 3.10.0
   typescript: 5.8.3
-  typescript-eslint: 8.64.0
+  typescript-eslint: 8.65.0
   vite: 7.3.6
   vite-plugin-checker: 0.14.4
 rust:
   chrono: 0.4.45
-  clap: 4.6.2
+  clap: 4.6.4
   dirs: 6.0.0
   fitparser: 0.11.0
   garmin-tracker-rs-macros: 0.1.0
   indexmap: 2.14.0
-  mtp-rs: 0.23.0
+  mtp-rs: 0.29.0
   phf: 0.14.0
   phf_codegen: 0.14.0
   rfd: 0.17.2
   rusqlite: 0.40.1
   semver: 1.0.28
-  serde: 1.0.228
-  serde_json: 1.0.150
+  serde: 1.0.229
+  serde_json: 1.0.151
   serde_yaml: 0.9.34+deprecated
-  swc_common: 23.0.2
-  swc_ecma_ast: 25.0.0
-  swc_ecma_parser: 41.1.2
-  swc_ecma_visit: 25.0.0
-  syn: 2.0.119
+  swc_common: 24.0.0
+  swc_ecma_ast: 26.0.0
+  swc_ecma_parser: 42.0.0
+  swc_ecma_visit: 26.0.0
+  syn: 3.0.3
   tauri: 2.11.5
   tauri-build: 2.6.3
   tauri-plugin-log: 2.9.0
   tauri-plugin-opener: 2.5.4
   tauri-rs-ts-ipc: 0.1.14
-  thiserror: 2.0.18
-  tokio: 1.53.0
+  thiserror: 2.0.19
+  tokio: 1.53.1
   ureq: 3.3.0
   walkdir: 2.5.0
