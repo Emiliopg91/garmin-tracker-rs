@@ -11,10 +11,10 @@ node:
   eslint: 9.39.5
   eslint-plugin-react: 7.37.5
   prettier: 3.9.6
-  react: 19.2.7
+  react: 19.2.8
   react-bootstrap: 2.10.10
   react-datepicker: 9.1.0
-  react-dom: 19.2.7
+  react-dom: 19.2.8
   recharts: 3.10.0
   typescript: 5.8.3
   typescript-eslint: 8.65.0
