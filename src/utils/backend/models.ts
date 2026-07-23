@@ -2,8 +2,8 @@
 
 // From src-tauri/src/ui/app/models.rs:4
 export enum AppEnvironment {
-  Debug = "Debug",
-  Release = "Release",
+	Debug = "Debug",
+	Release = "Release",
 }
 
 // From src-tauri/src/ui/devices/models.rs:7
@@ -39,14 +39,14 @@ export interface ExerciseListItem {
 
 // From src-tauri/src/ui/notifications/models.rs:4
 export enum NotificationKind {
-  Temporal = "Temporal",
-  Persistant = "Persistant",
+	Temporal = "Temporal",
+	Persistant = "Persistant",
 }
 
 // From src-tauri/src/garmin/database/dao/helpers/types/order_by.rs:3
 export enum OrderBy {
-  Asc = "Asc",
-  Desc = "Desc",
+	Asc = "Asc",
+	Desc = "Desc",
 }
 
 // From src-tauri/src/ui/sessions/models.rs:61
@@ -101,21 +101,21 @@ export interface UserListItem {
 
 // From src-tauri/src/garmin/database/dao/helpers/types/value.rs:7
 export enum Value {
-  IntSize = "IntSize",
-  Int8 = "Int8",
-  Int16 = "Int16",
-  Int32 = "Int32",
-  Int64 = "Int64",
-  UntSize = "UntSize",
-  Unt8 = "Unt8",
-  Unt16 = "Unt16",
-  Unt32 = "Unt32",
-  Unt64 = "Unt64",
-  Float32 = "Float32",
-  Float64 = "Float64",
-  Bool = "Bool",
-  Text = "Text",
-  Null = "Null",
+	IntSize = "IntSize",
+	Int8 = "Int8",
+	Int16 = "Int16",
+	Int32 = "Int32",
+	Int64 = "Int64",
+	UntSize = "UntSize",
+	Unt8 = "Unt8",
+	Unt16 = "Unt16",
+	Unt32 = "Unt32",
+	Unt64 = "Unt64",
+	Float32 = "Float32",
+	Float64 = "Float64",
+	Bool = "Bool",
+	Text = "Text",
+	Null = "Null",
 }
 
 // From src-tauri/src/ui/workouts/models.rs:33
@@ -143,3 +143,4 @@ export interface WorkoutSession {
   vol_diff: string;
   volume: number;
 }
+

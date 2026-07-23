@@ -50,6 +50,7 @@ clap = { version = "^4", features = ["derive"] }
 rfd = "^0"
 phf = { version = "^0", features = ["macros"] }
 garmin-tracker-rs-macros = { path = "../src-tauri-macros" }
+tauri-plugin-single-instance = "2"
 
 [profile.release]
 lto = "fat"
@@ -57,6 +58,3 @@ codegen-units = 1
 strip = "symbols"
 panic = "abort"
 opt-level = 3
-
-[target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
-tauri-plugin-single-instance = "2"
