@@ -3,12 +3,12 @@ use std::marker::PhantomData;
 use rusqlite::params_from_iter;
 
 use crate::garmin::database::{
+    DATABASE_INST,
     dao::{
-        helpers::{querys::QueryBuilder, types::order_by::OrderBy},
         Entity, Where,
+        helpers::{querys::QueryBuilder, types::order_by::OrderBy},
     },
     errors::DatabaseError,
-    DATABASE_INST,
 };
 
 pub struct SelectQuery<T> {

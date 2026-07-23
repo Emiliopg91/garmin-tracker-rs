@@ -5,8 +5,8 @@ use garmin_tracker_rs_macros::Entity;
 use indexmap::IndexMap;
 
 use crate::garmin::database::dao::{
-    helpers::types::{order_by::OrderBy, where_clause::Where},
     Entity,
+    helpers::types::{order_by::OrderBy, where_clause::Where},
 };
 
 use super::exercise::Exercise;
