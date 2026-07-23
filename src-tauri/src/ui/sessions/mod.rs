@@ -121,8 +121,8 @@ pub fn save_session_changes(details: SessionSeriesUpdate) -> Result<(), String> 
     let res: Result<(), String> = {
         let mut to_update = Vec::new();
         for serie in details.series {
-            let db_serie = Serie::select_by_id(details.timestamp, serie.idx)
-                .map_err(|e| e.to_string())?;
+            let db_serie =
+                Serie::select_by_id(details.timestamp, serie.idx).map_err(|e| e.to_string())?;
             if let Some(mut db_serie) = db_serie {
                 db_serie.reps = serie.reps;
                 db_serie.weight = serie.weight;
