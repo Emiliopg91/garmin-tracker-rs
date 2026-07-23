@@ -43,7 +43,7 @@ export enum NotificationKind {
 	Persistant = "Persistant",
 }
 
-// From src-tauri/src/garmin/database/dao/helpers/types/order_by.rs:1
+// From src-tauri/src/garmin/database/dao/helpers/types/order_by.rs:3
 export enum OrderBy {
 	Asc = "Asc",
 	Desc = "Desc",
@@ -99,7 +99,7 @@ export interface UserListItem {
   weight: number;
 }
 
-// From src-tauri/src/garmin/database/dao/helpers/types/where_clause.rs:6
+// From src-tauri/src/garmin/database/dao/helpers/types/value.rs:7
 export enum Value {
 	IntSize = "IntSize",
 	Int8 = "Int8",

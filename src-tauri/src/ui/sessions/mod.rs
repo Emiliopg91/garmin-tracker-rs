@@ -15,10 +15,10 @@ use crate::{
             DATABASE_INST,
             dao::{
                 Entity,
-                device::Device,
+                device::{DEVICE_COLUMN_LAST_SYNC, DEVICE_COLUMN_SERIAL, Device},
                 exercise::{EXERCISE_COLUMN_NAME, Exercise},
-                helpers::types::order_by::OrderBy,
-                serie::Serie,
+                helpers::types::{order_by::OrderBy, where_clause::Where},
+                serie::{SERIE_COLUMN_IDX, SERIE_COLUMN_SESSION, Serie},
                 session::Session,
             },
         },
@@ -121,7 +121,12 @@ pub fn save_session_changes(details: SessionSeriesUpdate) -> Result<(), String> 
     let res: Result<(), String> = {
         let mut to_update = Vec::new();
         for serie in details.series {
-            let db_serie = Serie::select_one(vec![details.timestamp.into(), serie.idx.into()])
+            let db_serie = Serie::select()
+                .where_(Where::And(vec![
+                    Where::Eq(SERIE_COLUMN_SESSION, details.timestamp.into()),
+                    Where::Eq(SERIE_COLUMN_IDX, serie.idx.into()),
+                ]))
+                .fetch_one()
                 .map_err(|e| e.to_string())?;
             if let Some(mut db_serie) = db_serie {
                 db_serie.reps = serie.reps;
@@ -137,7 +142,7 @@ pub fn save_session_changes(details: SessionSeriesUpdate) -> Result<(), String> 
         let mut db = DATABASE_INST.lock().map_err(|e| e.to_string())?;
         db.run_in_transaction(move |tx| {
             for to_upd in &to_update {
-                to_upd.update_one_in_transaction(tx)?;
+                to_upd.update_reps_and_weight(tx)?;
             }
             for exer in &exercises {
                 Serie::update_pr(tx, &exer.category, exer.id);
@@ -206,7 +211,11 @@ pub async fn import_from_file() -> Result<u16, String> {
 pub async fn import_from_device(serial: &str) -> Result<u16, String> {
     info!("Starting import from device with S/N {}", serial);
     let mut latest_date = "2026-06-08-00-00-00".to_string();
-    if let Ok(Some(dev)) = Device::select_one(vec![serial.into()])
+
+    if let Ok(devs) = Device::select()
+        .where_(Where::Eq(DEVICE_COLUMN_SERIAL, serial.into()))
+        .fetch_one()
+        && let Some(dev) = devs.into_iter().next()
         && let Some(latest) = dev.last_sync
     {
         let latest = Local.timestamp_opt(latest, 0).unwrap();
@@ -237,9 +246,18 @@ pub async fn import_from_device(serial: &str) -> Result<u16, String> {
 
         match import_file_list(&activities, false) {
             Ok(inserted) => {
-                if let Ok(Some(mut dev)) = Device::select_one(vec![serial.into()]) {
-                    dev.last_sync = Some(Local::now().timestamp());
-                    let _ = dev.update_one();
+                if let Ok(devs) = Device::select()
+                    .where_(Where::Eq(DEVICE_COLUMN_SERIAL, serial.into()))
+                    .fetch_one()
+                    && let Some(dev) = devs.into_iter().next()
+                {
+                    let _ = Device::update()
+                        .set(
+                            DEVICE_COLUMN_LAST_SYNC,
+                            Some(Local::now().timestamp()).into(),
+                        )
+                        .where_(Where::Eq(DEVICE_COLUMN_SERIAL, dev.serial.into()))
+                        .execute();
                 }
                 Ok(inserted)
             }

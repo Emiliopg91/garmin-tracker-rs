@@ -1,15 +1,14 @@
 use std::marker::PhantomData;
 
 use rusqlite::params_from_iter;
-use tauri_plugin_log::log::debug;
 
 use crate::garmin::database::{
-    DATABASE_INST,
     dao::{
+        helpers::{querys::QueryBuilder, types::value::Value},
         Entity,
-        helpers::{querys::QueryBuilder, types::where_clause::Value},
     },
     errors::DatabaseError,
+    DATABASE_INST,
 };
 
 pub struct InsertBuilder<T> {
@@ -70,11 +69,11 @@ where
             .flat_map(|item| T::get_values(item).into_iter())
             .collect::<Vec<Value>>();
 
-        debug!("Running SQL sentence {}", sentence);
+        Self::log_query_start(&sentence, &values);
         let inserted = tx
             .execute(&sentence, params_from_iter(values.iter()))
             .map_err(DatabaseError::Insert)?;
-        debug!("Inserted {} rows", inserted);
+        Self::log_query_ending(inserted);
 
         Ok(())
     }

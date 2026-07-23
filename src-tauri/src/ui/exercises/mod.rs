@@ -6,7 +6,7 @@ use tauri_plugin_log::log::{error, info};
 use crate::{
     garmin::database::dao::{
         Entity,
-        exercise::{EXERCISE_COLUMN_NAME, Exercise},
+        exercise::{EXERCISE_COLUMN_CATEGORY, EXERCISE_COLUMN_ID, EXERCISE_COLUMN_NAME, Exercise},
         helpers::types::{order_by::OrderBy, where_clause::Where},
         serie::{
             SERIE_COLUMN_EXERCISE_CATEGORY, SERIE_COLUMN_EXERCISE_ID, SERIE_COLUMN_SESSION, Serie,
@@ -75,8 +75,15 @@ pub fn get_exercise_details(category: &str, id: i16) -> Result<ExerciseDetails, 
         category, id
     );
     let res = {
-        if let Some(exercise) = Exercise::select_one(vec![(id as u16).into(), category.into()])
-            .map_err(|e| e.to_string())?
+        if let Some(exercise) =
+            //Exercise::select_one(vec![(id as u16).into(), category.into()])
+            Exercise::select()
+                .where_(Where::And(vec![
+                    Where::Eq(EXERCISE_COLUMN_ID, (id as u16).into()),
+                    Where::Eq(EXERCISE_COLUMN_CATEGORY, category.into()),
+                ]))
+                .fetch_one()
+                .map_err(|e| e.to_string())?
         {
             let mut res = ExerciseDetails::from(&exercise);
 
@@ -87,10 +94,10 @@ pub fn get_exercise_details(category: &str, id: i16) -> Result<ExerciseDetails, 
             res.pr_date = pr.format_date();
 
             let series = Serie::select()
-                .where_(Where::And(
-                    Box::new(Where::Eq(SERIE_COLUMN_EXERCISE_CATEGORY, category.into())),
-                    Box::new(Where::Eq(SERIE_COLUMN_EXERCISE_ID, id.into())),
-                ))
+                .where_(Where::And(vec![
+                    Where::Eq(SERIE_COLUMN_EXERCISE_CATEGORY, category.into()),
+                    Where::Eq(SERIE_COLUMN_EXERCISE_ID, id.into()),
+                ]))
                 .order_by(OrderBy::Desc(SERIE_COLUMN_SESSION))
                 .fetch()
                 .map_err(|e| e.to_string())?;

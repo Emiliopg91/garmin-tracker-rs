@@ -8,7 +8,7 @@ export class BackendClient {
 
     private static DONT_LOG_COMMANDS: string[] = [];
 
-	// From src-tauri/src/ui/user/mod.rs:50
+	// From src-tauri/src/ui/user/mod.rs:54
 	public static addUserMeasures(measures: UserListItem): Promise<void> {
 	  return BackendClient.inner_invoke("add_user_measures", { measures }); 
 	}
@@ -44,7 +44,7 @@ export class BackendClient {
 	}
 	
 
-	// From src-tauri/src/ui/user/mod.rs:19
+	// From src-tauri/src/ui/user/mod.rs:23
 	public static getUserMeasures(): Promise<UserListItem[]> {
 	  return BackendClient.inner_invoke("get_user_measures"); 
 	}
@@ -62,13 +62,13 @@ export class BackendClient {
 	}
 	
 
-	// From src-tauri/src/ui/sessions/mod.rs:206
+	// From src-tauri/src/ui/sessions/mod.rs:211
 	public static importFromDevice(serial: string): Promise<number> {
 	  return BackendClient.inner_invoke("import_from_device", { serial }); 
 	}
 	
 
-	// From src-tauri/src/ui/sessions/mod.rs:177
+	// From src-tauri/src/ui/sessions/mod.rs:182
 	public static importFromFile(): Promise<number> {
 	  return BackendClient.inner_invoke("import_from_file"); 
 	}

@@ -3,18 +3,18 @@ use garmin_tracker_rs_macros::Entity;
 use indexmap::IndexMap;
 
 use crate::garmin::database::dao::{
-    Entity,
     helpers::types::{order_by::OrderBy, where_clause::Where},
+    Entity,
 };
 
 use super::{exercise::Exercise, serie::Serie};
 
 #[derive(Default, Debug, Entity, Clone)]
 pub struct Session {
-    pub workout: String,
-
     #[id]
     pub date: i64,
+
+    pub workout: String,
 
     pub total_elapsed_time: f64,
     pub active_time: f64,
@@ -89,7 +89,9 @@ impl Session {
         timestamp: i64,
         with_series: bool,
     ) -> crate::garmin::database::errors::Result<Option<Session>> {
-        let opt_sess = Session::select_one(vec![timestamp.into()])?;
+        let opt_sess = Session::select()
+            .where_(Where::Eq(SESSION_COLUMN_DATE, timestamp.into()))
+            .fetch_one()?;
 
         Ok(match opt_sess {
             Some(mut session) => {

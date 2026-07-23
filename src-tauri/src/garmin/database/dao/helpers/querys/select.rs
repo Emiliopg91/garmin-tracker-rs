@@ -1,15 +1,14 @@
 use std::marker::PhantomData;
 
 use rusqlite::params_from_iter;
-use tauri_plugin_log::log::debug;
 
 use crate::garmin::database::{
-    DATABASE_INST,
     dao::{
-        Entity, Where,
         helpers::{querys::QueryBuilder, types::order_by::OrderBy},
+        Entity, Where,
     },
     errors::DatabaseError,
+    DATABASE_INST,
 };
 
 pub struct SelectQuery<T> {
@@ -80,15 +79,14 @@ where
             sentence.push_str(&format!(" LIMIT {}", limit));
         }
 
-        debug!("Running SQL sentence {}", sentence);
-
+        Self::log_query_start(&sentence, &params);
         let mut stmt = tx.prepare(&sentence).map_err(DatabaseError::Select)?;
         let rows = stmt
             .query_map(params_from_iter(params.iter()), T::map_from_row)
             .map_err(DatabaseError::Select)?;
 
         let res: Vec<T> = rows.filter_map(|r| r.ok()).collect();
-        debug!("Returned {} rows", res.len());
+        Self::log_query_ending(res.len());
 
         Ok(res)
     }
@@ -101,5 +99,22 @@ where
             Ok(())
         })?;
         Ok(res)
+    }
+
+    pub fn fetch_one_in_transaction(
+        &self,
+        tx: &rusqlite::Transaction,
+    ) -> crate::garmin::database::errors::Result<Option<T>> {
+        Ok(self.fetch_in_transaction(tx)?.into_iter().next())
+    }
+
+    pub fn fetch_one(&self) -> crate::garmin::database::errors::Result<Option<T>> {
+        let mut db = DATABASE_INST.lock().unwrap();
+        let mut res = Vec::new();
+        db.run_in_transaction(|tx| {
+            res = self.fetch_in_transaction(tx)?;
+            Ok(())
+        })?;
+        Ok(res.into_iter().next())
     }
 }

@@ -2,7 +2,7 @@ use std::{env, fs, path::PathBuf};
 
 use proc_macro::TokenStream;
 use quote::{format_ident, quote};
-use syn::{Data, DeriveInput, Ident, parse_macro_input};
+use syn::{parse_macro_input, Data, DeriveInput};
 
 pub fn dlls(_: TokenStream) -> TokenStream {
     let ddls_dir = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap())
@@ -118,7 +118,7 @@ pub fn derive_entity(input: TokenStream) -> TokenStream {
             let name = f.ident.clone().unwrap().to_string();
             let const_ident = format_ident!("{}_COLUMN_{}", table_name, name.to_uppercase());
             field_constants.push(quote! {
-                pub const #const_ident: &'static str = #name;
+                pub const #const_ident: crate::garmin::database::dao::helpers::types::column_name::ColumnName = #name;
             });
 
             for attr in &f.attrs {
@@ -133,12 +133,6 @@ pub fn derive_entity(input: TokenStream) -> TokenStream {
             field_types.push(f.ty.clone());
         }
     });
-
-    let no_id_field_names = field_names
-        .iter()
-        .filter(|f| !id_field_names.contains(f))
-        .cloned()
-        .collect::<Vec<Ident>>();
 
     let map_from_rows_lines = field_idents
         .iter()
@@ -162,29 +156,11 @@ pub fn derive_entity(input: TokenStream) -> TokenStream {
         }
     });
 
-    let get_values_id_lines = id_field_idents.iter().map(|ident| {
-        quote! {
-            self.#ident.clone().into()
-        }
-    });
-
-    let get_values_no_id_lines = field_idents.iter().filter_map(|ident| {
-        if id_field_idents.contains(ident) {
-            None
-        } else {
-            Some(quote! {
-                self.#ident.clone().into()
-            })
-        }
-    });
-
     let expanded = quote! {
         #(#field_constants)*
         impl crate::garmin::database::dao::Entity for #struct_name {
             const TABLE_NAME: &'static str = #table_name;
-            const FIELDS: &'static [&'static str] = &[ #(#field_names),* ];
-            const ID_FIELDS: &'static [&'static str] = &[ #(#id_field_names),* ];
-            const NO_ID_FIELDS: &'static [&'static str] = &[ #(#no_id_field_names),* ];
+            const FIELDS: &'static [crate::garmin::database::dao::helpers::types::column_name::ColumnName] = &[ #(#field_names),* ];
 
             fn map_from_row(row: &rusqlite::Row) -> Result<Self, rusqlite::Error> {
                 Ok(Self {
@@ -193,21 +169,9 @@ pub fn derive_entity(input: TokenStream) -> TokenStream {
                 })
             }
 
-            fn get_values(&self) -> Vec<crate::garmin::database::dao::helpers::types::where_clause::Value> {
+            fn get_values(&self) -> Vec<crate::garmin::database::dao::helpers::types::value::Value> {
                 vec![
                     #(#get_values_lines),*
-                ]
-            }
-
-            fn get_id_values(&self) -> Vec<crate::garmin::database::dao::helpers::types::where_clause::Value> {
-                vec![
-                    #(#get_values_id_lines),*
-                ]
-            }
-
-            fn get_no_id_values(&self) -> Vec<crate::garmin::database::dao::helpers::types::where_clause::Value> {
-                vec![
-                    #(#get_values_no_id_lines),*
                 ]
             }
         }

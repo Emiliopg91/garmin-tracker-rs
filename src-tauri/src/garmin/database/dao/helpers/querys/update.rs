@@ -1,18 +1,20 @@
 use rusqlite::params_from_iter;
-use tauri_plugin_log::log::debug;
 
 use crate::garmin::database::{
-    DATABASE_INST,
     dao::{
+        helpers::{
+            querys::QueryBuilder,
+            types::{column_name::ColumnName, value::Value},
+        },
         Entity, Where,
-        helpers::{querys::QueryBuilder, types::where_clause::Value},
     },
     errors::DatabaseError,
+    DATABASE_INST,
 };
 
 pub struct UpdateQuery<T> {
     condition: Option<Where>,
-    field_values: Vec<(&'static str, Value)>,
+    field_values: Vec<(ColumnName, Value)>,
     _marker: std::marker::PhantomData<T>,
 }
 
@@ -38,7 +40,7 @@ where
         self
     }
 
-    pub fn set(mut self, field: &'static str, value: Value) -> Self {
+    pub fn set(mut self, field: ColumnName, value: Value) -> Self {
         self.field_values.push((field, value));
         self
     }
@@ -75,11 +77,11 @@ where
             .collect::<Vec<Value>>();
         params.extend(cond_params);
 
-        debug!("Running SQL sentence {}", sentence);
+        Self::log_query_start(&sentence, &params);
         let updated = tx
             .execute(&sentence, params_from_iter(params))
             .map_err(DatabaseError::Update)?;
-        debug!("Updated {} rows", updated);
+        Self::log_query_ending(updated);
 
         Ok(())
     }

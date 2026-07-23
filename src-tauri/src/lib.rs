@@ -2,8 +2,8 @@ use std::process::exit;
 
 use tauri::Manager;
 use tauri_plugin_log::{
+    log::{debug, error, info, LevelFilter},
     Target, TargetKind,
-    log::{LevelFilter, debug, error, info},
 };
 
 use crate::{

@@ -1,6 +1,8 @@
+use super::column_name::ColumnName;
+
 pub enum OrderBy {
-    Asc(&'static str),
-    Desc(&'static str),
+    Asc(ColumnName),
+    Desc(ColumnName),
 }
 
 impl OrderBy {

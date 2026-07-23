@@ -6,6 +6,7 @@ use indexmap::IndexMap;
 
 use crate::garmin::database::dao::{
     Entity,
+    exercise::{EXERCISE_COLUMN_CATEGORY, EXERCISE_COLUMN_ID},
     helpers::types::{order_by::OrderBy, where_clause::Where},
 };
 
@@ -46,36 +47,46 @@ impl Serie {
         )
     }
 
+    pub fn update_reps_and_weight(
+        &self,
+        tx: &rusqlite::Transaction,
+    ) -> crate::garmin::database::errors::Result<()> {
+        Serie::update()
+            .set(SERIE_COLUMN_REPS, self.reps.into())
+            .set(SERIE_COLUMN_WEIGHT, self.weight.into())
+            .where_(Where::And(vec![
+                Where::Eq(SERIE_COLUMN_SESSION, self.session.into()),
+                Where::Eq(SERIE_COLUMN_IDX, self.idx.into()),
+            ]))
+            .execute_in_transaction(tx)
+    }
+
     pub fn update_pr(tx: &rusqlite::Transaction, category: &str, id: u16) {
         let result = Serie::select()
-            .where_(Where::And(
-                Box::new(Where::Eq(SERIE_COLUMN_EXERCISE_CATEGORY, category.into())),
-                Box::new(Where::Eq(SERIE_COLUMN_EXERCISE_ID, id.into())),
-            ))
+            .where_(Where::And(vec![
+                Where::Eq(SERIE_COLUMN_EXERCISE_CATEGORY, category.into()),
+                Where::Eq(SERIE_COLUMN_EXERCISE_ID, id.into()),
+            ]))
             .order_by(OrderBy::Desc(SERIE_COLUMN_WEIGHT))
             .order_by(OrderBy::Desc(SERIE_COLUMN_REPS))
-            .limit(1)
-            .fetch_in_transaction(tx)
-            .map(|v| v.first().unwrap().clone());
+            .fetch_one_in_transaction(tx)
+            .map(|rs| rs.unwrap());
 
         if let Ok(serie) = result {
             let _ = Serie::update()
                 .set(SERIE_COLUMN_PR, false.into())
-                .where_(Where::And(
-                    Box::new(Where::Eq(
-                        SERIE_COLUMN_EXERCISE_CATEGORY,
-                        category.to_string().into(),
-                    )),
-                    Box::new(Where::Eq(SERIE_COLUMN_EXERCISE_ID, id.into())),
-                ))
+                .where_(Where::And(vec![
+                    Where::Eq(SERIE_COLUMN_EXERCISE_CATEGORY, category.to_string().into()),
+                    Where::Eq(SERIE_COLUMN_EXERCISE_ID, id.into()),
+                ]))
                 .execute_in_transaction(tx);
 
             let _ = Serie::update()
                 .set(SERIE_COLUMN_PR, true.into())
-                .where_(Where::And(
-                    Box::new(Where::Eq(SERIE_COLUMN_SESSION, serie.session.into())),
-                    Box::new(Where::Eq(SERIE_COLUMN_IDX, serie.idx.into())),
-                ))
+                .where_(Where::And(vec![
+                    Where::Eq(SERIE_COLUMN_SESSION, serie.session.into()),
+                    Where::Eq(SERIE_COLUMN_IDX, serie.idx.into()),
+                ]))
                 .execute_in_transaction(tx);
         }
     }
@@ -96,8 +107,12 @@ impl Serie {
                 name: "".to_string(),
             };
             if !res.contains_key(&ex) {
-                if let Some(ex) =
-                    Exercise::select_one(vec![ex.id.into(), ex.category.clone().into()])?
+                if let Some(ex) = Exercise::select()
+                    .where_(Where::And(vec![
+                        Where::Eq(EXERCISE_COLUMN_ID, ex.id.into()),
+                        Where::Eq(EXERCISE_COLUMN_CATEGORY, ex.category.clone().into()),
+                    ]))
+                    .fetch_one()?
                 {
                     res.insert(ex, Vec::new());
                 } else {
@@ -114,16 +129,14 @@ impl Serie {
         exercise: &Exercise,
     ) -> crate::garmin::database::errors::Result<Serie> {
         Ok(Serie::select()
-            .where_(Where::And(
-                Box::new(Where::Eq(
+            .where_(Where::And(vec![
+                Where::Eq(
                     SERIE_COLUMN_EXERCISE_CATEGORY,
                     exercise.category.clone().into(),
-                )),
-                Box::new(Where::Eq(SERIE_COLUMN_EXERCISE_ID, exercise.id.into())),
-            ))
-            .limit(1)
-            .fetch()?
-            .first()
+                ),
+                Where::Eq(SERIE_COLUMN_EXERCISE_ID, exercise.id.into()),
+            ]))
+            .fetch_one()?
             .unwrap()
             .clone())
     }

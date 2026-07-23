@@ -2,7 +2,11 @@ use garmin_tracker_rs_macros::{traced_command, translate};
 use tauri_plugin_log::log::{error, info};
 
 use crate::{
-    garmin::database::dao::{Entity, helpers::types::order_by::OrderBy, user::User},
+    garmin::database::dao::{
+        Entity,
+        helpers::types::order_by::OrderBy,
+        user::{USER_COLUMN_DATE, User},
+    },
     ui::{
         notifications::{
             models::{NotificationDefinition, NotificationKind},
@@ -20,7 +24,7 @@ pub fn get_user_measures() -> Result<Vec<UserListItem>, String> {
     info!("Getting user measures list...");
 
     match User::select()
-        .order_by(OrderBy::Desc("date"))
+        .order_by(OrderBy::Desc(USER_COLUMN_DATE))
         .fetch()
         .map_err(|e| e.to_string())
     {
