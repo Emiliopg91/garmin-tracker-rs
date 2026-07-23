@@ -75,9 +75,8 @@ pub fn get_exercise_details(category: &str, id: i16) -> Result<ExerciseDetails, 
         category, id
     );
     let res = {
-        if let Some(exercise) =
-            Exercise::select_one(vec![Box::new(id as u16), Box::new(category.to_string())])
-                .map_err(|e| e.to_string())?
+        if let Some(exercise) = Exercise::select_one(vec![(id as u16).into(), category.into()])
+            .map_err(|e| e.to_string())?
         {
             let mut res = ExerciseDetails::from(&exercise);
 
@@ -89,11 +88,8 @@ pub fn get_exercise_details(category: &str, id: i16) -> Result<ExerciseDetails, 
 
             let series = Serie::select()
                 .where_(Where::And(
-                    Box::new(Where::Eq(
-                        SERIE_COLUMN_EXERCISE_CATEGORY,
-                        Box::new(category.to_string()),
-                    )),
-                    Box::new(Where::Eq(SERIE_COLUMN_EXERCISE_ID, Box::new(id))),
+                    Box::new(Where::Eq(SERIE_COLUMN_EXERCISE_CATEGORY, category.into())),
+                    Box::new(Where::Eq(SERIE_COLUMN_EXERCISE_ID, id.into())),
                 ))
                 .order_by(OrderBy::Desc(SERIE_COLUMN_SESSION))
                 .fetch()

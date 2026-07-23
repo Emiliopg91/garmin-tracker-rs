@@ -121,9 +121,8 @@ pub fn save_session_changes(details: SessionSeriesUpdate) -> Result<(), String> 
     let res: Result<(), String> = {
         let mut to_update = Vec::new();
         for serie in details.series {
-            let db_serie =
-                Serie::select_one(vec![Box::new(details.timestamp), Box::new(serie.idx)])
-                    .map_err(|e| e.to_string())?;
+            let db_serie = Serie::select_one(vec![details.timestamp.into(), serie.idx.into()])
+                .map_err(|e| e.to_string())?;
             if let Some(mut db_serie) = db_serie {
                 db_serie.reps = serie.reps;
                 db_serie.weight = serie.weight;
@@ -207,7 +206,7 @@ pub async fn import_from_file() -> Result<u16, String> {
 pub async fn import_from_device(serial: &str) -> Result<u16, String> {
     info!("Starting import from device with S/N {}", serial);
     let mut latest_date = "2026-06-08-00-00-00".to_string();
-    if let Ok(Some(dev)) = Device::select_one(vec![Box::new(serial.to_owned())])
+    if let Ok(Some(dev)) = Device::select_one(vec![serial.into()])
         && let Some(latest) = dev.last_sync
     {
         let latest = Local.timestamp_opt(latest, 0).unwrap();
@@ -238,7 +237,7 @@ pub async fn import_from_device(serial: &str) -> Result<u16, String> {
 
         match import_file_list(&activities, false) {
             Ok(inserted) => {
-                if let Ok(Some(mut dev)) = Device::select_one(vec![Box::new(serial.to_owned())]) {
+                if let Ok(Some(mut dev)) = Device::select_one(vec![serial.into()]) {
                     dev.last_sync = Some(Local::now().timestamp());
                     let _ = dev.update_one();
                 }

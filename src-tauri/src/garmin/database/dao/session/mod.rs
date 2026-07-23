@@ -89,7 +89,7 @@ impl Session {
         timestamp: i64,
         with_series: bool,
     ) -> crate::garmin::database::errors::Result<Option<Session>> {
-        let opt_sess = Session::select_one(vec![Box::new(timestamp)])?;
+        let opt_sess = Session::select_one(vec![timestamp.into()])?;
 
         Ok(match opt_sess {
             Some(mut session) => {
@@ -108,10 +108,7 @@ impl Session {
 
     pub fn find_by_workout(workout: &str) -> crate::garmin::database::errors::Result<Vec<Session>> {
         let mut res = Session::select()
-            .where_(Where::Eq(
-                SESSION_COLUMN_WORKOUT,
-                Box::new(workout.to_string()),
-            ))
+            .where_(Where::Eq(SESSION_COLUMN_WORKOUT, workout.into()))
             .order_by(OrderBy::Desc(SESSION_COLUMN_DATE))
             .fetch()?;
 

@@ -6,7 +6,7 @@ use crate::garmin::database::{
     DATABASE_INST,
     dao::helpers::{
         querys::{QueryBuilder, insert::InsertBuilder, select::SelectQuery, update::UpdateQuery},
-        types::{to_sql_str::ToSqlStr, where_clause::Where},
+        types::where_clause::{Value, Where},
     },
 };
 
@@ -43,9 +43,7 @@ pub trait Entity: Sized {
         Ok(())
     }
 
-    fn select_one(
-        values: Vec<Box<dyn ToSqlStr>>,
-    ) -> crate::garmin::database::errors::Result<Option<Self>> {
+    fn select_one(values: Vec<Value>) -> crate::garmin::database::errors::Result<Option<Self>> {
         if Self::ID_FIELDS.is_empty() {
             panic!("No id defined for table {}", Self::TABLE_NAME)
         }
@@ -98,7 +96,7 @@ pub trait Entity: Sized {
         upd.execute_in_transaction(tx)
     }
 
-    fn get_values(&self) -> Vec<Box<dyn ToSqlStr>>;
-    fn get_id_values(&self) -> Vec<Box<dyn ToSqlStr>>;
-    fn get_no_id_values(&self) -> Vec<Box<dyn ToSqlStr>>;
+    fn get_values(&self) -> Vec<Value>;
+    fn get_id_values(&self) -> Vec<Value>;
+    fn get_no_id_values(&self) -> Vec<Value>;
 }

@@ -49,11 +49,8 @@ impl Serie {
     pub fn update_pr(tx: &rusqlite::Transaction, category: &str, id: u16) {
         let result = Serie::select()
             .where_(Where::And(
-                Box::new(Where::Eq(
-                    SERIE_COLUMN_EXERCISE_CATEGORY,
-                    Box::new(category.to_string()),
-                )),
-                Box::new(Where::Eq(SERIE_COLUMN_EXERCISE_ID, Box::new(id))),
+                Box::new(Where::Eq(SERIE_COLUMN_EXERCISE_CATEGORY, category.into())),
+                Box::new(Where::Eq(SERIE_COLUMN_EXERCISE_ID, id.into())),
             ))
             .order_by(OrderBy::Desc(SERIE_COLUMN_WEIGHT))
             .order_by(OrderBy::Desc(SERIE_COLUMN_REPS))
@@ -63,21 +60,21 @@ impl Serie {
 
         if let Ok(serie) = result {
             let _ = Serie::update()
-                .set(SERIE_COLUMN_PR, false)
+                .set(SERIE_COLUMN_PR, false.into())
                 .where_(Where::And(
                     Box::new(Where::Eq(
                         SERIE_COLUMN_EXERCISE_CATEGORY,
-                        Box::new(category.to_string()),
+                        category.to_string().into(),
                     )),
-                    Box::new(Where::Eq(SERIE_COLUMN_EXERCISE_ID, Box::new(id))),
+                    Box::new(Where::Eq(SERIE_COLUMN_EXERCISE_ID, id.into())),
                 ))
                 .execute_in_transaction(tx);
 
             let _ = Serie::update()
-                .set(SERIE_COLUMN_PR, true)
+                .set(SERIE_COLUMN_PR, true.into())
                 .where_(Where::And(
-                    Box::new(Where::Eq(SERIE_COLUMN_SESSION, Box::new(serie.session))),
-                    Box::new(Where::Eq(SERIE_COLUMN_IDX, Box::new(serie.idx))),
+                    Box::new(Where::Eq(SERIE_COLUMN_SESSION, serie.session.into())),
+                    Box::new(Where::Eq(SERIE_COLUMN_IDX, serie.idx.into())),
                 ))
                 .execute_in_transaction(tx);
         }
@@ -88,7 +85,7 @@ impl Serie {
     ) -> crate::garmin::database::errors::Result<IndexMap<Exercise, Vec<Serie>>> {
         let mut res = IndexMap::new();
         let tuple_rows = Serie::select()
-            .where_(Where::Eq(SERIE_COLUMN_SESSION, Box::new(session)))
+            .where_(Where::Eq(SERIE_COLUMN_SESSION, session.into()))
             .order_by(OrderBy::Asc(SERIE_COLUMN_IDX))
             .fetch()?;
 
@@ -100,7 +97,7 @@ impl Serie {
             };
             if !res.contains_key(&ex) {
                 if let Some(ex) =
-                    Exercise::select_one(vec![Box::new(ex.id), Box::new(ex.category.clone())])?
+                    Exercise::select_one(vec![ex.id.into(), ex.category.clone().into()])?
                 {
                     res.insert(ex, Vec::new());
                 } else {
@@ -120,9 +117,9 @@ impl Serie {
             .where_(Where::And(
                 Box::new(Where::Eq(
                     SERIE_COLUMN_EXERCISE_CATEGORY,
-                    Box::new(exercise.category.clone()),
+                    exercise.category.clone().into(),
                 )),
-                Box::new(Where::Eq(SERIE_COLUMN_EXERCISE_ID, Box::new(exercise.id))),
+                Box::new(Where::Eq(SERIE_COLUMN_EXERCISE_ID, exercise.id.into())),
             ))
             .limit(1)
             .fetch()?

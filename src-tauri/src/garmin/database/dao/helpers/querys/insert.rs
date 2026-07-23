@@ -7,7 +7,7 @@ use crate::garmin::database::{
     DATABASE_INST,
     dao::{
         Entity,
-        helpers::{querys::QueryBuilder, types::to_sql_str::ToSqlStr},
+        helpers::{querys::QueryBuilder, types::where_clause::Value},
     },
     errors::DatabaseError,
 };
@@ -68,14 +68,11 @@ where
             .items
             .iter()
             .flat_map(|item| T::get_values(item).into_iter())
-            .collect::<Vec<Box<dyn ToSqlStr>>>();
+            .collect::<Vec<Value>>();
 
         debug!("Running SQL sentence {}", sentence);
         let inserted = tx
-            .execute(
-                &sentence,
-                params_from_iter(values.iter().map(|v| v.as_ref())),
-            )
+            .execute(&sentence, params_from_iter(values.iter()))
             .map_err(DatabaseError::Insert)?;
         debug!("Inserted {} rows", inserted);
 

@@ -84,10 +84,7 @@ where
 
         let mut stmt = tx.prepare(&sentence).map_err(DatabaseError::Select)?;
         let rows = stmt
-            .query_map(
-                params_from_iter(params.iter().map(|v| v.as_ref())),
-                T::map_from_row,
-            )
+            .query_map(params_from_iter(params.iter()), T::map_from_row)
             .map_err(DatabaseError::Select)?;
 
         let res: Vec<T> = rows.filter_map(|r| r.ok()).collect();

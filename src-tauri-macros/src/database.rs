@@ -158,13 +158,13 @@ pub fn derive_entity(input: TokenStream) -> TokenStream {
 
     let get_values_lines = field_idents.iter().map(|ident| {
         quote! {
-            Box::new(self.#ident.clone())
+            self.#ident.clone().into()
         }
     });
 
     let get_values_id_lines = id_field_idents.iter().map(|ident| {
         quote! {
-            Box::new(self.#ident.clone())
+            self.#ident.clone().into()
         }
     });
 
@@ -173,7 +173,7 @@ pub fn derive_entity(input: TokenStream) -> TokenStream {
             None
         } else {
             Some(quote! {
-                Box::new(self.#ident.clone())
+                self.#ident.clone().into()
             })
         }
     });
@@ -193,19 +193,19 @@ pub fn derive_entity(input: TokenStream) -> TokenStream {
                 })
             }
 
-            fn get_values(&self) -> Vec<Box<dyn crate::garmin::database::dao::ToSqlStr>> {
+            fn get_values(&self) -> Vec<crate::garmin::database::dao::helpers::types::where_clause::Value> {
                 vec![
                     #(#get_values_lines),*
                 ]
             }
 
-            fn get_id_values(&self) -> Vec<Box<dyn crate::garmin::database::dao::ToSqlStr>> {
+            fn get_id_values(&self) -> Vec<crate::garmin::database::dao::helpers::types::where_clause::Value> {
                 vec![
                     #(#get_values_id_lines),*
                 ]
             }
 
-            fn get_no_id_values(&self) -> Vec<Box<dyn crate::garmin::database::dao::ToSqlStr>> {
+            fn get_no_id_values(&self) -> Vec<crate::garmin::database::dao::helpers::types::where_clause::Value> {
                 vec![
                     #(#get_values_no_id_lines),*
                 ]
