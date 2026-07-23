@@ -1,6 +1,6 @@
 use rusqlite::{
-    types::{Null, ToSqlOutput},
     ToSql,
+    types::{Null, ToSqlOutput},
 };
 
 #[derive(Clone)]

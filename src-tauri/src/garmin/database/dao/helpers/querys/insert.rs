@@ -3,12 +3,12 @@ use std::marker::PhantomData;
 use rusqlite::params_from_iter;
 
 use crate::garmin::database::{
+    DATABASE_INST,
     dao::{
-        helpers::{querys::QueryBuilder, types::value::Value},
         Entity,
+        helpers::{querys::QueryBuilder, types::value::Value},
     },
     errors::DatabaseError,
-    DATABASE_INST,
 };
 
 pub struct InsertBuilder<T> {

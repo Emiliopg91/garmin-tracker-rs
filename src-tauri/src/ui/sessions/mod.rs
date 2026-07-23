@@ -18,7 +18,7 @@ use crate::{
                 device::{DEVICE_COLUMN_LAST_SYNC, DEVICE_COLUMN_SERIAL, Device},
                 exercise::{EXERCISE_COLUMN_NAME, Exercise},
                 helpers::types::{order_by::OrderBy, where_clause::Where},
-                serie::{SERIE_COLUMN_IDX, SERIE_COLUMN_SESSION, Serie},
+                serie::Serie,
                 session::Session,
             },
         },
@@ -121,12 +121,7 @@ pub fn save_session_changes(details: SessionSeriesUpdate) -> Result<(), String> 
     let res: Result<(), String> = {
         let mut to_update = Vec::new();
         for serie in details.series {
-            let db_serie = Serie::select()
-                .where_(Where::And(vec![
-                    Where::Eq(SERIE_COLUMN_SESSION, details.timestamp.into()),
-                    Where::Eq(SERIE_COLUMN_IDX, serie.idx.into()),
-                ]))
-                .fetch_one()
+            let db_serie = Serie::select_by_id(details.timestamp, serie.idx)
                 .map_err(|e| e.to_string())?;
             if let Some(mut db_serie) = db_serie {
                 db_serie.reps = serie.reps;
@@ -212,9 +207,7 @@ pub async fn import_from_device(serial: &str) -> Result<u16, String> {
     info!("Starting import from device with S/N {}", serial);
     let mut latest_date = "2026-06-08-00-00-00".to_string();
 
-    if let Ok(devs) = Device::select()
-        .where_(Where::Eq(DEVICE_COLUMN_SERIAL, serial.into()))
-        .fetch_one()
+    if let Ok(devs) = Device::select_by_id(serial.to_string())
         && let Some(dev) = devs.into_iter().next()
         && let Some(latest) = dev.last_sync
     {
@@ -246,9 +239,7 @@ pub async fn import_from_device(serial: &str) -> Result<u16, String> {
 
         match import_file_list(&activities, false) {
             Ok(inserted) => {
-                if let Ok(devs) = Device::select()
-                    .where_(Where::Eq(DEVICE_COLUMN_SERIAL, serial.into()))
-                    .fetch_one()
+                if let Ok(devs) = Device::select_by_id(serial.to_string())
                     && let Some(dev) = devs.into_iter().next()
                 {
                     let _ = Device::update()

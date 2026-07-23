@@ -6,7 +6,6 @@ use indexmap::IndexMap;
 
 use crate::garmin::database::dao::{
     Entity,
-    exercise::{EXERCISE_COLUMN_CATEGORY, EXERCISE_COLUMN_ID},
     helpers::types::{order_by::OrderBy, where_clause::Where},
 };
 
@@ -107,13 +106,7 @@ impl Serie {
                 name: "".to_string(),
             };
             if !res.contains_key(&ex) {
-                if let Some(ex) = Exercise::select()
-                    .where_(Where::And(vec![
-                        Where::Eq(EXERCISE_COLUMN_ID, ex.id.into()),
-                        Where::Eq(EXERCISE_COLUMN_CATEGORY, ex.category.clone().into()),
-                    ]))
-                    .fetch_one()?
-                {
+                if let Some(ex) = Exercise::select_by_id(ex.id, ex.category.clone())? {
                     res.insert(ex, Vec::new());
                 } else {
                     continue;
@@ -136,8 +129,10 @@ impl Serie {
                 ),
                 Where::Eq(SERIE_COLUMN_EXERCISE_ID, exercise.id.into()),
             ]))
-            .fetch_one()?
-            .unwrap()
-            .clone())
+            .limit(1)
+            .fetch()?
+            .into_iter()
+            .next()
+            .unwrap())
     }
 }

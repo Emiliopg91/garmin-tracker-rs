@@ -6,7 +6,7 @@ use tauri_plugin_log::log::{error, info};
 use crate::{
     garmin::database::dao::{
         Entity,
-        exercise::{EXERCISE_COLUMN_CATEGORY, EXERCISE_COLUMN_ID, EXERCISE_COLUMN_NAME, Exercise},
+        exercise::{EXERCISE_COLUMN_NAME, Exercise},
         helpers::types::{order_by::OrderBy, where_clause::Where},
         serie::{
             SERIE_COLUMN_EXERCISE_CATEGORY, SERIE_COLUMN_EXERCISE_ID, SERIE_COLUMN_SESSION, Serie,
@@ -77,12 +77,7 @@ pub fn get_exercise_details(category: &str, id: i16) -> Result<ExerciseDetails, 
     let res = {
         if let Some(exercise) =
             //Exercise::select_one(vec![(id as u16).into(), category.into()])
-            Exercise::select()
-                .where_(Where::And(vec![
-                    Where::Eq(EXERCISE_COLUMN_ID, (id as u16).into()),
-                    Where::Eq(EXERCISE_COLUMN_CATEGORY, category.into()),
-                ]))
-                .fetch_one()
+            Exercise::select_by_id(id as u16, category.to_string())
                 .map_err(|e| e.to_string())?
         {
             let mut res = ExerciseDetails::from(&exercise);

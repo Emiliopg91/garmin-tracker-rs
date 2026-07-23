@@ -1,15 +1,15 @@
 use rusqlite::params_from_iter;
 
 use crate::garmin::database::{
+    DATABASE_INST,
     dao::{
+        Entity, Where,
         helpers::{
             querys::QueryBuilder,
             types::{column_name::ColumnName, value::Value},
         },
-        Entity, Where,
     },
     errors::DatabaseError,
-    DATABASE_INST,
 };
 
 pub struct UpdateQuery<T> {

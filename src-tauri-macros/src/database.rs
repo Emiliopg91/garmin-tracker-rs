@@ -99,6 +99,7 @@ pub fn derive_entity(input: TokenStream) -> TokenStream {
 
     let mut id_field_names = Vec::new();
     let mut id_field_idents = Vec::new();
+    let mut id_field_types = Vec::new();
     let mut field_names = Vec::new();
     let mut field_idents = Vec::new();
     let mut field_types = Vec::new();
@@ -125,6 +126,7 @@ pub fn derive_entity(input: TokenStream) -> TokenStream {
                 if attr.path().is_ident("id") {
                     id_field_names.push(const_ident.clone());
                     id_field_idents.push(f.ident.clone().unwrap());
+                    id_field_types.push(f.ty.clone());
                 }
             }
 
@@ -156,6 +158,38 @@ pub fn derive_entity(input: TokenStream) -> TokenStream {
         }
     });
 
+    let by_id_params = id_field_idents
+        .iter()
+        .zip(id_field_types.iter())
+        .map(|(name, ty)| {
+            quote! {
+                #name: #ty
+            }
+        });
+
+    let id_condition = if id_field_names.len() > 1 {
+        let cond = id_field_idents.iter().map(|ident| {
+            let const_ident = format_ident!("{}_COLUMN_{}", table_name, ident.clone().to_string().to_uppercase());
+            quote!{
+                crate::garmin::database::dao::helpers::types::where_clause::Where::Eq(#const_ident, #ident.into())
+            }
+        });
+        quote! {
+            crate::garmin::database::dao::helpers::types::where_clause::Where::And(vec![
+                #(#cond),*
+            ])
+        }
+    } else {
+        let name = id_field_idents.get(0).unwrap().clone();
+        let const_ident =
+            format_ident!("{}_COLUMN_{}", table_name, name.to_string().to_uppercase());
+        quote! {
+            crate::garmin::database::dao::helpers::types::where_clause::Where::Eq(
+                #const_ident, #name.into()
+            )
+        }
+    };
+
     let expanded = quote! {
         #(#field_constants)*
         impl crate::garmin::database::dao::Entity for #struct_name {
@@ -173,6 +207,21 @@ pub fn derive_entity(input: TokenStream) -> TokenStream {
                 vec![
                     #(#get_values_lines),*
                 ]
+            }
+        }
+
+        impl #struct_name {
+            pub fn select_by_id(
+                #(#by_id_params),*
+            ) -> crate::garmin::database::errors::Result<Option<Self>>{
+                Ok(crate::garmin::database::dao::Entity::select()
+                .where_(
+                    #id_condition
+                )
+                .limit(1)
+                .fetch()?
+                .into_iter()
+                .next())
             }
         }
     };

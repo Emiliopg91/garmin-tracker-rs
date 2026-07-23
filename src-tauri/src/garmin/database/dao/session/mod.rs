@@ -3,8 +3,8 @@ use garmin_tracker_rs_macros::Entity;
 use indexmap::IndexMap;
 
 use crate::garmin::database::dao::{
-    helpers::types::{order_by::OrderBy, where_clause::Where},
     Entity,
+    helpers::types::{order_by::OrderBy, where_clause::Where},
 };
 
 use super::{exercise::Exercise, serie::Serie};
@@ -89,9 +89,7 @@ impl Session {
         timestamp: i64,
         with_series: bool,
     ) -> crate::garmin::database::errors::Result<Option<Session>> {
-        let opt_sess = Session::select()
-            .where_(Where::Eq(SESSION_COLUMN_DATE, timestamp.into()))
-            .fetch_one()?;
+        let opt_sess = Session::select_by_id(timestamp)?;
 
         Ok(match opt_sess {
             Some(mut session) => {
