@@ -21,11 +21,11 @@ tauri-build = { version = "^2", features = [] }
 serde_yaml = "^0"
 phf_codegen = "^0"
 syn = { version = "^2", features = ["visit"] }
-swc_ecma_ast = "*"
-swc_ecma_parser = "*"
-swc_ecma_visit = "*"
-swc_common = "*"
-walkdir = "*"
+swc_ecma_ast = "^26"
+swc_ecma_parser = "^42"
+swc_ecma_visit = "^26"
+swc_common = "^24"
+walkdir = "^2"
 
 [dependencies]
 tauri = { version = "^2", features = [] }
