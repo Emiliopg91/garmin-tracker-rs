@@ -5,8 +5,8 @@ use garmin_tracker_rs_macros::Entity;
 use indexmap::IndexMap;
 
 use crate::garmin::database::dao::{
-    Entity,
     helpers::types::{order_by::OrderBy, where_clause::Where},
+    Entity,
 };
 
 use super::exercise::Exercise;
@@ -130,9 +130,7 @@ impl Serie {
                 Where::Eq(SERIE_COLUMN_EXERCISE_ID, exercise.id.into()),
             ]))
             .limit(1)
-            .fetch()?
-            .into_iter()
-            .next()
+            .fetch_one()?
             .unwrap())
     }
 }

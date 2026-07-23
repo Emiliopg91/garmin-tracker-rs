@@ -3,12 +3,12 @@ use std::marker::PhantomData;
 use rusqlite::params_from_iter;
 
 use crate::garmin::database::{
-    DATABASE_INST,
     dao::{
-        Entity, Where,
         helpers::{querys::QueryBuilder, types::order_by::OrderBy},
+        Entity, Where,
     },
     errors::DatabaseError,
+    DATABASE_INST,
 };
 
 pub struct SelectQuery<T> {
@@ -106,5 +106,15 @@ where
         tx: &rusqlite::Transaction,
     ) -> crate::garmin::database::errors::Result<Option<T>> {
         Ok(self.fetch_in_transaction(tx)?.into_iter().next())
+    }
+
+    pub fn fetch_one(&self) -> crate::garmin::database::errors::Result<Option<T>> {
+        let mut db = DATABASE_INST.lock().unwrap();
+        let mut res = Vec::new();
+        db.run_in_transaction(|tx| {
+            res = self.fetch_in_transaction(tx)?;
+            Ok(())
+        })?;
+        Ok(res.into_iter().next())
     }
 }

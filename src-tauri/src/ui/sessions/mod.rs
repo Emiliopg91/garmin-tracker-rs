@@ -207,8 +207,8 @@ pub async fn import_from_device(serial: &str) -> Result<u16, String> {
     info!("Starting import from device with S/N {}", serial);
     let mut latest_date = "2026-06-08-00-00-00".to_string();
 
-    if let Ok(devs) = Device::select_by_id(serial.to_string())
-        && let Some(dev) = devs.into_iter().next()
+    if let Ok(dev) = Device::select_by_id(serial.to_string())
+        && let Some(dev) = dev
         && let Some(latest) = dev.last_sync
     {
         let latest = Local.timestamp_opt(latest, 0).unwrap();
@@ -239,8 +239,8 @@ pub async fn import_from_device(serial: &str) -> Result<u16, String> {
 
         match import_file_list(&activities, false) {
             Ok(inserted) => {
-                if let Ok(devs) = Device::select_by_id(serial.to_string())
-                    && let Some(dev) = devs.into_iter().next()
+                if let Ok(dev) = Device::select_by_id(serial.to_string())
+                    && let Some(dev) = dev
                 {
                     let _ = Device::update()
                         .set(
