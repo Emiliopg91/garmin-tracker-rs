@@ -135,7 +135,7 @@ pub fn save_session_changes(details: SessionSeriesUpdate) -> Result<(), String> 
             .map_err(|e| e.to_string())?;
 
         let mut db = DATABASE_INST.lock().map_err(|e| e.to_string())?;
-        db.run_in_transaction(move |tx| {
+        db.run_in_mut_tx(move |tx| {
             for to_upd in &to_update {
                 to_upd.update_reps_and_weight(tx)?;
             }
@@ -271,7 +271,7 @@ where
 
                 if !found {
                     let mut db = DATABASE_INST.lock().unwrap();
-                    if let Err(e) = db.run_in_transaction(|tx| {
+                    if let Err(e) = db.run_in_mut_tx(|tx| {
                         Session::insert().item(session.clone()).execute_in_tx(tx)?;
 
                         let mut insert = Exercise::insert().or_ignore(true);

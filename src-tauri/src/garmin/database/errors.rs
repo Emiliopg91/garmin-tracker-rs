@@ -6,6 +6,8 @@ pub enum DatabaseError {
     ClosedConnection(),
     #[error("Error while opening connection to {0}: {1}")]
     Connection(String, rusqlite::Error),
+    #[error("Error while dumping database to {0}: {1}")]
+    Dump(String, rusqlite::Error),
     #[error("Error while enabling foreign keys pragma: {0}")]
     ForeignKeysPragma(rusqlite::Error),
     #[error("Error while creating schema: {0}")]

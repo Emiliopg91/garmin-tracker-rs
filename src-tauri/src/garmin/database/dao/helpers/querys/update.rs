@@ -88,7 +88,7 @@ where
 
     pub fn execute(&self) -> crate::garmin::database::errors::Result<()> {
         let mut db = DATABASE_INST.lock().unwrap();
-        db.run_in_transaction(|tx| self.execute_in_tx(tx))?;
+        db.run_in_mut_tx(|tx| self.execute_in_tx(tx))?;
         Ok(())
     }
 }

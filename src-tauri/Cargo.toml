@@ -35,7 +35,7 @@ serde_json = "^1"
 chrono = "^0"
 fitparser = "^0"
 indexmap = { version = "^2", features = ["serde"] }
-rusqlite = { version = "^0" }
+rusqlite = { version = "^0", features = ["backup"] }
 thiserror = "^2"
 tokio = { version = "^1", features = ["rt-multi-thread", "macros", "time"] }
 dirs = "^6"
