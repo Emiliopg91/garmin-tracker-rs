@@ -141,6 +141,9 @@ impl Serie {
                 ),
                 Where::Eq(SERIE_COLUMN_EXERCISE_ID, exercise.id.into()),
             ]))
+            .order_by(OrderBy::Desc(SERIE_COLUMN_WEIGHT))
+            .order_by(OrderBy::Desc(SERIE_COLUMN_REPS))
+            .order_by(OrderBy::Asc(SERIE_COLUMN_SESSION))
             .limit(1)
             .fetch_one()?
             .unwrap())
