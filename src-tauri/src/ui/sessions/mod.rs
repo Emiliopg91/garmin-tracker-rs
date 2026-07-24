@@ -208,7 +208,7 @@ pub async fn import_from_device(serial: &str) -> Result<u16, String> {
     let mut latest_date = "2026-06-08-00-00-00".to_string();
     let mut device = None;
 
-    if let Ok(dev) = Device::select_by_id(serial.to_string())
+    if let Ok(dev) = Device::select_by_id(serial)
         && let Some(dev) = dev
     {
         device = Some(dev.clone());

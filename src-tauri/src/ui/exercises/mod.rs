@@ -76,7 +76,7 @@ pub fn get_exercise_details(category: &str, id: i16) -> Result<ExerciseDetails, 
     );
     let res = {
         if let Some(exercise) =
-            Exercise::select_by_id(category.to_string(), id as u16).map_err(|e| e.to_string())?
+            Exercise::select_by_id(category, id as u16).map_err(|e| e.to_string())?
         {
             let mut res = ExerciseDetails::from(&exercise);
 

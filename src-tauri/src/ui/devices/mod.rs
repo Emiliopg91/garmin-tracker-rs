@@ -51,7 +51,7 @@ pub async fn start_device_watcher(app: AppHandle) {
                         {
                             devices.push(device.clone());
 
-                            if let Ok(None) = Device::select_by_id(device.serial_number.clone()) {
+                            if let Ok(None) = Device::select_by_id(&device.serial_number) {
                                 let _ = Device::insert().item(Device::from(device)).execute();
                             }
 

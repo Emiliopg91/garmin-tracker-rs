@@ -3,7 +3,7 @@ use std::{env, fs, path::PathBuf};
 use proc_macro::TokenStream;
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{format_ident, quote};
-use syn::{Data, DeriveInput, Fields, parse_macro_input};
+use syn::{Data, DeriveInput, Fields, Type, parse_macro_input, parse_quote};
 
 pub fn dlls(_: TokenStream) -> TokenStream {
     let ddls_dir = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap())
@@ -234,7 +234,15 @@ pub fn derive_entity(input: TokenStream) -> TokenStream {
             .iter()
             .map(|f| {
                 let ident = &f.ident;
-                let ty = &f.ty;
+                let mut ty = &f.ty;
+                let str_ty: Type = parse_quote!(&str);
+
+                if let Type::Path(type_path) = ty
+                    && let Some(segment) = type_path.path.segments.last()
+                    && segment.ident == "String"
+                {
+                    ty = &str_ty;
+                }
                 quote! { #ident: #ty }
             })
             .collect();
