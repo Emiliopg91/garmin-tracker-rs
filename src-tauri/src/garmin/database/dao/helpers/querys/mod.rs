@@ -21,7 +21,7 @@ pub trait QueryBuilder<T> {
             sentence = sentence.replacen("?", &sql_str, 1);
         }
 
-        debug!("Running statement \"{}\"...", sentence,);
+        debug!("Running statement \"{}\"", sentence,);
     }
 
     fn log_query_ending(rows: usize, is_fetch: bool) {

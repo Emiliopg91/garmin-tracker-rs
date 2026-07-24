@@ -1,4 +1,7 @@
-use std::fmt::Display;
+use std::{
+    collections::{HashMap, HashSet},
+    fmt::Display,
+};
 
 use chrono::{Datelike, Local, TimeZone, Timelike};
 use garmin_tracker_rs_macros::Entity;
@@ -6,7 +9,8 @@ use indexmap::IndexMap;
 
 use crate::garmin::database::dao::{
     Entity,
-    helpers::types::{order_by::OrderBy, where_clause::Where},
+    exercise::{EXERCISE_COLUMN_CATEGORY, EXERCISE_COLUMN_ID},
+    helpers::types::{order_by::OrderBy, value::Value, where_clause::Where},
 };
 
 use super::exercise::Exercise;
@@ -88,23 +92,38 @@ impl Serie {
     pub fn load_for_session(
         session: i64,
     ) -> crate::garmin::database::errors::Result<IndexMap<Exercise, Vec<Serie>>> {
-        let mut res = IndexMap::new();
         let tuple_rows = Serie::select()
             .where_(Where::Eq(SERIE_COLUMN_SESSION, session.into()))
             .order_by(OrderBy::Asc(SERIE_COLUMN_IDX))
             .fetch()?;
 
-        let exercises = Exercise::select().fetch().unwrap();
+        let condition_set: HashSet<(_, _)> = tuple_rows
+            .iter()
+            .map(|r| (r.exercise_category.clone(), r.exercise_id))
+            .collect();
+
+        let in_conditions = condition_set
+            .into_iter()
+            .map(|(cat, id)| vec![cat.into(), id.into()])
+            .collect::<Vec<Vec<Value>>>();
+
+        let exercises = Exercise::select()
+            .where_(Where::InMultiple(
+                vec![EXERCISE_COLUMN_CATEGORY, EXERCISE_COLUMN_ID],
+                in_conditions,
+            ))
+            .fetch()?;
+
+        let exercise_by_key: HashMap<(_, _), &Exercise> = exercises
+            .iter()
+            .map(|e| ((e.category.clone(), e.id), e))
+            .collect();
+
+        let mut res: IndexMap<Exercise, Vec<Serie>> = IndexMap::with_capacity(exercises.len());
 
         for r in tuple_rows {
-            if let Some(ex) = exercises
-                .iter()
-                .find(|e| e.category == r.exercise_category && e.id == r.exercise_id)
-            {
-                if !res.contains_key(ex) {
-                    res.insert(ex.clone(), Vec::new());
-                }
-                res.get_mut(ex).unwrap().push(r);
+            if let Some(&ex) = exercise_by_key.get(&(r.exercise_category.clone(), r.exercise_id)) {
+                res.entry(ex.clone()).or_insert_with(Vec::new).push(r);
             }
         }
 
