@@ -123,7 +123,7 @@ impl Serie {
 
         for r in tuple_rows {
             if let Some(&ex) = exercise_by_key.get(&(r.exercise_category.clone(), r.exercise_id)) {
-                res.entry(ex.clone()).or_insert_with(Vec::new).push(r);
+                res.entry(ex.clone()).or_default().push(r);
             }
         }
 

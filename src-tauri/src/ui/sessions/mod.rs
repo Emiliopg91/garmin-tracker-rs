@@ -206,21 +206,24 @@ pub async fn import_from_file() -> Result<u16, String> {
 pub async fn import_from_device(serial: &str) -> Result<u16, String> {
     info!("Starting import from device with S/N {}", serial);
     let mut latest_date = "2026-06-08-00-00-00".to_string();
+    let mut device = None;
 
     if let Ok(dev) = Device::select_by_id(serial.to_string())
         && let Some(dev) = dev
-        && let Some(latest) = dev.last_sync
     {
-        let latest = Local.timestamp_opt(latest, 0).unwrap();
-        latest_date = format!(
-            "{:04}-{:02}-{:02}-{:02}-{:02}-{:02}",
-            latest.year(),
-            latest.month(),
-            latest.day(),
-            latest.hour(),
-            latest.minute(),
-            latest.second(),
-        );
+        device = Some(dev.clone());
+        if let Some(latest) = dev.last_sync {
+            let latest = Local.timestamp_opt(latest, 0).unwrap();
+            latest_date = format!(
+                "{:04}-{:02}-{:02}-{:02}-{:02}-{:02}",
+                latest.year(),
+                latest.month(),
+                latest.day(),
+                latest.hour(),
+                latest.minute(),
+                latest.second(),
+            );
+        }
     }
 
     info!(
@@ -234,24 +237,19 @@ pub async fn import_from_device(serial: &str) -> Result<u16, String> {
         .await
         .map_err(|e| e.to_string())?;
 
-    if !activities.is_empty() {
+    let res = if !activities.is_empty() {
         info!("Fetched {} activity files", activities.len());
-
-        match import_file_list(&activities, false) {
-            Ok(inserted) => {
-                if let Ok(dev) = Device::select_by_id(serial.to_string())
-                    && let Some(mut dev) = dev
-                {
-                    dev.last_sync = Some(Local::now().timestamp());
-                    let _ = dev.update_by_id();
-                }
-                Ok(inserted)
-            }
-            Err(e) => Err(e),
-        }
+        import_file_list(&activities, false)
     } else {
         Ok(0)
+    };
+
+    if let Some(mut dev) = device {
+        dev.last_sync = Some(Local::now().timestamp());
+        let _ = dev.update_by_id();
     }
+
+    res
 }
 
 fn import_file_list<F>(files: &[F], error_on_duplicate: bool) -> Result<u16, String>

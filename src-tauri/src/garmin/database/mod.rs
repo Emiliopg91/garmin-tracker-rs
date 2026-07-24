@@ -59,7 +59,7 @@ impl Database {
         let path = self.path.as_ref().unwrap();
         let connection = self.connection.as_ref().unwrap();
 
-        let mut file_connection = Connection::open(&path)
+        let mut file_connection = Connection::open(path)
             .map_err(|e| DatabaseError::Connection(path.display().to_string(), e))?;
 
         Backup::new(connection, &mut file_connection)
@@ -91,9 +91,10 @@ impl Database {
     where
         F: FnMut(&mut Transaction) -> Result<()>,
     {
-        let res = self.run_in_tx(f);
-        self.consolidate()?;
-        res
+        match self.run_in_tx(f) {
+            Ok(()) => self.consolidate(),
+            Err(e) => Err(e),
+        }
     }
 
     pub fn create_schema(&mut self) -> Result<()> {
