@@ -192,16 +192,6 @@ pub fn derive_entity(input: TokenStream) -> TokenStream {
         });
     }
 
-    let id_fields: Vec<&FieldInfo> = fields.iter().filter(|f| f.is_id).collect();
-    if id_fields.is_empty() {
-        return syn::Error::new_spanned(
-            struct_name,
-            "Entity requires at least one field tagged with #[id]",
-        )
-        .to_compile_error()
-        .into();
-    }
-
     let field_constants = fields.iter().map(|f| {
         let const_ident = &f.const_ident;
         let name = &f.column;
@@ -232,65 +222,131 @@ pub fn derive_entity(input: TokenStream) -> TokenStream {
         quote! { self.#ident.clone().into() }
     });
 
-    let by_id_params: Vec<TokenStream2> = id_fields
-        .iter()
-        .map(|f| {
-            let ident = &f.ident;
-            let ty = &f.ty;
-            quote! { #ident: #ty }
-        })
-        .collect();
+    let id_fields: Vec<&FieldInfo> = fields.iter().filter(|f| f.is_id).collect();
+    let instance_operations = if id_fields.is_empty() {
+        eprintln!(
+            "\x1b[33m{} entity has no primary key defined, select, update and delete operations by ID will not be available\x1b[0m",
+            struct_name
+        );
+        quote! {}
+    } else {
+        let by_id_params: Vec<TokenStream2> = id_fields
+            .iter()
+            .map(|f| {
+                let ident = &f.ident;
+                let ty = &f.ty;
+                quote! { #ident: #ty }
+            })
+            .collect();
 
-    fn build_condition(
-        id_fields: &[&FieldInfo],
-        value_for: impl Fn(&FieldInfo) -> TokenStream2,
-    ) -> TokenStream2 {
-        if id_fields.len() > 1 {
-            let cond = id_fields.iter().map(|f| {
+        fn build_condition(
+            id_fields: &[&FieldInfo],
+            value_for: impl Fn(&FieldInfo) -> TokenStream2,
+        ) -> TokenStream2 {
+            if id_fields.len() > 1 {
+                let cond = id_fields.iter().map(|f| {
+                    let const_ident = &f.const_ident;
+                    let value = value_for(f);
+                    quote! {
+                        crate::garmin::database::dao::helpers::types::where_clause::Where::Eq(#const_ident, #value)
+                    }
+                });
+                quote! {
+                    crate::garmin::database::dao::helpers::types::where_clause::Where::And(vec![
+                        #(#cond),*
+                    ])
+                }
+            } else {
+                let f = id_fields[0];
                 let const_ident = &f.const_ident;
                 let value = value_for(f);
                 quote! {
-                    crate::garmin::database::dao::helpers::types::where_clause::Where::Eq(#const_ident, #value)
+                    crate::garmin::database::dao::helpers::types::where_clause::Where::Eq(
+                        #const_ident, #value
+                    )
                 }
-            });
-            quote! {
-                crate::garmin::database::dao::helpers::types::where_clause::Where::And(vec![
-                    #(#cond),*
-                ])
-            }
-        } else {
-            let f = id_fields[0];
-            let const_ident = &f.const_ident;
-            let value = value_for(f);
-            quote! {
-                crate::garmin::database::dao::helpers::types::where_clause::Where::Eq(
-                    #const_ident, #value
-                )
             }
         }
-    }
 
-    let id_condition = build_condition(&id_fields, |f| {
-        let ident = &f.ident;
-        quote! { #ident.into() }
-    });
-
-    let update_delete_condition = build_condition(&id_fields, |f| {
-        let ident = &f.ident;
-        quote! { self.#ident.clone().into() }
-    });
-
-    let update_sets: Vec<TokenStream2> = fields
-        .iter()
-        .filter(|f| !f.is_id)
-        .map(|f| {
+        let id_condition = build_condition(&id_fields, |f| {
             let ident = &f.ident;
-            let const_ident = &f.const_ident;
-            quote! {
-                .set(#const_ident, self.#ident.clone().into())
+            quote! { #ident.into() }
+        });
+
+        let update_delete_condition = build_condition(&id_fields, |f| {
+            let ident = &f.ident;
+            quote! { self.#ident.clone().into() }
+        });
+
+        let update_sets: Vec<TokenStream2> = fields
+            .iter()
+            .filter(|f| !f.is_id)
+            .map(|f| {
+                let ident = &f.ident;
+                let const_ident = &f.const_ident;
+                quote! {
+                    .set(#const_ident, self.#ident.clone().into())
+                }
+            })
+            .collect();
+
+        quote! {
+            impl #struct_name {
+                pub fn select_by_id(
+                    #(#by_id_params),*
+                ) -> crate::garmin::database::errors::Result<Option<Self>> {
+                    Ok(<#struct_name as crate::garmin::database::dao::Entity>::select()
+                        .where_(#id_condition)
+                        .fetch()?
+                        .into_iter()
+                        .next())
+                }
+
+                pub fn select_by_id_in_tx(
+                    tx: &rusqlite::Transaction,
+                    #(#by_id_params),*
+                ) -> crate::garmin::database::errors::Result<Option<Self>> {
+                    Ok(<#struct_name as crate::garmin::database::dao::Entity>::select()
+                        .where_(#id_condition)
+                        .fetch_in_tx(tx)?
+                        .into_iter()
+                        .next())
+                }
+
+                pub fn update_by_id(&self) -> crate::garmin::database::errors::Result<()> {
+                    <#struct_name as crate::garmin::database::dao::Entity>::update()
+                        #(#update_sets)*
+                        .where_(#update_delete_condition)
+                        .execute()
+                }
+
+                pub fn update_by_id_in_tx(
+                    &self,
+                    tx: &rusqlite::Transaction,
+                ) -> crate::garmin::database::errors::Result<()> {
+                    <#struct_name as crate::garmin::database::dao::Entity>::update()
+                        #(#update_sets)*
+                        .where_(#update_delete_condition)
+                        .execute_in_tx(tx)
+                }
+
+                pub fn delete_by_id(&self) -> crate::garmin::database::errors::Result<()> {
+                    <#struct_name as crate::garmin::database::dao::Entity>::delete()
+                        .where_(#update_delete_condition)
+                        .execute()
+                }
+
+                pub fn delete_by_id_in_tx(
+                    &self,
+                    tx: &rusqlite::Transaction,
+                ) -> crate::garmin::database::errors::Result<()> {
+                    <#struct_name as crate::garmin::database::dao::Entity>::delete()
+                        .where_(#update_delete_condition)
+                        .execute_in_tx(tx)
+                }
             }
-        })
-        .collect();
+        }
+    };
 
     let expanded = quote! {
         #(#field_constants)*
@@ -314,60 +370,7 @@ pub fn derive_entity(input: TokenStream) -> TokenStream {
             }
         }
 
-        impl #struct_name {
-            pub fn select_by_id(
-                #(#by_id_params),*
-            ) -> crate::garmin::database::errors::Result<Option<Self>> {
-                Ok(<#struct_name as crate::garmin::database::dao::Entity>::select()
-                    .where_(#id_condition)
-                    .fetch()?
-                    .into_iter()
-                    .next())
-            }
-
-            pub fn select_by_id_in_tx(
-                tx: &rusqlite::Transaction,
-                #(#by_id_params),*
-            ) -> crate::garmin::database::errors::Result<Option<Self>> {
-                Ok(<#struct_name as crate::garmin::database::dao::Entity>::select()
-                    .where_(#id_condition)
-                    .fetch_in_tx(tx)?
-                    .into_iter()
-                    .next())
-            }
-
-            pub fn update_by_id(&self) -> crate::garmin::database::errors::Result<()> {
-                <#struct_name as crate::garmin::database::dao::Entity>::update()
-                    #(#update_sets)*
-                    .where_(#update_delete_condition)
-                    .execute()
-            }
-
-            pub fn update_by_id_in_tx(
-                &self,
-                tx: &rusqlite::Transaction,
-            ) -> crate::garmin::database::errors::Result<()> {
-                <#struct_name as crate::garmin::database::dao::Entity>::update()
-                    #(#update_sets)*
-                    .where_(#update_delete_condition)
-                    .execute_in_tx(tx)
-            }
-
-            pub fn delete_by_id(&self) -> crate::garmin::database::errors::Result<()> {
-                <#struct_name as crate::garmin::database::dao::Entity>::delete()
-                    .where_(#update_delete_condition)
-                    .execute()
-            }
-
-            pub fn delete_by_id_in_tx(
-                &self,
-                tx: &rusqlite::Transaction,
-            ) -> crate::garmin::database::errors::Result<()> {
-                <#struct_name as crate::garmin::database::dao::Entity>::delete()
-                    .where_(#update_delete_condition)
-                    .execute_in_tx(tx)
-            }
-        }
+        #instance_operations
     };
 
     expanded.into()

@@ -283,7 +283,7 @@ where
                         }
                         insert.execute_in_tx(tx)?;
 
-                        let mut insert = Serie::insert().or_ignore(true);
+                        let mut insert = Serie::insert();
                         for series in session.series.iter().map(|e| e.1) {
                             for serie in series {
                                 insert = insert.item(serie.clone());

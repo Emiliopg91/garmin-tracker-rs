@@ -94,20 +94,18 @@ impl Serie {
             .order_by(OrderBy::Asc(SERIE_COLUMN_IDX))
             .fetch()?;
 
+        let exercises = Exercise::select().fetch().unwrap();
+
         for r in tuple_rows {
-            let ex = Exercise {
-                category: r.exercise_category.clone(),
-                id: r.exercise_id,
-                name: "".to_string(),
-            };
-            if !res.contains_key(&ex) {
-                if let Some(ex) = Exercise::select_by_id(ex.category.clone(), ex.id)? {
-                    res.insert(ex, Vec::new());
-                } else {
-                    continue;
+            if let Some(ex) = exercises
+                .iter()
+                .find(|e| e.category == r.exercise_category && e.id == r.exercise_id)
+            {
+                if !res.contains_key(ex) {
+                    res.insert(ex.clone(), Vec::new());
                 }
+                res.get_mut(ex).unwrap().push(r);
             }
-            res.get_mut(&ex).unwrap().push(r);
         }
 
         Ok(res)
