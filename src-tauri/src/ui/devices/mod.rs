@@ -51,8 +51,12 @@ pub async fn start_device_watcher(app: AppHandle) {
                         {
                             devices.push(device.clone());
 
-                            let device_dao = Device::from(device);
-                            let _ = Device::insert().item(device_dao).execute();
+                            match Device::select_by_id(device.serial_number.clone()) {
+                                Ok(None) => {
+                                    let _ = Device::insert().item(Device::from(device)).execute();
+                                }
+                                Ok(Some(_)) | Err(_) => {}
+                            }
 
                             let payload: DeviceListItem = device.clone();
                             let _ = app.emit("device_connected", payload);
