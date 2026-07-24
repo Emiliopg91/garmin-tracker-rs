@@ -15,9 +15,9 @@ use crate::{
             DATABASE_INST,
             dao::{
                 Entity,
-                device::{DEVICE_COLUMN_LAST_SYNC, DEVICE_COLUMN_SERIAL, Device},
+                device::Device,
                 exercise::{EXERCISE_COLUMN_NAME, Exercise},
-                helpers::types::{order_by::OrderBy, where_clause::Where},
+                helpers::types::order_by::OrderBy,
                 serie::Serie,
                 session::Session,
             },
@@ -240,15 +240,10 @@ pub async fn import_from_device(serial: &str) -> Result<u16, String> {
         match import_file_list(&activities, false) {
             Ok(inserted) => {
                 if let Ok(dev) = Device::select_by_id(serial.to_string())
-                    && let Some(dev) = dev
+                    && let Some(mut dev) = dev
                 {
-                    let _ = Device::update()
-                        .set(
-                            DEVICE_COLUMN_LAST_SYNC,
-                            Some(Local::now().timestamp()).into(),
-                        )
-                        .where_(Where::Eq(DEVICE_COLUMN_SERIAL, dev.serial.into()))
-                        .execute();
+                    dev.last_sync = Some(Local::now().timestamp());
+                    let _ = dev.update_by_id();
                 }
                 Ok(inserted)
             }
@@ -277,9 +272,7 @@ where
                 if !found {
                     let mut db = DATABASE_INST.lock().unwrap();
                     if let Err(e) = db.run_in_transaction(|tx| {
-                        Session::insert()
-                            .item(session.clone())
-                            .execute_in_transaction(tx)?;
+                        Session::insert().item(session.clone()).execute_in_tx(tx)?;
 
                         let mut insert = Exercise::insert().or_ignore(true);
                         let mut seen = HashSet::new();
@@ -288,7 +281,7 @@ where
                                 insert = insert.item(exercise.clone());
                             }
                         }
-                        insert.execute_in_transaction(tx)?;
+                        insert.execute_in_tx(tx)?;
 
                         let mut insert = Serie::insert().or_ignore(true);
                         for series in session.series.iter().map(|e| e.1) {
@@ -296,7 +289,7 @@ where
                                 insert = insert.item(serie.clone());
                             }
                         }
-                        insert.execute_in_transaction(tx)?;
+                        insert.execute_in_tx(tx)?;
 
                         Ok(())
                     }) {

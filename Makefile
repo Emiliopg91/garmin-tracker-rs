@@ -6,7 +6,11 @@ build:
 	@mold --run pnpm tauri build
 
 lint:
+	@echo "Linting frontend"
 	@pnpm lint
+	@echo "Linting macros project"
+	@cd src-tauri-macros && cargo clippy
+	@echo "Linting backend"
 	@cd src-tauri && cargo clippy
 
 clean:

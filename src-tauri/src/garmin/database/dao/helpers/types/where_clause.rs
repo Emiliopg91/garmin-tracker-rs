@@ -35,28 +35,28 @@ impl Where {
             Self::NotNull(col) => {
                 format!("{} IS NOT NULL", col)
             }
-            Self::And(conditions) => {
-                format!(
-                    "( {} )",
-                    conditions
-                        .clone()
-                        .into_iter()
-                        .map(|condition| condition.to_sql())
-                        .collect::<Vec<String>>()
-                        .join(" AND ")
-                )
-            }
-            Self::Or(conditions) => {
-                format!(
-                    "( {} )",
-                    conditions
-                        .clone()
-                        .into_iter()
-                        .map(|condition| condition.to_sql())
-                        .collect::<Vec<String>>()
-                        .join(" OR ")
-                )
-            }
+            Self::And(conditions) => conditions
+                .clone()
+                .into_iter()
+                .map(|condition| match condition {
+                    Where::And(_) | Where::Or(_) => {
+                        format!("({})", condition.to_sql())
+                    }
+                    _ => condition.to_sql(),
+                })
+                .collect::<Vec<String>>()
+                .join(" AND "),
+            Self::Or(conditions) => conditions
+                .clone()
+                .into_iter()
+                .map(|condition| match condition {
+                    Where::And(_) | Where::Or(_) => {
+                        format!("({})", condition.to_sql())
+                    }
+                    _ => condition.to_sql(),
+                })
+                .collect::<Vec<String>>()
+                .join(" OR "),
         }
     }
 

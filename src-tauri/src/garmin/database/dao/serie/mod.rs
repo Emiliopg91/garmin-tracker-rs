@@ -57,7 +57,7 @@ impl Serie {
                 Where::Eq(SERIE_COLUMN_SESSION, self.session.into()),
                 Where::Eq(SERIE_COLUMN_IDX, self.idx.into()),
             ]))
-            .execute_in_transaction(tx)
+            .execute_in_tx(tx)
     }
 
     pub fn update_pr(tx: &rusqlite::Transaction, category: &str, id: u16) {
@@ -68,25 +68,20 @@ impl Serie {
             ]))
             .order_by(OrderBy::Desc(SERIE_COLUMN_WEIGHT))
             .order_by(OrderBy::Desc(SERIE_COLUMN_REPS))
-            .fetch_one_in_transaction(tx)
+            .fetch_one_in_tx(tx)
             .map(|rs| rs.unwrap());
 
-        if let Ok(serie) = result {
+        if let Ok(mut serie) = result {
             let _ = Serie::update()
                 .set(SERIE_COLUMN_PR, false.into())
                 .where_(Where::And(vec![
                     Where::Eq(SERIE_COLUMN_EXERCISE_CATEGORY, category.to_string().into()),
                     Where::Eq(SERIE_COLUMN_EXERCISE_ID, id.into()),
                 ]))
-                .execute_in_transaction(tx);
+                .execute_in_tx(tx);
 
-            let _ = Serie::update()
-                .set(SERIE_COLUMN_PR, true.into())
-                .where_(Where::And(vec![
-                    Where::Eq(SERIE_COLUMN_SESSION, serie.session.into()),
-                    Where::Eq(SERIE_COLUMN_IDX, serie.idx.into()),
-                ]))
-                .execute_in_transaction(tx);
+            serie.pr = true;
+            let _ = serie.update_by_id_in_tx(tx);
         }
     }
 
@@ -106,7 +101,7 @@ impl Serie {
                 name: "".to_string(),
             };
             if !res.contains_key(&ex) {
-                if let Some(ex) = Exercise::select_by_id(ex.id, ex.category.clone())? {
+                if let Some(ex) = Exercise::select_by_id(ex.category.clone(), ex.id)? {
                     res.insert(ex, Vec::new());
                 } else {
                     continue;

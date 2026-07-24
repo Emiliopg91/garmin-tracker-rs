@@ -5,9 +5,9 @@ use garmin_tracker_rs_macros::Entity;
 #[derive(Clone, Debug, Default, Entity)]
 pub struct Exercise {
     #[id]
-    pub id: u16,
-    #[id]
     pub category: String,
+    #[id]
+    pub id: u16,
     pub name: String,
 }
 impl PartialEq for Exercise {

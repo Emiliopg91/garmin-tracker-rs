@@ -1,8 +1,9 @@
 use std::{env, fs, path::PathBuf};
 
 use proc_macro::TokenStream;
+use proc_macro2::TokenStream as TokenStream2;
 use quote::{format_ident, quote};
-use syn::{parse_macro_input, Data, DeriveInput};
+use syn::{Data, DeriveInput, Fields, parse_macro_input};
 
 pub fn dlls(_: TokenStream) -> TokenStream {
     let ddls_dir = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap())
@@ -52,7 +53,7 @@ pub fn dlls(_: TokenStream) -> TokenStream {
                     return None;
                 }
 
-                return Some(l.to_string());
+                Some(l.to_string())
             })
             .collect::<Vec<String>>()
             .join("\n");
@@ -83,118 +84,221 @@ pub fn dlls(_: TokenStream) -> TokenStream {
     expanded.into()
 }
 
+struct FieldInfo {
+    ident: syn::Ident,
+    column: String,
+    ty: syn::Type,
+    const_ident: syn::Ident,
+    is_id: bool,
+}
+
 pub fn derive_entity(input: TokenStream) -> TokenStream {
-    let mut has_no_fields = false;
     let input = parse_macro_input!(input as DeriveInput);
     let struct_name = &input.ident;
-    let table_name = struct_name.to_string().to_uppercase();
 
-    let fields = match &input.data {
-        Data::Struct(data) => match &data.fields {
-            syn::Fields::Named(named) => &named.named,
-            _ => panic!("Derive only available with named types"),
-        },
-        _ => panic!("Derive only available for structs"),
-    };
-
-    let mut id_field_names = Vec::new();
-    let mut id_field_idents = Vec::new();
-    let mut id_field_types = Vec::new();
-    let mut field_names = Vec::new();
-    let mut field_idents = Vec::new();
-    let mut field_types = Vec::new();
-    let mut field_constants = Vec::new();
-
-    fields.iter().for_each(|f| {
-        let mut no_field = false;
-
-        for attr in &f.attrs {
-            if attr.path().is_ident("no_field") {
-                no_field = true;
-                has_no_fields = true;
-            }
+    let mut table_name = struct_name.to_string().to_lowercase();
+    for attr in &input.attrs {
+        if !attr.path().is_ident("entity") {
+            continue;
         }
 
-        if !no_field {
-            let name = f.ident.clone().unwrap().to_string();
-            let const_ident = format_ident!("{}_COLUMN_{}", table_name, name.to_uppercase());
-            field_constants.push(quote! {
-                pub const #const_ident: crate::garmin::database::dao::helpers::types::column_name::ColumnName = #name;
-            });
-
-            for attr in &f.attrs {
-                if attr.path().is_ident("id") {
-                    id_field_names.push(const_ident.clone());
-                    id_field_idents.push(f.ident.clone().unwrap());
-                    id_field_types.push(f.ty.clone());
+        let mut found_table = false;
+        let result = attr.parse_nested_meta(|meta| {
+            if meta.path.is_ident("table") {
+                let lit: syn::LitStr = meta.value()?.parse()?;
+                table_name = lit.value().trim().to_string();
+                if table_name.is_empty() {
+                    return Err(meta.error("Attribute table cannot be empty"));
                 }
-            }
-
-            field_names.push(const_ident);
-            field_idents.push(f.ident.clone().unwrap());
-            field_types.push(f.ty.clone());
-        }
-    });
-
-    let map_from_rows_lines = field_idents
-        .iter()
-        .zip(field_names.iter())
-        .zip(field_types.iter())
-        .map(|((name, column), typ)| {
-            quote! {
-                #name: row.get::<_, #typ>(#column)?
+                found_table = true;
+                Ok(())
+            } else {
+                Err(meta.error("Attribute `entity` not recognized, expected `table = \"...\"`"))
             }
         });
 
-    let default_spread = if has_no_fields {
+        if let Err(err) = result {
+            return err.to_compile_error().into();
+        }
+    }
+
+    let named_fields = match &input.data {
+        Data::Struct(data) => match &data.fields {
+            Fields::Named(named) => &named.named,
+            _ => {
+                return syn::Error::new_spanned(
+                    &input,
+                    "Entity only can be derived in named structs",
+                )
+                .to_compile_error()
+                .into();
+            }
+        },
+        _ => {
+            return syn::Error::new_spanned(&input, "Entity only can be derived in structs")
+                .to_compile_error()
+                .into();
+        }
+    };
+
+    let mut has_no_column = false;
+    let mut fields: Vec<FieldInfo> = Vec::new();
+
+    for f in named_fields.iter() {
+        let no_column = f.attrs.iter().any(|attr| attr.path().is_ident("no_column"));
+        if no_column {
+            has_no_column = true;
+            continue;
+        }
+
+        let ident = f.ident.clone().unwrap();
+        let name = ident.to_string();
+        let const_ident = format_ident!(
+            "{}_COLUMN_{}",
+            &struct_name.to_string().to_uppercase(),
+            name.to_uppercase()
+        );
+        let is_id = f.attrs.iter().any(|attr| attr.path().is_ident("id"));
+        let mut column_name = name.to_lowercase();
+
+        for attr in &f.attrs {
+            if attr.path().is_ident("column") {
+                let result = attr.parse_nested_meta(|meta| {
+                    if meta.path.is_ident("name") {
+                        let lit: syn::LitStr = meta.value()?.parse()?;
+                        column_name = lit.value().trim().to_string();
+                        if column_name.is_empty() {
+                            return Err(meta.error("Attribute name cannot be empty"));
+                        }
+                        Ok(())
+                    } else {
+                        Err(meta
+                            .error("Attribute `column` not recognized, expected `name = \"...\"`"))
+                    }
+                });
+
+                if let Err(err) = result {
+                    return err.to_compile_error().into();
+                }
+            }
+        }
+
+        fields.push(FieldInfo {
+            ident,
+            column: column_name,
+            ty: f.ty.clone(),
+            const_ident,
+            is_id,
+        });
+    }
+
+    let id_fields: Vec<&FieldInfo> = fields.iter().filter(|f| f.is_id).collect();
+    if id_fields.is_empty() {
+        return syn::Error::new_spanned(
+            struct_name,
+            "Entity requires at least one field tagged with #[id]",
+        )
+        .to_compile_error()
+        .into();
+    }
+
+    let field_constants = fields.iter().map(|f| {
+        let const_ident = &f.const_ident;
+        let name = &f.column;
+        quote! {
+            pub const #const_ident: crate::garmin::database::dao::helpers::types::column_name::ColumnName =
+                crate::garmin::database::dao::helpers::types::column_name::ColumnName::new(#name);
+        }
+    });
+
+    let field_name_list = fields.iter().map(|f| &f.const_ident);
+
+    let map_from_rows_lines = fields.iter().enumerate().map(|(idx, f)| {
+        let ident = &f.ident;
+        let ty = &f.ty;
+        quote! {
+            #ident: row.get::<_, #ty>(#idx)?
+        }
+    });
+
+    let default_spread = if has_no_column {
         quote! { , ..Default::default() }
     } else {
         quote! {}
     };
 
-    let get_values_lines = field_idents.iter().map(|ident| {
-        quote! {
-            self.#ident.clone().into()
-        }
+    let get_values_lines = fields.iter().map(|f| {
+        let ident = &f.ident;
+        quote! { self.#ident.clone().into() }
     });
 
-    let by_id_params = id_field_idents
+    let by_id_params: Vec<TokenStream2> = id_fields
         .iter()
-        .zip(id_field_types.iter())
-        .map(|(name, ty)| {
-            quote! {
-                #name: #ty
-            }
-        });
+        .map(|f| {
+            let ident = &f.ident;
+            let ty = &f.ty;
+            quote! { #ident: #ty }
+        })
+        .collect();
 
-    let id_condition = if id_field_names.len() > 1 {
-        let cond = id_field_idents.iter().map(|ident| {
-            let const_ident = format_ident!("{}_COLUMN_{}", table_name, ident.clone().to_string().to_uppercase());
-            quote!{
-                crate::garmin::database::dao::helpers::types::where_clause::Where::Eq(#const_ident, #ident.into())
+    fn build_condition(
+        id_fields: &[&FieldInfo],
+        value_for: impl Fn(&FieldInfo) -> TokenStream2,
+    ) -> TokenStream2 {
+        if id_fields.len() > 1 {
+            let cond = id_fields.iter().map(|f| {
+                let const_ident = &f.const_ident;
+                let value = value_for(f);
+                quote! {
+                    crate::garmin::database::dao::helpers::types::where_clause::Where::Eq(#const_ident, #value)
+                }
+            });
+            quote! {
+                crate::garmin::database::dao::helpers::types::where_clause::Where::And(vec![
+                    #(#cond),*
+                ])
             }
-        });
-        quote! {
-            crate::garmin::database::dao::helpers::types::where_clause::Where::And(vec![
-                #(#cond),*
-            ])
+        } else {
+            let f = id_fields[0];
+            let const_ident = &f.const_ident;
+            let value = value_for(f);
+            quote! {
+                crate::garmin::database::dao::helpers::types::where_clause::Where::Eq(
+                    #const_ident, #value
+                )
+            }
         }
-    } else {
-        let name = id_field_idents.get(0).unwrap().clone();
-        let const_ident =
-            format_ident!("{}_COLUMN_{}", table_name, name.to_string().to_uppercase());
-        quote! {
-            crate::garmin::database::dao::helpers::types::where_clause::Where::Eq(
-                #const_ident, #name.into()
-            )
-        }
-    };
+    }
+
+    let id_condition = build_condition(&id_fields, |f| {
+        let ident = &f.ident;
+        quote! { #ident.into() }
+    });
+
+    let update_delete_condition = build_condition(&id_fields, |f| {
+        let ident = &f.ident;
+        quote! { self.#ident.clone().into() }
+    });
+
+    let update_sets: Vec<TokenStream2> = fields
+        .iter()
+        .filter(|f| !f.is_id)
+        .map(|f| {
+            let ident = &f.ident;
+            let const_ident = &f.const_ident;
+            quote! {
+                .set(#const_ident, self.#ident.clone().into())
+            }
+        })
+        .collect();
 
     let expanded = quote! {
         #(#field_constants)*
+
         impl crate::garmin::database::dao::Entity for #struct_name {
             const TABLE_NAME: &'static str = #table_name;
-            const FIELDS: &'static [crate::garmin::database::dao::helpers::types::column_name::ColumnName] = &[ #(#field_names),* ];
+            const FIELDS: &'static [crate::garmin::database::dao::helpers::types::column_name::ColumnName] =
+                &[ #(#field_name_list),* ];
 
             fn map_from_row(row: &rusqlite::Row) -> Result<Self, rusqlite::Error> {
                 Ok(Self {
@@ -213,15 +317,55 @@ pub fn derive_entity(input: TokenStream) -> TokenStream {
         impl #struct_name {
             pub fn select_by_id(
                 #(#by_id_params),*
-            ) -> crate::garmin::database::errors::Result<Option<Self>>{
-                Ok(crate::garmin::database::dao::Entity::select()
-                .where_(
-                    #id_condition
-                )
-                .limit(1)
-                .fetch()?
-                .into_iter()
-                .next())
+            ) -> crate::garmin::database::errors::Result<Option<Self>> {
+                Ok(<#struct_name as crate::garmin::database::dao::Entity>::select()
+                    .where_(#id_condition)
+                    .fetch()?
+                    .into_iter()
+                    .next())
+            }
+
+            pub fn select_by_id_in_tx(
+                tx: &rusqlite::Transaction,
+                #(#by_id_params),*
+            ) -> crate::garmin::database::errors::Result<Option<Self>> {
+                Ok(<#struct_name as crate::garmin::database::dao::Entity>::select()
+                    .where_(#id_condition)
+                    .fetch_in_tx(tx)?
+                    .into_iter()
+                    .next())
+            }
+
+            pub fn update_by_id(&self) -> crate::garmin::database::errors::Result<()> {
+                <#struct_name as crate::garmin::database::dao::Entity>::update()
+                    #(#update_sets)*
+                    .where_(#update_delete_condition)
+                    .execute()
+            }
+
+            pub fn update_by_id_in_tx(
+                &self,
+                tx: &rusqlite::Transaction,
+            ) -> crate::garmin::database::errors::Result<()> {
+                <#struct_name as crate::garmin::database::dao::Entity>::update()
+                    #(#update_sets)*
+                    .where_(#update_delete_condition)
+                    .execute_in_tx(tx)
+            }
+
+            pub fn delete_by_id(&self) -> crate::garmin::database::errors::Result<()> {
+                <#struct_name as crate::garmin::database::dao::Entity>::delete()
+                    .where_(#update_delete_condition)
+                    .execute()
+            }
+
+            pub fn delete_by_id_in_tx(
+                &self,
+                tx: &rusqlite::Transaction,
+            ) -> crate::garmin::database::errors::Result<()> {
+                <#struct_name as crate::garmin::database::dao::Entity>::delete()
+                    .where_(#update_delete_condition)
+                    .execute_in_tx(tx)
             }
         }
     };

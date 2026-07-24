@@ -3,11 +3,14 @@
 pub mod helpers;
 
 use crate::garmin::database::dao::helpers::{
-    querys::{QueryBuilder, insert::InsertBuilder, select::SelectQuery, update::UpdateQuery},
+    querys::{
+        QueryBuilder, delete::DeleteBuilder, insert::InsertBuilder, select::SelectBuilder,
+        update::UpdateBuilder,
+    },
     types::where_clause::Where,
 };
 
-use self::helpers::types::value::Value;
+use self::helpers::types::{column_name::ColumnName, value::Value};
 
 pub mod device;
 pub mod exercise;
@@ -17,7 +20,7 @@ pub mod user;
 
 pub trait Entity: Sized {
     const TABLE_NAME: &'static str;
-    const FIELDS: &'static [&'static str];
+    const FIELDS: &'static [ColumnName];
 
     fn map_from_row(row: &rusqlite::Row) -> Result<Self, rusqlite::Error>;
 
@@ -25,12 +28,16 @@ pub trait Entity: Sized {
         InsertBuilder::new()
     }
 
-    fn select() -> SelectQuery<Self> {
-        SelectQuery::<Self>::new()
+    fn select() -> SelectBuilder<Self> {
+        SelectBuilder::<Self>::new()
     }
 
-    fn update() -> UpdateQuery<Self> {
-        UpdateQuery::new()
+    fn update() -> UpdateBuilder<Self> {
+        UpdateBuilder::new()
+    }
+
+    fn delete() -> DeleteBuilder<Self> {
+        DeleteBuilder::new()
     }
 
     fn get_values(&self) -> Vec<Value>;

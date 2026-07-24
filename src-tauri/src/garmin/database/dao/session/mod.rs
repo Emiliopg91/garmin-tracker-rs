@@ -29,7 +29,7 @@ pub struct Session {
 
     pub sub_sport: String,
 
-    #[no_field]
+    #[no_column]
     pub series: IndexMap<Exercise, Vec<Serie>>,
 }
 impl Session {

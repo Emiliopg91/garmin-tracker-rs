@@ -18,7 +18,7 @@ struct Cli {
 fn main() {
     #[cfg(debug_assertions)]
     if std::env::var("IN_DEBUG").is_err() {
-        tauri_rs_ts_ipc::build();
+        //tauri_rs_ts_ipc::build();
     }
     let cli = Cli::parse();
 

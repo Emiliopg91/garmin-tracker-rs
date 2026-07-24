@@ -103,23 +103,21 @@ pub fn traced_command(_attrs: TokenStream, item: TokenStream) -> TokenStream {
 }
 
 fn is_result_type(output: &ReturnType) -> bool {
-    if let ReturnType::Type(_, ty) = output {
-        if let Type::Path(type_path) = &**ty {
-            if let Some(segment) = type_path.path.segments.last() {
-                return segment.ident == "Result";
-            }
-        }
+    if let ReturnType::Type(_, ty) = output
+        && let Type::Path(type_path) = &**ty
+        && let Some(segment) = type_path.path.segments.last()
+    {
+        return segment.ident == "Result";
     }
     false
 }
 
 fn is_option_type(output: &ReturnType) -> bool {
-    if let ReturnType::Type(_, ty) = output {
-        if let Type::Path(type_path) = &**ty {
-            if let Some(segment) = type_path.path.segments.last() {
-                return segment.ident == "Option";
-            }
-        }
+    if let ReturnType::Type(_, ty) = output
+        && let Type::Path(type_path) = &**ty
+        && let Some(segment) = type_path.path.segments.last()
+    {
+        return segment.ident == "Option";
     }
     false
 }

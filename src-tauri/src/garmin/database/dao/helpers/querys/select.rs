@@ -11,14 +11,14 @@ use crate::garmin::database::{
     errors::DatabaseError,
 };
 
-pub struct SelectQuery<T> {
+pub struct SelectBuilder<T> {
     condition: Option<Where>,
     order: Vec<OrderBy>,
     limit: Option<u32>,
     _marker: PhantomData<T>,
 }
 
-impl<T> QueryBuilder<T> for SelectQuery<T>
+impl<T> QueryBuilder<T> for SelectBuilder<T>
 where
     T: Entity,
 {
@@ -32,7 +32,7 @@ where
     }
 }
 
-impl<T> SelectQuery<T>
+impl<T> SelectBuilder<T>
 where
     T: Entity,
 {
@@ -51,11 +51,19 @@ where
         self
     }
 
-    pub fn fetch_in_transaction(
+    pub fn fetch_in_tx(
         &self,
         tx: &rusqlite::Transaction,
     ) -> crate::garmin::database::errors::Result<Vec<T>> {
-        let mut sentence = format!("SELECT {} FROM {}", T::FIELDS.join(", "), T::TABLE_NAME);
+        let mut sentence = format!(
+            "SELECT {} FROM {}",
+            T::FIELDS
+                .iter()
+                .map(|f| f.as_ref().to_string())
+                .collect::<Vec<String>>()
+                .join(", "),
+            T::TABLE_NAME
+        );
 
         let mut params = Vec::new();
         if let Some(condition) = &self.condition {
@@ -86,7 +94,7 @@ where
             .map_err(DatabaseError::Select)?;
 
         let res: Vec<T> = rows.filter_map(|r| r.ok()).collect();
-        Self::log_query_ending(res.len());
+        Self::log_query_ending(res.len(), true);
 
         Ok(res)
     }
@@ -95,24 +103,24 @@ where
         let mut db = DATABASE_INST.lock().unwrap();
         let mut res = Vec::new();
         db.run_in_transaction(|tx| {
-            res = self.fetch_in_transaction(tx)?;
+            res = self.fetch_in_tx(tx)?;
             Ok(())
         })?;
         Ok(res)
     }
 
-    pub fn fetch_one_in_transaction(
+    pub fn fetch_one_in_tx(
         &self,
         tx: &rusqlite::Transaction,
     ) -> crate::garmin::database::errors::Result<Option<T>> {
-        Ok(self.fetch_in_transaction(tx)?.into_iter().next())
+        Ok(self.fetch_in_tx(tx)?.into_iter().next())
     }
 
     pub fn fetch_one(&self) -> crate::garmin::database::errors::Result<Option<T>> {
         let mut db = DATABASE_INST.lock().unwrap();
         let mut res = Vec::new();
         db.run_in_transaction(|tx| {
-            res = self.fetch_in_transaction(tx)?;
+            res = self.fetch_in_tx(tx)?;
             Ok(())
         })?;
         Ok(res.into_iter().next())

@@ -12,13 +12,13 @@ use crate::garmin::database::{
     errors::DatabaseError,
 };
 
-pub struct UpdateQuery<T> {
+pub struct UpdateBuilder<T> {
     condition: Option<Where>,
     field_values: Vec<(ColumnName, Value)>,
     _marker: std::marker::PhantomData<T>,
 }
 
-impl<T> QueryBuilder<T> for UpdateQuery<T>
+impl<T> QueryBuilder<T> for UpdateBuilder<T>
 where
     T: Entity,
 {
@@ -31,7 +31,7 @@ where
     }
 }
 
-impl<T> UpdateQuery<T>
+impl<T> UpdateBuilder<T>
 where
     T: Entity,
 {
@@ -45,7 +45,7 @@ where
         self
     }
 
-    pub fn execute_in_transaction(
+    pub fn execute_in_tx(
         &self,
         tx: &rusqlite::Transaction,
     ) -> crate::garmin::database::errors::Result<()> {
@@ -81,14 +81,14 @@ where
         let updated = tx
             .execute(&sentence, params_from_iter(params))
             .map_err(DatabaseError::Update)?;
-        Self::log_query_ending(updated);
+        Self::log_query_ending(updated, false);
 
         Ok(())
     }
 
     pub fn execute(&self) -> crate::garmin::database::errors::Result<()> {
         let mut db = DATABASE_INST.lock().unwrap();
-        db.run_in_transaction(|tx| self.execute_in_transaction(tx))?;
+        db.run_in_transaction(|tx| self.execute_in_tx(tx))?;
         Ok(())
     }
 }
