@@ -19,7 +19,7 @@ node:
   typescript: 5.8.3
   typescript-eslint: 8.65.0
   vite: 7.3.6
-  vite-plugin-checker: 0.14.4
+  vite-plugin-checker: 0.14.5
 rust:
   chrono: 0.4.45
   clap: 4.6.4
@@ -45,6 +45,7 @@ rust:
   tauri-build: 2.6.3
   tauri-plugin-log: 2.9.0
   tauri-plugin-opener: 2.5.4
+  tauri-plugin-single-instance: 2.4.3
   tauri-rs-ts-ipc: 0.1.14
   thiserror: 2.0.19
   tokio: 1.53.1
