@@ -34,8 +34,17 @@ pub fn get_exercises() -> Result<Vec<ExerciseListItem>, String> {
             .order_by(OrderBy::Asc(EXERCISE_COLUMN_NAME))
             .fetch()
             .map_err(|e| e.to_string())?;
+
+        let prs = Serie::get_prs().map_err(|e| e.to_string())?;
+
         for exercise in exercises {
-            let pr = Serie::get_pr_for_exercise(&exercise).map_err(|e| e.to_string())?;
+            let pr = prs
+                .iter()
+                .find(|pr| {
+                    pr.exercise_category == exercise.category && pr.exercise_id == exercise.id
+                })
+                .unwrap();
+
             result.push(ExerciseListItem {
                 category: exercise.category,
                 id: exercise.id,

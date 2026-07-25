@@ -72,6 +72,7 @@ impl Serie {
             ]))
             .order_by(OrderBy::Desc(SERIE_COLUMN_WEIGHT))
             .order_by(OrderBy::Desc(SERIE_COLUMN_REPS))
+            .order_by(OrderBy::Asc(SERIE_COLUMN_SESSION))
             .fetch_one_in_tx(tx)
             .map(|rs| rs.unwrap());
 
@@ -140,12 +141,16 @@ impl Serie {
                     exercise.category.clone().into(),
                 ),
                 Where::Eq(SERIE_COLUMN_EXERCISE_ID, exercise.id.into()),
+                Where::Eq(SERIE_COLUMN_PR, true.into()),
             ]))
-            .order_by(OrderBy::Desc(SERIE_COLUMN_WEIGHT))
-            .order_by(OrderBy::Desc(SERIE_COLUMN_REPS))
-            .order_by(OrderBy::Asc(SERIE_COLUMN_SESSION))
             .limit(1)
             .fetch_one()?
             .unwrap())
+    }
+
+    pub fn get_prs() -> crate::garmin::database::errors::Result<Vec<Serie>> {
+        Serie::select()
+            .where_(Where::Eq(SERIE_COLUMN_PR, true.into()))
+            .fetch()
     }
 }

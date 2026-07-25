@@ -93,7 +93,9 @@ where
             .query_map(params_from_iter(params.iter()), T::map_from_row)
             .map_err(DatabaseError::Select)?;
 
-        let res: Vec<T> = rows.filter_map(|r| r.ok()).collect();
+        let res: Vec<T> = rows
+            .collect::<Result<Vec<T>, rusqlite::Error>>()
+            .map_err(DatabaseError::Select)?;
         Self::log_query_ending(res.len(), true);
 
         Ok(res)
