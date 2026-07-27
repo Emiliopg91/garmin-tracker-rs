@@ -15,7 +15,7 @@ node:
   react-bootstrap: 2.10.10
   react-datepicker: 9.1.0
   react-dom: 19.2.8
-  recharts: 3.10.0
+  recharts: 3.10.1
   typescript: 5.8.3
   typescript-eslint: 8.65.0
   vite: 7.3.6
