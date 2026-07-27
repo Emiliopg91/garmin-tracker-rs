@@ -59,3 +59,14 @@ codegen-units = 1
 strip = "symbols"
 panic = "abort"
 opt-level = "z"
+
+[profile.dev]
+opt-level = 0
+debug = 0
+debug-assertions = true
+overflow-checks = false
+lto = false
+panic = "abort"
+codegen-units = 256
+incremental = true
+strip = false

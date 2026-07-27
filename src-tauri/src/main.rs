@@ -3,7 +3,7 @@
 
 use clap::Parser;
 
-#[derive(Parser, Debug)]
+#[derive(Parser)]
 #[command()]
 struct Cli {
     /// Enable verbose mode to log extended information

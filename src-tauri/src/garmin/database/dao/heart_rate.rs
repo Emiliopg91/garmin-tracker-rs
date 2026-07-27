@@ -1,6 +1,6 @@
 use garmin_tracker_rs_macros::Entity;
 
-#[derive(Entity, Debug, Clone)]
+#[derive(Entity, Clone)]
 #[entity(table = "heart_rate")]
 pub struct HeartRate {
     #[id]

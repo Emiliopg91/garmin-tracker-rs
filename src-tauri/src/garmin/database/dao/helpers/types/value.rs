@@ -3,7 +3,7 @@ use rusqlite::{
     types::{Null, ToSqlOutput},
 };
 
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 pub enum Value {
     IntSize(isize),
     Int8(i8),

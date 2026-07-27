@@ -10,7 +10,7 @@ use crate::garmin::database::dao::{
 
 use super::{exercise::Exercise, serie::Serie};
 
-#[derive(Default, Debug, Entity, Clone)]
+#[derive(Default, Entity, Clone)]
 pub struct Session {
     #[id]
     pub date: i64,

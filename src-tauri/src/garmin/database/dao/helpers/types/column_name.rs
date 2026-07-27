@@ -1,5 +1,5 @@
 #[repr(transparent)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Clone, Copy)]
 pub struct ColumnName(&'static str);
 
 impl AsRef<str> for ColumnName {
@@ -17,9 +17,5 @@ impl std::fmt::Display for ColumnName {
 impl ColumnName {
     pub const fn new(value: &'static str) -> Self {
         Self(value)
-    }
-
-    pub const fn as_str(self) -> &'static str {
-        self.0
     }
 }

@@ -15,7 +15,7 @@ use crate::garmin::database::dao::{
 
 use super::exercise::Exercise;
 
-#[derive(Debug, Default, Entity, Clone)]
+#[derive(Default, Entity, Clone)]
 pub struct Serie {
     #[id]
     pub session: i64,

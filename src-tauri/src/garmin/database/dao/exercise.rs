@@ -1,6 +1,6 @@
 use garmin_tracker_rs_macros::Entity;
 
-#[derive(Clone, Debug, Default, Entity)]
+#[derive(Clone, Default, Entity)]
 #[entity(hasheable = true, comparable = true)]
 pub struct Exercise {
     #[id]

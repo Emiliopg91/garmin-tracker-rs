@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::garmin::database::dao::user::User;
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize)]
 pub struct UserListItem {
     pub date: String,
     pub weight: f32,
@@ -32,7 +32,7 @@ impl TryFrom<&UserListItem> for User {
         let local: DateTime<Local> = Local
             .from_local_datetime(&naive)
             .single()
-            .ok_or("Fecha/hora ambigua o inexistente")?;
+            .ok_or("Wrong date format")?;
 
         Ok(Self {
             date: local.timestamp(),

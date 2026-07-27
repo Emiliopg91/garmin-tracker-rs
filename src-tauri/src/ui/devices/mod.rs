@@ -120,5 +120,6 @@ async fn mtp_dev_check_and_sync(app: AppHandle, devices: &mut Vec<DeviceListItem
             let _ = _import_from_device(&dev).await;
         }
         let _ = app.emit("finish_loading", ());
+        let _ = app.emit("sessions_added", ());
     }
 }

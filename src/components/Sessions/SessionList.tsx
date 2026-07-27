@@ -14,6 +14,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { BackendListener } from "@/utils/backend/listener";
 
 type WorkoutLoad = {
   date: number;
@@ -159,6 +160,13 @@ export function SessionsList() {
 
   useEffect(() => {
     refreshList();
+    const unregisterSessionAdded = BackendListener.onSessionsAdded(() => {
+      refreshList();
+    });
+
+    return () => {
+      unregisterSessionAdded();
+    };
   }, []);
 
   const importDevice = (serial: string) => {

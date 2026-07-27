@@ -1,6 +1,6 @@
 use serde::Serialize;
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize)]
 pub enum AppEnvironment {
     Debug,
     Release,

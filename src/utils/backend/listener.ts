@@ -27,6 +27,10 @@ export class BackendListener {
     return BackendListener.inner_listen<undefined>("finish_loading", callback);
   }
 
+  public static onSessionsAdded(callback: () => void): () => void {
+    return BackendListener.inner_listen<undefined>("sessions_added", callback);
+  }
+
   public static onStartLoading(callback: () => void): () => void {
     return BackendListener.inner_listen<undefined>("start_loading", callback);
   }
