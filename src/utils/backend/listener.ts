@@ -52,6 +52,11 @@ export class BackendListener {
         event.payload,
       );
       callback(event.payload);
+    }).catch((err) => {
+      console.error("Failed to listen to '" + event_name + "':", err);
+      return () => {
+        //Do nothing
+      };
     });
 
     return () => {
