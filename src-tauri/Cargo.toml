@@ -51,6 +51,8 @@ rfd = "^0"
 phf = { version = "^0", features = ["macros"] }
 garmin-tracker-rs-macros = { path = "../src-tauri-macros" }
 tauri-plugin-single-instance = "^2"
+nusb = "^0"
+tokio-stream = "^0"
 
 [profile.release]
 lto = "fat"
