@@ -15,7 +15,6 @@ export function AppProvider({
   const [environment, setEnvironment] = useState(AppEnvironment.Release);
   const [appReady, setAppReady] = useState(false);
   const [tab, setTab] = useState(Tabs.SESSIONS);
-  const [loading, setLoading] = useState(false);
   const [availableUpdate, setAvailableUpdate] = useState<string | undefined>(
     undefined,
   );
@@ -23,6 +22,31 @@ export function AppProvider({
     [],
   );
   const availableDevicesRef = useRef<DeviceListItem[]>([]);
+  const [loadingCount, setLoadingCount] = useState(0);
+
+  const startLoading = () => {
+    setLoadingCount((previous) => previous + 1);
+  };
+
+  const finishLoading = () => {
+    setLoadingCount((previous) => Math.max(0, previous - 1));
+  };
+
+  const loading = loadingCount > 0;
+
+  const translate = (key: string, replacements?: string[]) => {
+    if (!TRANSLATIONS[key]) {
+      console.warn("Missing translation", key);
+      return key;
+    }
+    let translation = TRANSLATIONS[key];
+    if (replacements) {
+      replacements.forEach((r) => {
+        translation = translation.replace("{}", r);
+      });
+    }
+    return translation;
+  };
 
   useEffect(() => {
     const unregisterConnection = BackendListener.onDeviceConnected((device) => {
@@ -51,6 +75,14 @@ export function AppProvider({
       },
     );
 
+    const unregisterStartLoading = BackendListener.onStartLoading(() => {
+      startLoading();
+    });
+
+    const unregisterFinishLoading = BackendListener.onFinishLoading(() => {
+      finishLoading();
+    });
+
     BackendClient.getEnvironment()
       .then((env) => {
         setEnvironment(env);
@@ -71,30 +103,19 @@ export function AppProvider({
       unregisterConnection();
       unregisterDisconnection();
       unregisterUpdateAvailable();
+      unregisterStartLoading();
+      unregisterFinishLoading();
     };
   }, []);
-
-  const translate = (key: string, replacements?: string[]) => {
-    if (!TRANSLATIONS[key]) {
-      console.warn("Missing translation", key);
-      return key;
-    }
-    let translation = TRANSLATIONS[key];
-    if (replacements) {
-      replacements.forEach((r) => {
-        translation = translation.replace("{}", r);
-      });
-    }
-    return translation;
-  };
 
   return (
     <AppContext.Provider
       value={{
         tab,
         setTab,
+        startLoading,
+        finishLoading,
         loading,
-        setLoading,
         availableDevices,
         appReady,
         availableUpdate,

@@ -24,7 +24,8 @@ type WorkoutLoad = {
 };
 
 export function SessionsList() {
-  const { setLoading, availableDevices, translate } = useContext(AppContext);
+  const { startLoading, finishLoading, availableDevices, translate } =
+    useContext(AppContext);
 
   const [minDate, setMinDate] = useState(0);
   const [workload, setWorkload] = useState<WorkoutLoad[]>([]);
@@ -34,7 +35,7 @@ export function SessionsList() {
   >(undefined);
 
   const refreshList = () => {
-    setLoading(true);
+    startLoading();
     BackendClient.getSessions()
       .then((data) => {
         setSessions(data);
@@ -152,7 +153,7 @@ export function SessionsList() {
         }
       })
       .finally(() => {
-        setLoading(false);
+        finishLoading();
       });
   };
 
@@ -161,7 +162,7 @@ export function SessionsList() {
   }, []);
 
   const importFile = () => {
-    setLoading(true);
+    startLoading();
     BackendClient.importFromFile()
       .then((count) => {
         if (count > 0) {
@@ -169,12 +170,12 @@ export function SessionsList() {
         }
       })
       .finally(() => {
-        setLoading(false);
+        finishLoading();
       });
   };
 
   const importDevice = (serial: string) => {
-    setLoading(true);
+    startLoading();
     BackendClient.importFromDevice(serial)
       .then((count) => {
         if (count > 0) {
@@ -182,18 +183,18 @@ export function SessionsList() {
         }
       })
       .finally(() => {
-        setLoading(false);
+        finishLoading();
       });
   };
 
   const getSessionDetails = (timestamp: string) => {
-    setLoading(true);
+    startLoading();
     BackendClient.getSessionDetails(timestamp)
       .then((details) => {
         setSessionDetails(details);
       })
       .finally(() => {
-        setLoading(false);
+        finishLoading();
       });
   };
 

@@ -7,7 +7,8 @@ interface AppContexType {
   tab: Tabs;
   setTab: (category: Tabs) => void;
   loading: boolean;
-  setLoading: (loading: boolean) => void;
+  startLoading: () => void;
+  finishLoading: () => void;
   availableDevices: DeviceListItem[];
   availableUpdate: string | undefined;
   environment: AppEnvironment;
@@ -21,7 +22,10 @@ const defaultValue: AppContexType = {
     /* empty */
   },
   loading: false,
-  setLoading: () => {
+  startLoading: () => {
+    /* empty */
+  },
+  finishLoading: () => {
     /* empty */
   },
   availableDevices: [],

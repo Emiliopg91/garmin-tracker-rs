@@ -1,12 +1,12 @@
 node:
-  '@eslint/js': 9.39.5
-  '@tauri-apps/api': 2.11.1
-  '@tauri-apps/cli': 2.11.4
-  '@tauri-apps/plugin-log': 2.9.0
-  '@tauri-apps/plugin-opener': 2.5.4
-  '@types/react': 19.2.17
-  '@types/react-dom': 19.2.3
-  '@vitejs/plugin-react': 4.7.0
+  "@eslint/js": 9.39.5
+  "@tauri-apps/api": 2.11.1
+  "@tauri-apps/cli": 2.11.4
+  "@tauri-apps/plugin-log": 2.9.0
+  "@tauri-apps/plugin-opener": 2.5.4
+  "@types/react": 19.2.17
+  "@types/react-dom": 19.2.3
+  "@vitejs/plugin-react": 4.7.0
   bootstrap: 5.3.8
   eslint: 9.39.5
   eslint-plugin-react: 7.37.5
@@ -47,7 +47,7 @@ rust:
   tauri-plugin-log: 2.9.0
   tauri-plugin-opener: 2.5.4
   tauri-plugin-single-instance: 2.4.3
-  tauri-rs-ts-ipc: 0.1.16
+  tauri-rs-ts-ipc: 0.1.17
   thiserror: 2.0.19
   tokio: 1.53.1
   tokio-stream: 0.1.19

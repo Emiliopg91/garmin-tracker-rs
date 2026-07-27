@@ -19,6 +19,7 @@ use crate::{
             models::{NotificationDefinition, NotificationKind},
             show_notification,
         },
+        sessions::_import_from_device,
     },
 };
 
@@ -37,12 +38,12 @@ pub async fn start_device_watcher(app: AppHandle) {
                 Ok(w) => {
                     info!("Device monitor initialized");
 
-                    mtp_dev_check(app.clone(), &mut devices).await;
+                    mtp_dev_check_and_sync(app.clone(), &mut devices).await;
                     let mut watch = w;
                     while let Some(event) = watch.next().await {
                         match event {
                             HotplugEvent::Connected(_) | HotplugEvent::Disconnected(_) => {
-                                mtp_dev_check(app.clone(), &mut devices).await;
+                                mtp_dev_check_and_sync(app.clone(), &mut devices).await;
                             }
                         }
                     }
@@ -55,7 +56,8 @@ pub async fn start_device_watcher(app: AppHandle) {
     }
 }
 
-async fn mtp_dev_check(app: AppHandle, devices: &mut Vec<DeviceListItem>) {
+async fn mtp_dev_check_and_sync(app: AppHandle, devices: &mut Vec<DeviceListItem>) {
+    let mut devs_to_sync = Vec::new();
     if let Ok(cur_dev) = MTP_CLIENT_INST
         .lock()
         .await
@@ -81,9 +83,10 @@ async fn mtp_dev_check(app: AppHandle, devices: &mut Vec<DeviceListItem>) {
                     "Connected {} {} ({})",
                     device.manufacturer, device.model, device.serial_number
                 );
+                devs_to_sync.push(device.serial_number.clone());
                 show_notification(NotificationDefinition {
                     title: translate!("device_connected"),
-                    body: format!("{} {}", device.manufacturer, device.model),
+                    body: translate!("syncing_device", device.manufacturer, device.model),
                     kind: NotificationKind::Temporal,
                 });
             }
@@ -110,5 +113,12 @@ async fn mtp_dev_check(app: AppHandle, devices: &mut Vec<DeviceListItem>) {
         }
 
         devices.retain(|d| cur_dev.iter().any(|cd| cd.serial_number == d.serial_number));
+    }
+    if devs_to_sync.len() > 0 {
+        let _ = app.emit("start_loading", ());
+        for dev in devs_to_sync {
+            let _ = _import_from_device(&dev).await;
+        }
+        let _ = app.emit("finish_loading", ());
     }
 }

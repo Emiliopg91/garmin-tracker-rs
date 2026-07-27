@@ -5,19 +5,20 @@ import { BackendClient } from "@/utils/backend/client";
 import { AppContext } from "@/context/AppContext";
 
 export function ExercisesList() {
-  const { setLoading, translate } = useContext(AppContext);
+  const { startLoading, finishLoading, translate } = useContext(AppContext);
   const [exercises, setExercises] = useState<ExerciseListItem[]>([]);
   const [exerciseDetails, setExerciseDetails] = useState<
     ExerciseDetails | undefined
   >(undefined);
 
   const refreshList = () => {
+    startLoading();
     BackendClient.getExercises()
       .then((data) => {
         setExercises(data);
       })
       .finally(() => {
-        setLoading(false);
+        finishLoading();
       });
   };
 

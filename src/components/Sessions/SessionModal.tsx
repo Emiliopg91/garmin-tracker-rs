@@ -20,7 +20,7 @@ type Props = {
 };
 
 export function SessionModal({ session, onClose, onUpdate }: Props) {
-  const { setLoading, translate } = useContext(AppContext);
+  const { startLoading, finishLoading, translate } = useContext(AppContext);
   const [localSession, setLocalSession] = useState({ ...session });
   const [changed, setChanged] = useState(false);
   const [hrData, setHrData] = useState<
@@ -93,7 +93,7 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
   };
 
   const saveChanges = () => {
-    setLoading(true);
+    startLoading();
     const update: SessionSeriesUpdate = {
       timestamp: localSession.timestamp,
       series: [],
@@ -109,7 +109,7 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
         onClose();
       })
       .finally(() => {
-        setLoading(false);
+        finishLoading();
       });
   };
 

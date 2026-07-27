@@ -178,3 +178,9 @@ other:
 heart_rate:
   en: Heart rate
   es: Frecuencia cardíaca
+sync_in_progress:
+  en: Syncing in progress
+  es: Sincronzacion en proceso
+syncing_device:
+  en: Syncing {} {}
+  es: Sincronizando {} {}

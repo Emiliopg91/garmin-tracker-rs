@@ -205,6 +205,10 @@ pub async fn import_from_file() -> Result<u16, String> {
 #[traced_command]
 #[tauri::command]
 pub async fn import_from_device(serial: &str) -> Result<u16, String> {
+    _import_from_device(serial).await
+}
+
+pub async fn _import_from_device(serial: &str) -> Result<u16, String> {
     info!("Starting import from device with S/N {}", serial);
     let mut latest_date = "2026-06-08-00-00-00".to_string();
     let mut device = None;

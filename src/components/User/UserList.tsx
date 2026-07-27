@@ -23,7 +23,7 @@ type ChartDataType = {
 }[];
 
 export function UserList() {
-  const { setLoading, translate } = useContext(AppContext);
+  const { startLoading, finishLoading, translate } = useContext(AppContext);
 
   const [userMeasures, setUserMeasures] = useState<UserListItem[]>([]);
   const [addingNew, setAddingNew] = useState(false);
@@ -46,6 +46,7 @@ export function UserList() {
   const [maxDate, setMaxDate] = useState(0);
 
   const refreshList = () => {
+    startLoading();
     BackendClient.getUserMeasures()
       .then((data) => {
         setUserMeasures(data);
@@ -100,7 +101,7 @@ export function UserList() {
         setChartData(newChartData);
       })
       .finally(() => {
-        setLoading(false);
+        finishLoading();
       });
   };
 

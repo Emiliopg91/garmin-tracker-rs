@@ -5,7 +5,7 @@ import { useContext, useEffect, useState } from "react";
 import { AppContext } from "@/context/AppContext";
 
 export function WorkoutsList() {
-  const { setLoading, translate } = useContext(AppContext);
+  const { startLoading, finishLoading, translate } = useContext(AppContext);
 
   const [workouts, setWorkouts] = useState<WorkoutListItem[]>([]);
   const [workoutDetails, setWorkoutDetails] = useState<
@@ -13,6 +13,7 @@ export function WorkoutsList() {
   >(undefined);
 
   const refreshList = () => {
+    startLoading();
     BackendClient.getWorkoutList()
       .then((data) => {
         data.sort((a, b) => {
@@ -29,7 +30,7 @@ export function WorkoutsList() {
         setWorkouts(data);
       })
       .finally(() => {
-        setLoading(false);
+        finishLoading();
       });
   };
 

@@ -13,6 +13,14 @@ export class BackendListener {
 	  return BackendListener.inner_listen<DeviceListItem>("device_disconnected", callback);
 	}
 
+	public static onFinishLoading(callback: () => void): () => void {
+	  return BackendListener.inner_listen<undefined>("finish_loading", callback);
+	}
+
+	public static onStartLoading(callback: () => void): () => void {
+	  return BackendListener.inner_listen<undefined>("start_loading", callback);
+	}
+
 	public static onUpdateAvailable(callback: (payload: string) => void): () => void {
 	  return BackendListener.inner_listen<string>("update_available", callback);
 	}
