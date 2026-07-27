@@ -114,7 +114,7 @@ async fn mtp_dev_check_and_sync(app: AppHandle, devices: &mut Vec<DeviceListItem
 
         devices.retain(|d| cur_dev.iter().any(|cd| cd.serial_number == d.serial_number));
     }
-    if devs_to_sync.len() > 0 {
+    if !devs_to_sync.is_empty() {
         let _ = app.emit("start_loading", ());
         for dev in devs_to_sync {
             let _ = _import_from_device(&dev).await;
