@@ -1,8 +1,17 @@
 import { AppContext } from "@/context/AppContext";
 import { BackendClient } from "@/utils/backend/client";
 import { SessionDetails, SessionSeriesUpdate } from "@/utils/backend/models";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Button, Modal } from "react-bootstrap";
+import {
+  CartesianGrid,
+  ComposedChart,
+  Legend,
+  Line,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+} from "recharts";
 
 type Props = {
   session: SessionDetails;
@@ -14,6 +23,27 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
   const { setLoading, translate } = useContext(AppContext);
   const [localSession, setLocalSession] = useState({ ...session });
   const [changed, setChanged] = useState(false);
+  const [hrData, setHrData] = useState<
+    { idx: number; hr: number; avg: number }[]
+  >([]);
+  const [minHr, setMinHr] = useState(0);
+
+  useEffect(() => {
+    const hrData: { idx: number; hr: number; avg: number }[] = [];
+    let minHr = 300;
+
+    if (session.heart_rates && session.heart_rates.length > 0) {
+      session.heart_rates.forEach((hr, idx) => {
+        minHr = Math.min(minHr, hr);
+        hrData.push({ idx, hr, avg: session.avg_heart_rate });
+      });
+    }
+
+    setHrData(hrData);
+    setMinHr(minHr);
+
+    console.log(minHr);
+  }, []);
 
   const updateSerieReps = (exercise: string, idx: number, newVal: string) => {
     let reps = parseInt(newVal);
@@ -101,6 +131,52 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
         </Modal.Header>
 
         <Modal.Body>
+          {hrData.length > 0 && (
+            <div style={{ width: "100%", height: 200 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <ComposedChart
+                  data={hrData}
+                  margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
+                >
+                  <CartesianGrid stroke="#80808000" strokeDasharray="5 5" />
+                  <XAxis
+                    dataKey="idx"
+                    type="number"
+                    stroke="#fff"
+                    tick={false}
+                    height={0}
+                  />
+                  <YAxis
+                    yAxisId="left"
+                    stroke="#fff"
+                    width={0}
+                    domain={[minHr, session.max_heart_rate]}
+                    tick={false}
+                  />{" "}
+                  <Line
+                    type="monotone"
+                    name={translate("heart_rate")}
+                    dataKey="hr"
+                    stroke="red"
+                    dot={false}
+                    isAnimationActive={false}
+                    activeDot={false}
+                  />
+                  <Line
+                    type="monotone"
+                    name={translate("avg_heart_rate")}
+                    dataKey="avg"
+                    stroke="#ffffff40"
+                    dot={false}
+                    legendType="none"
+                    isAnimationActive={false}
+                    activeDot={false}
+                  />
+                  <Legend />
+                </ComposedChart>
+              </ResponsiveContainer>
+            </div>
+          )}
           <table id="session-details-table">
             <colgroup>
               <col style={{ width: "250px" }} />

@@ -17,6 +17,7 @@ use crate::{
                 Entity,
                 device::Device,
                 exercise::{EXERCISE_COLUMN_NAME, Exercise},
+                heart_rate::HeartRate,
                 helpers::types::order_by::OrderBy,
                 serie::Serie,
                 session::Session,
@@ -279,13 +280,25 @@ where
                                 insert = insert.item(exercise.clone());
                             }
                         }
-                        insert.execute_in_tx(tx)?;
+                        if seen.len() > 0 {
+                            insert.execute_in_tx(tx)?;
+                        }
 
                         let mut insert = Serie::insert();
+                        let mut count = 0;
                         for series in session.series.iter().map(|e| e.1) {
                             for serie in series {
                                 insert = insert.item(serie.clone());
+                                count += 1;
                             }
+                        }
+                        if count > 0 {
+                            insert.execute_in_tx(tx)?;
+                        }
+
+                        let mut insert = HeartRate::insert();
+                        for hr in &session.heart_rates {
+                            insert = insert.item(hr.clone());
                         }
                         insert.execute_in_tx(tx)?;
 

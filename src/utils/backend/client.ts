@@ -32,13 +32,13 @@ export class BackendClient {
 	}
 	
 
-	// From src-tauri/src/ui/sessions/mod.rs:69
+	// From src-tauri/src/ui/sessions/mod.rs:70
 	public static getSessionDetails(timestamp: string): Promise<SessionDetails> {
 	  return BackendClient.inner_invoke("get_session_details", { timestamp }); 
 	}
 	
 
-	// From src-tauri/src/ui/sessions/mod.rs:39
+	// From src-tauri/src/ui/sessions/mod.rs:40
 	public static getSessions(): Promise<SessionListItem[]> {
 	  return BackendClient.inner_invoke("get_sessions"); 
 	}
@@ -62,13 +62,13 @@ export class BackendClient {
 	}
 	
 
-	// From src-tauri/src/ui/sessions/mod.rs:206
+	// From src-tauri/src/ui/sessions/mod.rs:207
 	public static importFromDevice(serial: string): Promise<number> {
 	  return BackendClient.inner_invoke("import_from_device", { serial }); 
 	}
 	
 
-	// From src-tauri/src/ui/sessions/mod.rs:177
+	// From src-tauri/src/ui/sessions/mod.rs:178
 	public static importFromFile(): Promise<number> {
 	  return BackendClient.inner_invoke("import_from_file"); 
 	}
@@ -86,7 +86,7 @@ export class BackendClient {
 	}
 	
 
-	// From src-tauri/src/ui/sessions/mod.rs:113
+	// From src-tauri/src/ui/sessions/mod.rs:114
 	public static saveSessionChanges(details: SessionSeriesUpdate): Promise<void> {
 	  return BackendClient.inner_invoke("save_session_changes", { details }); 
 	}

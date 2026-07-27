@@ -1,0 +1,13 @@
+-- Support for activity heart rate
+
+CREATE TABLE IF NOT EXISTS HEART_RATE(
+    session INTEGER NOT NULL,
+    idx INTEGER NOT NULL,
+    hr INTEGER NOT NULL,
+
+    PRIMARY KEY(session, idx),
+
+    FOREIGN KEY(session) REFERENCES SESSION(date) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS HEART_RATE_SESSION ON SERIE(session);

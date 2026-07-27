@@ -78,6 +78,7 @@ pub struct SessionDetails {
 
     pub exercises: Vec<String>,
     pub series: HashMap<String, Vec<SessionSerie>>,
+    pub heart_rates: Vec<u8>,
 }
 
 impl From<&Session> for SessionDetails {
@@ -96,6 +97,7 @@ impl From<&Session> for SessionDetails {
             sub_sport: value.sub_sport.clone(),
             exercises: Vec::new(),
             series: HashMap::new(),
+            heart_rates: value.heart_rates.iter().map(|hr| hr.hr).collect(),
         }
     }
 }

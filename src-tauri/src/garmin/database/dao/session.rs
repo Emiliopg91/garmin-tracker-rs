@@ -4,6 +4,7 @@ use indexmap::IndexMap;
 
 use crate::garmin::database::dao::{
     Entity,
+    heart_rate::{HEARTRATE_COLUMN_SESSION, HeartRate},
     helpers::types::{order_by::OrderBy, where_clause::Where},
 };
 
@@ -31,6 +32,9 @@ pub struct Session {
 
     #[no_column]
     pub series: IndexMap<Exercise, Vec<Serie>>,
+
+    #[no_column]
+    pub heart_rates: Vec<HeartRate>,
 }
 impl Session {
     pub fn format_date(&self) -> String {
@@ -87,18 +91,22 @@ impl Session {
 
     pub fn find_by_id(
         timestamp: i64,
-        with_series: bool,
+        with_details: bool,
     ) -> crate::garmin::database::errors::Result<Option<Session>> {
         let opt_sess = Session::select_by_id(timestamp)?;
 
         Ok(match opt_sess {
             Some(mut session) => {
-                if with_series {
+                if with_details {
                     session.series = if session.sub_sport == "strength_training" {
                         Serie::load_for_session(session.date)?
                     } else {
                         IndexMap::new()
                     };
+
+                    session.heart_rates = HeartRate::select()
+                        .where_(Where::Eq(HEARTRATE_COLUMN_SESSION, session.date.into()))
+                        .fetch()?;
                 }
                 Some(session)
             }

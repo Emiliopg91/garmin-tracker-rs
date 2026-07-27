@@ -175,3 +175,6 @@ workout_load:
 other:
   en: Other
   es: Otro
+heart_rate:
+  en: Heart rate
+  es: Frecuencia cardíaca

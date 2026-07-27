@@ -41,6 +41,13 @@ export interface ExerciseListItem {
   weight: number;
 }
 
+// From src-tauri/src/garmin/database/dao/heart_rate.rs:5
+export interface HeartRate {
+  hr: number;
+  idx: number;
+  session: string;
+}
+
 // From src-tauri/src/ui/notifications/models.rs:4
 export enum NotificationKind {
 	Temporal = "Temporal",
@@ -59,6 +66,7 @@ export interface SessionDetails {
   avg_heart_rate: number;
   date: string;
   exercises: string[];
+  heart_rates: number[];
   max_heart_rate: number;
   metabolic_calories: number;
   name: string;
@@ -88,7 +96,7 @@ export interface SessionSerie {
   weight: number;
 }
 
-// From src-tauri/src/ui/sessions/models.rs:104
+// From src-tauri/src/ui/sessions/models.rs:106
 export interface SessionSeriesUpdate {
   series: SessionSerie[];
   timestamp: string;

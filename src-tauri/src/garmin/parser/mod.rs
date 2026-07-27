@@ -4,6 +4,8 @@ use chrono::{DateTime, Local};
 use fitparser::{FitDataField, FitDataRecord, Value, profile};
 use indexmap::IndexMap;
 
+use crate::garmin::database::dao::heart_rate::HeartRate;
+
 use self::errors::ParseFitFileError;
 
 use super::database::dao::{exercise::Exercise, serie::Serie, session::Session};
@@ -30,6 +32,7 @@ where
                     | profile::MesgNum::Workout
                     | profile::MesgNum::WorkoutStep
                     | profile::MesgNum::Set
+                    | profile::MesgNum::Record
             )
         })
         .collect();
@@ -61,6 +64,7 @@ where
     } else {
         IndexMap::new()
     };
+    let heart_rates = get_heart_rate(&entries, &timestamp)?;
 
     Ok(Session {
         workout,
@@ -74,6 +78,7 @@ where
         series,
         training_load,
         sub_sport,
+        heart_rates,
     })
 }
 
@@ -128,6 +133,31 @@ fn get_sets(
     }
 
     Ok(sets)
+}
+
+fn get_heart_rate(
+    entries: &[FitDataRecord],
+    timestamp: &DateTime<Local>,
+) -> errors::Result<Vec<HeartRate>> {
+    let mut hrs = Vec::new();
+
+    let entries = entries
+        .iter()
+        .filter(|e| matches!(e.kind(), profile::MesgNum::Record))
+        .cloned()
+        .collect::<Vec<FitDataRecord>>();
+
+    entries.iter().for_each(|entry| {
+        if let Ok(val) = get_u8("heart_rate", entry.fields()) {
+            hrs.push(HeartRate {
+                session: timestamp.timestamp(),
+                idx: hrs.len() as u32,
+                hr: val,
+            });
+        }
+    });
+
+    Ok(hrs)
 }
 
 fn get_steps(
