@@ -83,6 +83,19 @@ pub struct SessionDetails {
 
 impl From<&Session> for SessionDetails {
     fn from(value: &Session) -> Self {
+        let mut exercises = Vec::new();
+        let mut series_d = HashMap::<String, Vec<SessionSerie>>::new();
+
+        for (exercise, series) in &value.series {
+            if !exercises.contains(&exercise.name) {
+                exercises.push(exercise.name.clone())
+            }
+            let entry = series_d.entry(exercise.name.clone()).or_default();
+            for serie in series {
+                entry.push(SessionSerie::from(serie));
+            }
+        }
+
         Self {
             name: value.workout.clone(),
             date: value.format_date(),
@@ -95,8 +108,8 @@ impl From<&Session> for SessionDetails {
             total_elapsed_time: value.format_total_time(),
             training_load: value.training_load.round() as u16,
             sub_sport: value.sub_sport.clone(),
-            exercises: Vec::new(),
-            series: HashMap::new(),
+            exercises,
+            series: series_d,
             heart_rates: value.heart_rates.iter().map(|hr| hr.hr).collect(),
         }
     }

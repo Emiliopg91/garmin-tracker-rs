@@ -73,9 +73,6 @@ volume:
 import_sessions:
   en: Import sessions
   es: Importar sesiones
-import_from_file:
-  en: From file
-  es: Desde archivo
 import_from_device:
   en: From {}
   es: Desde {}
@@ -178,9 +175,6 @@ other:
 heart_rate:
   en: Heart rate
   es: Frecuencia cardíaca
-sync_in_progress:
-  en: Syncing in progress
-  es: Sincronzacion en proceso
 syncing_device:
   en: Syncing {} {}
   es: Sincronizando {} {}

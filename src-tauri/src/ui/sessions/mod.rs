@@ -1,12 +1,8 @@
 pub mod models;
-use std::{
-    collections::HashSet,
-    path::{Path, PathBuf},
-};
+use std::{collections::HashSet, path::Path};
 
 use chrono::{Datelike, Local, TimeZone, Timelike};
 use garmin_tracker_rs_macros::{traced_command, translate};
-use rfd::AsyncFileDialog;
 use tauri_plugin_log::log::{error, info, warn};
 
 use crate::{
@@ -31,7 +27,7 @@ use crate::{
             models::{NotificationDefinition, NotificationKind},
             show_notification,
         },
-        sessions::models::{SessionDetails, SessionListItem, SessionSerie, SessionSeriesUpdate},
+        sessions::models::{SessionDetails, SessionListItem, SessionSeriesUpdate},
     },
 };
 
@@ -72,30 +68,19 @@ pub fn get_session_details(timestamp: i64) -> Result<SessionDetails, String> {
         "Getting details for session {}",
         Local.timestamp_opt(timestamp, 0).unwrap().to_rfc3339()
     );
-    let res = {
-        if let Some(session) = Session::find_by_id(timestamp, true).map_err(|e| e.to_string())? {
-            let mut details = SessionDetails::from(&session);
 
-            for (exercise, series) in &session.series {
-                if !details.exercises.contains(&exercise.name) {
-                    details.exercises.push(exercise.name.clone())
-                }
-                let entry = details.series.entry(exercise.name.clone()).or_default();
-                for serie in series {
-                    entry.push(SessionSerie::from(serie));
-                }
-            }
-
+    match Session::find_by_id(timestamp, true).map_err(|e| e.to_string()) {
+        Ok(Some(l)) => {
+            let details = SessionDetails::from(&l);
+            info!(
+                "Found details for session {} - {}",
+                details.name, details.date
+            );
             Ok(details)
-        } else {
-            Err("Could not find session".to_string())
         }
-    };
-
-    match res {
-        Ok(l) => {
-            info!("Found details for session {} - {}", l.name, l.date);
-            Ok(l)
+        Ok(None) => {
+            info!("Session not found");
+            Err("Session not found".to_string())
         }
         Err(e) => {
             error!("Error getting session details: {}", e);
@@ -175,35 +160,6 @@ pub fn save_session_changes(details: SessionSeriesUpdate) -> Result<(), String> 
 
 #[traced_command]
 #[tauri::command]
-pub async fn import_from_file() -> Result<u16, String> {
-    info!("Starting import from file/s...");
-
-    info!("Waiting for user to select files...");
-    let selection = AsyncFileDialog::new()
-        .set_directory(std::env::current_dir().unwrap())
-        .set_can_create_directories(false)
-        .add_filter("Garmin FIT file", &["fit"])
-        .pick_files()
-        .await;
-
-    match selection {
-        Some(files) => {
-            let files = files
-                .iter()
-                .map(|f| f.path().to_path_buf())
-                .collect::<Vec<PathBuf>>();
-            info!("Selected files: {:?}", files);
-            import_file_list(&files, true)
-        }
-        None => {
-            info!("No file was selected");
-            Ok(0)
-        }
-    }
-}
-
-#[traced_command]
-#[tauri::command]
 pub async fn import_from_device(serial: &str) -> Result<u16, String> {
     _import_from_device(serial).await
 }
@@ -244,7 +200,7 @@ pub async fn _import_from_device(serial: &str) -> Result<u16, String> {
 
     let res = if !activities.is_empty() {
         info!("Fetched {} activity files", activities.len());
-        import_file_list(&activities, false)
+        import_file_list(&activities)
     } else {
         Ok(0)
     };
@@ -257,7 +213,7 @@ pub async fn _import_from_device(serial: &str) -> Result<u16, String> {
     res
 }
 
-fn import_file_list<F>(files: &[F], error_on_duplicate: bool) -> Result<u16, String>
+fn import_file_list<F>(files: &[F]) -> Result<u16, String>
 where
     F: AsRef<Path>,
 {
@@ -324,15 +280,8 @@ where
                     }
                 } else {
                     let msg = format!("Session with date {} already exists", session.format_date());
-                    if error_on_duplicate {
-                        Err(format!(
-                            "Session with date {} already exists",
-                            session.format_date()
-                        ))
-                    } else {
-                        warn!("{}", msg);
-                        Err("".to_string())
-                    }
+                    warn!("{}", msg);
+                    Err("".to_string())
                 }
             }
             Err(e) => Err(format!("Error parsing session: {}", e)),

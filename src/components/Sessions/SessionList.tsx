@@ -161,19 +161,6 @@ export function SessionsList() {
     refreshList();
   }, []);
 
-  const importFile = () => {
-    startLoading();
-    BackendClient.importFromFile()
-      .then((count) => {
-        if (count > 0) {
-          refreshList();
-        }
-      })
-      .finally(() => {
-        finishLoading();
-      });
-  };
-
   const importDevice = (serial: string) => {
     startLoading();
     BackendClient.importFromDevice(serial)
@@ -332,9 +319,6 @@ export function SessionsList() {
           </Dropdown.Toggle>
 
           <Dropdown.Menu id="import-file-menu">
-            <Dropdown.Item key={"file"} onClick={importFile}>
-              {translate("import_from_file")}
-            </Dropdown.Item>
             {availableDevices.length > 0 &&
               availableDevices.map((device, idx) => (
                 <Dropdown.Item

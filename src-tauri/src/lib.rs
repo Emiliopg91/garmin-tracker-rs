@@ -11,10 +11,7 @@ use crate::{
     ui::{
         app::{get_environment, notify_frontend_ready, open_version_changelog},
         exercises::{get_exercise_details, get_exercises},
-        sessions::{
-            get_session_details, get_sessions, import_from_device, import_from_file,
-            save_session_changes,
-        },
+        sessions::{get_session_details, get_sessions, import_from_device, save_session_changes},
         user::{add_user_measures, get_user_measures},
         workouts::{get_workout_details, get_workout_list},
     },
@@ -89,7 +86,6 @@ pub fn run() {
             save_session_changes,
             get_exercises,
             get_exercise_details,
-            import_from_file,
             get_workout_list,
             get_workout_details,
             import_from_device,

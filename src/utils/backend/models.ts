@@ -2,8 +2,8 @@
 
 // From src-tauri/src/ui/app/models.rs:4
 export enum AppEnvironment {
-  Debug = "Debug",
-  Release = "Release",
+	Debug = "Debug",
+	Release = "Release",
 }
 
 // From src-tauri/src/ui/devices/models.rs:7
@@ -73,7 +73,7 @@ export interface SessionSerie {
   weight: number;
 }
 
-// From src-tauri/src/ui/sessions/models.rs:106
+// From src-tauri/src/ui/sessions/models.rs:119
 export interface SessionSeriesUpdate {
   series: SessionSerie[];
   timestamp: string;
@@ -113,3 +113,4 @@ export interface WorkoutSession {
   vol_diff: string;
   volume: number;
 }
+

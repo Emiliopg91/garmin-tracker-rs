@@ -47,7 +47,6 @@ serde_yaml = "^0"
 semver = "^1"
 ureq = { version = "^3", features = ["json"] }
 clap = { version = "^4", features = ["derive"] }
-rfd = "^0"
 phf = { version = "^0", features = ["macros"] }
 garmin-tracker-rs-macros = { path = "../src-tauri-macros" }
 tauri-plugin-single-instance = "^2"

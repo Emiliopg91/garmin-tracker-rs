@@ -14,7 +14,6 @@ export const TRANSLATIONS: Record<string, string> = {
 	"fat_ratio": "% grasa",
 	"heart_rate": "Frecuencia cardíaca",
 	"import_from_device": "Desde {}",
-	"import_from_file": "Desde archivo",
 	"import_sessions": "Importar sesiones",
 	"latest_session": "Última sesión",
 	"lean_mass": "Masa magra",
