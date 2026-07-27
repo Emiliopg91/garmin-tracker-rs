@@ -280,7 +280,7 @@ where
                                 insert = insert.item(exercise.clone());
                             }
                         }
-                        if seen.len() > 0 {
+                        if !seen.is_empty() {
                             insert.execute_in_tx(tx)?;
                         }
 

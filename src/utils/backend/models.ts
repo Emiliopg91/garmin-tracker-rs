@@ -6,10 +6,6 @@ export enum AppEnvironment {
 	Release = "Release",
 }
 
-// From src-tauri/src/garmin/database/dao/helpers/types/column_name.rs:3
-export interface ColumnName {
-}
-
 // From src-tauri/src/ui/devices/models.rs:7
 export interface DeviceListItem {
   manufacturer: string;
@@ -39,25 +35,6 @@ export interface ExerciseListItem {
   reps: number;
   rm: number;
   weight: number;
-}
-
-// From src-tauri/src/garmin/database/dao/heart_rate.rs:5
-export interface HeartRate {
-  hr: number;
-  idx: number;
-  session: string;
-}
-
-// From src-tauri/src/ui/notifications/models.rs:4
-export enum NotificationKind {
-	Temporal = "Temporal",
-	Persistant = "Persistant",
-}
-
-// From src-tauri/src/garmin/database/dao/helpers/types/order_by.rs:3
-export enum OrderBy {
-	Asc = "Asc",
-	Desc = "Desc",
 }
 
 // From src-tauri/src/ui/sessions/models.rs:61
@@ -109,39 +86,6 @@ export interface UserListItem {
   lean_mass: number;
   water_ratio: number;
   weight: number;
-}
-
-// From src-tauri/src/garmin/database/dao/helpers/types/value.rs:7
-export enum Value {
-	IntSize = "IntSize",
-	Int8 = "Int8",
-	Int16 = "Int16",
-	Int32 = "Int32",
-	Int64 = "Int64",
-	UntSize = "UntSize",
-	Unt8 = "Unt8",
-	Unt16 = "Unt16",
-	Unt32 = "Unt32",
-	Unt64 = "Unt64",
-	Float32 = "Float32",
-	Float64 = "Float64",
-	Bool = "Bool",
-	Text = "Text",
-	Null = "Null",
-}
-
-// From src-tauri/src/garmin/database/dao/helpers/types/where_clause.rs:6
-export enum Where {
-	Eq = "Eq",
-	NotEq = "NotEq",
-	Gt = "Gt",
-	Lt = "Lt",
-	In = "In",
-	InMultiple = "InMultiple",
-	Null = "Null",
-	NotNull = "NotNull",
-	And = "And",
-	Or = "Or",
 }
 
 // From src-tauri/src/ui/workouts/models.rs:33
