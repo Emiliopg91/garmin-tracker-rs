@@ -1,6 +1,6 @@
 [package]
 name = "garmin-tracker-rs"
-version = "1.6.3"
+version = "1.6.2"
 description = "Sync your devices and track your strength training"
 authors = ["Emiliopg91 <ojosdeserbio@gmail.com>"]
 edition = "2024"
@@ -58,4 +58,4 @@ lto = "fat"
 codegen-units = 1
 strip = "symbols"
 panic = "abort"
-opt-level = "z"
+opt-level = "3"
