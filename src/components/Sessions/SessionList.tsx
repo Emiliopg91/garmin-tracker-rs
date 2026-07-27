@@ -312,15 +312,15 @@ export function SessionsList() {
           />
         )}
       </div>
-      <div style={{ padding: "5px", width: "100%", marginTop: "auto" }}>
-        <Dropdown id="import-file-dropdown" className="w-100">
-          <Dropdown.Toggle id="import-file-toggle">
-            {translate("import_sessions")}
-          </Dropdown.Toggle>
+      {availableDevices.length > 0 && (
+        <div style={{ padding: "5px", width: "100%", marginTop: "auto" }}>
+          <Dropdown id="import-file-dropdown" className="w-100">
+            <Dropdown.Toggle id="import-file-toggle">
+              {translate("import_sessions")}
+            </Dropdown.Toggle>
 
-          <Dropdown.Menu id="import-file-menu">
-            {availableDevices.length > 0 &&
-              availableDevices.map((device, idx) => (
+            <Dropdown.Menu id="import-file-menu">
+              {availableDevices.map((device, idx) => (
                 <Dropdown.Item
                   key={"dev-" + idx}
                   onClick={() => {
@@ -332,14 +332,10 @@ export function SessionsList() {
                   ])}
                 </Dropdown.Item>
               ))}
-            {availableDevices.length == 0 && (
-              <Dropdown.Item disabled={true}>
-                {translate("no_device_found")}
-              </Dropdown.Item>
-            )}
-          </Dropdown.Menu>
-        </Dropdown>
-      </div>
+            </Dropdown.Menu>
+          </Dropdown>
+        </div>
+      )}
     </>
   );
 }

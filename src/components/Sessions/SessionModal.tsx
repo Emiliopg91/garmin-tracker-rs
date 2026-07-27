@@ -147,10 +147,9 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                     height={0}
                   />
                   <YAxis
-                    yAxisId="left"
                     stroke="#fff"
                     width={0}
-                    domain={[minHr, session.max_heart_rate]}
+                    domain={[(3 * minHr) / 4, session.max_heart_rate]}
                     tick={false}
                   />{" "}
                   <Line
