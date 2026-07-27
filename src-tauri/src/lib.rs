@@ -6,6 +6,9 @@ use tauri_plugin_log::{
     log::{LevelFilter, debug, error, info},
 };
 
+#[cfg(debug_assertions)]
+use crate::garmin::parser::{debug_dump, read_from_file};
+
 use crate::{
     garmin::database::DATABASE_INST,
     ui::{
@@ -23,6 +26,13 @@ mod ui;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    #[cfg(debug_assertions)]
+    if let Ok(path) = std::env::var("GTRS-UNWRAP-PATH") {
+        let entries = read_from_file(&path).unwrap();
+        debug_dump(&path, &entries);
+        exit(0);
+    }
+
     let res = tauri::Builder::default()
         .plugin(
             tauri_plugin_log::Builder::new()

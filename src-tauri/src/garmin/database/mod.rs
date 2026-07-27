@@ -2,13 +2,12 @@ pub mod dao;
 pub mod errors;
 
 use std::{
-    path::{Path, PathBuf},
+    path::Path,
     sync::{LazyLock, Mutex},
-    time::Duration,
 };
 
 use garmin_tracker_rs_macros::dlls;
-use rusqlite::{Connection, Transaction, backup::Backup};
+use rusqlite::{Connection, Transaction};
 use tauri_plugin_log::log::debug;
 
 use self::errors::{DatabaseError, Result};
@@ -17,15 +16,11 @@ dlls!();
 
 pub struct Database {
     connection: Option<Connection>,
-    path: Option<PathBuf>,
 }
 
 impl Database {
     pub fn new() -> Self {
-        Self {
-            connection: None,
-            path: None,
-        }
+        Self { connection: None }
     }
 
     pub fn open<P>(&mut self, path: P) -> Result<()>
@@ -35,37 +30,11 @@ impl Database {
         let file_connection = Connection::open(&path)
             .map_err(|e| DatabaseError::Connection(path.as_ref().display().to_string(), e))?;
 
-        let mut mem_connection = Connection::open_in_memory()
-            .map_err(|e| DatabaseError::Connection(":memory:".to_string(), e))?;
-
-        Backup::new(&file_connection, &mut mem_connection)
-            .map_err(|e| DatabaseError::Dump(":memory:".to_string(), e))?
-            .run_to_completion(i32::MAX, Duration::from_secs(0), None)
-            .map_err(|e| DatabaseError::Dump(":memory:".to_string(), e))?;
-
-        drop(file_connection);
-
-        mem_connection
+        file_connection
             .execute("PRAGMA foreign_keys = ON", [])
             .map_err(DatabaseError::ForeignKeysPragma)?;
 
-        self.connection = Some(mem_connection);
-        self.path = Some(path.as_ref().to_path_buf());
-
-        Ok(())
-    }
-
-    fn consolidate(&self) -> Result<()> {
-        let path = self.path.as_ref().unwrap();
-        let connection = self.connection.as_ref().unwrap();
-
-        let mut file_connection = Connection::open(path)
-            .map_err(|e| DatabaseError::Connection(path.display().to_string(), e))?;
-
-        Backup::new(connection, &mut file_connection)
-            .map_err(|e| DatabaseError::Dump(path.display().to_string(), e))?
-            .run_to_completion(i32::MAX, Duration::from_secs(0), None)
-            .map_err(|e| DatabaseError::Dump(path.display().to_string(), e))?;
+        self.connection = Some(file_connection);
 
         Ok(())
     }
@@ -89,21 +58,8 @@ impl Database {
         }
     }
 
-    pub fn run_in_mut_tx<F, R>(&mut self, f: F) -> Result<R>
-    where
-        F: FnMut(&mut Transaction) -> Result<R>,
-    {
-        match self.run_in_tx(f) {
-            Ok(r) => {
-                self.consolidate()?;
-                Ok(r)
-            }
-            Err(e) => Err(e),
-        }
-    }
-
     pub fn create_schema(&mut self) -> Result<()> {
-        self.run_in_mut_tx(|tx| {
+        self.run_in_tx(|tx| {
             let current_vers: u16 = tx
                 .pragma_query_value(None, "user_version", |r| r.get(0))
                 .map_err(DatabaseError::SchemaCreation)?;

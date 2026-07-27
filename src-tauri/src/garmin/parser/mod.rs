@@ -1,7 +1,11 @@
-use std::{collections::HashMap, fs::File, path::Path};
+use std::{
+    collections::{HashMap, HashSet},
+    fs::File,
+    path::Path,
+};
 
 use chrono::{DateTime, Local};
-use fitparser::{FitDataField, FitDataRecord, Value, profile};
+use fitparser::{FitDataField, FitDataRecord, Value, de::DecodeOption, profile};
 use indexmap::IndexMap;
 
 use crate::garmin::database::dao::heart_rate::HeartRate;
@@ -16,13 +20,7 @@ pub(crate) fn load_from_file<P>(path: P) -> errors::Result<Session>
 where
     P: AsRef<Path>,
 {
-    let path_ref = path.as_ref();
-
-    let mut fp = File::open(path_ref)
-        .map_err(|e| ParseFitFileError::FileOpening(path_ref.display().to_string(), e))?;
-
-    let entries: Vec<FitDataRecord> = fitparser::from_reader(&mut fp)
-        .map_err(|e| ParseFitFileError::FileReading(path_ref.display().to_string(), e))?
+    let entries = read_from_file(&path)?
         .into_iter()
         .filter(|r| {
             matches!(
@@ -35,10 +33,10 @@ where
                     | profile::MesgNum::Record
             )
         })
-        .collect();
+        .collect::<Vec<FitDataRecord>>();
 
     #[cfg(debug_assertions)]
-    debug_dump(&entries);
+    debug_dump(&path, &entries);
 
     let session_entry = entries
         .iter()
@@ -82,9 +80,28 @@ where
     })
 }
 
+pub fn read_from_file<P>(path: P) -> errors::Result<Vec<FitDataRecord>>
+where
+    P: AsRef<Path>,
+{
+    let path_ref = path.as_ref();
+
+    let mut fp = File::open(path_ref)
+        .map_err(|e| ParseFitFileError::FileOpening(path_ref.display().to_string(), e))?;
+
+    let mut options = HashSet::<DecodeOption>::new();
+    options.insert(DecodeOption::DropUnknownFields);
+    options.insert(DecodeOption::DropUnknownMessages);
+    fitparser::de::from_reader_with_options(&mut fp, &options)
+        .map_err(|e| ParseFitFileError::FileReading(path_ref.display().to_string(), e))
+}
+
 #[cfg(debug_assertions)]
-fn debug_dump(entries: &[FitDataRecord]) {
-    let dump_path = std::env::temp_dir().join("taurfit_activity_debug.txt");
+pub fn debug_dump<P>(path: P, entries: &[FitDataRecord])
+where
+    P: AsRef<Path>,
+{
+    let dump_path = format!("{}.txt", path.as_ref().display());
     if let Err(e) = std::fs::write(&dump_path, format!("{:#?}", entries)) {
         eprintln!("failed to write debug dump to {:?}: {e}", dump_path);
     }
