@@ -44,7 +44,7 @@ where
     pub fn execute_in_tx(
         &self,
         tx: &rusqlite::Transaction,
-    ) -> crate::garmin::database::errors::Result<()> {
+    ) -> crate::garmin::database::errors::Result<usize> {
         let mut sentence = "INSERT ".to_string();
 
         if self.or_ignore {
@@ -79,12 +79,11 @@ where
             .map_err(DatabaseError::Insert)?;
         Self::log_query_ending(inserted, false);
 
-        Ok(())
+        Ok(inserted)
     }
 
-    pub fn execute(&self) -> crate::garmin::database::errors::Result<()> {
+    pub fn execute(&self) -> crate::garmin::database::errors::Result<usize> {
         let mut db = DATABASE_INST.lock().unwrap();
-        db.run_in_mut_tx(|tx| self.execute_in_tx(tx))?;
-        Ok(())
+        db.run_in_mut_tx(|tx| self.execute_in_tx(tx))
     }
 }

@@ -65,7 +65,6 @@ pub fn traced_command(_attrs: TokenStream, item: TokenStream) -> TokenStream {
 
     let expanded = quote! {
         #(#attrs)*
-        #[cfg(debug_assertions)]
         #vis #sig {
             let t0 = std::time::Instant::now();
 
@@ -93,10 +92,6 @@ pub fn traced_command(_attrs: TokenStream, item: TokenStream) -> TokenStream {
 
             result
         }
-
-        #(#attrs)*
-        #[cfg(not(debug_assertions))]
-        #vis #sig #block
     };
 
     expanded.into()

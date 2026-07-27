@@ -103,12 +103,7 @@ where
 
     pub fn fetch(&self) -> crate::garmin::database::errors::Result<Vec<T>> {
         let mut db = DATABASE_INST.lock().unwrap();
-        let mut res = Vec::new();
-        db.run_in_tx(|tx| {
-            res = self.fetch_in_tx(tx)?;
-            Ok(())
-        })?;
-        Ok(res)
+        db.run_in_tx(|tx| self.fetch_in_tx(tx))
     }
 
     pub fn fetch_one_in_tx(
@@ -120,11 +115,7 @@ where
 
     pub fn fetch_one(&self) -> crate::garmin::database::errors::Result<Option<T>> {
         let mut db = DATABASE_INST.lock().unwrap();
-        let mut res = Vec::new();
-        db.run_in_tx(|tx| {
-            res = self.fetch_in_tx(tx)?;
-            Ok(())
-        })?;
+        let res = db.run_in_tx(|tx| self.fetch_in_tx(tx))?;
         Ok(res.into_iter().next())
     }
 }

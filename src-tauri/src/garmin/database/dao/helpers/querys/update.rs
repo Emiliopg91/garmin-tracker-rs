@@ -48,11 +48,7 @@ where
     pub fn execute_in_tx(
         &self,
         tx: &rusqlite::Transaction,
-    ) -> crate::garmin::database::errors::Result<()> {
-        if self.field_values.is_empty() {
-            return Ok(()); // o un error, según prefieras
-        }
-
+    ) -> crate::garmin::database::errors::Result<usize> {
         let mut sentence = format!("UPDATE {} SET ", T::TABLE_NAME);
         sentence.push_str(
             &self
@@ -83,12 +79,11 @@ where
             .map_err(DatabaseError::Update)?;
         Self::log_query_ending(updated, false);
 
-        Ok(())
+        Ok(updated)
     }
 
-    pub fn execute(&self) -> crate::garmin::database::errors::Result<()> {
+    pub fn execute(&self) -> crate::garmin::database::errors::Result<usize> {
         let mut db = DATABASE_INST.lock().unwrap();
-        db.run_in_mut_tx(|tx| self.execute_in_tx(tx))?;
-        Ok(())
+        db.run_in_mut_tx(|tx| self.execute_in_tx(tx))
     }
 }

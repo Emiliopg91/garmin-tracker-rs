@@ -95,6 +95,8 @@ struct FieldInfo {
 pub fn derive_entity(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
     let struct_name = &input.ident;
+    let mut comparable = false;
+    let mut hasheable = false;
 
     let mut table_name = struct_name.to_string().to_lowercase();
     for attr in &input.attrs {
@@ -104,18 +106,28 @@ pub fn derive_entity(input: TokenStream) -> TokenStream {
 
         let mut found_table = false;
         let result = attr.parse_nested_meta(|meta| {
-            if meta.path.is_ident("table") {
-                let lit: syn::LitStr = meta.value()?.parse()?;
-                table_name = lit.value().trim().to_string();
-                if table_name.is_empty() {
-                    return Err(meta.error("Attribute table cannot be empty"));
-                }
-                found_table = true;
-                Ok(())
-            } else {
-                Err(meta.error("Attribute `entity` not recognized, expected `table = \"...\"`"))
+        if meta.path.is_ident("table") {
+            let lit: syn::LitStr = meta.value()?.parse()?;
+            table_name = lit.value().trim().to_string();
+            if table_name.is_empty() {
+                return Err(meta.error("Attribute table cannot be empty"));
             }
-        });
+            found_table = true;
+            Ok(())
+        } else if meta.path.is_ident("comparable") {
+            let lit: syn::LitBool = meta.value()?.parse()?;
+            comparable = lit.value();
+            Ok(())
+        } else if meta.path.is_ident("hasheable") {
+            let lit: syn::LitBool = meta.value()?.parse()?;
+            hasheable = lit.value();
+            Ok(())
+        } else {
+            Err(meta.error(
+                "Attribute `entity` not recognized, expected `table = \"...\"`, `comparable = true|false` or `hasheable = true|false`",
+            ))
+        }
+    });
 
         if let Err(err) = result {
             return err.to_compile_error().into();
@@ -224,10 +236,6 @@ pub fn derive_entity(input: TokenStream) -> TokenStream {
 
     let id_fields: Vec<&FieldInfo> = fields.iter().filter(|f| f.is_id).collect();
     let instance_operations = if id_fields.is_empty() {
-        eprintln!(
-            "\x1b[33m{} entity has no primary key defined, select, update and delete operations by ID will not be available\x1b[0m",
-            struct_name
-        );
         quote! {}
     } else {
         let by_id_params: Vec<TokenStream2> = id_fields
@@ -325,7 +333,8 @@ pub fn derive_entity(input: TokenStream) -> TokenStream {
                     <#struct_name as crate::garmin::database::dao::Entity>::update()
                         #(#update_sets)*
                         .where_(#update_delete_condition)
-                        .execute()
+                        .execute()?;
+                    Ok(())
                 }
 
                 pub fn update_by_id_in_tx(
@@ -335,13 +344,15 @@ pub fn derive_entity(input: TokenStream) -> TokenStream {
                     <#struct_name as crate::garmin::database::dao::Entity>::update()
                         #(#update_sets)*
                         .where_(#update_delete_condition)
-                        .execute_in_tx(tx)
+                        .execute_in_tx(tx)?;
+                    Ok(())
                 }
 
                 pub fn delete_by_id(&self) -> crate::garmin::database::errors::Result<()> {
                     <#struct_name as crate::garmin::database::dao::Entity>::delete()
                         .where_(#update_delete_condition)
-                        .execute()
+                        .execute()?;
+                    Ok(())
                 }
 
                 pub fn delete_by_id_in_tx(
@@ -350,7 +361,53 @@ pub fn derive_entity(input: TokenStream) -> TokenStream {
                 ) -> crate::garmin::database::errors::Result<()> {
                     <#struct_name as crate::garmin::database::dao::Entity>::delete()
                         .where_(#update_delete_condition)
-                        .execute_in_tx(tx)
+                        .execute_in_tx(tx)?;
+                    Ok(())
+                }
+            }
+        }
+    };
+
+    let comparable_impl = if !comparable {
+        quote! {}
+    } else {
+        let comparaisons = id_fields
+            .iter()
+            .map(|field| {
+                let name = &field.ident;
+                quote! {
+                    self.#name == other.#name
+                }
+            })
+            .collect::<Vec<TokenStream2>>();
+
+        quote! {
+            impl PartialEq for #struct_name {
+                fn eq(&self, other: &Self) -> bool {
+                    #(#comparaisons)&& *
+                }
+            }
+            impl Eq for #struct_name {}
+        }
+    };
+
+    let hashseable_impl = if !hasheable {
+        quote! {}
+    } else {
+        let hashes = id_fields
+            .iter()
+            .map(|field| {
+                let name = &field.ident;
+                quote! {
+                    self.#name.hash(state);
+                }
+            })
+            .collect::<Vec<TokenStream2>>();
+
+        quote! {
+            impl std::hash::Hash for #struct_name {
+                fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+                    #(#hashes)*
                 }
             }
         }
@@ -379,6 +436,10 @@ pub fn derive_entity(input: TokenStream) -> TokenStream {
         }
 
         #instance_operations
+
+        #comparable_impl
+
+        #hashseable_impl
     };
 
     expanded.into()

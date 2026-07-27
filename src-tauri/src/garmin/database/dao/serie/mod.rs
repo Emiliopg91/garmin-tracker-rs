@@ -53,7 +53,7 @@ impl Serie {
     pub fn update_reps_and_weight(
         &self,
         tx: &rusqlite::Transaction,
-    ) -> crate::garmin::database::errors::Result<()> {
+    ) -> crate::garmin::database::errors::Result<usize> {
         Serie::update()
             .set(SERIE_COLUMN_REPS, self.reps.into())
             .set(SERIE_COLUMN_WEIGHT, self.weight.into())

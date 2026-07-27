@@ -70,29 +70,34 @@ impl Database {
         Ok(())
     }
 
-    pub fn run_in_tx<F>(&mut self, mut f: F) -> Result<()>
+    pub fn run_in_tx<F, R>(&mut self, mut f: F) -> Result<R>
     where
-        F: FnMut(&mut Transaction) -> Result<()>,
+        F: FnMut(&mut Transaction) -> Result<R>,
     {
         if let Some(connection) = self.connection.as_mut() {
             let mut tx = connection
                 .transaction()
                 .map_err(DatabaseError::Transaction)?;
 
-            f(&mut tx)?;
+            let res = f(&mut tx)?;
 
-            tx.commit().map_err(DatabaseError::Transaction)
+            tx.commit().map_err(DatabaseError::Transaction)?;
+
+            Ok(res)
         } else {
             Err(DatabaseError::ClosedConnection())
         }
     }
 
-    pub fn run_in_mut_tx<F>(&mut self, f: F) -> Result<()>
+    pub fn run_in_mut_tx<F, R>(&mut self, f: F) -> Result<R>
     where
-        F: FnMut(&mut Transaction) -> Result<()>,
+        F: FnMut(&mut Transaction) -> Result<R>,
     {
         match self.run_in_tx(f) {
-            Ok(()) => self.consolidate(),
+            Ok(r) => {
+                self.consolidate()?;
+                Ok(r)
+            }
             Err(e) => Err(e),
         }
     }

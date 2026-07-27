@@ -20,6 +20,8 @@ pub enum DatabaseError {
     Update(rusqlite::Error),
     #[error("Error on select: {0}")]
     Select(rusqlite::Error),
+    #[error("Error on delete: {0}")]
+    Delete(rusqlite::Error),
 }
 
 pub type Result<T> = std::result::Result<T, DatabaseError>;

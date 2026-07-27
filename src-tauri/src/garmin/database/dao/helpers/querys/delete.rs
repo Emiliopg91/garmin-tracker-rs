@@ -40,7 +40,7 @@ where
     pub fn execute_in_tx(
         &self,
         tx: &rusqlite::Transaction,
-    ) -> crate::garmin::database::errors::Result<()> {
+    ) -> crate::garmin::database::errors::Result<usize> {
         let mut sentence = format!("DELETE FROM {} ", T::TABLE_NAME);
 
         let params: Vec<Value> = Vec::new();
@@ -49,17 +49,16 @@ where
         }
 
         Self::log_query_start(&sentence, &params);
-        let updated = tx
+        let deleted = tx
             .execute(&sentence, params_from_iter(params))
-            .map_err(DatabaseError::Update)?;
-        Self::log_query_ending(updated, false);
+            .map_err(DatabaseError::Delete)?;
+        Self::log_query_ending(deleted, false);
 
-        Ok(())
+        Ok(deleted)
     }
 
-    pub fn execute(&self) -> crate::garmin::database::errors::Result<()> {
+    pub fn execute(&self) -> crate::garmin::database::errors::Result<usize> {
         let mut db = DATABASE_INST.lock().unwrap();
-        db.run_in_mut_tx(|tx| self.execute_in_tx(tx))?;
-        Ok(())
+        db.run_in_mut_tx(|tx| self.execute_in_tx(tx))
     }
 }
