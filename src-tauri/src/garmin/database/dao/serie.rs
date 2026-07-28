@@ -69,7 +69,7 @@ impl Serie {
     pub fn update_pr(tx: &rusqlite::Transaction, category: &str, id: u16) {
         if let Ok(new_prs) = Serie::select_by_ex_cat_and_ex_id_in_tx(
             tx,
-            &category,
+            category,
             id,
             Some(&[
                 OrderBy::Desc(entity::columns::WEIGHT),

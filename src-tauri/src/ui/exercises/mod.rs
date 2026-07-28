@@ -80,9 +80,7 @@ pub fn get_exercise_details(category: &str, id: u16) -> Result<ExerciseDetails, 
         category, id
     );
     let res = {
-        if let Some(exercise) =
-            Exercise::select_by_id(category, id as u16).map_err(|e| e.to_string())?
-        {
+        if let Some(exercise) = Exercise::select_by_id(category, id).map_err(|e| e.to_string())? {
             let mut res = ExerciseDetails::from(&exercise);
 
             let pr = Serie::get_pr_for_exercise(&exercise).map_err(|e| e.to_string())?;
@@ -92,7 +90,7 @@ pub fn get_exercise_details(category: &str, id: u16) -> Result<ExerciseDetails, 
             res.pr_date = pr.format_date();
 
             let series = Serie::select_by_ex_cat_and_ex_id(
-                &category,
+                category,
                 id,
                 Some(&[OrderBy::Desc(serie::entity::columns::SESSION)]),
             )

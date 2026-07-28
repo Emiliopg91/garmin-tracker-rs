@@ -154,10 +154,6 @@ pub fn derive_entity(input: TokenStream) -> TokenStream {
                 let lit: syn::LitBool = meta.value()?.parse()?;
                 hasheable = lit.value();
                 Ok(())
-            } else if meta.path.is_ident("") {
-                let lit: syn::LitBool = meta.value()?.parse()?;
-                hasheable = lit.value();
-                Ok(())
             } else {
                 Err(meta.error(
                     "Attribute `entity` not recognized, expected `table = \"...\"`, `comparable = true|false` or `hasheable = true|false`",
@@ -261,10 +257,10 @@ pub fn derive_entity(input: TokenStream) -> TokenStream {
                 Ok(groups) => {
                     for group in groups {
                         let mut index = Vec::new();
-                        let cols: Vec<String> = group.iter().map(|i| i.to_string()).collect();
+                        let cols: Vec<syn::Ident> = group.iter().cloned().collect();
 
                         for col in cols {
-                            let field = fields.iter().find(|f| f.ident.to_string() == col);
+                            let field = fields.iter().find(|f| f.ident == col);
                             match field {
                                 Some(field) => index.push(field),
                                 None => {

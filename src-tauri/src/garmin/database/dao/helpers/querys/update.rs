@@ -65,7 +65,7 @@ where
         let mut cond_params: Vec<Value> = Vec::new();
         if let Some(cond) = &self.condition {
             sentence.push_str(&format!(" WHERE {}", cond.to_sql()));
-            cond_params = <Where<T> as Clone>::clone(&cond).into_params();
+            cond_params = <Where<T> as Clone>::clone(cond).into_params();
         }
 
         let mut params = self

@@ -25,7 +25,7 @@ impl<T> OrderBy<T>
 where
     T: Entity,
 {
-    pub fn to_sql(&self) -> String {
+    pub fn to_sql(self) -> String {
         match self {
             OrderBy::Asc(col) => {
                 format!("{} ASC", col)
