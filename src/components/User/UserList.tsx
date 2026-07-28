@@ -190,32 +190,36 @@ export function UserList() {
         </>
       )}
 
-      <table>
-        <thead>
-          <tr>
-            <th style={{ textAlign: "center" }}>{translate("date")}</th>
-            <th style={{ textAlign: "center" }}>{translate("weight")}</th>
-            <th style={{ textAlign: "center" }}>{translate("fat_ratio")}</th>
-            <th style={{ textAlign: "center" }}>{translate("lean_mass")}</th>
-            <th style={{ textAlign: "center" }}>{translate("water_ratio")}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {userMeasures.map((measure, idx) => (
-            <tr
-              key={idx}
-              style={{ cursor: "pointer" }}
-              onClick={() => openModal(measure)}
-            >
-              <td>{measure.date}</td>
-              <td>{measure.weight.toFixed(1)} Kg</td>
-              <td>{measure.fat_ratio.toFixed(1)}%</td>
-              <td>{measure.lean_mass.toFixed(1)} Kg</td>
-              <td>{measure.water_ratio.toFixed(1)}%</td>
+      <div id="list-layer">
+        <table>
+          <thead>
+            <tr>
+              <th style={{ textAlign: "center" }}>{translate("date")}</th>
+              <th style={{ textAlign: "center" }}>{translate("weight")}</th>
+              <th style={{ textAlign: "center" }}>{translate("fat_ratio")}</th>
+              <th style={{ textAlign: "center" }}>{translate("lean_mass")}</th>
+              <th style={{ textAlign: "center" }}>
+                {translate("water_ratio")}
+              </th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {userMeasures.map((measure, idx) => (
+              <tr
+                key={idx}
+                style={{ cursor: "pointer" }}
+                onClick={() => openModal(measure)}
+              >
+                <td>{measure.date}</td>
+                <td>{measure.weight.toFixed(1)} Kg</td>
+                <td>{measure.fat_ratio.toFixed(1)}%</td>
+                <td>{measure.lean_mass.toFixed(1)} Kg</td>
+                <td>{measure.water_ratio.toFixed(1)}%</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       <div>
         {measureDetails && (
