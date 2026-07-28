@@ -186,6 +186,7 @@ pub fn derive_entity(input: TokenStream) -> TokenStream {
     };
 
     let mut has_no_column = false;
+    let mut has_id = false;
     let mut fields: Vec<FieldInfo> = Vec::new();
 
     for f in named_fields.iter() {
@@ -199,6 +200,7 @@ pub fn derive_entity(input: TokenStream) -> TokenStream {
         let name = ident.to_string();
         let const_ident = format_ident!("{}", name.to_uppercase());
         let is_id = f.attrs.iter().any(|attr| attr.path().is_ident("id"));
+        has_id = has_id || is_id;
         let mut column_name = name.to_lowercase();
 
         for attr in &f.attrs {
@@ -230,6 +232,19 @@ pub fn derive_entity(input: TokenStream) -> TokenStream {
             const_ident,
             is_id,
         });
+    }
+
+    if !has_id {
+        if comparable {
+            return syn::Error::new_spanned(input, "comparable requires id columns")
+                .to_compile_error()
+                .into();
+        }
+        if hasheable {
+            return syn::Error::new_spanned(input, "hasheable requires id columns")
+                .to_compile_error()
+                .into();
+        }
     }
 
     let mut indexes = Vec::new();

@@ -1,7 +1,4 @@
-use std::{
-    collections::{HashMap, HashSet},
-    fmt::Display,
-};
+use std::collections::{HashMap, HashSet};
 
 use chrono::{Datelike, Local, TimeZone, Timelike};
 use garmin_tracker_rs_macros::Entity;
@@ -28,11 +25,6 @@ pub struct Serie {
     pub reps: u16,
     pub weight: f64,
     pub pr: bool,
-}
-impl Display for Serie {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}x{}Kg", self.reps, self.weight)
-    }
 }
 
 impl Serie {
