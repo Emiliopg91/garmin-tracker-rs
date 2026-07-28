@@ -1,5 +1,5 @@
 use chrono::{Datelike, Local, TimeZone};
-use garmin_tracker_rs_macros::Entity;
+use rusqlite_orm_macros::Entity;
 
 #[derive(Default, Entity)]
 #[indexes((date))]

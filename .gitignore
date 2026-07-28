@@ -27,3 +27,4 @@ activity.txt
 aur
 
 src-tauri-macros/target
+rusqlite_orm

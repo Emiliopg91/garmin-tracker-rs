@@ -1,5 +1,7 @@
 use std::process::exit;
 
+use rusqlite_orm::database::DATABASE_INST;
+use rusqlite_orm_macros::dlls;
 use tauri::Manager;
 use tauri_plugin_log::{
     Target, TargetKind,
@@ -9,20 +11,19 @@ use tauri_plugin_log::{
 #[cfg(debug_assertions)]
 use crate::garmin::parser::{debug_dump, read_from_file};
 
-use crate::{
-    garmin::database::DATABASE_INST,
-    ui::{
-        app::{get_environment, notify_frontend_ready, open_version_changelog},
-        exercises::{get_exercise_details, get_exercises},
-        sessions::{get_session_details, get_sessions, import_from_device, save_session_changes},
-        user::{add_user_measures, get_user_measures},
-        workouts::{get_workout_details, get_workout_list},
-    },
+use crate::ui::{
+    app::{get_environment, notify_frontend_ready, open_version_changelog},
+    exercises::{get_exercise_details, get_exercises},
+    sessions::{get_session_details, get_sessions, import_from_device, save_session_changes},
+    user::{add_user_measures, get_user_measures},
+    workouts::{get_workout_details, get_workout_list},
 };
 
 mod constants;
 mod garmin;
 mod ui;
+
+dlls!("../resources/ddl");
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -82,7 +83,7 @@ pub fn run() {
                 error!("Could not open database: {}", e);
                 exit(constants::ExitCodes::DbError.into())
             }
-            if let Err(e) = db.create_schema() {
+            if let Err(e) = db.create_schema(&DDLS) {
                 error!("Could not initialize database: {}", e);
                 exit(constants::ExitCodes::DbError.into())
             }

@@ -1,13 +1,12 @@
 pub mod models;
 
 use garmin_tracker_rs_macros::{traced_command, translate};
+use rusqlite_orm::dao::{Entity, helpers::types::order_by::OrderBy};
 use tauri_plugin_log::log::{error, info};
 
 use crate::{
     garmin::database::dao::{
-        Entity,
         exercise::{self, Exercise},
-        helpers::types::order_by::OrderBy,
         serie::{self, Serie},
         session::Session,
     },

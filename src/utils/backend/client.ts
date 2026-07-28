@@ -8,7 +8,7 @@ export class BackendClient {
 
     private static DONT_LOG_COMMANDS: string[] = [];
 
-	// From src-tauri/src/ui/user/mod.rs:54
+	// From src-tauri/src/ui/user/mod.rs:51
 	public static addUserMeasures(measures: UserListItem): Promise<void> {
 	  return BackendClient.inner_invoke("add_user_measures", { measures }); 
 	}
@@ -20,31 +20,31 @@ export class BackendClient {
 	}
 	
 
-	// From src-tauri/src/ui/exercises/mod.rs:77
+	// From src-tauri/src/ui/exercises/mod.rs:76
 	public static getExerciseDetails(category: string, id: number): Promise<ExerciseDetails> {
 	  return BackendClient.inner_invoke("get_exercise_details", { category, id }); 
 	}
 	
 
-	// From src-tauri/src/ui/exercises/mod.rs:26
+	// From src-tauri/src/ui/exercises/mod.rs:25
 	public static getExercises(): Promise<ExerciseListItem[]> {
 	  return BackendClient.inner_invoke("get_exercises"); 
 	}
 	
 
-	// From src-tauri/src/ui/sessions/mod.rs:66
+	// From src-tauri/src/ui/sessions/mod.rs:65
 	public static getSessionDetails(timestamp: string): Promise<SessionDetails> {
 	  return BackendClient.inner_invoke("get_session_details", { timestamp }); 
 	}
 	
 
-	// From src-tauri/src/ui/sessions/mod.rs:36
+	// From src-tauri/src/ui/sessions/mod.rs:35
 	public static getSessions(): Promise<SessionListItem[]> {
 	  return BackendClient.inner_invoke("get_sessions"); 
 	}
 	
 
-	// From src-tauri/src/ui/user/mod.rs:23
+	// From src-tauri/src/ui/user/mod.rs:20
 	public static getUserMeasures(): Promise<UserListItem[]> {
 	  return BackendClient.inner_invoke("get_user_measures"); 
 	}
@@ -62,7 +62,7 @@ export class BackendClient {
 	}
 	
 
-	// From src-tauri/src/ui/sessions/mod.rs:163
+	// From src-tauri/src/ui/sessions/mod.rs:162
 	public static importFromDevice(serial: string): Promise<number> {
 	  return BackendClient.inner_invoke("import_from_device", { serial }); 
 	}
@@ -80,7 +80,7 @@ export class BackendClient {
 	}
 	
 
-	// From src-tauri/src/ui/sessions/mod.rs:99
+	// From src-tauri/src/ui/sessions/mod.rs:98
 	public static saveSessionChanges(details: SessionSeriesUpdate): Promise<void> {
 	  return BackendClient.inner_invoke("save_session_changes", { details }); 
 	}

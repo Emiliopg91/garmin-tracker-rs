@@ -1,4 +1,4 @@
-use garmin_tracker_rs_macros::Entity;
+use rusqlite_orm_macros::Entity;
 
 #[derive(Default, Clone, Entity)]
 #[indexes((serial))]

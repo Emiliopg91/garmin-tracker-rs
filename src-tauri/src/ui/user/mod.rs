@@ -1,12 +1,9 @@
 use garmin_tracker_rs_macros::{traced_command, translate};
+use rusqlite_orm::dao::{Entity, helpers::types::order_by::OrderBy};
 use tauri_plugin_log::log::{error, info};
 
 use crate::{
-    garmin::database::dao::{
-        Entity,
-        helpers::types::order_by::OrderBy,
-        user::{self, User},
-    },
+    garmin::database::dao::user::{self, User},
     ui::{
         notifications::{
             models::{NotificationDefinition, NotificationKind},

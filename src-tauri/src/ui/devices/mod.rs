@@ -2,6 +2,7 @@ pub mod models;
 
 use garmin_tracker_rs_macros::translate;
 use nusb::hotplug::HotplugEvent;
+use rusqlite_orm::dao::Entity;
 use std::sync::{LazyLock, Mutex};
 use tokio_stream::StreamExt;
 
@@ -9,10 +10,7 @@ use tauri::{AppHandle, Emitter, async_runtime::JoinHandle};
 use tauri_plugin_log::log::{error, info, warn};
 
 use crate::{
-    garmin::{
-        database::dao::{Entity, device::Device},
-        mtp::MTP_CLIENT_INST,
-    },
+    garmin::{database::dao::device::Device, mtp::MTP_CLIENT_INST},
     ui::{
         devices::models::DeviceListItem,
         notifications::{

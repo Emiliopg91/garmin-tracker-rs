@@ -1,4 +1,3 @@
-mod database;
 mod traced_command;
 mod translate;
 
@@ -12,14 +11,4 @@ pub fn traced_command(_attrs: TokenStream, item: TokenStream) -> TokenStream {
 #[proc_macro]
 pub fn translate(item: TokenStream) -> TokenStream {
     translate::translate(item)
-}
-
-#[proc_macro]
-pub fn dlls(item: TokenStream) -> TokenStream {
-    database::dlls(item)
-}
-
-#[proc_macro_derive(Entity, attributes(entity, id, no_column, column, indexes))]
-pub fn derive_entity(input: TokenStream) -> TokenStream {
-    database::derive_entity(input)
 }

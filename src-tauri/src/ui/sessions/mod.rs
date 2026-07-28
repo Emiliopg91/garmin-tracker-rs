@@ -3,21 +3,20 @@ use std::{collections::HashSet, path::Path};
 
 use chrono::{Datelike, Local, TimeZone, Timelike};
 use garmin_tracker_rs_macros::{traced_command, translate};
+use rusqlite_orm::{
+    dao::{Entity, helpers::types::order_by::OrderBy},
+    database::DATABASE_INST,
+};
 use tauri_plugin_log::log::{error, info, warn};
 
 use crate::{
     garmin::{
-        database::{
-            DATABASE_INST,
-            dao::{
-                Entity,
-                device::Device,
-                exercise::{self, Exercise},
-                heart_rate::HeartRate,
-                helpers::types::order_by::OrderBy,
-                serie::Serie,
-                session::Session,
-            },
+        database::dao::{
+            device::Device,
+            exercise::{self, Exercise},
+            heart_rate::HeartRate,
+            serie::Serie,
+            session::Session,
         },
         mtp::MTP_CLIENT_INST,
         parser::load_from_file,

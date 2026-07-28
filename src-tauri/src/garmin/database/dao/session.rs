@@ -1,12 +1,9 @@
 use chrono::{Datelike, Local, TimeZone, Timelike};
-use garmin_tracker_rs_macros::Entity;
 use indexmap::IndexMap;
+use rusqlite_orm::dao::{Entity, helpers::types::order_by::OrderBy};
+use rusqlite_orm_macros::Entity;
 
-use crate::garmin::database::dao::{
-    Entity,
-    heart_rate::{self, HeartRate},
-    helpers::types::order_by::OrderBy,
-};
+use crate::garmin::database::dao::heart_rate::{self, HeartRate};
 
 use super::{exercise::Exercise, serie::Serie};
 
@@ -93,7 +90,7 @@ impl Session {
     pub fn find_by_id(
         timestamp: i64,
         with_details: bool,
-    ) -> crate::garmin::database::errors::Result<Option<Session>> {
+    ) -> rusqlite_orm::database::errors::Result<Option<Session>> {
         let opt_sess = Session::select_by_id(timestamp)?;
 
         Ok(match opt_sess {
@@ -116,7 +113,7 @@ impl Session {
         })
     }
 
-    pub fn find_by_workout(workout: &str) -> crate::garmin::database::errors::Result<Vec<Session>> {
+    pub fn find_by_workout(workout: &str) -> rusqlite_orm::database::errors::Result<Vec<Session>> {
         let mut res =
             Session::select_by_workout(workout, Some(&[OrderBy::Desc(entity::columns::DATE)]))?;
 
@@ -127,9 +124,7 @@ impl Session {
         Ok(res)
     }
 
-    pub fn load_from_db(
-        with_series: bool,
-    ) -> crate::garmin::database::errors::Result<Vec<Session>> {
+    pub fn load_from_db(with_series: bool) -> rusqlite_orm::database::errors::Result<Vec<Session>> {
         let mut res = Session::select()
             .order_by(OrderBy::Desc(entity::columns::DATE))
             .fetch()?;

@@ -1,13 +1,17 @@
 use std::collections::{HashMap, HashSet};
 
 use chrono::{Datelike, Local, TimeZone, Timelike};
-use garmin_tracker_rs_macros::Entity;
 use indexmap::IndexMap;
-
-use crate::garmin::database::dao::{
-    Entity, exercise,
-    helpers::types::{order_by::OrderBy, value::Value, where_clause::Where},
+use rusqlite_orm::{
+    dao::{
+        Entity,
+        helpers::types::{order_by::OrderBy, value::Value, where_clause::Where},
+    },
+    rusqlite,
 };
+use rusqlite_orm_macros::Entity;
+
+use crate::garmin::database::dao::exercise;
 
 use super::exercise::Exercise;
 
@@ -47,7 +51,7 @@ impl Serie {
     pub fn update_reps_and_weight(
         &self,
         tx: &rusqlite::Transaction,
-    ) -> crate::garmin::database::errors::Result<usize> {
+    ) -> rusqlite_orm::database::errors::Result<usize> {
         Serie::update()
             .set(entity::columns::REPS, self.reps.into())
             .set(entity::columns::WEIGHT, self.weight.into())
@@ -86,7 +90,7 @@ impl Serie {
 
     pub fn load_for_session(
         session: i64,
-    ) -> crate::garmin::database::errors::Result<IndexMap<Exercise, Vec<Serie>>> {
+    ) -> rusqlite_orm::database::errors::Result<IndexMap<Exercise, Vec<Serie>>> {
         let tuple_rows =
             Serie::select_by_session(session, Some(&[OrderBy::Asc(entity::columns::IDX)]))?;
 
@@ -128,7 +132,7 @@ impl Serie {
 
     pub fn get_pr_for_exercise(
         exercise: &Exercise,
-    ) -> crate::garmin::database::errors::Result<Serie> {
+    ) -> rusqlite_orm::database::errors::Result<Serie> {
         Ok(Serie::select()
             .where_(Where::And(vec![
                 Where::Eq(entity::columns::EX_CAT, exercise.category.clone().into()),
@@ -140,7 +144,7 @@ impl Serie {
             .unwrap())
     }
 
-    pub fn get_prs() -> crate::garmin::database::errors::Result<Vec<Serie>> {
+    pub fn get_prs() -> rusqlite_orm::database::errors::Result<Vec<Serie>> {
         Serie::select()
             .where_(Where::Eq(entity::columns::PR, true.into()))
             .fetch()
