@@ -110,7 +110,7 @@ pub fn derive_entity(input: TokenStream) -> TokenStream {
                     let const_ident = &f.const_ident;
                     let value = value_for(f);
                     quote! {
-                        crate::garmin::database::dao::helpers::types::where_clause::Where::Eq(#const_ident, #value)
+                        crate::garmin::database::dao::helpers::types::where_clause::Where::Eq(self::entity::columns::#const_ident, #value)
                     }
                 });
             quote! {
@@ -124,7 +124,7 @@ pub fn derive_entity(input: TokenStream) -> TokenStream {
             let value = value_for(f);
             quote! {
                 crate::garmin::database::dao::helpers::types::where_clause::Where::Eq(
-                    #const_ident, #value
+                    self::entity::columns::#const_ident, #value
                 )
             }
         }
@@ -201,11 +201,7 @@ pub fn derive_entity(input: TokenStream) -> TokenStream {
 
         let ident = f.ident.clone().unwrap();
         let name = ident.to_string();
-        let const_ident = format_ident!(
-            "{}_COLUMN_{}",
-            &struct_name.to_string().to_uppercase(),
-            name.to_uppercase()
-        );
+        let const_ident = format_ident!("{}", name.to_uppercase());
         let is_id = f.attrs.iter().any(|attr| attr.path().is_ident("id"));
         let mut column_name = name.to_lowercase();
 
@@ -356,6 +352,16 @@ pub fn derive_entity(input: TokenStream) -> TokenStream {
         indexes_expand.push(expand);
     }
 
+    let indexes_impl = if indexes_expand.is_empty() {
+        quote! {}
+    } else {
+        quote! {
+            impl #struct_name {
+                #(#indexes_expand)*
+            }
+        }
+    };
+
     let field_constants = fields.iter().map(|f| {
         let const_ident = &f.const_ident;
         let name = &f.column;
@@ -365,7 +371,12 @@ pub fn derive_entity(input: TokenStream) -> TokenStream {
         }
     });
 
-    let field_name_list = fields.iter().map(|f| &f.const_ident);
+    let field_name_list = fields.iter().map(|f| {
+        let ident = &f.const_ident;
+        quote! {
+            self::entity::columns::#ident
+        }
+    });
 
     let map_from_rows_lines = fields.iter().enumerate().map(|(idx, f)| {
         let ident = &f.ident;
@@ -424,7 +435,7 @@ pub fn derive_entity(input: TokenStream) -> TokenStream {
                 let ident = &f.ident;
                 let const_ident = &f.const_ident;
                 quote! {
-                    .set(#const_ident, self.#ident.clone().into())
+                    .set(self::entity::columns::#const_ident, self.#ident.clone().into())
                 }
             })
             .collect();
@@ -537,7 +548,12 @@ pub fn derive_entity(input: TokenStream) -> TokenStream {
     };
 
     let expanded = quote! {
-        #(#field_constants)*
+        pub mod entity {
+            pub mod columns {
+                use super::super::*;
+                #(#field_constants)*
+            }
+        }
 
         impl crate::garmin::database::dao::Entity for #struct_name {
             const TABLE_NAME: &'static str = #table_name;
@@ -559,15 +575,13 @@ pub fn derive_entity(input: TokenStream) -> TokenStream {
 
         }
 
-        impl #struct_name {
-            #(#indexes_expand)*
-        }
-
-        #instance_operations
-
         #comparable_impl
 
         #hashseable_impl
+
+        #instance_operations
+
+        #indexes_impl
     };
 
     expanded.into()
