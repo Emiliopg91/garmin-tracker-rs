@@ -5,7 +5,7 @@ use crate::{
     garmin::database::dao::{
         Entity,
         helpers::types::order_by::OrderBy,
-        user::{USER_COLUMN_DATE, User},
+        user::{self, User},
     },
     ui::{
         notifications::{
@@ -24,7 +24,7 @@ pub fn get_user_measures() -> Result<Vec<UserListItem>, String> {
     info!("Getting user measures list...");
 
     match User::select()
-        .order_by(OrderBy::Desc(USER_COLUMN_DATE))
+        .order_by(OrderBy::Desc(user::entity::columns::DATE))
         .fetch()
         .map_err(|e| e.to_string())
     {

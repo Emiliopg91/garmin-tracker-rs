@@ -8,8 +8,7 @@ use garmin_tracker_rs_macros::Entity;
 use indexmap::IndexMap;
 
 use crate::garmin::database::dao::{
-    Entity,
-    exercise::{EXERCISE_COLUMN_CATEGORY, EXERCISE_COLUMN_ID},
+    Entity, exercise,
     helpers::types::{order_by::OrderBy, value::Value, where_clause::Where},
 };
 
@@ -58,11 +57,11 @@ impl Serie {
         tx: &rusqlite::Transaction,
     ) -> crate::garmin::database::errors::Result<usize> {
         Serie::update()
-            .set(SERIE_COLUMN_REPS, self.reps.into())
-            .set(SERIE_COLUMN_WEIGHT, self.weight.into())
+            .set(entity::columns::REPS, self.reps.into())
+            .set(entity::columns::WEIGHT, self.weight.into())
             .where_(Where::And(vec![
-                Where::Eq(SERIE_COLUMN_SESSION, self.session.into()),
-                Where::Eq(SERIE_COLUMN_IDX, self.idx.into()),
+                Where::Eq(entity::columns::SESSION, self.session.into()),
+                Where::Eq(entity::columns::IDX, self.idx.into()),
             ]))
             .execute_in_tx(tx)
     }
@@ -73,16 +72,16 @@ impl Serie {
             &category,
             id,
             Some(&[
-                OrderBy::Desc(SERIE_COLUMN_WEIGHT),
-                OrderBy::Desc(SERIE_COLUMN_REPS),
-                OrderBy::Asc(SERIE_COLUMN_SESSION),
+                OrderBy::Desc(entity::columns::WEIGHT),
+                OrderBy::Desc(entity::columns::REPS),
+                OrderBy::Asc(entity::columns::SESSION),
             ]),
         ) {
             let _ = Serie::update()
-                .set(SERIE_COLUMN_PR, false.into())
+                .set(entity::columns::PR, false.into())
                 .where_(Where::And(vec![
-                    Where::Eq(SERIE_COLUMN_EX_CAT, category.to_string().into()),
-                    Where::Eq(SERIE_COLUMN_EX_ID, id.into()),
+                    Where::Eq(entity::columns::EX_CAT, category.to_string().into()),
+                    Where::Eq(entity::columns::EX_ID, id.into()),
                 ]))
                 .execute_in_tx(tx);
 
@@ -97,7 +96,7 @@ impl Serie {
         session: i64,
     ) -> crate::garmin::database::errors::Result<IndexMap<Exercise, Vec<Serie>>> {
         let tuple_rows =
-            Serie::select_by_session(session, Some(&[OrderBy::Asc(SERIE_COLUMN_IDX)]))?;
+            Serie::select_by_session(session, Some(&[OrderBy::Asc(entity::columns::IDX)]))?;
 
         let condition_set: HashSet<(_, _)> = tuple_rows
             .iter()
@@ -111,7 +110,10 @@ impl Serie {
 
         let exercises = Exercise::select()
             .where_(Where::InMultiple(
-                vec![EXERCISE_COLUMN_CATEGORY, EXERCISE_COLUMN_ID],
+                vec![
+                    exercise::entity::columns::CATEGORY,
+                    exercise::entity::columns::ID,
+                ],
                 in_conditions,
             ))
             .fetch()?;
@@ -137,9 +139,9 @@ impl Serie {
     ) -> crate::garmin::database::errors::Result<Serie> {
         Ok(Serie::select()
             .where_(Where::And(vec![
-                Where::Eq(SERIE_COLUMN_EX_CAT, exercise.category.clone().into()),
-                Where::Eq(SERIE_COLUMN_EX_ID, exercise.id.into()),
-                Where::Eq(SERIE_COLUMN_PR, true.into()),
+                Where::Eq(entity::columns::EX_CAT, exercise.category.clone().into()),
+                Where::Eq(entity::columns::EX_ID, exercise.id.into()),
+                Where::Eq(entity::columns::PR, true.into()),
             ]))
             .limit(1)
             .fetch_one()?
@@ -148,7 +150,7 @@ impl Serie {
 
     pub fn get_prs() -> crate::garmin::database::errors::Result<Vec<Serie>> {
         Serie::select()
-            .where_(Where::Eq(SERIE_COLUMN_PR, true.into()))
+            .where_(Where::Eq(entity::columns::PR, true.into()))
             .fetch()
     }
 }

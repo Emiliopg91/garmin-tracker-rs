@@ -4,7 +4,7 @@ use indexmap::IndexMap;
 
 use crate::garmin::database::dao::{
     Entity,
-    heart_rate::{HEARTRATE_COLUMN_IDX, HeartRate},
+    heart_rate::{self, HeartRate},
     helpers::types::order_by::OrderBy,
 };
 
@@ -107,7 +107,7 @@ impl Session {
 
                     session.heart_rates = HeartRate::select_by_session(
                         session.date,
-                        Some(&[OrderBy::Asc(HEARTRATE_COLUMN_IDX)]),
+                        Some(&[OrderBy::Asc(heart_rate::entity::columns::IDX)]),
                     )?;
                 }
                 Some(session)
@@ -118,7 +118,7 @@ impl Session {
 
     pub fn find_by_workout(workout: &str) -> crate::garmin::database::errors::Result<Vec<Session>> {
         let mut res =
-            Session::select_by_workout(workout, Some(&[OrderBy::Desc(SESSION_COLUMN_DATE)]))?;
+            Session::select_by_workout(workout, Some(&[OrderBy::Desc(entity::columns::DATE)]))?;
 
         for r in &mut res {
             r.series = Serie::load_for_session(r.date)?;
@@ -131,7 +131,7 @@ impl Session {
         with_series: bool,
     ) -> crate::garmin::database::errors::Result<Vec<Session>> {
         let mut res = Session::select()
-            .order_by(OrderBy::Desc(SESSION_COLUMN_DATE))
+            .order_by(OrderBy::Desc(entity::columns::DATE))
             .fetch()?;
 
         if with_series {

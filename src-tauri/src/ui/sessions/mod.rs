@@ -12,7 +12,7 @@ use crate::{
             dao::{
                 Entity,
                 device::Device,
-                exercise::{EXERCISE_COLUMN_NAME, Exercise},
+                exercise::{self, Exercise},
                 heart_rate::HeartRate,
                 helpers::types::order_by::OrderBy,
                 serie::Serie,
@@ -116,7 +116,7 @@ pub fn save_session_changes(details: SessionSeriesUpdate) -> Result<(), String> 
             }
         }
         let exercises = Exercise::select()
-            .order_by(OrderBy::Asc(EXERCISE_COLUMN_NAME))
+            .order_by(OrderBy::Asc(exercise::entity::columns::NAME))
             .fetch()
             .map_err(|e| e.to_string())?;
 
