@@ -141,8 +141,8 @@ fn get_sets(
         sets.entry(exercise.clone()).or_default().push(Serie {
             session: timestamp.timestamp(),
             idx: idx as u8,
-            exercise_category: exercise.category.clone(),
-            exercise_id: exercise.id,
+            ex_cat: exercise.category.clone(),
+            ex_id: exercise.id,
             reps,
             weight,
             pr: false,

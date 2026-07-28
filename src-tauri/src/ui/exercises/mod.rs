@@ -8,9 +8,7 @@ use crate::{
         Entity,
         exercise::{EXERCISE_COLUMN_NAME, Exercise},
         helpers::types::{order_by::OrderBy, where_clause::Where},
-        serie::{
-            SERIE_COLUMN_EXERCISE_CATEGORY, SERIE_COLUMN_EXERCISE_ID, SERIE_COLUMN_SESSION, Serie,
-        },
+        serie::{SERIE_COLUMN_EX_CAT, SERIE_COLUMN_EX_ID, SERIE_COLUMN_SESSION, Serie},
         session::Session,
     },
     ui::{
@@ -40,9 +38,7 @@ pub fn get_exercises() -> Result<Vec<ExerciseListItem>, String> {
         for exercise in exercises {
             let pr = prs
                 .iter()
-                .find(|pr| {
-                    pr.exercise_category == exercise.category && pr.exercise_id == exercise.id
-                })
+                .find(|pr| pr.ex_cat == exercise.category && pr.ex_id == exercise.id)
                 .unwrap();
 
             result.push(ExerciseListItem {
@@ -97,8 +93,8 @@ pub fn get_exercise_details(category: &str, id: i16) -> Result<ExerciseDetails, 
 
             let series = Serie::select()
                 .where_(Where::And(vec![
-                    Where::Eq(SERIE_COLUMN_EXERCISE_CATEGORY, category.into()),
-                    Where::Eq(SERIE_COLUMN_EXERCISE_ID, id.into()),
+                    Where::Eq(SERIE_COLUMN_EX_CAT, category.into()),
+                    Where::Eq(SERIE_COLUMN_EX_ID, id.into()),
                 ]))
                 .order_by(OrderBy::Desc(SERIE_COLUMN_SESSION))
                 .fetch()

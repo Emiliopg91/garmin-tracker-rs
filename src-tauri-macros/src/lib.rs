@@ -19,7 +19,7 @@ pub fn dlls(item: TokenStream) -> TokenStream {
     database::dlls(item)
 }
 
-#[proc_macro_derive(Entity, attributes(entity, id, no_column, column))]
+#[proc_macro_derive(Entity, attributes(entity, id, no_column, column, indexes))]
 pub fn derive_entity(input: TokenStream) -> TokenStream {
     database::derive_entity(input)
 }

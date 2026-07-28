@@ -12,9 +12,12 @@ use crate::garmin::database::{
     errors::DatabaseError,
 };
 
-pub struct UpdateBuilder<T> {
-    condition: Option<Where>,
-    field_values: Vec<(ColumnName, Value)>,
+pub struct UpdateBuilder<T>
+where
+    T: Entity,
+{
+    condition: Option<Where<T>>,
+    field_values: Vec<(ColumnName<T>, Value)>,
     _marker: std::marker::PhantomData<T>,
 }
 
@@ -35,12 +38,12 @@ impl<T> UpdateBuilder<T>
 where
     T: Entity,
 {
-    pub fn where_(mut self, condition: Where) -> Self {
+    pub fn where_(mut self, condition: Where<T>) -> Self {
         self.condition = Some(condition);
         self
     }
 
-    pub fn set(mut self, field: ColumnName, value: Value) -> Self {
+    pub fn set(mut self, field: ColumnName<T>, value: Value) -> Self {
         self.field_values.push((field, value));
         self
     }
@@ -62,7 +65,7 @@ where
         let mut cond_params: Vec<Value> = Vec::new();
         if let Some(cond) = &self.condition {
             sentence.push_str(&format!(" WHERE {}", cond.to_sql()));
-            cond_params = cond.clone().into_params();
+            cond_params = <Where<T> as Clone>::clone(&cond).into_params();
         }
 
         let mut params = self

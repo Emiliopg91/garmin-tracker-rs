@@ -14,12 +14,18 @@ use crate::garmin::database::{
     errors::DatabaseError,
 };
 
-pub struct DeleteBuilder<T> {
-    condition: Option<Where>,
+pub struct DeleteBuilder<T>
+where
+    T: Entity,
+{
+    condition: Option<Where<T>>,
     _marker: PhantomData<T>,
 }
 
-impl<T> QueryBuilder<T> for DeleteBuilder<T> {
+impl<T> QueryBuilder<T> for DeleteBuilder<T>
+where
+    T: Entity,
+{
     fn new() -> Self {
         DeleteBuilder {
             condition: None,
@@ -32,7 +38,7 @@ impl<T> DeleteBuilder<T>
 where
     T: Entity,
 {
-    pub fn where_(mut self, condition: Where) -> Self {
+    pub fn where_(mut self, condition: Where<T>) -> Self {
         self.condition = Some(condition);
         self
     }

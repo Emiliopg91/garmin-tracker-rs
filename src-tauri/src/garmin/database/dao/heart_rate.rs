@@ -2,6 +2,7 @@ use garmin_tracker_rs_macros::Entity;
 
 #[derive(Entity, Clone)]
 #[entity(table = "heart_rate")]
+#[indexes((session))]
 pub struct HeartRate {
     #[id]
     pub session: i64,

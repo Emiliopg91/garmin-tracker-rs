@@ -16,13 +16,16 @@ use crate::garmin::database::dao::{
 use super::exercise::Exercise;
 
 #[derive(Default, Entity, Clone)]
+#[indexes((session), (session, idx), (ex_cat, ex_id))]
 pub struct Serie {
     #[id]
     pub session: i64,
     #[id]
     pub idx: u8,
-    pub exercise_category: String,
-    pub exercise_id: u16,
+    #[column(name = "exercise_category")]
+    pub ex_cat: String,
+    #[column(name = "exercise_id")]
+    pub ex_id: u16,
     pub reps: u16,
     pub weight: f64,
     pub pr: bool,
@@ -65,42 +68,40 @@ impl Serie {
     }
 
     pub fn update_pr(tx: &rusqlite::Transaction, category: &str, id: u16) {
-        let result = Serie::select()
-            .where_(Where::And(vec![
-                Where::Eq(SERIE_COLUMN_EXERCISE_CATEGORY, category.into()),
-                Where::Eq(SERIE_COLUMN_EXERCISE_ID, id.into()),
-            ]))
-            .order_by(OrderBy::Desc(SERIE_COLUMN_WEIGHT))
-            .order_by(OrderBy::Desc(SERIE_COLUMN_REPS))
-            .order_by(OrderBy::Asc(SERIE_COLUMN_SESSION))
-            .fetch_one_in_tx(tx)
-            .map(|rs| rs.unwrap());
-
-        if let Ok(mut serie) = result {
+        if let Ok(new_prs) = Serie::select_by_ex_cat_and_ex_id_in_tx(
+            tx,
+            &category,
+            id,
+            Some(&[
+                OrderBy::Desc(SERIE_COLUMN_WEIGHT),
+                OrderBy::Desc(SERIE_COLUMN_REPS),
+                OrderBy::Asc(SERIE_COLUMN_SESSION),
+            ]),
+        ) {
             let _ = Serie::update()
                 .set(SERIE_COLUMN_PR, false.into())
                 .where_(Where::And(vec![
-                    Where::Eq(SERIE_COLUMN_EXERCISE_CATEGORY, category.to_string().into()),
-                    Where::Eq(SERIE_COLUMN_EXERCISE_ID, id.into()),
+                    Where::Eq(SERIE_COLUMN_EX_CAT, category.to_string().into()),
+                    Where::Eq(SERIE_COLUMN_EX_ID, id.into()),
                 ]))
                 .execute_in_tx(tx);
 
-            serie.pr = true;
-            let _ = serie.update_by_id_in_tx(tx);
+            for mut pr in new_prs {
+                pr.pr = true;
+                let _ = pr.update_by_id_in_tx(tx);
+            }
         }
     }
 
     pub fn load_for_session(
         session: i64,
     ) -> crate::garmin::database::errors::Result<IndexMap<Exercise, Vec<Serie>>> {
-        let tuple_rows = Serie::select()
-            .where_(Where::Eq(SERIE_COLUMN_SESSION, session.into()))
-            .order_by(OrderBy::Asc(SERIE_COLUMN_IDX))
-            .fetch()?;
+        let tuple_rows =
+            Serie::select_by_session(session, Some(&[OrderBy::Asc(SERIE_COLUMN_IDX)]))?;
 
         let condition_set: HashSet<(_, _)> = tuple_rows
             .iter()
-            .map(|r| (r.exercise_category.clone(), r.exercise_id))
+            .map(|r| (r.ex_cat.clone(), r.ex_id))
             .collect();
 
         let in_conditions = condition_set
@@ -123,7 +124,7 @@ impl Serie {
         let mut res: IndexMap<Exercise, Vec<Serie>> = IndexMap::with_capacity(exercises.len());
 
         for r in tuple_rows {
-            if let Some(&ex) = exercise_by_key.get(&(r.exercise_category.clone(), r.exercise_id)) {
+            if let Some(&ex) = exercise_by_key.get(&(r.ex_cat.clone(), r.ex_id)) {
                 res.entry(ex.clone()).or_default().push(r);
             }
         }
@@ -136,11 +137,8 @@ impl Serie {
     ) -> crate::garmin::database::errors::Result<Serie> {
         Ok(Serie::select()
             .where_(Where::And(vec![
-                Where::Eq(
-                    SERIE_COLUMN_EXERCISE_CATEGORY,
-                    exercise.category.clone().into(),
-                ),
-                Where::Eq(SERIE_COLUMN_EXERCISE_ID, exercise.id.into()),
+                Where::Eq(SERIE_COLUMN_EX_CAT, exercise.category.clone().into()),
+                Where::Eq(SERIE_COLUMN_EX_ID, exercise.id.into()),
                 Where::Eq(SERIE_COLUMN_PR, true.into()),
             ]))
             .limit(1)

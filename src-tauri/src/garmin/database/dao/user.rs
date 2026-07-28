@@ -2,6 +2,7 @@ use chrono::{Datelike, Local, TimeZone};
 use garmin_tracker_rs_macros::Entity;
 
 #[derive(Default, Entity)]
+#[indexes((date))]
 pub struct User {
     #[id]
     pub date: i64,

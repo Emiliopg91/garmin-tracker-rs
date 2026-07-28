@@ -4,13 +4,14 @@ use indexmap::IndexMap;
 
 use crate::garmin::database::dao::{
     Entity,
-    heart_rate::{HEARTRATE_COLUMN_SESSION, HeartRate},
-    helpers::types::{order_by::OrderBy, where_clause::Where},
+    heart_rate::{HEARTRATE_COLUMN_IDX, HeartRate},
+    helpers::types::order_by::OrderBy,
 };
 
 use super::{exercise::Exercise, serie::Serie};
 
 #[derive(Default, Entity, Clone)]
+#[indexes((date), (workout))]
 pub struct Session {
     #[id]
     pub date: i64,
@@ -104,9 +105,10 @@ impl Session {
                         IndexMap::new()
                     };
 
-                    session.heart_rates = HeartRate::select()
-                        .where_(Where::Eq(HEARTRATE_COLUMN_SESSION, session.date.into()))
-                        .fetch()?;
+                    session.heart_rates = HeartRate::select_by_session(
+                        session.date,
+                        Some(&[OrderBy::Asc(HEARTRATE_COLUMN_IDX)]),
+                    )?;
                 }
                 Some(session)
             }
@@ -115,10 +117,8 @@ impl Session {
     }
 
     pub fn find_by_workout(workout: &str) -> crate::garmin::database::errors::Result<Vec<Session>> {
-        let mut res = Session::select()
-            .where_(Where::Eq(SESSION_COLUMN_WORKOUT, workout.into()))
-            .order_by(OrderBy::Desc(SESSION_COLUMN_DATE))
-            .fetch()?;
+        let mut res =
+            Session::select_by_workout(workout, Some(&[OrderBy::Desc(SESSION_COLUMN_DATE)]))?;
 
         for r in &mut res {
             r.series = Serie::load_for_session(r.date)?;

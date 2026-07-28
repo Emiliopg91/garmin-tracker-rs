@@ -11,9 +11,12 @@ use crate::garmin::database::{
     errors::DatabaseError,
 };
 
-pub struct SelectBuilder<T> {
-    condition: Option<Where>,
-    order: Vec<OrderBy>,
+pub struct SelectBuilder<T>
+where
+    T: Entity,
+{
+    condition: Option<Where<T>>,
+    order: Vec<OrderBy<T>>,
     limit: Option<u32>,
     _marker: PhantomData<T>,
 }
@@ -36,12 +39,12 @@ impl<T> SelectBuilder<T>
 where
     T: Entity,
 {
-    pub fn where_(mut self, condition: Where) -> Self {
+    pub fn where_(mut self, condition: Where<T>) -> Self {
         self.condition = Some(condition);
         self
     }
 
-    pub fn order_by(mut self, order: OrderBy) -> Self {
+    pub fn order_by(mut self, order: OrderBy<T>) -> Self {
         self.order.push(order);
         self
     }

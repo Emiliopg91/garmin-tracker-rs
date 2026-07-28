@@ -1,22 +1,27 @@
-use crate::garmin::database::dao::helpers::types::value::Value;
+use crate::garmin::database::dao::{Entity, helpers::types::value::Value};
 
 use super::column_name::ColumnName;
 
-#[derive(Clone)]
-pub enum Where {
-    Eq(ColumnName, Value),
-    NotEq(ColumnName, Value),
-    Gt(ColumnName, Value),
-    Lt(ColumnName, Value),
-    In(ColumnName, Vec<Value>),
-    InMultiple(Vec<ColumnName>, Vec<Vec<Value>>),
-    Null(ColumnName),
-    NotNull(ColumnName),
-    And(Vec<Where>),
-    Or(Vec<Where>),
+pub enum Where<T>
+where
+    T: Entity,
+{
+    Eq(ColumnName<T>, Value),
+    NotEq(ColumnName<T>, Value),
+    Gt(ColumnName<T>, Value),
+    Lt(ColumnName<T>, Value),
+    In(ColumnName<T>, Vec<Value>),
+    InMultiple(Vec<ColumnName<T>>, Vec<Vec<Value>>),
+    Null(ColumnName<T>),
+    NotNull(ColumnName<T>),
+    And(Vec<Where<T>>),
+    Or(Vec<Where<T>>),
 }
 
-impl Where {
+impl<T> Where<T>
+where
+    T: Entity,
+{
     pub fn to_sql(&self) -> String {
         match self {
             Self::Eq(col, _) => {
@@ -105,6 +110,26 @@ impl Where {
                 }
                 params
             }
+        }
+    }
+}
+
+impl<T> Clone for Where<T>
+where
+    T: Entity,
+{
+    fn clone(&self) -> Self {
+        match self {
+            Self::Eq(col, val) => Self::Eq(*col, val.clone()),
+            Self::NotEq(col, val) => Self::NotEq(*col, val.clone()),
+            Self::Gt(col, val) => Self::Gt(*col, val.clone()),
+            Self::Lt(col, val) => Self::Lt(*col, val.clone()),
+            Self::In(col, vals) => Self::In(*col, vals.clone()),
+            Self::InMultiple(cols, vals) => Self::InMultiple(cols.clone(), vals.clone()),
+            Self::Null(col) => Self::Null(*col),
+            Self::NotNull(col) => Self::NotNull(*col),
+            Self::And(conds) => Self::And(conds.clone()),
+            Self::Or(conds) => Self::Or(conds.clone()),
         }
     }
 }

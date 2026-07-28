@@ -1,6 +1,7 @@
 use garmin_tracker_rs_macros::Entity;
 
-#[derive(Default, Entity, Clone)]
+#[derive(Default, Clone, Entity)]
+#[indexes((serial))]
 pub struct Device {
     #[id]
     pub serial: String,

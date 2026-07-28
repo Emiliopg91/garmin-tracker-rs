@@ -3,7 +3,10 @@ use std::{env, fs, path::PathBuf};
 use proc_macro::TokenStream;
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{format_ident, quote};
-use syn::{Data, DeriveInput, Fields, Type, parse_macro_input, parse_quote};
+use syn::{
+    Data, DeriveInput, Fields, Token, Type, parenthesized, parse::ParseStream, parse_macro_input,
+    parse_quote, punctuated::Punctuated,
+};
 
 pub fn dlls(_: TokenStream) -> TokenStream {
     let ddls_dir = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap())
@@ -98,6 +101,35 @@ pub fn derive_entity(input: TokenStream) -> TokenStream {
     let mut comparable = false;
     let mut hasheable = false;
 
+    fn build_condition(
+        id_fields: &[&FieldInfo],
+        value_for: impl Fn(&FieldInfo) -> TokenStream2,
+    ) -> TokenStream2 {
+        if id_fields.len() > 1 {
+            let cond = id_fields.iter().map(|f| {
+                    let const_ident = &f.const_ident;
+                    let value = value_for(f);
+                    quote! {
+                        crate::garmin::database::dao::helpers::types::where_clause::Where::Eq(#const_ident, #value)
+                    }
+                });
+            quote! {
+                crate::garmin::database::dao::helpers::types::where_clause::Where::And(vec![
+                    #(#cond),*
+                ])
+            }
+        } else {
+            let f = id_fields[0];
+            let const_ident = &f.const_ident;
+            let value = value_for(f);
+            quote! {
+                crate::garmin::database::dao::helpers::types::where_clause::Where::Eq(
+                    #const_ident, #value
+                )
+            }
+        }
+    }
+
     let mut table_name = struct_name.to_string().to_lowercase();
     for attr in &input.attrs {
         if !attr.path().is_ident("entity") {
@@ -106,28 +138,32 @@ pub fn derive_entity(input: TokenStream) -> TokenStream {
 
         let mut found_table = false;
         let result = attr.parse_nested_meta(|meta| {
-        if meta.path.is_ident("table") {
-            let lit: syn::LitStr = meta.value()?.parse()?;
-            table_name = lit.value().trim().to_string();
-            if table_name.is_empty() {
-                return Err(meta.error("Attribute table cannot be empty"));
+            if meta.path.is_ident("table") {
+                let lit: syn::LitStr = meta.value()?.parse()?;
+                table_name = lit.value().trim().to_string();
+                if table_name.is_empty() {
+                    return Err(meta.error("Attribute table cannot be empty"));
+                }
+                found_table = true;
+                Ok(())
+            } else if meta.path.is_ident("comparable") {
+                let lit: syn::LitBool = meta.value()?.parse()?;
+                comparable = lit.value();
+                Ok(())
+            } else if meta.path.is_ident("hasheable") {
+                let lit: syn::LitBool = meta.value()?.parse()?;
+                hasheable = lit.value();
+                Ok(())
+            } else if meta.path.is_ident("") {
+                let lit: syn::LitBool = meta.value()?.parse()?;
+                hasheable = lit.value();
+                Ok(())
+            } else {
+                Err(meta.error(
+                    "Attribute `entity` not recognized, expected `table = \"...\"`, `comparable = true|false` or `hasheable = true|false`",
+                ))
             }
-            found_table = true;
-            Ok(())
-        } else if meta.path.is_ident("comparable") {
-            let lit: syn::LitBool = meta.value()?.parse()?;
-            comparable = lit.value();
-            Ok(())
-        } else if meta.path.is_ident("hasheable") {
-            let lit: syn::LitBool = meta.value()?.parse()?;
-            hasheable = lit.value();
-            Ok(())
-        } else {
-            Err(meta.error(
-                "Attribute `entity` not recognized, expected `table = \"...\"`, `comparable = true|false` or `hasheable = true|false`",
-            ))
-        }
-    });
+        });
 
         if let Err(err) = result {
             return err.to_compile_error().into();
@@ -204,12 +240,128 @@ pub fn derive_entity(input: TokenStream) -> TokenStream {
         });
     }
 
+    let mut indexes = Vec::new();
+
+    for attr in &input.attrs {
+        if attr.path().is_ident("indexes") {
+            let result = attr.parse_args_with(|input: ParseStream| {
+                let mut groups: Vec<Punctuated<syn::Ident, Token![,]>> = Vec::new();
+
+                while !input.is_empty() {
+                    let content;
+                    parenthesized!(content in input);
+                    let idents = Punctuated::<syn::Ident, Token![,]>::parse_terminated(&content)?;
+                    groups.push(idents);
+
+                    if !input.is_empty() {
+                        input.parse::<Token![,]>()?;
+                    }
+                }
+
+                Ok(groups)
+            });
+
+            match result {
+                Ok(groups) => {
+                    for group in groups {
+                        let mut index = Vec::new();
+                        let cols: Vec<String> = group.iter().map(|i| i.to_string()).collect();
+
+                        for col in cols {
+                            let field = fields.iter().find(|f| f.ident.to_string() == col);
+                            match field {
+                                Some(field) => index.push(field),
+                                None => {
+                                    return syn::Error::new_spanned(
+                                        attr,
+                                        format!("missing field {}", col),
+                                    )
+                                    .to_compile_error()
+                                    .into();
+                                }
+                            }
+                        }
+
+                        indexes.push(index);
+                    }
+                }
+                Err(err) => return err.to_compile_error().into(),
+            }
+        }
+    }
+
+    let mut indexes_expand = Vec::new();
+    for index in indexes {
+        let fn_name = format_ident!(
+            "select_by_{}",
+            index
+                .iter()
+                .map(|i| i.ident.to_string())
+                .collect::<Vec<String>>()
+                .join("_and_"),
+        );
+        let fn_name_tx = format_ident!(
+            "select_by_{}_in_tx",
+            index
+                .iter()
+                .map(|i| i.ident.to_string())
+                .collect::<Vec<String>>()
+                .join("_and_"),
+        );
+        let select_params: Vec<TokenStream2> = index
+            .iter()
+            .map(|f| {
+                let ident = &f.ident;
+                let mut ty = &f.ty;
+                let str_ty: Type = parse_quote!(&str);
+
+                if let Type::Path(type_path) = ty
+                    && let Some(segment) = type_path.path.segments.last()
+                    && segment.ident == "String"
+                {
+                    ty = &str_ty;
+                }
+                quote! { #ident: #ty }
+            })
+            .collect();
+
+        let condition = build_condition(&index, |f| {
+            let ident = &f.ident;
+            quote! { #ident.into() }
+        });
+
+        let expand = quote! {
+            pub fn #fn_name(#(#select_params),*, order_by: Option<&[crate::garmin::database::dao::helpers::types::order_by::OrderBy<Self>]>) -> crate::garmin::database::errors::Result<Vec<Self>> {
+                let mut builder = <#struct_name as crate::garmin::database::dao::Entity>::select()
+                    .where_(#condition);
+                if let Some(order_by) = order_by{
+                    for ob in order_by {
+                        builder = builder.order_by((*ob).clone());
+                    }
+                }
+                builder.fetch()
+            }
+            pub fn #fn_name_tx(tx: &rusqlite::Transaction, #(#select_params),*, order_by: Option<&[crate::garmin::database::dao::helpers::types::order_by::OrderBy<Self>]>) -> crate::garmin::database::errors::Result<Vec<Self>> {
+                let mut builder = <#struct_name as crate::garmin::database::dao::Entity>::select()
+                    .where_(#condition);
+                if let Some(order_by) = order_by{
+                    for ob in order_by {
+                        builder = builder.order_by((*ob).clone());
+                    }
+                }
+                builder.fetch_in_tx(tx)
+            }
+        };
+
+        indexes_expand.push(expand);
+    }
+
     let field_constants = fields.iter().map(|f| {
         let const_ident = &f.const_ident;
         let name = &f.column;
         quote! {
-            pub const #const_ident: crate::garmin::database::dao::helpers::types::column_name::ColumnName =
-                crate::garmin::database::dao::helpers::types::column_name::ColumnName::new(#name);
+            pub const #const_ident: crate::garmin::database::dao::helpers::types::column_name::ColumnName<#struct_name> =
+                crate::garmin::database::dao::helpers::types::column_name::ColumnName::<#struct_name>::new(#name);
         }
     });
 
@@ -254,35 +406,6 @@ pub fn derive_entity(input: TokenStream) -> TokenStream {
                 quote! { #ident: #ty }
             })
             .collect();
-
-        fn build_condition(
-            id_fields: &[&FieldInfo],
-            value_for: impl Fn(&FieldInfo) -> TokenStream2,
-        ) -> TokenStream2 {
-            if id_fields.len() > 1 {
-                let cond = id_fields.iter().map(|f| {
-                    let const_ident = &f.const_ident;
-                    let value = value_for(f);
-                    quote! {
-                        crate::garmin::database::dao::helpers::types::where_clause::Where::Eq(#const_ident, #value)
-                    }
-                });
-                quote! {
-                    crate::garmin::database::dao::helpers::types::where_clause::Where::And(vec![
-                        #(#cond),*
-                    ])
-                }
-            } else {
-                let f = id_fields[0];
-                let const_ident = &f.const_ident;
-                let value = value_for(f);
-                quote! {
-                    crate::garmin::database::dao::helpers::types::where_clause::Where::Eq(
-                        #const_ident, #value
-                    )
-                }
-            }
-        }
 
         let id_condition = build_condition(&id_fields, |f| {
             let ident = &f.ident;
@@ -418,7 +541,7 @@ pub fn derive_entity(input: TokenStream) -> TokenStream {
 
         impl crate::garmin::database::dao::Entity for #struct_name {
             const TABLE_NAME: &'static str = #table_name;
-            const FIELDS: &'static [crate::garmin::database::dao::helpers::types::column_name::ColumnName] =
+            const FIELDS: &'static [crate::garmin::database::dao::helpers::types::column_name::ColumnName<Self>] =
                 &[ #(#field_name_list),* ];
 
             fn map_from_row(row: &rusqlite::Row) -> Result<Self, rusqlite::Error> {
@@ -433,6 +556,11 @@ pub fn derive_entity(input: TokenStream) -> TokenStream {
                     #(#get_values_lines),*
                 ]
             }
+
+        }
+
+        impl #struct_name {
+            #(#indexes_expand)*
         }
 
         #instance_operations
