@@ -36,7 +36,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     subprocess.check_call(["pnpm", "tsc"])
-    subprocess.check_call(["cargo", "clippy", "--manifest-path", CARGO_TOML_FILE, "--", "-D", "warnings"])
+    subprocess.check_call(["cargo", "clippy", "--release", "--manifest-path", CARGO_TOML_FILE, "--", "-D", "warnings"])
     subprocess.check_call(["pnpm", "prettier", "--write", SRC_DIR])
     subprocess.check_call(["cargo", "fmt"], cwd=SRC_TAURI_SRC_DIR)
 
@@ -71,6 +71,7 @@ if __name__ == "__main__":
     subprocess.check_call(["git", "push"])
 
     print("Waiting for github release to be published...")
+    t0 = time.time()
     URL = f"https://api.github.com/repos/Emiliopg91/garmin-tracker-rs/releases/tags/{version}"
     while True:
         try:
@@ -80,7 +81,7 @@ if __name__ == "__main__":
             )
 
             if r.status_code == 200:
-                print(f"✅ {version} published!")
+                print(f"✅ {version} published after {(time.time()-t0)/1000}s in https://github.com/Emiliopg91/garmin-tracker-rs/releases/tag/{version}!")
                 break
 
         except requests.RequestException as e:
@@ -89,6 +90,7 @@ if __name__ == "__main__":
         time.sleep(3)
 
     print("Waiting for AUR to be published...")
+    t0 = time.time()
     URL = "https://aur.archlinux.org/rpc/?v=5&type=info&arg=garmin-tracker-rs"
     while True:
         try:
@@ -101,6 +103,7 @@ if __name__ == "__main__":
                 response = r.json()
                 if response["results"][0]["Version"].startswith(f"{version}-1"):
                     print(f"✅ {version} published!")
+                    print(f"✅ {version} published after {(time.time()-t0)/1000}s!")
                     break
 
         except requests.RequestException as e:
