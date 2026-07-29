@@ -1416,7 +1416,7 @@ dependencies = [
  "indexmap 2.14.0",
  "mtp-rs",
  "nusb",
- "phf 0.11.3",
+ "phf 0.13.1",
  "phf_codegen",
  "rusqlite_orm",
  "rusqlite_orm_macros",
@@ -3348,6 +3348,8 @@ dependencies = [
 [[package]]
 name = "rusqlite_orm"
 version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f02c885d805443b5ffa5c732ae79997f1cb081d6d60911cfbd0cd91e049d3abf"
 dependencies = [
  "log",
  "rusqlite",
@@ -3357,6 +3359,8 @@ dependencies = [
 [[package]]
 name = "rusqlite_orm_macros"
 version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1232165a8b55f28374cfc540dcb128933f6d6631afaf844dc06bb764427caaac"
 dependencies = [
  "proc-macro2",
  "quote",
