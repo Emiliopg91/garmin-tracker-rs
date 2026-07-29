@@ -8,12 +8,9 @@ import { ExercisesList } from "../Exercises/ExercisesList";
 import { UserList } from "../User/UserList";
 import { Loading } from "../Loading/Loading";
 import { WorkoutsList } from "../Workouts/WorkoutList";
-import { BackendClient } from "@/utils/backend/client";
-import { Nav } from "react-bootstrap";
 
 export function App(): JSX.Element {
-  const { tab, setTab, loading, appReady, availableUpdate, translate } =
-    useContext(AppContext);
+  const { tab, setTab, loading, appReady, translate } = useContext(AppContext);
 
   const leftNavBarItems = [
     {
@@ -46,10 +43,6 @@ export function App(): JSX.Element {
     },
   ];
 
-  const openChangelog = () => {
-    BackendClient.openVersionChangelog(availableUpdate!);
-  };
-
   return (
     <>
       <div id="viewport">
@@ -65,13 +58,6 @@ export function App(): JSX.Element {
               {tab == Tabs.WORKOUTS && <WorkoutsList />}
               {tab == Tabs.USER && <UserList />}
             </div>
-            {availableUpdate && (
-              <div style={{ margin: "auto" }}>
-                <Nav.Link onClick={openChangelog}>
-                  Update {availableUpdate} available. View changes
-                </Nav.Link>
-              </div>
-            )}
           </>
         )}
       </div>

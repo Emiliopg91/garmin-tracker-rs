@@ -10,7 +10,6 @@ interface AppContexType {
   startLoading: () => void;
   finishLoading: () => void;
   availableDevices: DeviceListItem[];
-  availableUpdate: string | undefined;
   environment: AppEnvironment;
   translate: (key: string, replacements?: string[]) => string;
 }
@@ -29,7 +28,6 @@ const defaultValue: AppContexType = {
     /* empty */
   },
   availableDevices: [],
-  availableUpdate: undefined,
   environment: AppEnvironment.Release,
   translate: () => {
     return "";

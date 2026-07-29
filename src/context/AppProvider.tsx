@@ -15,9 +15,6 @@ export function AppProvider({
   const [environment, setEnvironment] = useState(AppEnvironment.Release);
   const [appReady, setAppReady] = useState(false);
   const [tab, setTab] = useState(Tabs.SESSIONS);
-  const [availableUpdate, setAvailableUpdate] = useState<string | undefined>(
-    undefined,
-  );
   const [availableDevices, setAvailableDevices] = useState<DeviceListItem[]>(
     [],
   );
@@ -69,12 +66,6 @@ export function AppProvider({
       },
     );
 
-    const unregisterUpdateAvailable = BackendListener.onUpdateAvailable(
-      (version) => {
-        setAvailableUpdate(version);
-      },
-    );
-
     const unregisterStartLoading = BackendListener.onStartLoading(() => {
       startLoading();
     });
@@ -102,7 +93,6 @@ export function AppProvider({
     return () => {
       unregisterConnection();
       unregisterDisconnection();
-      unregisterUpdateAvailable();
       unregisterStartLoading();
       unregisterFinishLoading();
     };
@@ -118,7 +108,6 @@ export function AppProvider({
         loading,
         availableDevices,
         appReady,
-        availableUpdate,
         environment,
         translate,
       }}
