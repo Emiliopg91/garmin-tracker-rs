@@ -35,12 +35,12 @@ if __name__ == "__main__":
             print("")
         sys.exit(1)
 
+    subprocess.check_call(["make", "build"])
+
     subprocess.check_call(["pnpm", "tsc"])
     subprocess.check_call(["cargo", "clippy", "--release", "--manifest-path", CARGO_TOML_FILE, "--", "-D", "warnings"])
     subprocess.check_call(["pnpm", "prettier", "--write", SRC_DIR])
     subprocess.check_call(["cargo", "fmt"], cwd=SRC_TAURI_SRC_DIR)
-
-    subprocess.check_call(["make", "build"])
 
     if len(subprocess.check_output(["git", "status", "--porcelain"], text=True).strip().splitlines()) > 0:
         subprocess.check_call(["git", "commit", "-am", "[chore] Check and format before release"])
