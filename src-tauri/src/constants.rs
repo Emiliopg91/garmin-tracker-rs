@@ -11,9 +11,11 @@ pub static LIB_NAME: LazyLock<String> =
 
 // Dir block
 pub static DATA_LOCAL_DIR: LazyLock<PathBuf> = LazyLock::new(|| {
-    let dir = dirs::data_local_dir()
-        .expect("Could not get local data folder")
+    let dir = PathBuf::from(std::env::var("HOME").expect("Could not get local data folder"))
+        .join(".local")
+        .join("share")
         .join(APP_NAME.clone());
+    eprintln!("{}", dir.display());
 
     if !fs::exists(&dir).expect("IO error") {
         fs::create_dir_all(&dir).expect("Could not create local data folder");
