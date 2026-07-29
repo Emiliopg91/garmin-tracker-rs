@@ -81,7 +81,7 @@ if __name__ == "__main__":
             )
 
             if r.status_code == 200:
-                print(f"✅ {version} published after {(int(time.time()-t0)*1000)/1000}s in {URL}!")
+                print(f"✅ {version} published after {(int(time.time()-t0)*1000)/1000}s in https://github.com/Emiliopg91/garmin-tracker-rs/releases/tag/{version}")
                 break
 
         except requests.RequestException as e:
