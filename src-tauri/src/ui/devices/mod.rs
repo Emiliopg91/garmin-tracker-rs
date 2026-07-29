@@ -115,10 +115,18 @@ async fn mtp_dev_check_and_sync(app: AppHandle, devices: &mut Vec<DeviceListItem
     }
     if !devs_to_sync.is_empty() {
         let _ = app.emit("start_loading", ());
+        let mut imported = 0;
         for dev in devs_to_sync {
-            let _ = _import_from_device(&dev).await;
+            match _import_from_device(&dev).await {
+                Ok(i) => {
+                    imported += i;
+                }
+                Err(_) => {}
+            }
         }
         let _ = app.emit("finish_loading", ());
-        let _ = app.emit("sessions_added", ());
+        if imported > 0 {
+            let _ = app.emit("sessions_added", ());
+        }
     }
 }
