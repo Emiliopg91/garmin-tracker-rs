@@ -1378,7 +1378,7 @@ dependencies = [
 
 [[package]]
 name = "garmin-tracker-rs"
-version = "1.7.2"
+version = "1.7.3"
 dependencies = [
  "chrono",
  "clap",
