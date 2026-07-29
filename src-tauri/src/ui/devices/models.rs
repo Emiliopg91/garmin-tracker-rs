@@ -1,7 +1,7 @@
 use mtp_rs::DeviceInfo;
 use serde::Serialize;
 
-use crate::garmin::database::dao::device::Device;
+use crate::dao::device::Device;
 
 #[derive(Serialize, Clone)]
 pub struct DeviceListItem {

@@ -3,7 +3,7 @@ use rusqlite_orm::dao::{Entity, helpers::types::order_by::OrderBy};
 use tauri_plugin_log::log::{error, info};
 
 use crate::{
-    garmin::database::dao::user::{self, User},
+    dao::user::{self, User},
     ui::{
         notifications::{
             models::{NotificationDefinition, NotificationKind},

@@ -1,3 +1,9 @@
+mod constants;
+mod dao;
+mod mtp;
+mod parser;
+mod ui;
+
 use std::process::exit;
 
 use rusqlite_orm::database::DATABASE_INST;
@@ -8,9 +14,6 @@ use tauri_plugin_log::{
     log::{LevelFilter, debug, error, info},
 };
 
-#[cfg(debug_assertions)]
-use crate::garmin::parser::{debug_dump, read_from_file};
-
 use crate::ui::{
     app::{get_environment, notify_frontend_ready, open_version_changelog},
     exercises::{get_exercise_details, get_exercises},
@@ -19,9 +22,8 @@ use crate::ui::{
     workouts::{get_workout_details, get_workout_list},
 };
 
-mod constants;
-mod garmin;
-mod ui;
+#[cfg(debug_assertions)]
+use crate::parser::{debug_dump, read_from_file};
 
 dlls!("../resources/ddl");
 

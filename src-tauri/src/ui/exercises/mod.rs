@@ -5,7 +5,7 @@ use rusqlite_orm::dao::{Entity, helpers::types::order_by::OrderBy};
 use tauri_plugin_log::log::{error, info};
 
 use crate::{
-    garmin::database::dao::{
+    dao::{
         exercise::{self, Exercise},
         serie::{self, Serie},
         session::Session,

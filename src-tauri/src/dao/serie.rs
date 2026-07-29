@@ -11,16 +11,16 @@ use rusqlite_orm::{
 };
 use rusqlite_orm_macros::Entity;
 
-use crate::garmin::database::dao::exercise;
+use crate::dao::exercise;
 
 use super::exercise::Exercise;
 
 #[derive(Default, Entity, Clone)]
-#[indexes((session), (session, idx), (ex_cat, ex_id))]
+#[indexes((session), (ex_cat, ex_id))]
 pub struct Serie {
-    #[id]
+    #[primary_key]
     pub session: i64,
-    #[id]
+    #[primary_key]
     pub idx: u8,
     #[column(name = "exercise_category")]
     pub ex_cat: String,

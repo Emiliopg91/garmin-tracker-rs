@@ -4,9 +4,9 @@ use rusqlite_orm_macros::Entity;
 #[entity(table = "heart_rate")]
 #[indexes((session))]
 pub struct HeartRate {
-    #[id]
+    #[primary_key]
     pub session: i64,
-    #[id]
+    #[primary_key]
     pub idx: u32,
     pub hr: u8,
 }

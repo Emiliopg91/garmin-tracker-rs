@@ -10,8 +10,15 @@ use rusqlite_orm::{
 use tauri_plugin_log::log::{error, info, warn};
 
 use crate::{
-    garmin::{
-        database::dao::{
+    ui::{
+        notifications::{
+            models::{NotificationDefinition, NotificationKind},
+            show_notification,
+        },
+        sessions::models::{SessionDetails, SessionListItem, SessionSeriesUpdate},
+    },
+    {
+        dao::{
             device::Device,
             exercise::{self, Exercise},
             heart_rate::HeartRate,
@@ -20,13 +27,6 @@ use crate::{
         },
         mtp::MTP_CLIENT_INST,
         parser::load_from_file,
-    },
-    ui::{
-        notifications::{
-            models::{NotificationDefinition, NotificationKind},
-            show_notification,
-        },
-        sessions::models::{SessionDetails, SessionListItem, SessionSeriesUpdate},
     },
 };
 

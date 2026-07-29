@@ -1,6 +1,6 @@
 use serde::Serialize;
 
-use crate::garmin::database::dao::session::Session;
+use crate::dao::session::Session;
 
 #[derive(Serialize)]
 pub struct WorkoutListItem {

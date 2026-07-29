@@ -1,7 +1,7 @@
 use chrono::{DateTime, Local, NaiveDateTime, TimeZone};
 use serde::{Deserialize, Serialize};
 
-use crate::garmin::database::dao::user::User;
+use crate::dao::user::User;
 
 #[derive(Serialize, Deserialize)]
 pub struct UserListItem {

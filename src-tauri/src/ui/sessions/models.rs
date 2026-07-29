@@ -2,7 +2,7 @@ use std::{collections::HashMap, hash::Hash};
 
 use serde::{Deserialize, Serialize};
 
-use crate::garmin::database::dao::{serie::Serie, session::Session};
+use crate::dao::{serie::Serie, session::Session};
 
 #[derive(Serialize, Default)]
 pub struct SessionListItem {

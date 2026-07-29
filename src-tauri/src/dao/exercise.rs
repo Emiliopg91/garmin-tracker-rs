@@ -1,12 +1,11 @@
 use rusqlite_orm_macros::Entity;
 
 #[derive(Clone, Default, Entity)]
-#[entity(hasheable = true, comparable = true)]
-#[indexes((category, id))]
+#[entity(hashable = true, comparable = true)]
 pub struct Exercise {
-    #[id]
+    #[primary_key]
     pub category: String,
-    #[id]
+    #[primary_key]
     pub id: u16,
     pub name: String,
 }

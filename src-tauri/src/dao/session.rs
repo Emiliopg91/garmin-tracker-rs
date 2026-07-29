@@ -3,14 +3,14 @@ use indexmap::IndexMap;
 use rusqlite_orm::dao::{Entity, helpers::types::order_by::OrderBy};
 use rusqlite_orm_macros::Entity;
 
-use crate::garmin::database::dao::heart_rate::{self, HeartRate};
+use crate::dao::heart_rate::{self, HeartRate};
 
 use super::{exercise::Exercise, serie::Serie};
 
 #[derive(Default, Entity, Clone)]
-#[indexes((date), (workout))]
+#[indexes((workout))]
 pub struct Session {
-    #[id]
+    #[primary_key]
     pub date: i64,
 
     pub workout: String,
@@ -28,10 +28,10 @@ pub struct Session {
 
     pub sub_sport: String,
 
-    #[no_column]
+    #[dont_map]
     pub series: IndexMap<Exercise, Vec<Serie>>,
 
-    #[no_column]
+    #[dont_map]
     pub heart_rates: Vec<HeartRate>,
 }
 impl Session {

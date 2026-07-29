@@ -4,7 +4,7 @@ use rusqlite_orm_macros::Entity;
 #[derive(Default, Entity)]
 #[indexes((date))]
 pub struct User {
-    #[id]
+    #[primary_key]
     pub date: i64,
     pub weight: f32,
     pub fat_ratio: f32,

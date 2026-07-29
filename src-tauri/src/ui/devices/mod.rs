@@ -10,7 +10,8 @@ use tauri::{AppHandle, Emitter, async_runtime::JoinHandle};
 use tauri_plugin_log::log::{error, info, warn};
 
 use crate::{
-    garmin::{database::dao::device::Device, mtp::MTP_CLIENT_INST},
+    dao::device::Device,
+    mtp::MTP_CLIENT_INST,
     ui::{
         devices::models::DeviceListItem,
         notifications::{

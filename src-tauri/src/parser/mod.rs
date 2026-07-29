@@ -8,11 +8,9 @@ use chrono::{DateTime, Local};
 use fitparser::{FitDataField, FitDataRecord, Value, de::DecodeOption, profile};
 use indexmap::IndexMap;
 
-use crate::garmin::database::dao::heart_rate::HeartRate;
+use crate::dao::{exercise::Exercise, heart_rate::HeartRate, serie::Serie, session::Session};
 
 use self::errors::ParseFitFileError;
-
-use super::database::dao::{exercise::Exercise, serie::Serie, session::Session};
 
 pub mod errors;
 

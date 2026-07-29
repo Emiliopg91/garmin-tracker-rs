@@ -11,7 +11,7 @@ use tauri_plugin_log::log::{debug, info};
 use tokio::sync::Mutex;
 
 use crate::{
-    garmin::mtp::errors::{MtpError, Result},
+    mtp::errors::{MtpError, Result},
     ui::devices::models::DeviceListItem,
 };
 pub mod errors;
