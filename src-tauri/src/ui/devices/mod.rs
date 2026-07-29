@@ -117,11 +117,8 @@ async fn mtp_dev_check_and_sync(app: AppHandle, devices: &mut Vec<DeviceListItem
         let _ = app.emit("start_loading", ());
         let mut imported = 0;
         for dev in devs_to_sync {
-            match _import_from_device(&dev).await {
-                Ok(i) => {
-                    imported += i;
-                }
-                Err(_) => {}
+            if let Ok(i) = _import_from_device(&dev).await {
+                imported += i;
             }
         }
         let _ = app.emit("finish_loading", ());
