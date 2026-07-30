@@ -76,6 +76,9 @@ import_sessions:
 import_from_device:
   en: From {}
   es: Desde {}
+imported_session:
+  en: Session imported succesfully
+  es: Sesión importada con éxito
 no_device_found:
   en: No device found
   es: No se detectó dispositivo
@@ -178,3 +181,9 @@ heart_rate:
 syncing_device:
   en: Syncing {} {}
   es: Sincronizando {} {}
+error_persisting_session:
+  en: "Error persisting session: {}"
+  es: "Error guardando sesión: {}"
+error_parsing_session:
+  en: "Error parsing session file: {}"
+  es: "Error leyendo archivo de sesión: {}"

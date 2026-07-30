@@ -7,80 +7,72 @@ pub static APP_TITLE: &str = "Garmin Tracker";
 pub static APP_NAME: LazyLock<String> = LazyLock::new(|| env!("CARGO_PKG_NAME").to_string());
 pub static APP_VERSION: LazyLock<String> = LazyLock::new(|| env!("CARGO_PKG_VERSION").to_string());
 pub static LIB_NAME: LazyLock<String> =
-    LazyLock::new(|| format!("{}_lib", APP_NAME.replace("-", "_")));
+    LazyLock::new(|| format!("{}_lib", APP_NAME.replace('-', "_")));
 
 // Dir block
 pub static DATA_LOCAL_DIR: LazyLock<PathBuf> = LazyLock::new(|| {
-    let dir = PathBuf::from(std::env::var("HOME").expect("Could not get local data folder"))
-        .join(".local")
-        .join("share")
-        .join(APP_NAME.clone());
-    eprintln!("{}", dir.display());
-
-    if !fs::exists(&dir).expect("IO error") {
-        fs::create_dir_all(&dir).expect("Could not create local data folder");
-    }
-
-    dir
+    let home = std::env::var("HOME").expect("Could not get local data folder");
+    ensure_dir(
+        PathBuf::from(home)
+            .join(".local")
+            .join("share")
+            .join(APP_NAME.as_str()), // sin clone()
+    )
 });
 
 // Database block
 pub static DB_FILE: LazyLock<PathBuf> = LazyLock::new(|| DATA_LOCAL_DIR.join("database.db"));
 
 // Logs block
-pub static LOGS_DIR: LazyLock<PathBuf> = LazyLock::new(|| {
-    let dir = DATA_LOCAL_DIR.join("logs");
+pub static LOGS_DIR: LazyLock<PathBuf> = LazyLock::new(|| ensure_dir(DATA_LOCAL_DIR.join("logs")));
 
-    if !fs::exists(&dir).expect("IO error") {
-        fs::create_dir_all(&dir).expect("Could not create logs folder");
-    }
-
-    dir
-});
 pub static LOG_LEVEL: LazyLock<LevelFilter> = LazyLock::new(|| {
-    let mut level = LevelFilter::Info;
-
-    if let Ok(level_var) = std::env::var("LOGGER_LEVEL")
-        && let Ok(level_filter) = LevelFilter::from_str(level_var.trim())
-    {
-        level = level_filter
-    }
-
-    level
+    std::env::var("LOGGER_LEVEL")
+        .ok()
+        .and_then(|v| LevelFilter::from_str(v.trim()).ok())
+        .unwrap_or(LevelFilter::Info)
 });
+
 pub const LOG_FILE_MAX_SIZE: u128 = 50 * 1_024;
 pub const LOG_FILE_ROTATION_STRATEGY: RotationStrategy = RotationStrategy::KeepSome(3);
 
+#[repr(i32)]
 pub enum ExitCodes {
-    SettingsError,
-    DbError,
-    NoMainWindow,
-    TauriError,
+    SettingsError = 1,
+    DbError = 2,
+    NoMainWindow = 3,
+    TauriError = 4,
 }
 
 impl From<ExitCodes> for i32 {
     fn from(val: ExitCodes) -> Self {
-        match val {
-            ExitCodes::SettingsError => 1,
-            ExitCodes::DbError => 2,
-            ExitCodes::NoMainWindow => 3,
-            ExitCodes::TauriError => 4,
-        }
+        val as i32
     }
 }
 
 // UI block
 pub static ICON_PATH: LazyLock<String> = LazyLock::new(|| {
     #[cfg(debug_assertions)]
-    return std::env::current_exe()
-        .unwrap()
-        .parent()
-        .unwrap()
-        .to_path_buf()
-        .join("../../icons/icon.png")
-        .display()
-        .to_string();
+    {
+        std::env::current_exe()
+            .unwrap()
+            .parent()
+            .unwrap()
+            .join("../../icons/icon.png")
+            .display()
+            .to_string()
+    }
 
     #[cfg(not(debug_assertions))]
-    return "/usr/share/icons/hicolor/128x128/apps/garmin-tracker-rs.png".to_string();
+    {
+        "/usr/share/icons/hicolor/128x128/apps/garmin-tracker-rs.png".to_string()
+    }
 });
+
+fn ensure_dir(dir: PathBuf) -> PathBuf {
+    if !dir.exists() {
+        fs::create_dir_all(&dir)
+            .unwrap_or_else(|e| panic!("Could not create directory {}: {e}", dir.display()));
+    }
+    dir
+}

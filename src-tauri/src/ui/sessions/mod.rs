@@ -223,13 +223,14 @@ where
         info!("Importing file {}", file.as_ref().display());
         let res = match load_from_file(file.as_ref()) {
             Ok(session) => {
-                let found = Session::find_by_id(session.date, false)
-                    .map(|opt| opt.is_some())
-                    .unwrap_or(false);
-
-                if !found {
-                    let mut db = DATABASE_INST.lock().unwrap();
-                    if let Err(e) = db.run_in_tx(|tx| {
+                let mut db = DATABASE_INST.lock().unwrap();
+                let imp_res = db.run_in_tx(|tx| {
+                    if Session::exists_in_tx(tx, session.date)? {
+                        let msg =
+                            format!("Session with date {} already exists", session.format_date());
+                        warn!("{}", msg);
+                        Ok(false)
+                    } else {
                         Session::insert().item(session.clone()).execute_in_tx(tx)?;
 
                         let mut insert = Exercise::insert().or_ignore(true);
@@ -261,38 +262,44 @@ where
                         }
                         insert.execute_in_tx(tx)?;
 
-                        Ok(())
-                    }) {
-                        Err(format!("Error persisting session: {}", e))
-                    } else {
-                        success += 1;
-                        latest = if let Some(latest_v) = latest {
-                            if session.date > latest_v {
-                                Some(session.date)
-                            } else {
-                                latest
-                            }
-                        } else {
-                            Some(session.date)
-                        };
-                        Ok("Session imported succesfully".to_string())
+                        Ok(true)
                     }
-                } else {
-                    let msg = format!("Session with date {} already exists", session.format_date());
-                    warn!("{}", msg);
-                    Err("".to_string())
+                });
+                match imp_res {
+                    Ok(added) => {
+                        if added {
+                            success += 1;
+                            latest = if let Some(latest_v) = latest {
+                                if session.date > latest_v {
+                                    Some(session.date)
+                                } else {
+                                    latest
+                                }
+                            } else {
+                                Some(session.date)
+                            };
+                        }
+                        Ok(added)
+                    }
+                    Err(e) => {
+                        error!("Error persisting session: {}", e);
+                        Err(translate!("error_persisting_session", e))
+                    }
                 }
             }
-            Err(e) => Err(format!("Error parsing session: {}", e)),
+            Err(e) => {
+                error!("Error parsing session: {}", e);
+                Err(translate!("error_parsing_session", e))
+            }
         };
 
         match res {
-            Ok(msg) => {
-                info!("  {}", msg);
+            Ok(added) if added => {
+                info!("Session imported succesfully");
 
                 show_notification(NotificationDefinition {
                     title: format!("{}", file.as_ref().file_name().unwrap().display()),
-                    body: msg,
+                    body: translate!("imported_session"),
                     kind: NotificationKind::Temporal,
                 });
             }

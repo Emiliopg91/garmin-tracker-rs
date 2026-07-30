@@ -1,5 +1,5 @@
 use proc_macro::TokenStream;
-use quote::{ToTokens, quote};
+use quote::quote;
 use syn::{FnArg, ItemFn, Pat, ReturnType, Type, parse_macro_input};
 
 pub fn traced_command(_attrs: TokenStream, item: TokenStream) -> TokenStream {
@@ -20,8 +20,9 @@ pub fn traced_command(_attrs: TokenStream, item: TokenStream) -> TokenStream {
             FnArg::Receiver(_) => None,
             FnArg::Typed(pat_type) => match &*pat_type.pat {
                 Pat::Ident(pat_ident) => {
-                    let type_name = pat_type.ty.to_token_stream().to_string();
-                    if type_name == "WebviewWindow" || type_name == "AppHandle" {
+                    if last_segment_is(&pat_type.ty, "WebviewWindow")
+                        || last_segment_is(&pat_type.ty, "AppHandle")
+                    {
                         return None;
                     }
                     Some(pat_ident.ident.clone())
@@ -39,27 +40,23 @@ pub fn traced_command(_attrs: TokenStream, item: TokenStream) -> TokenStream {
         quote! { (|| #block)() }
     };
 
-    let returns_result = is_result_type(&sig.output);
-    let result_json_code = if returns_result {
+    let result_json_code = if last_segment_is_return(&sig.output, "Result") {
         quote! {
             let __result_json = match &result {
                 Ok(v) => serde_json::json!(v),
                 Err(e) => serde_json::json!({ "error": e.to_string() }),
             };
         }
+    } else if last_segment_is_return(&sig.output, "Option") {
+        quote! {
+            let __result_json = match &result {
+                Some(v) => serde_json::json!(v),
+                None => serde_json::Value::Null,
+            };
+        }
     } else {
-        let returns_option = is_option_type(&sig.output);
-        if returns_option {
-            quote! {
-                let __result_json = match &result {
-                    Some(v) => serde_json::json!(v),
-                    None => serde_json::Value::Null,
-                };
-            }
-        } else {
-            quote! {
-                let __result_json = serde_json::json!(&result);
-            }
+        quote! {
+            let __result_json = serde_json::json!(&result);
         }
     };
 
@@ -97,22 +94,19 @@ pub fn traced_command(_attrs: TokenStream, item: TokenStream) -> TokenStream {
     expanded.into()
 }
 
-fn is_result_type(output: &ReturnType) -> bool {
-    if let ReturnType::Type(_, ty) = output
-        && let Type::Path(type_path) = &**ty
+fn last_segment_is(ty: &Type, name: &str) -> bool {
+    if let Type::Path(type_path) = ty
         && let Some(segment) = type_path.path.segments.last()
     {
-        return segment.ident == "Result";
+        return segment.ident == name;
     }
     false
 }
 
-fn is_option_type(output: &ReturnType) -> bool {
-    if let ReturnType::Type(_, ty) = output
-        && let Type::Path(type_path) = &**ty
-        && let Some(segment) = type_path.path.segments.last()
-    {
-        return segment.ident == "Option";
+fn last_segment_is_return(output: &ReturnType, name: &str) -> bool {
+    if let ReturnType::Type(_, ty) = output {
+        last_segment_is(ty, name)
+    } else {
+        false
     }
-    false
 }
