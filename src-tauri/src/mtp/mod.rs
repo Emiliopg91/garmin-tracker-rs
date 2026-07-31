@@ -11,8 +11,8 @@ use tauri_plugin_log::log::{debug, info};
 use tokio::sync::Mutex;
 
 use crate::{
+    dto::devices::DeviceListItem,
     mtp::errors::{MtpError, Result},
-    ui::devices::models::DeviceListItem,
 };
 pub mod errors;
 

@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use serde::Serialize;
 
-use crate::{dao::exercise::Exercise, ui::sessions::models::SessionSerie};
+use crate::{dao::exercise::Exercise, dto::sessions::SessionSerie};
 
 #[derive(Serialize)]
 pub struct ExerciseListItem {

@@ -1,12 +1,7 @@
-pub mod models;
-
 use garmin_tracker_rs_macros::traced_command;
 use tauri::{AppHandle, WebviewWindow};
 
-use crate::{
-    constants,
-    ui::{app::models::AppEnvironment, devices::start_device_watcher},
-};
+use crate::{constants, dto::app::AppEnvironment, logic::devices::start_device_watcher};
 use tauri_plugin_log::log::info;
 
 #[traced_command]

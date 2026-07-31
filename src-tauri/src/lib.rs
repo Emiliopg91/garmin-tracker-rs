@@ -1,8 +1,9 @@
 mod constants;
 mod dao;
+mod dto;
+mod logic;
 mod mtp;
 mod parser;
-mod ui;
 
 use std::process::exit;
 
@@ -14,7 +15,7 @@ use tauri_plugin_log::{
     log::{LevelFilter, debug, error, info},
 };
 
-use crate::ui::{
+use crate::logic::{
     app::{get_environment, notify_frontend_ready},
     exercises::{get_exercise_details, get_exercises},
     sessions::{get_session_details, get_sessions, import_from_device, save_session_changes},

@@ -1,5 +1,3 @@
-pub mod models;
-
 use garmin_tracker_rs_macros::translate;
 use nusb::hotplug::HotplugEvent;
 use rusqlite_orm::dao::Entity;
@@ -11,15 +9,12 @@ use tauri_plugin_log::log::{error, info, warn};
 
 use crate::{
     dao::device::Device,
-    mtp::MTP_CLIENT_INST,
-    ui::{
-        devices::models::DeviceListItem,
-        notifications::{
-            models::{NotificationDefinition, NotificationKind},
-            show_notification,
-        },
-        sessions::_import_from_device,
+    dto::{
+        devices::DeviceListItem,
+        notifications::{NotificationDefinition, NotificationKind},
     },
+    logic::{notifications::show_notification, sessions::_import_from_device},
+    mtp::MTP_CLIENT_INST,
 };
 
 static DEVICE_WATCHER: LazyLock<Mutex<Option<JoinHandle<()>>>> = LazyLock::new(|| Mutex::new(None));

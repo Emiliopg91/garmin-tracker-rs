@@ -1,12 +1,10 @@
-pub mod models;
-
 use std::process::Command;
 
 use tauri_plugin_log::log::error;
 
 use crate::{
     constants::{APP_TITLE, ICON_PATH},
-    ui::notifications::models::NotificationDefinition,
+    dto::notifications::NotificationDefinition,
 };
 
 pub fn show_notification(notification: NotificationDefinition) {

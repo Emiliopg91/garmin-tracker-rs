@@ -1,4 +1,3 @@
-pub mod models;
 use std::{collections::HashSet, path::Path};
 
 use chrono::{Datelike, Local, TimeZone, Timelike};
@@ -10,24 +9,20 @@ use rusqlite_orm::{
 use tauri_plugin_log::log::{error, info, warn};
 
 use crate::{
-    ui::{
-        notifications::{
-            models::{NotificationDefinition, NotificationKind},
-            show_notification,
-        },
-        sessions::models::{SessionDetails, SessionListItem, SessionSeriesUpdate},
+    dao::{
+        device::Device,
+        exercise::{self, Exercise},
+        heart_rate::HeartRate,
+        serie::Serie,
+        session::Session,
     },
-    {
-        dao::{
-            device::Device,
-            exercise::{self, Exercise},
-            heart_rate::HeartRate,
-            serie::Serie,
-            session::Session,
-        },
-        mtp::MTP_CLIENT_INST,
-        parser::load_from_file,
+    dto::{
+        notifications::{NotificationDefinition, NotificationKind},
+        sessions::{SessionDetails, SessionListItem, SessionSeriesUpdate},
     },
+    logic::notifications::show_notification,
+    mtp::MTP_CLIENT_INST,
+    parser::load_from_file,
 };
 
 #[traced_command]

@@ -1,5 +1,3 @@
-pub mod models;
-
 use std::collections::HashMap;
 
 use garmin_tracker_rs_macros::{traced_command, translate};
@@ -7,13 +5,11 @@ use tauri_plugin_log::log::{error, info};
 
 use crate::{
     dao::session::Session,
-    ui::{
-        notifications::{
-            models::{NotificationDefinition, NotificationKind},
-            show_notification,
-        },
-        workouts::models::{WorkoutDetails, WorkoutListItem, WorkoutSession},
+    dto::{
+        notifications::{NotificationDefinition, NotificationKind},
+        workouts::{WorkoutDetails, WorkoutListItem, WorkoutSession},
     },
+    logic::notifications::show_notification,
 };
 
 #[traced_command]

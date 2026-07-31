@@ -19,7 +19,6 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 [build-dependencies]
 tauri-build = { version = "^2", features = [] }
 serde_yaml = "^0"
-phf_codegen = "^0"
 syn = { version = "^2", features = ["visit"] }
 swc_ecma_ast = "^26"
 swc_ecma_parser = "^42"
@@ -35,7 +34,6 @@ garmin-tracker-rs-macros = { path = "../src-tauri-macros" }
 indexmap = { version = "^2", features = ["serde"] }
 mtp-rs = "^0"
 nusb = "^0"
-phf = { version = "^0", features = ["macros"] }
 #rusqlite_orm = { path = "../rusqlite_orm/orm" }
 rusqlite_orm = "^0"
 #rusqlite_orm_macros = { path = "../rusqlite_orm/macros" }

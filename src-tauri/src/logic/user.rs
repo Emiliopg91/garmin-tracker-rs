@@ -4,16 +4,12 @@ use tauri_plugin_log::log::{error, info};
 
 use crate::{
     dao::user::{self, User},
-    ui::{
-        notifications::{
-            models::{NotificationDefinition, NotificationKind},
-            show_notification,
-        },
-        user::models::UserListItem,
+    dto::{
+        notifications::{NotificationDefinition, NotificationKind},
+        user::UserListItem,
     },
+    logic::notifications::show_notification,
 };
-
-pub mod models;
 
 #[traced_command]
 #[tauri::command]

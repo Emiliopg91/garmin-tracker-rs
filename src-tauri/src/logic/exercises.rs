@@ -1,5 +1,3 @@
-pub mod models;
-
 use garmin_tracker_rs_macros::{traced_command, translate};
 use rusqlite_orm::dao::{Entity, helpers::types::order_by::OrderBy};
 use tauri_plugin_log::log::{error, info};
@@ -10,14 +8,12 @@ use crate::{
         serie::{self, Serie},
         session::Session,
     },
-    ui::{
-        exercises::models::{ExerciseDetails, ExerciseListItem},
-        notifications::{
-            models::{NotificationDefinition, NotificationKind},
-            show_notification,
-        },
-        sessions::models::SessionSerie,
+    dto::{
+        exercises::{ExerciseDetails, ExerciseListItem},
+        notifications::{NotificationDefinition, NotificationKind},
+        sessions::SessionSerie,
     },
+    logic::notifications::show_notification,
 };
 
 #[traced_command]
