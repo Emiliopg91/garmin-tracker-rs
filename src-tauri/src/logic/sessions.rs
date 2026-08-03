@@ -3,18 +3,18 @@ use std::{collections::HashSet, path::Path};
 use chrono::{Datelike, Local, TimeZone, Timelike};
 use garmin_tracker_rs_macros::{traced_command, translate};
 use rusqlite_orm::{
-    dao::{Entity, helpers::types::order_by::OrderBy},
+    dao::{Repository, helpers::types::order_by::OrderBy},
     database::DATABASE_INST,
 };
 use tauri_plugin_log::log::{error, info, warn};
 
 use crate::{
     dao::{
-        device::Device,
-        exercise::{self, Exercise},
-        heart_rate::HeartRate,
-        serie::Serie,
-        session::Session,
+        device::DeviceRepository,
+        exercise::{self, ExerciseRepository},
+        heart_rate::HeartRateRepository,
+        serie::{Serie, SerieRepository},
+        session::{Session, SessionRepository},
     },
     dto::{
         notifications::{NotificationDefinition, NotificationKind},
@@ -101,15 +101,15 @@ pub fn save_session_changes(details: SessionSeriesUpdate) -> Result<(), String> 
     let res: Result<(), String> = {
         let mut to_update = Vec::new();
         for serie in details.series {
-            let db_serie =
-                Serie::select_by_id(details.timestamp, serie.idx).map_err(|e| e.to_string())?;
+            let db_serie = SerieRepository::select_by_id(details.timestamp, serie.idx)
+                .map_err(|e| e.to_string())?;
             if let Some(mut db_serie) = db_serie {
                 db_serie.reps = serie.reps;
                 db_serie.weight = serie.weight;
                 to_update.push(db_serie);
             }
         }
-        let exercises = Exercise::select()
+        let exercises = ExerciseRepository::select()
             .order_by(OrderBy::Asc(exercise::entity::columns::NAME))
             .fetch()
             .map_err(|e| e.to_string())?;
@@ -163,7 +163,7 @@ pub async fn _import_from_device(serial: &str) -> Result<u16, String> {
     let mut latest_date = "2026-06-08-00-00-00".to_string();
     let mut device = None;
 
-    if let Ok(dev) = Device::select_by_id(serial)
+    if let Ok(dev) = DeviceRepository::select_by_id(serial)
         && let Some(dev) = dev
     {
         device = Some(dev.clone());
@@ -220,15 +220,17 @@ where
             Ok(session) => {
                 let mut db = DATABASE_INST.lock().unwrap();
                 let imp_res = db.run_in_tx(|tx| {
-                    if Session::exists_in_tx(tx, session.date)? {
+                    if SessionRepository::exists_in_tx(tx, session.date)? {
                         let msg =
                             format!("Session with date {} already exists", session.format_date());
                         warn!("{}", msg);
                         Ok(false)
                     } else {
-                        Session::insert().item(session.clone()).execute_in_tx(tx)?;
+                        SessionRepository::insert()
+                            .item(session.clone())
+                            .execute_in_tx(tx)?;
 
-                        let mut insert = Exercise::insert().or_ignore(true);
+                        let mut insert = ExerciseRepository::insert().or_ignore(true);
                         let mut seen = HashSet::new();
                         for exercise in session.series.iter().map(|e| e.0) {
                             if seen.insert(exercise.clone()) {
@@ -239,7 +241,7 @@ where
                             insert.execute_in_tx(tx)?;
                         }
 
-                        let mut insert = Serie::insert();
+                        let mut insert = SerieRepository::insert();
                         let mut count = 0;
                         for series in session.series.iter().map(|e| e.1) {
                             for serie in series {
@@ -251,7 +253,7 @@ where
                             insert.execute_in_tx(tx)?;
                         }
 
-                        let mut insert = HeartRate::insert();
+                        let mut insert = HeartRateRepository::insert();
                         for hr in &session.heart_rates {
                             insert = insert.item(hr.clone());
                         }

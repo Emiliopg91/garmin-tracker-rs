@@ -1,9 +1,9 @@
 use garmin_tracker_rs_macros::{traced_command, translate};
-use rusqlite_orm::dao::{Entity, helpers::types::order_by::OrderBy};
+use rusqlite_orm::dao::{Repository, helpers::types::order_by::OrderBy};
 use tauri_plugin_log::log::{error, info};
 
 use crate::{
-    dao::user::{self, User},
+    dao::user::{self, User, UserRepository},
     dto::{
         notifications::{NotificationDefinition, NotificationKind},
         user::UserListItem,
@@ -16,7 +16,7 @@ use crate::{
 pub fn get_user_measures() -> Result<Vec<UserListItem>, String> {
     info!("Getting user measures list...");
 
-    match User::select()
+    match UserRepository::select()
         .order_by(OrderBy::Desc(user::entity::columns::DATE))
         .fetch()
         .map_err(|e| e.to_string())
@@ -48,7 +48,7 @@ pub fn add_user_measures(measures: UserListItem) -> Result<(), String> {
     info!("Adding user measures list...");
 
     let res = match User::try_from(&measures).map_err(|e| e.to_string()) {
-        Ok(entry) => User::insert()
+        Ok(entry) => UserRepository::insert()
             .item(entry)
             .execute()
             .map_err(|e| e.to_string()),

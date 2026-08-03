@@ -4,14 +4,14 @@ use chrono::{Datelike, Local, TimeZone, Timelike};
 use indexmap::IndexMap;
 use rusqlite_orm::{
     dao::{
-        Entity,
+        Repository,
         helpers::types::{order_by::OrderBy, value::Value, where_clause::Where},
     },
     rusqlite,
 };
 use rusqlite_orm_macros::Entity;
 
-use crate::dao::exercise;
+use crate::dao::exercise::{self, ExerciseRepository};
 
 use super::exercise::Exercise;
 
@@ -52,7 +52,7 @@ impl Serie {
         &self,
         tx: &rusqlite::Transaction,
     ) -> rusqlite_orm::database::errors::Result<usize> {
-        Serie::update()
+        SerieRepository::update()
             .set(entity::columns::REPS, self.reps.into())
             .set(entity::columns::WEIGHT, self.weight.into())
             .where_(Where::And(vec![
@@ -63,7 +63,7 @@ impl Serie {
     }
 
     pub fn update_pr(tx: &rusqlite::Transaction, category: &str, id: u16) {
-        if let Ok(new_prs) = Serie::select_by_ex_cat_and_ex_id_in_tx(
+        if let Ok(new_prs) = SerieRepository::select_by_ex_cat_and_ex_id_in_tx(
             tx,
             category,
             id,
@@ -73,7 +73,7 @@ impl Serie {
                 OrderBy::Asc(entity::columns::SESSION),
             ]),
         ) {
-            let _ = Serie::update()
+            let _ = SerieRepository::update()
                 .set(entity::columns::PR, false.into())
                 .where_(Where::And(vec![
                     Where::Eq(entity::columns::EX_CAT, category.to_string().into()),
@@ -91,8 +91,10 @@ impl Serie {
     pub fn load_for_session(
         session: i64,
     ) -> rusqlite_orm::database::errors::Result<IndexMap<Exercise, Vec<Serie>>> {
-        let tuple_rows =
-            Serie::select_by_session(session, Some(&[OrderBy::Asc(entity::columns::IDX)]))?;
+        let tuple_rows = SerieRepository::select_by_session(
+            session,
+            Some(&[OrderBy::Asc(entity::columns::IDX)]),
+        )?;
 
         let condition_set: HashSet<(_, _)> = tuple_rows
             .iter()
@@ -104,7 +106,7 @@ impl Serie {
             .map(|(cat, id)| vec![cat.into(), id.into()])
             .collect::<Vec<Vec<Value>>>();
 
-        let exercises = Exercise::select()
+        let exercises = ExerciseRepository::select()
             .where_(Where::InMultiple(
                 vec![
                     exercise::entity::columns::CATEGORY,
@@ -133,7 +135,7 @@ impl Serie {
     pub fn get_pr_for_exercise(
         exercise: &Exercise,
     ) -> rusqlite_orm::database::errors::Result<Serie> {
-        Ok(Serie::select()
+        Ok(SerieRepository::select()
             .where_(Where::And(vec![
                 Where::Eq(entity::columns::EX_CAT, exercise.category.clone().into()),
                 Where::Eq(entity::columns::EX_ID, exercise.id.into()),
@@ -145,7 +147,7 @@ impl Serie {
     }
 
     pub fn get_prs() -> rusqlite_orm::database::errors::Result<Vec<Serie>> {
-        Serie::select()
+        SerieRepository::select()
             .where_(Where::Eq(entity::columns::PR, true.into()))
             .fetch()
     }

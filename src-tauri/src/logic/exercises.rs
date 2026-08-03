@@ -1,11 +1,11 @@
 use garmin_tracker_rs_macros::{traced_command, translate};
-use rusqlite_orm::dao::{Entity, helpers::types::order_by::OrderBy};
+use rusqlite_orm::dao::{Repository, helpers::types::order_by::OrderBy};
 use tauri_plugin_log::log::{error, info};
 
 use crate::{
     dao::{
-        exercise::{self, Exercise},
-        serie::{self, Serie},
+        exercise::{self, ExerciseRepository},
+        serie::{self, Serie, SerieRepository},
         session::Session,
     },
     dto::{
@@ -23,7 +23,7 @@ pub fn get_exercises() -> Result<Vec<ExerciseListItem>, String> {
     let res: Result<Vec<ExerciseListItem>, String> = {
         let mut result = Vec::new();
 
-        let exercises = Exercise::select()
+        let exercises = ExerciseRepository::select()
             .order_by(OrderBy::Asc(exercise::entity::columns::NAME))
             .fetch()
             .map_err(|e| e.to_string())?;
@@ -75,7 +75,9 @@ pub fn get_exercise_details(category: &str, id: u16) -> Result<ExerciseDetails, 
         category, id
     );
     let res = {
-        if let Some(exercise) = Exercise::select_by_id(category, id).map_err(|e| e.to_string())? {
+        if let Some(exercise) =
+            ExerciseRepository::select_by_id(category, id).map_err(|e| e.to_string())?
+        {
             let mut res = ExerciseDetails::from(&exercise);
 
             let pr = Serie::get_pr_for_exercise(&exercise).map_err(|e| e.to_string())?;
@@ -84,7 +86,7 @@ pub fn get_exercise_details(category: &str, id: u16) -> Result<ExerciseDetails, 
             res.rm = pr.get_1rm_estimation();
             res.pr_date = pr.format_date();
 
-            let series = Serie::select_by_ex_cat_and_ex_id(
+            let series = SerieRepository::select_by_ex_cat_and_ex_id(
                 category,
                 id,
                 Some(&[OrderBy::Desc(serie::entity::columns::SESSION)]),

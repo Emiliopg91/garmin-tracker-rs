@@ -1,6 +1,6 @@
 use garmin_tracker_rs_macros::translate;
 use nusb::hotplug::HotplugEvent;
-use rusqlite_orm::dao::Entity;
+use rusqlite_orm::dao::Repository;
 use std::sync::{LazyLock, Mutex};
 use tokio_stream::StreamExt;
 
@@ -8,7 +8,7 @@ use tauri::{AppHandle, Emitter, async_runtime::JoinHandle};
 use tauri_plugin_log::log::{error, info, warn};
 
 use crate::{
-    dao::device::Device,
+    dao::device::{Device, DeviceRepository},
     dto::{
         devices::DeviceListItem,
         notifications::{NotificationDefinition, NotificationKind},
@@ -66,8 +66,10 @@ async fn mtp_dev_check_and_sync(app: AppHandle, devices: &mut Vec<DeviceListItem
             {
                 devices.push(device.clone());
 
-                if let Ok(None) = Device::select_by_id(&device.serial_number) {
-                    let _ = Device::insert().item(Device::from(device)).execute();
+                if let Ok(None) = DeviceRepository::select_by_id(&device.serial_number) {
+                    let _ = DeviceRepository::insert()
+                        .item(Device::from(device))
+                        .execute();
                 }
 
                 let payload: DeviceListItem = device.clone();

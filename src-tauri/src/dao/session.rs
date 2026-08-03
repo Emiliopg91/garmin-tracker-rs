@@ -1,9 +1,9 @@
 use chrono::{Datelike, Local, TimeZone, Timelike};
 use indexmap::IndexMap;
-use rusqlite_orm::dao::{Entity, helpers::types::order_by::OrderBy};
+use rusqlite_orm::dao::{Repository, helpers::types::order_by::OrderBy};
 use rusqlite_orm_macros::Entity;
 
-use crate::dao::heart_rate::{self, HeartRate};
+use crate::dao::heart_rate::{self, HeartRate, HeartRateRepository};
 
 use super::{exercise::Exercise, serie::Serie};
 
@@ -28,10 +28,10 @@ pub struct Session {
 
     pub sub_sport: String,
 
-    #[dont_map]
+    #[trasient]
     pub series: IndexMap<Exercise, Vec<Serie>>,
 
-    #[dont_map]
+    #[trasient]
     pub heart_rates: Vec<HeartRate>,
 }
 impl Session {
@@ -91,7 +91,7 @@ impl Session {
         timestamp: i64,
         with_details: bool,
     ) -> rusqlite_orm::database::errors::Result<Option<Session>> {
-        let opt_sess = Session::select_by_id(timestamp)?;
+        let opt_sess = SessionRepository::select_by_id(timestamp)?;
 
         Ok(match opt_sess {
             Some(mut session) => {
@@ -102,7 +102,7 @@ impl Session {
                         IndexMap::new()
                     };
 
-                    session.heart_rates = HeartRate::select_by_session(
+                    session.heart_rates = HeartRateRepository::select_by_session(
                         session.date,
                         Some(&[OrderBy::Asc(heart_rate::entity::columns::IDX)]),
                     )?;
@@ -114,8 +114,10 @@ impl Session {
     }
 
     pub fn find_by_workout(workout: &str) -> rusqlite_orm::database::errors::Result<Vec<Session>> {
-        let mut res =
-            Session::select_by_workout(workout, Some(&[OrderBy::Desc(entity::columns::DATE)]))?;
+        let mut res = SessionRepository::select_by_workout(
+            workout,
+            Some(&[OrderBy::Desc(entity::columns::DATE)]),
+        )?;
 
         for r in &mut res {
             r.series = Serie::load_for_session(r.date)?;
@@ -125,7 +127,7 @@ impl Session {
     }
 
     pub fn load_from_db(with_series: bool) -> rusqlite_orm::database::errors::Result<Vec<Session>> {
-        let mut res = Session::select()
+        let mut res = SessionRepository::select()
             .order_by(OrderBy::Desc(entity::columns::DATE))
             .fetch()?;
 

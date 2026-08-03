@@ -1,6 +1,6 @@
 use rusqlite_orm_macros::Entity;
 
-#[derive(Entity, Clone)]
+#[derive(Entity, Clone, Default)]
 #[entity(table = "heart_rate")]
 #[indexes((session))]
 pub struct HeartRate {
