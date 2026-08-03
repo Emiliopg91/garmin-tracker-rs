@@ -1,4 +1,3 @@
-
 use rusqlite_orm_macros::Entity;
 
 use crate::dao::exercise::{self};
