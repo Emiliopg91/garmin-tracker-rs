@@ -187,3 +187,6 @@ error_persisting_session:
 error_parsing_session:
   en: "Error parsing session file: {}"
   es: "Error leyendo archivo de sesión: {}"
+imported_from:
+  en: Imported from
+  es: Importado desde

@@ -74,6 +74,7 @@ where
         training_load,
         sub_sport,
         heart_rates,
+        ..Default::default()
     })
 }
 

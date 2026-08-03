@@ -2,8 +2,8 @@
 
 // From src-tauri/src/dto/app.rs:4
 export enum AppEnvironment {
-  Debug = "Debug",
-  Release = "Release",
+	Debug = "Debug",
+	Release = "Release",
 }
 
 // From src-tauri/src/dto/devices.rs:7
@@ -42,6 +42,7 @@ export interface SessionDetails {
   active_time: string;
   avg_heart_rate: number;
   date: string;
+  device: string | null;
   exercises: string[];
   heart_rates: number[];
   max_heart_rate: number;
@@ -73,7 +74,7 @@ export interface SessionSerie {
   weight: number;
 }
 
-// From src-tauri/src/dto/sessions.rs:123
+// From src-tauri/src/dto/sessions.rs:131
 export interface SessionSeriesUpdate {
   series: SessionSerie[];
   timestamp: string;
@@ -113,3 +114,4 @@ export interface WorkoutSession {
   vol_diff: string;
   volume: number;
 }
+

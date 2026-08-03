@@ -83,6 +83,8 @@ pub struct SessionDetails {
     pub exercises: Vec<String>,
     pub series: HashMap<String, Vec<SessionSerie>>,
     pub heart_rates: Vec<u8>,
+
+    pub device: Option<String>,
 }
 
 impl From<(&Session, &IndexMap<Exercise, Vec<Serie>>)> for SessionDetails {
@@ -100,6 +102,11 @@ impl From<(&Session, &IndexMap<Exercise, Vec<Serie>>)> for SessionDetails {
             }
         }
 
+        let device = match &value.0.device_obj {
+            Some(dev) => Some(format!("Garmin {}", dev.model)),
+            None => None,
+        };
+
         Self {
             name: value.0.workout.clone(),
             date: DateTimeUtils::format_time_date(value.0.date),
@@ -115,6 +122,7 @@ impl From<(&Session, &IndexMap<Exercise, Vec<Serie>>)> for SessionDetails {
             exercises,
             series: series_d,
             heart_rates: value.0.heart_rates.iter().map(|hr| hr.hr).collect(),
+            device,
         }
     }
 }

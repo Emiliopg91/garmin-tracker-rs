@@ -223,6 +223,12 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                   <td>{getVolume()} Kg</td>
                 </tr>
               )}
+              {localSession.device && (
+                <tr>
+                  <td>{translate("imported_from")}:</td>
+                  <td>{localSession.device}</td>
+                </tr>
+              )}
             </tbody>
           </table>
           {session.sub_sport == "strength_training" &&

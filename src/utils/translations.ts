@@ -15,6 +15,7 @@ export const TRANSLATIONS: Record<string, string> = {
 	"heart_rate": "Frecuencia cardíaca",
 	"import_from_device": "Desde {}",
 	"import_sessions": "Importar sesiones",
+	"imported_from": "Importado desde",
 	"latest_session": "Última sesión",
 	"lean_mass": "Masa magra",
 	"loading": "Cargando...",

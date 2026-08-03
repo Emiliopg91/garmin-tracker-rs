@@ -17,7 +17,7 @@ use tauri_plugin_log::log::{error, info, warn};
 
 use crate::{
     dao::{
-        device::DeviceRepository,
+        device::{Device, DeviceRepository},
         exercise::{self, Exercise, ExerciseRepository},
         heart_rate::HeartRateRepository,
         serie::{self, Serie, SerieRepository, entity},
@@ -88,6 +88,11 @@ pub fn get_session_details(timestamp: i64) -> Result<SessionDetails, String> {
             session
                 .fetch_heart_rates_relationship()
                 .map_err(|e| e.to_string())?;
+            if session.device.is_some() {
+                session
+                    .fetch_device_obj_relationship()
+                    .map_err(|e| e.to_string())?;
+            }
 
             let condition_set: HashSet<(_, _)> = session
                 .series
@@ -250,7 +255,7 @@ pub async fn _import_from_device(serial: &str) -> Result<u16, String> {
 
     let res = if !activities.is_empty() {
         info!("Fetched {} activity files", activities.len());
-        import_file_list(&activities)
+        import_file_list(&activities, &device)
     } else {
         Ok(0)
     };
@@ -261,7 +266,7 @@ pub async fn _import_from_device(serial: &str) -> Result<u16, String> {
     res
 }
 
-fn import_file_list<F>(files: &[F]) -> Result<u16, String>
+fn import_file_list<F>(files: &[F], device: &Device) -> Result<u16, String>
 where
     F: AsRef<Path>,
 {
@@ -271,7 +276,7 @@ where
     for file in files {
         info!("Importing file {}", file.as_ref().display());
         let res = match load_from_file(file.as_ref()) {
-            Ok(session) => {
+            Ok(mut session) => {
                 let mut db = DATABASE_INST.lock().unwrap();
                 let imp_res = db.run_in_tx(|tx| {
                     if SessionRepository::exists_in_tx(tx, session.date)? {
@@ -282,6 +287,7 @@ where
                         warn!("{}", msg);
                         Ok(false)
                     } else {
+                        session.device = Some(device.serial.to_string());
                         SessionRepository::insert()
                             .item(session.clone())
                             .execute_in_tx(tx)?;
