@@ -1,9 +1,10 @@
 use std::{collections::HashMap, hash::Hash};
 
+use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    dao::{serie::Serie, session::Session},
+    dao::{exercise::Exercise, serie::Serie, session::Session},
     utils::date_time_utils::DateTimeUtils,
 };
 
@@ -84,12 +85,12 @@ pub struct SessionDetails {
     pub heart_rates: Vec<u8>,
 }
 
-impl From<&Session> for SessionDetails {
-    fn from(value: &Session) -> Self {
+impl From<(&Session, &IndexMap<Exercise, Vec<Serie>>)> for SessionDetails {
+    fn from(value: (&Session, &IndexMap<Exercise, Vec<Serie>>)) -> Self {
         let mut exercises = Vec::new();
         let mut series_d = HashMap::<String, Vec<SessionSerie>>::new();
 
-        for (exercise, series) in &value.series {
+        for (exercise, series) in value.1 {
             if !exercises.contains(&exercise.name) {
                 exercises.push(exercise.name.clone())
             }
@@ -100,20 +101,20 @@ impl From<&Session> for SessionDetails {
         }
 
         Self {
-            name: value.workout.clone(),
-            date: DateTimeUtils::format_time_date(value.date),
-            timestamp: value.date,
-            active_time: DateTimeUtils::format_duration(value.active_time as u64),
-            avg_heart_rate: value.avg_heart_rate,
-            max_heart_rate: value.max_heart_rate,
-            metabolic_calories: value.metabolic_calories,
-            total_calories: value.total_calories,
-            total_elapsed_time: DateTimeUtils::format_duration(value.total_elapsed_time as u64),
-            training_load: value.training_load.round() as u16,
-            sub_sport: value.sub_sport.clone(),
+            name: value.0.workout.clone(),
+            date: DateTimeUtils::format_time_date(value.0.date),
+            timestamp: value.0.date,
+            active_time: DateTimeUtils::format_duration(value.0.active_time as u64),
+            avg_heart_rate: value.0.avg_heart_rate,
+            max_heart_rate: value.0.max_heart_rate,
+            metabolic_calories: value.0.metabolic_calories,
+            total_calories: value.0.total_calories,
+            total_elapsed_time: DateTimeUtils::format_duration(value.0.total_elapsed_time as u64),
+            training_load: value.0.training_load.round() as u16,
+            sub_sport: value.0.sub_sport.clone(),
             exercises,
             series: series_d,
-            heart_rates: value.heart_rates.iter().map(|hr| hr.hr).collect(),
+            heart_rates: value.0.heart_rates.iter().map(|hr| hr.hr).collect(),
         }
     }
 }

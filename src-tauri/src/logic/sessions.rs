@@ -1,11 +1,15 @@
-use std::{collections::HashSet, path::Path};
+use std::{
+    collections::{HashMap, HashSet},
+    path::Path,
+};
 
 use chrono::{Datelike, Local, TimeZone, Timelike};
 use garmin_tracker_rs_macros::{traced_command, translate};
+use indexmap::IndexMap;
 use rusqlite_orm::{
     dao::{
         Repository,
-        helpers::types::{order_by::OrderBy, where_clause::Where},
+        helpers::types::{order_by::OrderBy, value::Value, where_clause::Where},
     },
     database::DATABASE_INST,
 };
@@ -14,10 +18,10 @@ use tauri_plugin_log::log::{error, info, warn};
 use crate::{
     dao::{
         device::DeviceRepository,
-        exercise::{self, ExerciseRepository},
+        exercise::{self, Exercise, ExerciseRepository},
         heart_rate::HeartRateRepository,
-        serie::{SerieRepository, entity},
-        session::{Session, SessionRepository},
+        serie::{self, Serie, SerieRepository, entity},
+        session::{self, SessionRepository},
     },
     dto::{
         notifications::{NotificationDefinition, NotificationKind},
@@ -34,7 +38,16 @@ use crate::{
 pub fn get_sessions() -> Result<Vec<SessionListItem>, String> {
     info!("Getting sessions list...");
     let res: Result<Vec<SessionListItem>, String> = {
-        let sessions = Session::load_from_db(true).map_err(|e| e.to_string())?;
+        let mut sessions = SessionRepository::select()
+            .order_by(OrderBy::Desc(session::entity::columns::DATE))
+            .fetch()
+            .map_err(|e| e.to_string())?;
+
+        for session in &mut sessions {
+            session
+                .fetch_series_relationship()
+                .map_err(|e| e.to_string())?;
+        }
 
         Ok(sessions
             .into_iter()
@@ -67,9 +80,50 @@ pub fn get_session_details(timestamp: i64) -> Result<SessionDetails, String> {
         Local.timestamp_opt(timestamp, 0).unwrap().to_rfc3339()
     );
 
-    match Session::find_by_id(timestamp, true).map_err(|e| e.to_string()) {
-        Ok(Some(l)) => {
-            let details = SessionDetails::from(&l);
+    match SessionRepository::select_by_id(timestamp).map_err(|e| e.to_string()) {
+        Ok(Some(mut session)) => {
+            session
+                .fetch_series_relationship()
+                .map_err(|e| e.to_string())?;
+            session
+                .fetch_heart_rates_relationship()
+                .map_err(|e| e.to_string())?;
+
+            let condition_set: HashSet<(_, _)> = session
+                .series
+                .iter()
+                .map(|r| (r.ex_cat.clone(), r.ex_id))
+                .collect();
+
+            let in_conditions = condition_set
+                .into_iter()
+                .map(|(cat, id)| vec![cat.into(), id.into()])
+                .collect::<Vec<Vec<Value>>>();
+
+            let exercises = ExerciseRepository::select()
+                .where_(Where::InMultiple(
+                    vec![
+                        exercise::entity::columns::CATEGORY,
+                        exercise::entity::columns::ID,
+                    ],
+                    in_conditions,
+                ))
+                .fetch()
+                .map_err(|e| e.to_string())?;
+
+            let exercise_by_key: HashMap<(_, _), &Exercise> = exercises
+                .iter()
+                .map(|e| ((e.category.clone(), e.id), e))
+                .collect();
+
+            let mut res: IndexMap<Exercise, Vec<Serie>> = IndexMap::with_capacity(exercises.len());
+            for r in &session.series {
+                if let Some(&ex) = exercise_by_key.get(&(r.ex_cat.clone(), r.ex_id)) {
+                    res.entry(ex.clone()).or_default().push(r.clone());
+                }
+            }
+
+            let details = SessionDetails::from((&session, &res));
             info!(
                 "Found details for session {} - {}",
                 details.name, details.date
@@ -113,10 +167,6 @@ pub fn save_session_changes(details: SessionSeriesUpdate) -> Result<(), String> 
                 to_update.push(db_serie);
             }
         }
-        let exercises = ExerciseRepository::select()
-            .order_by(OrderBy::Asc(exercise::entity::columns::NAME))
-            .fetch()
-            .map_err(|e| e.to_string())?;
 
         let mut db = DATABASE_INST.lock().map_err(|e| e.to_string())?;
         db.run_in_tx(move |tx| {
@@ -130,31 +180,7 @@ pub fn save_session_changes(details: SessionSeriesUpdate) -> Result<(), String> 
                     ]))
                     .execute_in_tx(tx)?;
             }
-            for exer in &exercises {
-                if let Ok(new_prs) = SerieRepository::select_by_ex_cat_and_ex_id_in_tx(
-                    tx,
-                    &exer.category,
-                    exer.id,
-                    Some(&[
-                        OrderBy::Desc(entity::columns::WEIGHT),
-                        OrderBy::Desc(entity::columns::REPS),
-                        OrderBy::Asc(entity::columns::SESSION),
-                    ]),
-                ) {
-                    let _ = SerieRepository::update()
-                        .set(entity::columns::PR, false.into())
-                        .where_(Where::And(vec![
-                            Where::Eq(entity::columns::EX_CAT, exer.category.clone().into()),
-                            Where::Eq(entity::columns::EX_ID, exer.id.into()),
-                        ]))
-                        .execute_in_tx(tx);
-
-                    for mut pr in new_prs {
-                        pr.pr = true;
-                        let _ = pr.update_by_id_in_tx(tx);
-                    }
-                }
-            }
+            update_prs(tx)?;
             Ok(())
         })
         .map_err(|e| e.to_string())?;
@@ -194,24 +220,21 @@ pub async fn import_from_device(serial: &str) -> Result<u16, String> {
 pub async fn _import_from_device(serial: &str) -> Result<u16, String> {
     info!("Starting import from device with S/N {}", serial);
     let mut latest_date = "2026-06-08-00-00-00".to_string();
-    let mut device = None;
+    let mut device = DeviceRepository::select_by_id(serial)
+        .map_err(|e| e.to_string())?
+        .unwrap();
 
-    if let Ok(dev) = DeviceRepository::select_by_id(serial)
-        && let Some(dev) = dev
-    {
-        device = Some(dev.clone());
-        if let Some(latest) = dev.last_sync {
-            let latest = Local.timestamp_opt(latest, 0).unwrap();
-            latest_date = format!(
-                "{:04}-{:02}-{:02}-{:02}-{:02}-{:02}",
-                latest.year(),
-                latest.month(),
-                latest.day(),
-                latest.hour(),
-                latest.minute(),
-                latest.second(),
-            );
-        }
+    if let Some(latest) = device.last_sync {
+        let latest = Local.timestamp_opt(latest, 0).unwrap();
+        latest_date = format!(
+            "{:04}-{:02}-{:02}-{:02}-{:02}-{:02}",
+            latest.year(),
+            latest.month(),
+            latest.day(),
+            latest.hour(),
+            latest.minute(),
+            latest.second(),
+        );
     }
 
     info!(
@@ -232,10 +255,8 @@ pub async fn _import_from_device(serial: &str) -> Result<u16, String> {
         Ok(0)
     };
 
-    if let Some(mut dev) = device {
-        dev.last_sync = Some(Local::now().timestamp());
-        let _ = dev.update_by_id();
-    }
+    device.last_sync = Some(Local::now().timestamp());
+    let _ = device.update_by_id();
 
     res
 }
@@ -267,9 +288,10 @@ where
 
                         let mut insert = ExerciseRepository::insert().or_ignore(true);
                         let mut seen = HashSet::new();
-                        for exercise in session.series.iter().map(|e| e.0) {
+                        for serie in &session.series {
+                            let exercise = serie.exercise.clone().unwrap();
                             if seen.insert(exercise.clone()) {
-                                insert = insert.item(exercise.clone());
+                                insert = insert.item(exercise);
                             }
                         }
                         if !seen.is_empty() {
@@ -278,11 +300,9 @@ where
 
                         let mut insert = SerieRepository::insert();
                         let mut count = 0;
-                        for series in session.series.iter().map(|e| e.1) {
-                            for serie in series {
-                                insert = insert.item(serie.clone());
-                                count += 1;
-                            }
+                        for serie in &session.series {
+                            insert = insert.item(serie.clone());
+                            count += 1;
                         }
                         if count > 0 {
                             insert.execute_in_tx(tx)?;
@@ -293,6 +313,8 @@ where
                             insert = insert.item(hr.clone());
                         }
                         insert.execute_in_tx(tx)?;
+
+                        update_prs(tx)?;
 
                         Ok(true)
                     }
@@ -349,4 +371,44 @@ where
     }
 
     Ok(success)
+}
+
+fn update_prs(
+    tx: &rusqlite_orm::rusqlite::Transaction,
+) -> rusqlite_orm::database::errors::Result<()> {
+    let mut update_conditions = vec![];
+    let exercises = ExerciseRepository::select()
+        .order_by(OrderBy::Asc(exercise::entity::columns::NAME))
+        .fetch_in_tx(tx)?;
+    for exer in &exercises {
+        if let Some(pr) = SerieRepository::select_by_ex_cat_and_ex_id_in_tx(
+            tx,
+            &exer.category,
+            exer.id,
+            Some(&[
+                OrderBy::Desc(entity::columns::WEIGHT),
+                OrderBy::Desc(entity::columns::REPS),
+                OrderBy::Asc(entity::columns::SESSION),
+            ]),
+        )?
+        .first()
+        {
+            update_conditions.push(vec![pr.session.into(), pr.idx.into()]);
+        }
+    }
+
+    if !update_conditions.is_empty() {
+        SerieRepository::update()
+            .set(serie::entity::columns::PR, false.into())
+            .execute_in_tx(tx)?;
+        SerieRepository::update()
+            .set(serie::entity::columns::PR, true.into())
+            .where_(Where::InMultiple(
+                vec![serie::entity::columns::SESSION, serie::entity::columns::IDX],
+                update_conditions,
+            ))
+            .execute_in_tx(tx)?;
+    }
+
+    Ok(())
 }

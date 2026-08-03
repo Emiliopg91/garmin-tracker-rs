@@ -6,7 +6,6 @@ use std::{
 
 use chrono::{DateTime, Local};
 use fitparser::{FitDataField, FitDataRecord, Value, de::DecodeOption, profile};
-use indexmap::IndexMap;
 
 use crate::dao::{exercise::Exercise, heart_rate::HeartRate, serie::Serie, session::Session};
 
@@ -58,7 +57,7 @@ where
     let series = if sub_sport == "strength_training" {
         get_sets(&entries, &timestamp)?
     } else {
-        IndexMap::new()
+        Vec::new()
     };
     let heart_rates = get_heart_rate(&entries, &timestamp)?;
 
@@ -115,14 +114,11 @@ fn get_workout_name(entries: &[FitDataRecord]) -> errors::Result<String> {
         .map_err(|_| ParseFitFileError::InvalidFieldValue("name".to_string(), "string".to_string()))
 }
 
-fn get_sets(
-    entries: &[FitDataRecord],
-    timestamp: &DateTime<Local>,
-) -> errors::Result<IndexMap<Exercise, Vec<Serie>>> {
+fn get_sets(entries: &[FitDataRecord], timestamp: &DateTime<Local>) -> errors::Result<Vec<Serie>> {
     let exercises = get_exercises(entries)?;
     let steps = get_steps(entries, &exercises)?;
 
-    let mut sets = IndexMap::<Exercise, Vec<Serie>>::new();
+    let mut sets = Vec::new();
 
     let valid_sets = entries
         .iter()
@@ -136,7 +132,7 @@ fn get_sets(
         });
 
     for (idx, (exercise, reps, weight)) in valid_sets.enumerate() {
-        sets.entry(exercise.clone()).or_default().push(Serie {
+        sets.push(Serie {
             session: timestamp.timestamp(),
             idx: idx as u8,
             ex_cat: exercise.category.clone(),
@@ -144,6 +140,7 @@ fn get_sets(
             reps,
             weight,
             pr: false,
+            exercise: Some(exercise),
         });
     }
 
@@ -162,7 +159,7 @@ fn get_heart_rate(
         .cloned()
         .collect::<Vec<FitDataRecord>>();
 
-    entries.iter().for_each(|entry| {
+    entries.iter().step_by(4).for_each(|entry| {
         if let Ok(val) = get_u8("heart_rate", entry.fields()) {
             hrs.push(HeartRate {
                 session: timestamp.timestamp(),

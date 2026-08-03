@@ -1,10 +1,11 @@
-use indexmap::IndexMap;
-use rusqlite_orm::dao::{Repository, helpers::types::order_by::OrderBy};
 use rusqlite_orm_macros::Entity;
 
-use crate::dao::heart_rate::{self, HeartRate, HeartRateRepository};
+use crate::dao::{
+    heart_rate::{self, HeartRate},
+    serie,
+};
 
-use super::{exercise::Exercise, serie::Serie};
+use super::serie::Serie;
 
 #[derive(Default, Entity, Clone)]
 #[indexes((workout))]
@@ -27,79 +28,21 @@ pub struct Session {
 
     pub sub_sport: String,
 
-    #[trasient]
-    pub series: IndexMap<Exercise, Vec<Serie>>,
+    #[relationship((date, serie::entity::columns::SESSION))]
+    pub series: Vec<Serie>,
 
-    #[trasient]
+    #[relationship((date, heart_rate::entity::columns::SESSION))]
     pub heart_rates: Vec<HeartRate>,
 }
+
 impl Session {
     pub fn get_volume(&self) -> f64 {
         let mut volume = 0_f64;
 
-        for (_, series) in &self.series {
-            for serie in series {
-                volume += (serie.reps as f64) * serie.weight
-            }
+        for serie in &self.series {
+            volume += (serie.reps as f64) * serie.weight
         }
 
         volume
-    }
-
-    pub fn find_by_id(
-        timestamp: i64,
-        with_details: bool,
-    ) -> rusqlite_orm::database::errors::Result<Option<Session>> {
-        let opt_sess = SessionRepository::select_by_id(timestamp)?;
-
-        Ok(match opt_sess {
-            Some(mut session) => {
-                if with_details {
-                    session.series = if session.sub_sport == "strength_training" {
-                        Serie::load_for_session(session.date)?
-                    } else {
-                        IndexMap::new()
-                    };
-
-                    session.heart_rates = HeartRateRepository::select_by_session(
-                        session.date,
-                        Some(&[OrderBy::Asc(heart_rate::entity::columns::IDX)]),
-                    )?;
-                }
-                Some(session)
-            }
-            None => None,
-        })
-    }
-
-    pub fn find_by_workout(workout: &str) -> rusqlite_orm::database::errors::Result<Vec<Session>> {
-        let mut res = SessionRepository::select_by_workout(
-            workout,
-            Some(&[OrderBy::Desc(entity::columns::DATE)]),
-        )?;
-
-        for r in &mut res {
-            r.series = Serie::load_for_session(r.date)?;
-        }
-
-        Ok(res)
-    }
-
-    pub fn load_from_db(with_series: bool) -> rusqlite_orm::database::errors::Result<Vec<Session>> {
-        let mut res = SessionRepository::select()
-            .order_by(OrderBy::Desc(entity::columns::DATE))
-            .fetch()?;
-
-        if with_series {
-            for r in &mut res {
-                r.series = if r.sub_sport == "strength_training" {
-                    Serie::load_for_session(r.date)?
-                } else {
-                    IndexMap::new()
-                };
-            }
-        }
-
-        Ok(res)
     }
 }

@@ -9,7 +9,7 @@ use crate::{
     dao::{
         exercise::{self, ExerciseRepository},
         serie::{self, SerieRepository, entity},
-        session::Session,
+        session::SessionRepository,
     },
     dto::{
         exercises::{ExerciseDetails, ExerciseListItem},
@@ -112,7 +112,7 @@ pub fn get_exercise_details(category: &str, id: u16) -> Result<ExerciseDetails, 
             for serie in series {
                 let wk = SessionSerie::from(&serie);
                 if let Some(ses) =
-                    Session::find_by_id(serie.session, false).map_err(|e| e.to_string())?
+                    SessionRepository::select_by_id(serie.session).map_err(|e| e.to_string())?
                 {
                     let ex_str = format!(
                         "{}\n{}",

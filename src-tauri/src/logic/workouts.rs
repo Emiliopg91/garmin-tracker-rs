@@ -1,10 +1,11 @@
 use std::collections::HashMap;
 
 use garmin_tracker_rs_macros::{traced_command, translate};
+use rusqlite_orm::dao::{Repository, helpers::types::order_by::OrderBy};
 use tauri_plugin_log::log::{error, info};
 
 use crate::{
-    dao::session::Session,
+    dao::session::{SessionRepository, entity},
     dto::{
         notifications::{NotificationDefinition, NotificationKind},
         workouts::{WorkoutDetails, WorkoutListItem, WorkoutSession},
@@ -18,7 +19,10 @@ use crate::{
 pub fn get_workout_list() -> Result<Vec<WorkoutListItem>, String> {
     info!("Getting workouts list...");
     let res: Result<Vec<WorkoutListItem>, String> = {
-        let sessions = Session::load_from_db(false).map_err(|e| e.to_string())?;
+        let sessions = SessionRepository::select()
+            .order_by(OrderBy::Desc(entity::columns::DATE))
+            .fetch()
+            .map_err(|e| e.to_string())?;
 
         let mut count = HashMap::new();
         let mut latest = HashMap::new();
@@ -73,7 +77,12 @@ pub fn get_workout_list() -> Result<Vec<WorkoutListItem>, String> {
 pub fn get_workout_details(name: &str) -> Result<WorkoutDetails, String> {
     let res: Result<WorkoutDetails, String> = {
         info!("Getting details for workout {}", name);
-        let sessions = Session::find_by_workout(name).map_err(|e| e.to_string())?;
+
+        let sessions = SessionRepository::select_by_workout(
+            name,
+            Some(&[OrderBy::Desc(entity::columns::DATE)]),
+        )
+        .map_err(|e| e.to_string())?;
 
         let mut latest = sessions.first().unwrap();
         let mut count = 0_u32;
