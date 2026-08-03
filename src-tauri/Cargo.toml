@@ -34,10 +34,10 @@ garmin-tracker-rs-macros = { path = "../src-tauri-macros" }
 indexmap = { version = "^2", features = ["serde"] }
 mtp-rs = "^0"
 nusb = "^0"
-rusqlite_orm = { path = "../rusqlite_orm/orm" }
-#rusqlite_orm = "^0"
-rusqlite_orm_macros = { path = "../rusqlite_orm/macros" }
-#rusqlite_orm_macros = "^0"
+#rusqlite_orm = { path = "../rusqlite_orm/orm" }
+rusqlite_orm = "^0"
+#rusqlite_orm_macros = { path = "../rusqlite_orm/macros" }
+rusqlite_orm_macros = "^0"
 serde = { version = "^1", features = ["derive"] }
 serde_json = "^1"
 tauri = { version = "^2", features = [] }
