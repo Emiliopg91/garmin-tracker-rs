@@ -1,4 +1,3 @@
-use chrono::{Datelike, Local, TimeZone, Timelike};
 use indexmap::IndexMap;
 use rusqlite_orm::dao::{Repository, helpers::types::order_by::OrderBy};
 use rusqlite_orm_macros::Entity;
@@ -35,18 +34,6 @@ pub struct Session {
     pub heart_rates: Vec<HeartRate>,
 }
 impl Session {
-    pub fn format_date(&self) -> String {
-        let timestamp = Local.timestamp_opt(self.date, 0).unwrap();
-        format!(
-            "{:02}:{:02} {:02}/{:02}/{:04}",
-            timestamp.hour(),
-            timestamp.minute(),
-            timestamp.day(),
-            timestamp.month(),
-            timestamp.year()
-        )
-    }
-
     pub fn get_volume(&self) -> f64 {
         let mut volume = 0_f64;
 
@@ -57,34 +44,6 @@ impl Session {
         }
 
         volume
-    }
-
-    pub fn format_total_time(&self) -> String {
-        Self::format_duration(self.total_elapsed_time as u64)
-    }
-
-    pub fn format_active_time(&self) -> String {
-        Self::format_duration(self.active_time as u64)
-    }
-
-    pub fn format_duration(seconds: u64) -> String {
-        let h = seconds / 3600;
-        let m = (seconds % 3600) / 60;
-        let s = seconds % 60;
-
-        let mut res = if h > 0 {
-            format!("{:02}:{:02}:{:02}", h, m, s)
-        } else if m > 0 {
-            format!("{:02}:{:02}", m, s)
-        } else {
-            format!("{s}")
-        };
-
-        while res.starts_with("0") {
-            res.remove(0);
-        }
-
-        res
     }
 
     pub fn find_by_id(

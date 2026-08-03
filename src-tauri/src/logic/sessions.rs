@@ -3,7 +3,10 @@ use std::{collections::HashSet, path::Path};
 use chrono::{Datelike, Local, TimeZone, Timelike};
 use garmin_tracker_rs_macros::{traced_command, translate};
 use rusqlite_orm::{
-    dao::{Repository, helpers::types::order_by::OrderBy},
+    dao::{
+        Repository,
+        helpers::types::{order_by::OrderBy, where_clause::Where},
+    },
     database::DATABASE_INST,
 };
 use tauri_plugin_log::log::{error, info, warn};
@@ -13,7 +16,7 @@ use crate::{
         device::DeviceRepository,
         exercise::{self, ExerciseRepository},
         heart_rate::HeartRateRepository,
-        serie::{Serie, SerieRepository},
+        serie::{SerieRepository, entity},
         session::{Session, SessionRepository},
     },
     dto::{
@@ -23,6 +26,7 @@ use crate::{
     logic::notifications::show_notification,
     mtp::MTP_CLIENT_INST,
     parser::load_from_file,
+    utils::date_time_utils::DateTimeUtils,
 };
 
 #[traced_command]
@@ -117,10 +121,39 @@ pub fn save_session_changes(details: SessionSeriesUpdate) -> Result<(), String> 
         let mut db = DATABASE_INST.lock().map_err(|e| e.to_string())?;
         db.run_in_tx(move |tx| {
             for to_upd in &to_update {
-                to_upd.update_reps_and_weight(tx)?;
+                SerieRepository::update()
+                    .set(entity::columns::REPS, to_upd.reps.into())
+                    .set(entity::columns::WEIGHT, to_upd.weight.into())
+                    .where_(Where::And(vec![
+                        Where::Eq(entity::columns::SESSION, to_upd.session.into()),
+                        Where::Eq(entity::columns::IDX, to_upd.idx.into()),
+                    ]))
+                    .execute_in_tx(tx)?;
             }
             for exer in &exercises {
-                Serie::update_pr(tx, &exer.category, exer.id);
+                if let Ok(new_prs) = SerieRepository::select_by_ex_cat_and_ex_id_in_tx(
+                    tx,
+                    &exer.category,
+                    exer.id,
+                    Some(&[
+                        OrderBy::Desc(entity::columns::WEIGHT),
+                        OrderBy::Desc(entity::columns::REPS),
+                        OrderBy::Asc(entity::columns::SESSION),
+                    ]),
+                ) {
+                    let _ = SerieRepository::update()
+                        .set(entity::columns::PR, false.into())
+                        .where_(Where::And(vec![
+                            Where::Eq(entity::columns::EX_CAT, exer.category.clone().into()),
+                            Where::Eq(entity::columns::EX_ID, exer.id.into()),
+                        ]))
+                        .execute_in_tx(tx);
+
+                    for mut pr in new_prs {
+                        pr.pr = true;
+                        let _ = pr.update_by_id_in_tx(tx);
+                    }
+                }
             }
             Ok(())
         })
@@ -221,8 +254,10 @@ where
                 let mut db = DATABASE_INST.lock().unwrap();
                 let imp_res = db.run_in_tx(|tx| {
                     if SessionRepository::exists_in_tx(tx, session.date)? {
-                        let msg =
-                            format!("Session with date {} already exists", session.format_date());
+                        let msg = format!(
+                            "Session with date {} already exists",
+                            DateTimeUtils::format_time_date(session.date)
+                        );
                         warn!("{}", msg);
                         Ok(false)
                     } else {

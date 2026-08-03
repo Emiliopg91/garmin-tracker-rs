@@ -1,7 +1,7 @@
 use chrono::{DateTime, Local, NaiveDateTime, TimeZone};
 use serde::{Deserialize, Serialize};
 
-use crate::dao::user::User;
+use crate::{dao::user::User, utils::date_time_utils::DateTimeUtils};
 
 #[derive(Serialize, Deserialize)]
 pub struct UserListItem {
@@ -15,7 +15,7 @@ pub struct UserListItem {
 impl From<&User> for UserListItem {
     fn from(value: &User) -> Self {
         Self {
-            date: value.format_date(),
+            date: DateTimeUtils::format_date(value.date),
             weight: value.weight,
             fat_ratio: value.fat_ratio,
             lean_mass: value.lean_mass,

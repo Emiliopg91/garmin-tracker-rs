@@ -1,9 +1,9 @@
-mod constants;
 mod dao;
 mod dto;
 mod logic;
 mod mtp;
 mod parser;
+mod utils;
 
 use std::process::exit;
 
@@ -15,12 +15,15 @@ use tauri_plugin_log::{
     log::{LevelFilter, debug, error, info},
 };
 
-use crate::logic::{
-    app::{get_environment, notify_frontend_ready},
-    exercises::{get_exercise_details, get_exercises},
-    sessions::{get_session_details, get_sessions, import_from_device, save_session_changes},
-    user::{add_user_measures, get_user_measures},
-    workouts::{get_workout_details, get_workout_list},
+use crate::{
+    logic::{
+        app::{get_environment, notify_frontend_ready},
+        exercises::{get_exercise_details, get_exercises},
+        sessions::{get_session_details, get_sessions, import_from_device, save_session_changes},
+        user::{add_user_measures, get_user_measures},
+        workouts::{get_workout_details, get_workout_list},
+    },
+    utils::constants,
 };
 
 #[cfg(debug_assertions)]

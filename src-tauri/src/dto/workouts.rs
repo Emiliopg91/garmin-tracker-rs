@@ -1,6 +1,6 @@
 use serde::Serialize;
 
-use crate::dao::session::Session;
+use crate::{dao::session::Session, utils::date_time_utils::DateTimeUtils};
 
 #[derive(Serialize)]
 pub struct WorkoutListItem {
@@ -21,9 +21,9 @@ pub struct WorkoutSession {
 impl From<&Session> for WorkoutSession {
     fn from(value: &Session) -> Self {
         WorkoutSession {
-            date: value.format_date(),
+            date: DateTimeUtils::format_time_date(value.date),
             volume: value.get_volume(),
-            time: value.format_total_time(),
+            time: DateTimeUtils::format_duration(value.total_elapsed_time as u64),
             vol_diff: "-".to_string(),
         }
     }

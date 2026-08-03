@@ -2,7 +2,10 @@ use std::{collections::HashMap, hash::Hash};
 
 use serde::{Deserialize, Serialize};
 
-use crate::dao::{serie::Serie, session::Session};
+use crate::{
+    dao::{serie::Serie, session::Session},
+    utils::date_time_utils::DateTimeUtils,
+};
 
 #[derive(Serialize, Default)]
 pub struct SessionListItem {
@@ -19,7 +22,7 @@ impl From<&Session> for SessionListItem {
     fn from(value: &Session) -> Self {
         Self {
             name: value.workout.clone(),
-            date: value.format_date(),
+            date: DateTimeUtils::format_time_date(value.date),
             timestamp: value.date,
             active_calories: value.total_calories - value.metabolic_calories,
             volume: value.get_volume(),
@@ -98,14 +101,14 @@ impl From<&Session> for SessionDetails {
 
         Self {
             name: value.workout.clone(),
-            date: value.format_date(),
+            date: DateTimeUtils::format_time_date(value.date),
             timestamp: value.date,
-            active_time: value.format_active_time(),
+            active_time: DateTimeUtils::format_duration(value.active_time as u64),
             avg_heart_rate: value.avg_heart_rate,
             max_heart_rate: value.max_heart_rate,
             metabolic_calories: value.metabolic_calories,
             total_calories: value.total_calories,
-            total_elapsed_time: value.format_total_time(),
+            total_elapsed_time: DateTimeUtils::format_duration(value.total_elapsed_time as u64),
             training_load: value.training_load.round() as u16,
             sub_sport: value.sub_sport.clone(),
             exercises,

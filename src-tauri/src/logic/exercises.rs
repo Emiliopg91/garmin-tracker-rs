@@ -1,11 +1,14 @@
 use garmin_tracker_rs_macros::{traced_command, translate};
-use rusqlite_orm::dao::{Repository, helpers::types::order_by::OrderBy};
+use rusqlite_orm::dao::{
+    Repository,
+    helpers::types::{order_by::OrderBy, where_clause::Where},
+};
 use tauri_plugin_log::log::{error, info};
 
 use crate::{
     dao::{
         exercise::{self, ExerciseRepository},
-        serie::{self, Serie, SerieRepository},
+        serie::{self, SerieRepository, entity},
         session::Session,
     },
     dto::{
@@ -14,6 +17,7 @@ use crate::{
         sessions::SessionSerie,
     },
     logic::notifications::show_notification,
+    utils::date_time_utils::DateTimeUtils,
 };
 
 #[traced_command]
@@ -28,7 +32,10 @@ pub fn get_exercises() -> Result<Vec<ExerciseListItem>, String> {
             .fetch()
             .map_err(|e| e.to_string())?;
 
-        let prs = Serie::get_prs().map_err(|e| e.to_string())?;
+        let prs = SerieRepository::select()
+            .where_(Where::Eq(entity::columns::PR, true.into()))
+            .fetch()
+            .map_err(|e| e.to_string())?;
 
         for exercise in exercises {
             let pr = prs
@@ -43,7 +50,7 @@ pub fn get_exercises() -> Result<Vec<ExerciseListItem>, String> {
                 reps: pr.reps,
                 weight: pr.weight,
                 rm: pr.get_1rm_estimation(),
-                date: pr.format_date(),
+                date: DateTimeUtils::format_time_date(pr.session),
             });
         }
 
@@ -80,11 +87,21 @@ pub fn get_exercise_details(category: &str, id: u16) -> Result<ExerciseDetails, 
         {
             let mut res = ExerciseDetails::from(&exercise);
 
-            let pr = Serie::get_pr_for_exercise(&exercise).map_err(|e| e.to_string())?;
+            let pr = SerieRepository::select()
+                .where_(Where::And(vec![
+                    Where::Eq(entity::columns::EX_CAT, exercise.category.clone().into()),
+                    Where::Eq(entity::columns::EX_ID, exercise.id.into()),
+                    Where::Eq(entity::columns::PR, true.into()),
+                ]))
+                .limit(1)
+                .fetch_one()
+                .map_err(|e| e.to_string())?
+                .unwrap();
+
             res.reps = pr.reps;
             res.weight = pr.weight;
             res.rm = pr.get_1rm_estimation();
-            res.pr_date = pr.format_date();
+            res.pr_date = DateTimeUtils::format_time_date(pr.session);
 
             let series = SerieRepository::select_by_ex_cat_and_ex_id(
                 category,
@@ -97,7 +114,11 @@ pub fn get_exercise_details(category: &str, id: u16) -> Result<ExerciseDetails, 
                 if let Some(ses) =
                     Session::find_by_id(serie.session, false).map_err(|e| e.to_string())?
                 {
-                    let ex_str = format!("{}\n{}", ses.workout, ses.format_date());
+                    let ex_str = format!(
+                        "{}\n{}",
+                        ses.workout,
+                        DateTimeUtils::format_time_date(ses.date)
+                    );
 
                     if !res.workouts.contains(&ex_str) {
                         res.workouts.push(ex_str.clone());
