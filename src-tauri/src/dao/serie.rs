@@ -5,13 +5,8 @@ use crate::dao::exercise::{self};
 use super::exercise::Exercise;
 
 #[derive(Default, Entity, Clone)]
-#[indexes(
-    (session), 
-    (pr), 
-    (ex_cat, ex_id))]
-#[uniques(
-    (ex_cat, ex_id, pr=true)
-)]
+#[indexes((session), (pr), (ex_cat, ex_id))]
+#[uniques((ex_cat, ex_id, pr=true))]
 pub struct Serie {
     #[primary_key]
     pub session: i64,
