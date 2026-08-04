@@ -1,12 +1,12 @@
 node:
-  '@eslint/js': 9.39.5
-  '@tauri-apps/api': 2.11.1
-  '@tauri-apps/cli': 2.11.4
-  '@tauri-apps/plugin-log': 2.9.0
-  '@tauri-apps/plugin-opener': 2.5.4
-  '@types/react': 19.2.18
-  '@types/react-dom': 19.2.4
-  '@vitejs/plugin-react': 4.7.0
+  "@eslint/js": 9.39.5
+  "@tauri-apps/api": 2.11.1
+  "@tauri-apps/cli": 2.11.4
+  "@tauri-apps/plugin-log": 2.9.0
+  "@tauri-apps/plugin-opener": 2.5.4
+  "@types/react": 19.2.18
+  "@types/react-dom": 19.2.4
+  "@vitejs/plugin-react": 4.7.0
   bootstrap: 5.3.8
   eslint: 9.39.5
   eslint-plugin-react: 7.37.5
@@ -27,9 +27,9 @@ rust:
   garmin-tracker-rs-macros: 0.1.0
   indexmap: 2.14.0
   mtp-rs: 0.29.0
-  nusb: 0.2.6
-  rusqlite_orm: 0.2.2
-  rusqlite_orm_macros: 0.2.2
+  nusb: 0.2.7
+  rusqlite_orm: 0.2.3
+  rusqlite_orm_macros: 0.2.3
   serde: 1.0.229
   serde_json: 1.0.151
   serde_yaml: 0.9.34+deprecated
