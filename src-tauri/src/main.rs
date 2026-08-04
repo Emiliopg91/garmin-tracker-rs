@@ -15,6 +15,7 @@ fn main() {
     }
 
     unsafe {
+        std::env::set_var("GDK_BACKEND", "x11");
         std::env::set_var(
             "LOGGER_LEVEL",
             if args.contains(&"-v".to_string()) {
