@@ -28,7 +28,6 @@ walkdir = "^2"
 
 [dependencies]
 chrono = "^0"
-clap = { version = "^4", features = ["derive"] }
 fitparser = "^0"
 garmin-tracker-rs-macros = { path = "../src-tauri-macros" }
 indexmap = { version = "^2", features = ["serde"] }

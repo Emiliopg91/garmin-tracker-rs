@@ -1,11 +1,17 @@
 use std::collections::HashMap;
 
 use garmin_tracker_rs_macros::{traced_command, translate};
-use rusqlite_orm::dao::{Repository, helpers::types::order_by::OrderBy};
+use rusqlite_orm::dao::{
+    Repository,
+    helpers::types::{order_by::OrderBy, value::Value, where_clause::Where},
+};
 use tauri_plugin_log::log::{error, info};
 
 use crate::{
-    dao::session::{SessionRepository, entity},
+    dao::{
+        serie::{self, SerieRepository},
+        session::{SessionRepository, entity},
+    },
     dto::{
         notifications::{NotificationDefinition, NotificationKind},
         workouts::{WorkoutDetails, WorkoutListItem, WorkoutSession},
@@ -24,29 +30,23 @@ pub fn get_workout_list() -> Result<Vec<WorkoutListItem>, String> {
             .fetch()
             .map_err(|e| e.to_string())?;
 
-        let mut count = HashMap::new();
-        let mut latest = HashMap::new();
-        let mut time: HashMap<_, _> = HashMap::new();
+        let mut workout_stats = HashMap::new();
         sessions.iter().for_each(|s| {
-            let entry = count.entry(s.workout.clone()).or_insert(0_u32);
-            *entry += 1_u32;
-
-            let entry = time.entry(s.workout.clone()).or_insert(0_f64);
-            *entry += s.total_elapsed_time;
-
-            let entry = latest.entry(s.workout.clone()).or_insert(s);
-            *entry = if s.date > entry.date { s } else { entry }
+            let entry = workout_stats
+                .entry(s.workout.clone())
+                .or_insert((0_u32, 0_f64, s.date));
+            entry.0 = entry.0 + 1_u32;
+            entry.1 = entry.1 + s.total_elapsed_time;
+            entry.2 = if s.date > entry.2 { s.date } else { entry.2 };
         });
 
-        let mut res = count
-            .keys()
-            .map(|k| WorkoutListItem {
-                name: k.clone(),
-                sessions: *count.get(k).unwrap(),
-                avg_time: DateTimeUtils::format_duration(
-                    (*time.get(k).unwrap() / (*count.get(k).unwrap() as f64)) as u64,
-                ),
-                latest_session: DateTimeUtils::format_time_date(latest.get(k).unwrap().date),
+        let mut res = workout_stats
+            .into_iter()
+            .map(|wd| WorkoutListItem {
+                name: wd.0,
+                sessions: wd.1.0,
+                avg_time: DateTimeUtils::format_duration((wd.1.1 / (wd.1.0 as f64)) as u64),
+                latest_session: DateTimeUtils::format_time_date(wd.1.2),
             })
             .collect::<Vec<_>>();
 
@@ -89,6 +89,17 @@ pub fn get_workout_details(name: &str) -> Result<WorkoutDetails, String> {
         let mut time = 0_f64;
         let mut volume = 0_f64;
 
+        let series = SerieRepository::select()
+            .where_(Where::In(
+                serie::entity::columns::SESSION,
+                sessions
+                    .iter()
+                    .map(|s| s.date.into())
+                    .collect::<Vec<Value>>(),
+            ))
+            .fetch()
+            .map_err(|e| e.to_string())?;
+
         sessions.iter_mut().for_each(|s| {
             if s.date > latest.date {
                 latest = s.clone();
@@ -96,10 +107,16 @@ pub fn get_workout_details(name: &str) -> Result<WorkoutDetails, String> {
             count += 1;
             time += s.total_elapsed_time;
 
-            s.fetch_series_relationship().unwrap();
-            for serie in &s.series {
+            let series = series
+                .iter()
+                .filter(|sr| sr.session == s.date)
+                .cloned()
+                .collect::<Vec<_>>();
+
+            for serie in &series {
                 volume += (serie.reps as f64) * serie.weight
             }
+            s.series = series;
         });
 
         let mut details = WorkoutDetails {

@@ -6,7 +6,7 @@ use std::{
     time::{Duration, SystemTime, UNIX_EPOCH},
 };
 
-use mtp_rs::{MtpDevice, ObjectInfo};
+use mtp_rs::MtpDevice;
 use tauri_plugin_log::log::{debug, info};
 use tokio::sync::Mutex;
 
@@ -93,11 +93,7 @@ impl MtpClient {
                         .map_err(MtpError::ListFiles)?;
 
                     info!("Found {} files", objs.len());
-                    objs = objs
-                        .iter()
-                        .filter(|f| f.filename.split('.').nth(0).unwrap() > date.as_str())
-                        .cloned()
-                        .collect::<Vec<ObjectInfo>>();
+                    objs.retain(|f| f.filename.split('.').nth(0).unwrap() > date.as_str());
 
                     if objs.is_empty() {
                         info!("No pending files to import");

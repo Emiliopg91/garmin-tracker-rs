@@ -43,10 +43,23 @@ pub fn get_sessions() -> Result<Vec<SessionListItem>, String> {
             .fetch()
             .map_err(|e| e.to_string())?;
 
+        let series = SerieRepository::select()
+            .where_(Where::In(
+                serie::entity::columns::SESSION,
+                sessions
+                    .iter()
+                    .map(|s| s.date.into())
+                    .collect::<Vec<Value>>(),
+            ))
+            .fetch()
+            .map_err(|e| e.to_string())?;
+
         for session in &mut sessions {
-            session
-                .fetch_series_relationship()
-                .map_err(|e| e.to_string())?;
+            session.series = series
+                .iter()
+                .filter(|s| s.session == session.date)
+                .cloned()
+                .collect::<Vec<Serie>>()
         }
 
         Ok(sessions

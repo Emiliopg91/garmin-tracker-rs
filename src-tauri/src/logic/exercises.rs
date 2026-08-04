@@ -1,12 +1,17 @@
+use std::collections::{HashMap, HashSet};
+
 use garmin_tracker_rs_macros::{traced_command, translate};
-use rusqlite_orm::dao::{Repository, helpers::types::order_by::OrderBy};
+use rusqlite_orm::dao::{
+    Repository,
+    helpers::types::{order_by::OrderBy, value::Value, where_clause::Where},
+};
 use tauri_plugin_log::log::{error, info};
 
 use crate::{
     dao::{
         exercise::{self, ExerciseRepository},
         serie::{self, SerieRepository},
-        session::SessionRepository,
+        session::{self, SessionRepository},
     },
     dto::{
         exercises::{ExerciseDetails, ExerciseListItem},
@@ -81,42 +86,54 @@ pub fn get_exercise_details(category: &str, id: u16) -> Result<ExerciseDetails, 
         {
             let mut res = ExerciseDetails::from(&exercise);
 
-            let pr = SerieRepository::select_by_ex_cat_and_ex_id_where_pr_eq_true(
-                &exercise.category,
-                exercise.id,
-            )
-            .map_err(|e| e.to_string())?
-            .unwrap();
-
-            res.reps = pr.reps;
-            res.weight = pr.weight;
-            res.rm = get_1rm_estimation(pr.weight, pr.reps as f64);
-            res.pr_date = DateTimeUtils::format_time_date(pr.session);
-
             let series = SerieRepository::select_by_ex_cat_and_ex_id(
                 category,
                 id,
                 Some(&[OrderBy::Desc(serie::entity::columns::SESSION)]),
             )
             .map_err(|e| e.to_string())?;
+
+            let pr = series.iter().filter(|s| s.pr).collect::<Vec<_>>();
+            let pr = pr.first().unwrap();
+
+            res.reps = pr.reps;
+            res.weight = pr.weight;
+            res.rm = get_1rm_estimation(pr.weight, pr.reps as f64);
+            res.pr_date = DateTimeUtils::format_time_date(pr.session);
+
+            let mut timestamps = HashSet::new();
+            series.iter().map(|s| s.session).for_each(|t| {
+                timestamps.insert(t);
+            });
+
+            let workouts = SessionRepository::select()
+                .where_(Where::In(
+                    session::entity::columns::DATE,
+                    timestamps
+                        .into_iter()
+                        .map(|t| t.into())
+                        .collect::<Vec<Value>>(),
+                ))
+                .fetch()
+                .map_err(|e| e.to_string())?
+                .iter()
+                .map(|s| (s.date, s.workout.clone()))
+                .collect::<HashMap<_, _>>();
+
             for serie in series {
                 let wk = SessionSerie::from(&serie);
-                if let Some(ses) =
-                    SessionRepository::select_by_id(serie.session).map_err(|e| e.to_string())?
-                {
-                    let ex_str = format!(
-                        "{}\n{}",
-                        ses.workout,
-                        DateTimeUtils::format_time_date(ses.date)
-                    );
+                let ex_str = format!(
+                    "{}\n{}",
+                    workouts.get(&serie.session).unwrap(),
+                    DateTimeUtils::format_time_date(serie.session)
+                );
 
-                    if !res.workouts.contains(&ex_str) {
-                        res.workouts.push(ex_str.clone());
-                    }
-
-                    let entry = res.series.entry(ex_str).or_default();
-                    entry.push(wk);
+                if !res.workouts.contains(&ex_str) {
+                    res.workouts.push(ex_str.clone());
                 }
+
+                let entry = res.series.entry(ex_str).or_default();
+                entry.push(wk);
             }
 
             Ok(res)
