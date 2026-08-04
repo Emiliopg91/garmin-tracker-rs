@@ -37,7 +37,7 @@ export interface ExerciseListItem {
   weight: number;
 }
 
-// From src-tauri/src/dto/sessions.rs:65
+// From src-tauri/src/dto/sessions.rs:71
 export interface SessionDetails {
   active_time: string;
   avg_heart_rate: number;
@@ -67,14 +67,14 @@ export interface SessionListItem {
   volume: number;
 }
 
-// From src-tauri/src/dto/sessions.rs:48
+// From src-tauri/src/dto/sessions.rs:54
 export interface SessionSerie {
   idx: number;
   reps: number;
   weight: number;
 }
 
-// From src-tauri/src/dto/sessions.rs:131
+// From src-tauri/src/dto/sessions.rs:138
 export interface SessionSeriesUpdate {
   series: SessionSerie[];
   timestamp: string;
@@ -89,7 +89,7 @@ export interface UserListItem {
   weight: number;
 }
 
-// From src-tauri/src/dto/workouts.rs:33
+// From src-tauri/src/dto/workouts.rs:39
 export interface WorkoutDetails {
   avg_time: string;
   avg_volume: number;

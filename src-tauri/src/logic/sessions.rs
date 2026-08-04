@@ -162,26 +162,15 @@ pub fn save_session_changes(details: SessionSeriesUpdate) -> Result<(), String> 
             .to_rfc3339()
     );
     let res: Result<(), String> = {
-        let mut to_update = Vec::new();
-        for serie in details.series {
-            let db_serie = SerieRepository::select_by_id(details.timestamp, serie.idx)
-                .map_err(|e| e.to_string())?;
-            if let Some(mut db_serie) = db_serie {
-                db_serie.reps = serie.reps;
-                db_serie.weight = serie.weight;
-                to_update.push(db_serie);
-            }
-        }
-
         let mut db = DATABASE_INST.lock().map_err(|e| e.to_string())?;
         db.run_in_tx(move |tx| {
-            for to_upd in &to_update {
+            for serie in &details.series {
                 SerieRepository::update()
-                    .set(entity::columns::REPS, to_upd.reps.into())
-                    .set(entity::columns::WEIGHT, to_upd.weight.into())
+                    .set(entity::columns::REPS, serie.reps.into())
+                    .set(entity::columns::WEIGHT, serie.weight.into())
                     .where_(Where::And(vec![
-                        Where::Eq(entity::columns::SESSION, to_upd.session.into()),
-                        Where::Eq(entity::columns::IDX, to_upd.idx.into()),
+                        Where::Eq(entity::columns::SESSION, details.timestamp.into()),
+                        Where::Eq(entity::columns::IDX, serie.idx.into()),
                     ]))
                     .execute_in_tx(tx)?;
             }

@@ -21,6 +21,7 @@ type Props = {
 
 export function SessionModal({ session, onClose, onUpdate }: Props) {
   const { startLoading, finishLoading, translate } = useContext(AppContext);
+  const [originalSession] = useState(session);
   const [localSession, setLocalSession] = useState({ ...session });
   const [changed, setChanged] = useState(false);
   const [hrData, setHrData] = useState<
@@ -41,8 +42,6 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
 
     setHrData(hrData);
     setMinHr(minHr);
-
-    console.log(minHr);
   }, []);
 
   const updateSerieReps = (exercise: string, idx: number, newVal: string) => {
@@ -98,9 +97,14 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
       timestamp: localSession.timestamp,
       series: [],
     };
-    Object.entries(localSession.series).forEach(([, series]) => {
-      series.forEach((serie) => {
-        update.series.push(serie);
+    Object.entries(localSession.series).forEach(([ex, series]) => {
+      series.forEach((serie, serIdx) => {
+        if (
+          originalSession.series[ex][serIdx].reps != serie.reps ||
+          originalSession.series[ex][serIdx].weight != serie.weight
+        ) {
+          update.series.push(serie);
+        }
       });
     });
     BackendClient.saveSessionChanges(update)

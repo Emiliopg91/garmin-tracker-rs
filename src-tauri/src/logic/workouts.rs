@@ -78,24 +78,28 @@ pub fn get_workout_details(name: &str) -> Result<WorkoutDetails, String> {
     let res: Result<WorkoutDetails, String> = {
         info!("Getting details for workout {}", name);
 
-        let sessions = SessionRepository::select_by_workout(
+        let mut sessions = SessionRepository::select_by_workout(
             name,
             Some(&[OrderBy::Desc(entity::columns::DATE)]),
         )
         .map_err(|e| e.to_string())?;
 
-        let mut latest = sessions.first().unwrap();
+        let mut latest = sessions.first().unwrap().clone();
         let mut count = 0_u32;
         let mut time = 0_f64;
         let mut volume = 0_f64;
 
-        sessions.iter().for_each(|s| {
+        sessions.iter_mut().for_each(|s| {
             if s.date > latest.date {
-                latest = s;
+                latest = s.clone();
             }
             count += 1;
             time += s.total_elapsed_time;
-            volume += s.get_volume();
+
+            s.fetch_series_relationship().unwrap();
+            for serie in &s.series {
+                volume += (serie.reps as f64) * serie.weight
+            }
         });
 
         let mut details = WorkoutDetails {

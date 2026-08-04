@@ -33,15 +33,3 @@ pub struct Session {
     #[relationship((device, device::entity::columns::SERIAL))]
     pub device_obj: Option<Device>,
 }
-
-impl Session {
-    pub fn get_volume(&self) -> f64 {
-        let mut volume = 0_f64;
-
-        for serie in &self.series {
-            volume += (serie.reps as f64) * serie.weight
-        }
-
-        volume
-    }
-}

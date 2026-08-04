@@ -21,12 +21,18 @@ pub struct SessionListItem {
 
 impl From<&Session> for SessionListItem {
     fn from(value: &Session) -> Self {
+        let mut volume = 0_f64;
+
+        for serie in &value.series {
+            volume += (serie.reps as f64) * serie.weight
+        }
+
         Self {
             name: value.workout.clone(),
             date: DateTimeUtils::format_time_date(value.date),
             timestamp: value.date,
             active_calories: value.total_calories - value.metabolic_calories,
-            volume: value.get_volume(),
+            volume,
             training_load: value.training_load.round() as u16,
             sub_sport: value.sub_sport.clone(),
         }
@@ -102,10 +108,11 @@ impl From<(&Session, &IndexMap<Exercise, Vec<Serie>>)> for SessionDetails {
             }
         }
 
-        let device = match &value.0.device_obj {
-            Some(dev) => Some(format!("Garmin {}", dev.model)),
-            None => None,
-        };
+        let device = value
+            .0
+            .device_obj
+            .as_ref()
+            .map(|dev| format!("Garmin {}", dev.model));
 
         Self {
             name: value.0.workout.clone(),

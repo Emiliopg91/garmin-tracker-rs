@@ -5,7 +5,13 @@ use crate::dao::exercise::{self};
 use super::exercise::Exercise;
 
 #[derive(Default, Entity, Clone)]
-#[indexes((session), (ex_cat, ex_id))]
+#[indexes(
+    (session), 
+    (pr), 
+    (ex_cat, ex_id))]
+#[uniques(
+    (ex_cat, ex_id, pr=true)
+)]
 pub struct Serie {
     #[primary_key]
     pub session: i64,
@@ -21,10 +27,4 @@ pub struct Serie {
 
     #[relationship((ex_cat, exercise::entity::columns::CATEGORY),(ex_id, exercise::entity::columns::ID))]
     pub exercise: Option<Exercise>,
-}
-
-impl Serie {
-    pub fn get_1rm_estimation(&self) -> f64 {
-        self.weight * (self.reps as f64).powf(0.1)
-    }
 }

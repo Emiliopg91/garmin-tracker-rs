@@ -13,6 +13,39 @@ use self::errors::ParseFitFileError;
 
 pub mod errors;
 
+/// Buckets the (already kind-filtered) entries by message type in a single
+/// pass, so downstream extraction reads each bucket instead of re-scanning
+/// and re-filtering the whole entry list once per field group.
+#[derive(Default)]
+struct GroupedEntries<'a> {
+    session: Option<&'a FitDataRecord>,
+    workout: Option<&'a FitDataRecord>,
+    exercise_titles: Vec<&'a FitDataRecord>,
+    workout_steps: Vec<&'a FitDataRecord>,
+    sets: Vec<&'a FitDataRecord>,
+    records: Vec<&'a FitDataRecord>,
+}
+
+impl<'a> GroupedEntries<'a> {
+    fn from_entries(entries: &'a [FitDataRecord]) -> Self {
+        let mut grouped = GroupedEntries::default();
+
+        for entry in entries {
+            match entry.kind() {
+                profile::MesgNum::Session => grouped.session = Some(entry),
+                profile::MesgNum::Workout => grouped.workout = Some(entry),
+                profile::MesgNum::ExerciseTitle => grouped.exercise_titles.push(entry),
+                profile::MesgNum::WorkoutStep => grouped.workout_steps.push(entry),
+                profile::MesgNum::Set => grouped.sets.push(entry),
+                profile::MesgNum::Record => grouped.records.push(entry),
+                _ => {}
+            }
+        }
+
+        grouped
+    }
+}
+
 pub(crate) fn load_from_file<P>(path: P) -> errors::Result<Session>
 where
     P: AsRef<Path>,
@@ -35,15 +68,16 @@ where
     #[cfg(debug_assertions)]
     debug_dump(&path, &entries);
 
-    let session_entry = entries
-        .iter()
-        .find(|r| r.kind() == profile::MesgNum::Session)
+    let grouped = GroupedEntries::from_entries(&entries);
+
+    let session_entry = grouped
+        .session
         .ok_or_else(|| ParseFitFileError::MissingField("session".to_string()))?;
 
     let timestamp = get_timestamp("timestamp", session_entry.fields())?;
     let sub_sport = get_string("sub_sport", session_entry.fields())?;
     let workout = if sub_sport == "strength_training" {
-        get_workout_name(&entries)?
+        get_workout_name(grouped.workout)?
     } else {
         "".to_string()
     };
@@ -55,11 +89,11 @@ where
     let avg_heart_rate = get_u8("avg_heart_rate", session_entry.fields())?;
     let max_heart_rate = get_u8("max_heart_rate", session_entry.fields())?;
     let series = if sub_sport == "strength_training" {
-        get_sets(&entries, &timestamp)?
+        get_sets(&grouped, &timestamp)?
     } else {
         Vec::new()
     };
-    let heart_rates = get_heart_rate(&entries, &timestamp)?;
+    let heart_rates = get_heart_rate(&grouped.records, &timestamp)?;
 
     Ok(Session {
         workout,
@@ -105,32 +139,27 @@ where
     }
 }
 
-fn get_workout_name(entries: &[FitDataRecord]) -> errors::Result<String> {
-    let wkt_entry = entries
-        .iter()
-        .find(|r| r.kind() == profile::MesgNum::Workout)
-        .ok_or_else(|| ParseFitFileError::MissingField("workout".to_string()))?;
+fn get_workout_name(wkt_entry: Option<&FitDataRecord>) -> errors::Result<String> {
+    let wkt_entry =
+        wkt_entry.ok_or_else(|| ParseFitFileError::MissingField("workout".to_string()))?;
 
     get_string("wkt_name", wkt_entry.fields())
         .map_err(|_| ParseFitFileError::InvalidFieldValue("name".to_string(), "string".to_string()))
 }
 
-fn get_sets(entries: &[FitDataRecord], timestamp: &DateTime<Local>) -> errors::Result<Vec<Serie>> {
-    let exercises = get_exercises(entries)?;
-    let steps = get_steps(entries, &exercises)?;
+fn get_sets(grouped: &GroupedEntries, timestamp: &DateTime<Local>) -> errors::Result<Vec<Serie>> {
+    let exercises = get_exercises(&grouped.exercise_titles)?;
+    let steps = get_steps(&grouped.workout_steps, &exercises)?;
 
     let mut sets = Vec::new();
 
-    let valid_sets = entries
-        .iter()
-        .filter(|r| r.kind() == profile::MesgNum::Set)
-        .filter_map(|reg| {
-            let reps = get_u16("repetitions", reg.fields()).ok()?;
-            let weight = get_f64("weight", reg.fields()).ok()?;
-            let ex_idx = get_i64("wkt_step_index", reg.fields()).ok()?;
-            let exercise = steps.get(ex_idx as usize)?.as_ref()?;
-            Some((exercise.clone(), reps, weight))
-        });
+    let valid_sets = grouped.sets.iter().filter_map(|reg| {
+        let reps = get_u16("repetitions", reg.fields()).ok()?;
+        let weight = get_f64("weight", reg.fields()).ok()?;
+        let ex_idx = get_i64("wkt_step_index", reg.fields()).ok()?;
+        let exercise = steps.get(ex_idx as usize)?.as_ref()?;
+        Some((exercise.clone(), reps, weight))
+    });
 
     for (idx, (exercise, reps, weight)) in valid_sets.enumerate() {
         sets.push(Serie {
@@ -149,18 +178,12 @@ fn get_sets(entries: &[FitDataRecord], timestamp: &DateTime<Local>) -> errors::R
 }
 
 fn get_heart_rate(
-    entries: &[FitDataRecord],
+    records: &[&FitDataRecord],
     timestamp: &DateTime<Local>,
 ) -> errors::Result<Vec<HeartRate>> {
     let mut hrs = Vec::new();
 
-    let entries = entries
-        .iter()
-        .filter(|e| matches!(e.kind(), profile::MesgNum::Record))
-        .cloned()
-        .collect::<Vec<FitDataRecord>>();
-
-    entries.iter().step_by(4).for_each(|entry| {
+    records.iter().step_by(4).for_each(|entry| {
         if let Ok(val) = get_u8("heart_rate", entry.fields()) {
             hrs.push(HeartRate {
                 session: timestamp.timestamp(),
@@ -174,7 +197,7 @@ fn get_heart_rate(
 }
 
 fn get_steps(
-    entries: &[FitDataRecord],
+    workout_steps: &[&FitDataRecord],
     exercises: &[Exercise],
 ) -> errors::Result<Vec<Option<Exercise>>> {
     let lookup: HashMap<(u16, &str), &Exercise> = exercises
@@ -182,9 +205,8 @@ fn get_steps(
         .map(|e| ((e.id, e.category.as_str()), e))
         .collect();
 
-    entries
+    workout_steps
         .iter()
-        .filter(|r| r.kind() == profile::MesgNum::WorkoutStep)
         .map(|reg| {
             let Ok(ex_cat) = get_string("exercise_category", reg.fields()) else {
                 return Ok(None);
@@ -205,10 +227,9 @@ fn get_steps(
         .collect()
 }
 
-pub fn get_exercises(entries: &[FitDataRecord]) -> errors::Result<Vec<Exercise>> {
-    entries
+pub fn get_exercises(exercise_titles: &[&FitDataRecord]) -> errors::Result<Vec<Exercise>> {
+    exercise_titles
         .iter()
-        .filter(|r| r.kind() == profile::MesgNum::ExerciseTitle)
         .map(|reg| {
             Ok(Exercise {
                 id: get_u16("exercise_name", reg.fields()).unwrap_or(1),

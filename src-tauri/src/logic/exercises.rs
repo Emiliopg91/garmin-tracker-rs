@@ -1,14 +1,11 @@
 use garmin_tracker_rs_macros::{traced_command, translate};
-use rusqlite_orm::dao::{
-    Repository,
-    helpers::types::{order_by::OrderBy, where_clause::Where},
-};
+use rusqlite_orm::dao::{Repository, helpers::types::order_by::OrderBy};
 use tauri_plugin_log::log::{error, info};
 
 use crate::{
     dao::{
         exercise::{self, ExerciseRepository},
-        serie::{self, SerieRepository, entity},
+        serie::{self, SerieRepository},
         session::SessionRepository,
     },
     dto::{
@@ -32,10 +29,7 @@ pub fn get_exercises() -> Result<Vec<ExerciseListItem>, String> {
             .fetch()
             .map_err(|e| e.to_string())?;
 
-        let prs = SerieRepository::select()
-            .where_(Where::Eq(entity::columns::PR, true.into()))
-            .fetch()
-            .map_err(|e| e.to_string())?;
+        let prs = SerieRepository::select_by_pr(true, None).map_err(|e| e.to_string())?;
 
         for exercise in exercises {
             let pr = prs
@@ -49,7 +43,7 @@ pub fn get_exercises() -> Result<Vec<ExerciseListItem>, String> {
                 name: exercise.name,
                 reps: pr.reps,
                 weight: pr.weight,
-                rm: pr.get_1rm_estimation(),
+                rm: get_1rm_estimation(pr.weight, pr.reps as f64),
                 date: DateTimeUtils::format_time_date(pr.session),
             });
         }
@@ -87,20 +81,16 @@ pub fn get_exercise_details(category: &str, id: u16) -> Result<ExerciseDetails, 
         {
             let mut res = ExerciseDetails::from(&exercise);
 
-            let pr = SerieRepository::select()
-                .where_(Where::And(vec![
-                    Where::Eq(entity::columns::EX_CAT, exercise.category.clone().into()),
-                    Where::Eq(entity::columns::EX_ID, exercise.id.into()),
-                    Where::Eq(entity::columns::PR, true.into()),
-                ]))
-                .limit(1)
-                .fetch_one()
-                .map_err(|e| e.to_string())?
-                .unwrap();
+            let pr = SerieRepository::select_by_ex_cat_and_ex_id_where_pr_eq_true(
+                &exercise.category,
+                exercise.id,
+            )
+            .map_err(|e| e.to_string())?
+            .unwrap();
 
             res.reps = pr.reps;
             res.weight = pr.weight;
-            res.rm = pr.get_1rm_estimation();
+            res.rm = get_1rm_estimation(pr.weight, pr.reps as f64);
             res.pr_date = DateTimeUtils::format_time_date(pr.session);
 
             let series = SerieRepository::select_by_ex_cat_and_ex_id(
@@ -150,4 +140,8 @@ pub fn get_exercise_details(category: &str, id: u16) -> Result<ExerciseDetails, 
             Err(e)
         }
     }
+}
+
+pub fn get_1rm_estimation(weight: f64, reps: f64) -> f64 {
+    weight * (reps).powf(0.1)
 }
