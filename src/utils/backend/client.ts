@@ -2,102 +2,111 @@
 
 import { invoke, InvokeArgs } from "@tauri-apps/api/core";
 
-import { AppEnvironment, ExerciseDetails, ExerciseListItem, SessionDetails, SessionListItem, SessionSeriesUpdate, UserListItem, WorkoutDetails, WorkoutListItem } from "./models";
+import {
+  AppEnvironment,
+  ExerciseDetails,
+  ExerciseListItem,
+  SessionDetails,
+  SessionListItem,
+  SessionSeriesUpdate,
+  UserListItem,
+  WorkoutDetails,
+  WorkoutListItem,
+} from "./models";
 
 export class BackendClient {
+  private static DONT_LOG_COMMANDS: string[] = [];
 
-    private static DONT_LOG_COMMANDS: string[] = [];
+  // From src-tauri/src/logic/user.rs:47
+  public static addUserMeasures(measures: UserListItem): Promise<void> {
+    return BackendClient.inner_invoke("add_user_measures", { measures });
+  }
 
-	// From src-tauri/src/logic/user.rs:47
-	public static addUserMeasures(measures: UserListItem): Promise<void> {
-	  return BackendClient.inner_invoke("add_user_measures", { measures }); 
-	}
-	
+  // From src-tauri/src/logic/app.rs:28
+  public static getEnvironment(): Promise<AppEnvironment> {
+    return BackendClient.inner_invoke("get_environment");
+  }
 
-	// From src-tauri/src/logic/app.rs:28
-	public static getEnvironment(): Promise<AppEnvironment> {
-	  return BackendClient.inner_invoke("get_environment"); 
-	}
-	
+  // From src-tauri/src/logic/exercises.rs:73
+  public static getExerciseDetails(
+    category: string,
+    id: number,
+  ): Promise<ExerciseDetails> {
+    return BackendClient.inner_invoke("get_exercise_details", { category, id });
+  }
 
-	// From src-tauri/src/logic/exercises.rs:73
-	public static getExerciseDetails(category: string, id: number): Promise<ExerciseDetails> {
-	  return BackendClient.inner_invoke("get_exercise_details", { category, id }); 
-	}
-	
+  // From src-tauri/src/logic/exercises.rs:22
+  public static getExercises(): Promise<ExerciseListItem[]> {
+    return BackendClient.inner_invoke("get_exercises");
+  }
 
-	// From src-tauri/src/logic/exercises.rs:22
-	public static getExercises(): Promise<ExerciseListItem[]> {
-	  return BackendClient.inner_invoke("get_exercises"); 
-	}
-	
+  // From src-tauri/src/logic/sessions.rs:77
+  public static getSessionDetails(timestamp: string): Promise<SessionDetails> {
+    return BackendClient.inner_invoke("get_session_details", { timestamp });
+  }
 
-	// From src-tauri/src/logic/sessions.rs:77
-	public static getSessionDetails(timestamp: string): Promise<SessionDetails> {
-	  return BackendClient.inner_invoke("get_session_details", { timestamp }); 
-	}
-	
+  // From src-tauri/src/logic/sessions.rs:38
+  public static getSessions(): Promise<SessionListItem[]> {
+    return BackendClient.inner_invoke("get_sessions");
+  }
 
-	// From src-tauri/src/logic/sessions.rs:38
-	public static getSessions(): Promise<SessionListItem[]> {
-	  return BackendClient.inner_invoke("get_sessions"); 
-	}
-	
+  // From src-tauri/src/logic/user.rs:16
+  public static getUserMeasures(): Promise<UserListItem[]> {
+    return BackendClient.inner_invoke("get_user_measures");
+  }
 
-	// From src-tauri/src/logic/user.rs:16
-	public static getUserMeasures(): Promise<UserListItem[]> {
-	  return BackendClient.inner_invoke("get_user_measures"); 
-	}
-	
+  // From src-tauri/src/logic/workouts.rs:77
+  public static getWorkoutDetails(name: string): Promise<WorkoutDetails> {
+    return BackendClient.inner_invoke("get_workout_details", { name });
+  }
 
-	// From src-tauri/src/logic/workouts.rs:77
-	public static getWorkoutDetails(name: string): Promise<WorkoutDetails> {
-	  return BackendClient.inner_invoke("get_workout_details", { name }); 
-	}
-	
+  // From src-tauri/src/logic/workouts.rs:19
+  public static getWorkoutList(): Promise<WorkoutListItem[]> {
+    return BackendClient.inner_invoke("get_workout_list");
+  }
 
-	// From src-tauri/src/logic/workouts.rs:19
-	public static getWorkoutList(): Promise<WorkoutListItem[]> {
-	  return BackendClient.inner_invoke("get_workout_list"); 
-	}
-	
+  // From src-tauri/src/logic/sessions.rs:210
+  public static importFromDevice(serial: string): Promise<number> {
+    return BackendClient.inner_invoke("import_from_device", { serial });
+  }
 
-	// From src-tauri/src/logic/sessions.rs:210
-	public static importFromDevice(serial: string): Promise<number> {
-	  return BackendClient.inner_invoke("import_from_device", { serial }); 
-	}
-	
+  // From src-tauri/src/logic/app.rs:9
+  public static notifyFrontendReady(): Promise<void> {
+    return BackendClient.inner_invoke("notify_frontend_ready");
+  }
 
-	// From src-tauri/src/logic/app.rs:9
-	public static notifyFrontendReady(): Promise<void> {
-	  return BackendClient.inner_invoke("notify_frontend_ready"); 
-	}
-	
+  // From src-tauri/src/logic/sessions.rs:156
+  public static saveSessionChanges(
+    details: SessionSeriesUpdate,
+  ): Promise<void> {
+    return BackendClient.inner_invoke("save_session_changes", { details });
+  }
 
-	// From src-tauri/src/logic/sessions.rs:156
-	public static saveSessionChanges(details: SessionSeriesUpdate): Promise<void> {
-	  return BackendClient.inner_invoke("save_session_changes", { details }); 
-	}
-	
-
-  
-	private static inner_invoke<R>(method: string, payload?: InvokeArgs): Promise<R> {
-		return new Promise<R>((resolve,reject)=>{
-			const do_log = !BackendClient.DONT_LOG_COMMANDS.includes(method);
-			if(do_log) {
-				console.debug("Invoking command '"+method+"', payload: ", payload);
-			}
-			invoke<R>(method, payload).then((response)=>{
-				if(do_log) {
-					console.debug("Finished command '"+method+"', response: ", response);
-				}
-				resolve(response);
-			}).catch((err) =>{
-				if(do_log) {
-					console.debug("Failed command '"+method+"', reason: ", err);
-				}
-				reject(err);
-			});
-		});
-	}
+  private static inner_invoke<R>(
+    method: string,
+    payload?: InvokeArgs,
+  ): Promise<R> {
+    return new Promise<R>((resolve, reject) => {
+      const do_log = !BackendClient.DONT_LOG_COMMANDS.includes(method);
+      if (do_log) {
+        console.debug("Invoking command '" + method + "', payload: ", payload);
+      }
+      invoke<R>(method, payload)
+        .then((response) => {
+          if (do_log) {
+            console.debug(
+              "Finished command '" + method + "', response: ",
+              response,
+            );
+          }
+          resolve(response);
+        })
+        .catch((err) => {
+          if (do_log) {
+            console.debug("Failed command '" + method + "', reason: ", err);
+          }
+          reject(err);
+        });
+    });
+  }
 }
