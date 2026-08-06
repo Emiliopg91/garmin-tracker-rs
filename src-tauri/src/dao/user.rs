@@ -2,7 +2,6 @@ use rusqlite_orm_macros::Entity;
 
 #[derive(Entity)]
 #[primary_key(date)]
-#[index("date", (date))]
 pub struct User {
     pub date: i64,
     pub weight: f32,
