@@ -1,6 +1,6 @@
 use garmin_tracker_rs_macros::translate;
 use nusb::hotplug::HotplugEvent;
-use rusqlite_orm::dao::Repository;
+use rusqlite_orm::{dao::Repository, database::DATABASE_INST};
 use std::sync::{LazyLock, Mutex};
 use tokio_stream::StreamExt;
 
@@ -59,34 +59,55 @@ async fn mtp_dev_check_and_sync(app: AppHandle, devices: &mut Vec<DeviceListItem
         .await
         .map_err(|e| e.to_string())
     {
-        for device in &cur_dev {
-            if !devices
-                .iter()
-                .any(|e| e.serial_number == device.serial_number)
-            {
-                devices.push(device.clone());
+        let _ = DATABASE_INST.lock().unwrap().run_in_tx(
+            |tx: &mut rusqlite_orm::rusqlite::Transaction<'_>| {
+                for device in &cur_dev {
+                    if !devices
+                        .iter()
+                        .any(|e| e.serial_number == device.serial_number)
+                    {
+                        let enrol_err =
+                            match DeviceRepository::select_by_id_in_tx(tx, &device.serial_number) {
+                                Ok(None) => DeviceRepository::insert()
+                                    .item(Device::from(device))
+                                    .execute_in_tx(tx)
+                                    .err(),
+                                Ok(Some(_)) => None,
+                                Err(e) => Some(e),
+                            };
 
-                if let Ok(None) = DeviceRepository::select_by_id(&device.serial_number) {
-                    let _ = DeviceRepository::insert()
-                        .item(Device::from(device))
-                        .execute();
+                        if let Some(e) = enrol_err {
+                            error!(
+                                "Error enrolling {} {} ({}): {}",
+                                device.manufacturer, device.model, device.serial_number, e
+                            )
+                        } else {
+                            info!(
+                                "Connected {} {} ({})",
+                                device.manufacturer, device.model, device.serial_number
+                            );
+                            devices.push(device.clone());
+
+                            let payload: DeviceListItem = device.clone();
+                            let _ = app.emit("device_connected", payload);
+
+                            devs_to_sync.push(device.serial_number.clone());
+                            show_notification(NotificationDefinition {
+                                title: translate!("device_connected"),
+                                body: translate!(
+                                    "syncing_device",
+                                    device.manufacturer,
+                                    device.model
+                                ),
+                                kind: NotificationKind::Temporal,
+                            });
+                        }
+                    }
                 }
 
-                let payload: DeviceListItem = device.clone();
-                let _ = app.emit("device_connected", payload);
-
-                info!(
-                    "Connected {} {} ({})",
-                    device.manufacturer, device.model, device.serial_number
-                );
-                devs_to_sync.push(device.serial_number.clone());
-                show_notification(NotificationDefinition {
-                    title: translate!("device_connected"),
-                    body: translate!("syncing_device", device.manufacturer, device.model),
-                    kind: NotificationKind::Temporal,
-                });
-            }
-        }
+                Ok(())
+            },
+        );
 
         for device in devices.iter() {
             if !cur_dev
@@ -110,6 +131,7 @@ async fn mtp_dev_check_and_sync(app: AppHandle, devices: &mut Vec<DeviceListItem
 
         devices.retain(|d| cur_dev.iter().any(|cd| cd.serial_number == d.serial_number));
     }
+
     if !devs_to_sync.is_empty() {
         let _ = app.emit("start_loading", ());
         let mut imported = 0;

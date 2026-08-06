@@ -63,29 +63,34 @@ pub fn traced_command(_attrs: TokenStream, item: TokenStream) -> TokenStream {
     let expanded = quote! {
         #(#attrs)*
         #vis #sig {
+            let __debug_enabled = tauri_plugin_log::log::log_enabled!(tauri_plugin_log::log::Level::Debug);
             let t0 = std::time::Instant::now();
 
-            let __params_json = serde_json::json!({
-                #( #param_keys: #param_names ),*
-            });
+            if __debug_enabled {
+                let __params_json = serde_json::json!({
+                    #( #param_keys: #param_names ),*
+                });
 
-            tauri_plugin_log::log::debug!(
-                "Invoking command '{}' with params {}",
-                #name,
-                __params_json.to_string()
-            );
+                tauri_plugin_log::log::debug!(
+                    "Invoking command '{}' with params {}",
+                    #name,
+                    __params_json.to_string()
+                );
+            }
 
             let result = #call;
 
-            #result_json_code
-            let json_str = __result_json.to_string();
+            if __debug_enabled {
+                #result_json_code
+                let json_str = __result_json.to_string();
 
-            tauri_plugin_log::log::debug!(
-                "Finished command '{}' after {:.3} with response {}",
-                #name,
-                t0.elapsed().as_secs_f64(),
-                json_str
-            );
+                tauri_plugin_log::log::debug!(
+                    "Finished command '{}' after {:.3} with response {}",
+                    #name,
+                    t0.elapsed().as_secs_f64(),
+                    json_str
+                );
+            }
 
             result
         }

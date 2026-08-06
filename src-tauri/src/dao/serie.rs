@@ -4,17 +4,18 @@ use crate::dao::exercise::{self};
 
 use super::exercise::Exercise;
 
-#[derive(Default, Entity, Clone)]
-#[indexes((session), (pr), (ex_cat, ex_id))]
-#[uniques((ex_cat, ex_id, pr=true))]
+#[derive(Entity, Clone)]
+#[primary_key(session, idx)]
+#[index("personal_records", (pr))]
+#[index("session", (session))]
+#[index("exercise", (ex_cat, ex_id))]
+#[unique("exercise_personal_record", (ex_cat, ex_id), (pr=true))]
 pub struct Serie {
-    #[primary_key]
     pub session: i64,
-    #[primary_key]
     pub idx: u8,
-    #[column(name = "exercise_category")]
+    #[column("exercise_category")]
     pub ex_cat: String,
-    #[column(name = "exercise_id")]
+    #[column("exercise_id")]
     pub ex_id: u16,
     pub reps: u16,
     pub weight: f64,

@@ -1,8 +1,8 @@
 use rusqlite_orm_macros::Entity;
 
-#[derive(Default, Clone, Entity)]
+#[derive(Clone, Entity)]
+#[primary_key(serial)]
 pub struct Device {
-    #[primary_key]
     pub serial: String,
     pub model: String,
     pub last_sync: Option<i64>,

@@ -2,16 +2,15 @@ use rusqlite_orm_macros::Entity;
 
 use crate::dao::{
     device::{self, Device},
-    heart_rate::{self, HeartRate},
     serie,
 };
 
 use super::serie::Serie;
 
-#[derive(Default, Entity, Clone)]
-#[indexes((workout))]
+#[derive(Entity, Clone)]
+#[primary_key(date)]
+#[index("workout", (workout))]
 pub struct Session {
-    #[primary_key]
     pub date: i64,
     pub workout: String,
     pub total_elapsed_time: f64,
@@ -23,12 +22,10 @@ pub struct Session {
     pub training_load: f64,
     pub sub_sport: String,
     pub device: Option<String>,
+    pub heart_rates: Vec<u8>,
 
     #[relationship((date, serie::entity::columns::SESSION))]
     pub series: Vec<Serie>,
-
-    #[relationship((date, heart_rate::entity::columns::SESSION))]
-    pub heart_rates: Vec<HeartRate>,
 
     #[relationship((device, device::entity::columns::SERIAL))]
     pub device_obj: Option<Device>,

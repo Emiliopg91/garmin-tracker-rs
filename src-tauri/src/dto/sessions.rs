@@ -128,7 +128,7 @@ impl From<(&Session, &IndexMap<Exercise, Vec<Serie>>)> for SessionDetails {
             sub_sport: value.0.sub_sport.clone(),
             exercises,
             series: series_d,
-            heart_rates: value.0.heart_rates.iter().map(|hr| hr.hr).collect(),
+            heart_rates: value.0.heart_rates.clone(),
             device,
         }
     }

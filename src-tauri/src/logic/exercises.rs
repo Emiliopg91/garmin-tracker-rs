@@ -1,9 +1,15 @@
-use std::collections::{HashMap, HashSet};
+use std::{
+    collections::{HashMap, HashSet},
+    ops::Deref,
+};
 
 use garmin_tracker_rs_macros::{traced_command, translate};
-use rusqlite_orm::dao::{
-    Repository,
-    helpers::types::{order_by::OrderBy, value::Value, where_clause::Where},
+use rusqlite_orm::{
+    dao::{
+        Repository,
+        helpers::types::{order_by::OrderBy, value::Value, where_clause::Where},
+    },
+    database::{DATABASE_INST, errors::DatabaseError},
 };
 use tauri_plugin_log::log::{error, info};
 
@@ -26,15 +32,14 @@ use crate::{
 #[tauri::command]
 pub fn get_exercises() -> Result<Vec<ExerciseListItem>, String> {
     info!("Getting exercises list...");
-    let res: Result<Vec<ExerciseListItem>, String> = {
+    let res = DATABASE_INST.lock().unwrap().run_in_tx(|tx| {
         let mut result = Vec::new();
 
         let exercises = ExerciseRepository::select()
             .order_by(OrderBy::Asc(exercise::entity::columns::NAME))
-            .fetch()
-            .map_err(|e| e.to_string())?;
+            .fetch_in_tx(tx)?;
 
-        let prs = SerieRepository::select_by_pr(true, None).map_err(|e| e.to_string())?;
+        let prs = SerieRepository::select_by_personal_records_in_tx(tx, true, None)?;
 
         for exercise in exercises {
             let pr = prs
@@ -54,22 +59,23 @@ pub fn get_exercises() -> Result<Vec<ExerciseListItem>, String> {
         }
 
         Ok(result)
-    };
+    });
 
     match res {
         Ok(l) => {
             info!("Retreived {} exercises", l.len());
             Ok(l)
         }
-        Err(e) => {
+        Err(DatabaseError::Transaction(e)) => {
             error!("Error getting exercises list: {}", e);
             show_notification(NotificationDefinition {
                 title: translate!("error_exercise_list"),
-                body: e.to_string(),
+                body: e.deref().to_string(),
                 kind: NotificationKind::Persistant,
             });
-            Err(e)
+            Err(e.deref().to_string())
         }
+        _ => unreachable!(),
     }
 }
 
@@ -80,85 +86,80 @@ pub fn get_exercise_details(category: &str, id: u16) -> Result<ExerciseDetails, 
         "Getting details for exercise with category {} and id {}...",
         category, id
     );
-    let res = {
-        if let Some(exercise) =
-            ExerciseRepository::select_by_id(category, id).map_err(|e| e.to_string())?
-        {
-            let mut res = ExerciseDetails::from(&exercise);
+    let res = DATABASE_INST.lock().unwrap().run_in_tx(|tx| {
+        let exercise = ExerciseRepository::select_by_id_in_tx(tx, category, id)?.unwrap();
+        let mut res = ExerciseDetails::from(&exercise);
 
-            let series = SerieRepository::select_by_ex_cat_and_ex_id(
-                category,
-                id,
-                Some(&[OrderBy::Desc(serie::entity::columns::SESSION)]),
-            )
-            .map_err(|e| e.to_string())?;
+        let series = SerieRepository::select_by_exercise_in_tx(
+            tx,
+            category,
+            id,
+            Some(&[OrderBy::Desc(serie::entity::columns::SESSION)]),
+        )?;
 
-            let pr = series.iter().filter(|s| s.pr).collect::<Vec<_>>();
-            let pr = pr.first().unwrap();
+        let pr = series.iter().filter(|s| s.pr).collect::<Vec<_>>();
+        let pr = pr.first().unwrap();
 
-            res.reps = pr.reps;
-            res.weight = pr.weight;
-            res.rm = get_1rm_estimation(pr.weight, pr.reps as f64);
-            res.pr_date = DateTimeUtils::format_time_date(pr.session);
+        res.reps = pr.reps;
+        res.weight = pr.weight;
+        res.rm = get_1rm_estimation(pr.weight, pr.reps as f64);
+        res.pr_date = DateTimeUtils::format_time_date(pr.session);
 
-            let mut timestamps = HashSet::new();
-            series.iter().map(|s| s.session).for_each(|t| {
-                timestamps.insert(t);
-            });
+        let mut timestamps = HashSet::new();
+        series.iter().map(|s| s.session).for_each(|t| {
+            timestamps.insert(t);
+        });
 
-            let workouts = SessionRepository::select()
-                .where_(Where::In(
-                    session::entity::columns::DATE,
-                    timestamps
-                        .into_iter()
-                        .map(|t| t.into())
-                        .collect::<Vec<Value>>(),
-                ))
-                .fetch()
-                .map_err(|e| e.to_string())?
-                .iter()
-                .map(|s| (s.date, s.workout.clone()))
-                .collect::<HashMap<_, _>>();
+        let workouts = SessionRepository::select()
+            .where_(Where::In(
+                session::entity::columns::DATE,
+                timestamps
+                    .into_iter()
+                    .map(|t| t.into())
+                    .collect::<Vec<Value>>(),
+            ))
+            .fetch_in_tx(tx)?
+            .iter()
+            .map(|s| (s.date, s.workout.clone()))
+            .collect::<HashMap<_, _>>();
 
-            for serie in series {
-                let wk = SessionSerie::from(&serie);
-                let ex_str = format!(
-                    "{}\n{}",
-                    workouts.get(&serie.session).unwrap(),
-                    DateTimeUtils::format_time_date(serie.session)
-                );
+        for serie in series {
+            let wk = SessionSerie::from(&serie);
+            let ex_str = format!(
+                "{}\n{}",
+                workouts.get(&serie.session).unwrap(),
+                DateTimeUtils::format_time_date(serie.session)
+            );
 
-                if !res.workouts.contains(&ex_str) {
-                    res.workouts.push(ex_str.clone());
-                }
-
-                let entry = res.series.entry(ex_str).or_default();
-                entry.push(wk);
+            if !res.workouts.contains(&ex_str) {
+                res.workouts.push(ex_str.clone());
             }
 
-            Ok(res)
-        } else {
-            Err("Could not find exercise".to_string())
+            let entry = res.series.entry(ex_str).or_default();
+            entry.push(wk);
         }
-    };
+
+        Ok(res)
+    });
 
     match res {
         Ok(l) => {
             info!("Found details for exercise {}", l.name);
             Ok(l)
         }
-        Err(e) => {
+        Err(DatabaseError::Transaction(e)) => {
             error!("Error getting exercise details: {}", e);
             show_notification(NotificationDefinition {
                 title: translate!("error_exercise_details"),
-                body: e.to_string(),
+                body: e.deref().to_string(),
                 kind: NotificationKind::Persistant,
             });
-            Err(e)
+            Err(e.deref().to_string())
         }
+        _ => unreachable!(),
     }
 }
 
 pub fn get_1rm_estimation(weight: f64, reps: f64) -> f64 {
-    weight * (reps).powf(0.1)
+    weight * reps.powf(0.1)
 }

@@ -7,7 +7,7 @@ use std::{
 use chrono::{DateTime, Local};
 use fitparser::{FitDataField, FitDataRecord, Value, de::DecodeOption, profile};
 
-use crate::dao::{exercise::Exercise, heart_rate::HeartRate, serie::Serie, session::Session};
+use crate::dao::{exercise::Exercise, serie::Serie, session::Session};
 
 use self::errors::ParseFitFileError;
 
@@ -93,7 +93,7 @@ where
     } else {
         Vec::new()
     };
-    let heart_rates = get_heart_rate(&grouped.records, &timestamp)?;
+    let heart_rates = get_heart_rate(&grouped.records)?;
 
     Ok(Session {
         workout,
@@ -107,8 +107,9 @@ where
         series,
         training_load,
         sub_sport,
+        device: None,
+        device_obj: None,
         heart_rates,
-        ..Default::default()
     })
 }
 
@@ -177,19 +178,12 @@ fn get_sets(grouped: &GroupedEntries, timestamp: &DateTime<Local>) -> errors::Re
     Ok(sets)
 }
 
-fn get_heart_rate(
-    records: &[&FitDataRecord],
-    timestamp: &DateTime<Local>,
-) -> errors::Result<Vec<HeartRate>> {
+fn get_heart_rate(records: &[&FitDataRecord]) -> errors::Result<Vec<u8>> {
     let mut hrs = Vec::new();
 
     records.iter().step_by(4).for_each(|entry| {
         if let Ok(val) = get_u8("heart_rate", entry.fields()) {
-            hrs.push(HeartRate {
-                session: timestamp.timestamp(),
-                idx: hrs.len() as u32,
-                hr: val,
-            });
+            hrs.push(val);
         }
     });
 
