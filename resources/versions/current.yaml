@@ -27,7 +27,7 @@ rust:
   indexmap: 2.14.0
   mtp-rs: 0.29.0
   nusb: 0.2.7
-  rusqlite_orm: 0.4.1
+  rusqlite_orm: 0.4.2
   rusqlite_orm_macros: 0.4.1
   serde: 1.0.229
   serde_json: 1.0.151
