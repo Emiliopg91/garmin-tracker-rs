@@ -4,6 +4,7 @@ import { SessionDetails, SessionSeriesUpdate } from "@/utils/backend/models";
 import { useContext, useEffect, useState } from "react";
 import { Button, Modal } from "react-bootstrap";
 import {
+  Area,
   CartesianGrid,
   ComposedChart,
   Legend,
@@ -24,19 +25,46 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
   const [originalSession] = useState(session);
   const [localSession, setLocalSession] = useState({ ...session });
   const [changed, setChanged] = useState(false);
+  const [minHr, setMinHr] = useState(0);
   const [hrData, setHrData] = useState<
     { idx: number; hr: number; avg: number }[]
   >([]);
-  const [minHr, setMinHr] = useState(0);
 
   useEffect(() => {
-    const hrData: { idx: number; hr: number; avg: number }[] = [];
+    const hrData: {
+      idx: number;
+      hr: number;
+      avg: number;
+      z1: number;
+      z2: number;
+      z3: number;
+      z4: number;
+      z5: number;
+    }[] = [];
     let minHr = 300;
+
+    const maxHr = Math.max(189, session.max_heart_rate);
+    const zones = [
+      maxHr * 0.6,
+      maxHr * 0.7,
+      maxHr * 0.8,
+      maxHr * 0.9,
+      maxHr * 1,
+    ];
 
     if (session.heart_rates && session.heart_rates.length > 0) {
       session.heart_rates.forEach((hr, idx) => {
         minHr = Math.min(minHr, hr);
-        hrData.push({ idx, hr, avg: session.avg_heart_rate });
+        hrData.push({
+          idx,
+          hr,
+          avg: session.avg_heart_rate,
+          z1: zones[0],
+          z2: zones[1] - zones[0],
+          z3: zones[2] - zones[1],
+          z4: zones[3] - zones[2],
+          z5: zones[4] - zones[3],
+        });
       });
     }
 
@@ -146,6 +174,7 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                   <XAxis
                     dataKey="idx"
                     type="number"
+                    domain={["dataMin", "dataMax"]}
                     stroke="#fff"
                     tick={false}
                     height={0}
@@ -153,25 +182,72 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                   <YAxis
                     stroke="#fff"
                     width={0}
-                    domain={[(3 * minHr) / 4, session.max_heart_rate]}
+                    domain={[0.75 * minHr, session.max_heart_rate]}
+                    allowDataOverflow={true}
                     tick={false}
                   />{" "}
                   <Line
                     type="monotone"
                     name={translate("heart_rate")}
                     dataKey="hr"
-                    stroke="red"
+                    stroke="white"
+                    width={10}
                     dot={false}
                     isAnimationActive={false}
                     activeDot={false}
                   />
-                  <Line
+                  <Area
+                    dataKey="z1"
+                    stackId="1"
+                    stroke="none"
                     type="monotone"
-                    name={translate("avg_heart_rate")}
-                    dataKey="avg"
-                    stroke="#ffffff40"
-                    dot={false}
                     legendType="none"
+                    fill="gray"
+                    dot={false}
+                    isAnimationActive={false}
+                    activeDot={false}
+                  />
+                  <Area
+                    dataKey="z2"
+                    stackId="1"
+                    stroke="none"
+                    type="monotone"
+                    legendType="none"
+                    fill="cyan"
+                    dot={false}
+                    isAnimationActive={false}
+                    activeDot={false}
+                  />
+                  <Area
+                    dataKey="z3"
+                    stackId="1"
+                    stroke="none"
+                    type="monotone"
+                    legendType="none"
+                    fill="green"
+                    dot={false}
+                    isAnimationActive={false}
+                    activeDot={false}
+                  />
+                  <Area
+                    dataKey="z4"
+                    stackId="1"
+                    stroke="none"
+                    type="monotone"
+                    legendType="none"
+                    fill="gold"
+                    dot={false}
+                    isAnimationActive={false}
+                    activeDot={false}
+                  />
+                  <Area
+                    dataKey="z5"
+                    stackId="1"
+                    stroke="none"
+                    type="monotone"
+                    legendType="none"
+                    fill="red"
+                    dot={false}
                     isAnimationActive={false}
                     activeDot={false}
                   />
