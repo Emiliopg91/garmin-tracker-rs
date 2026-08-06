@@ -14,7 +14,7 @@ export class BackendClient {
 	}
 	
 
-	// From src-tauri/src/logic/app.rs:28
+	// From src-tauri/src/logic/app.rs:25
 	public static getEnvironment(): Promise<AppEnvironment> {
 	  return BackendClient.inner_invoke("get_environment"); 
 	}

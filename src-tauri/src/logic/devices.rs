@@ -1,11 +1,10 @@
 use garmin_tracker_rs_macros::translate;
 use nusb::hotplug::HotplugEvent;
 use rusqlite_orm::{dao::Repository, database::DATABASE_INST};
-use std::sync::{LazyLock, Mutex};
 use tokio_stream::StreamExt;
 
-use tauri::{AppHandle, Emitter, async_runtime::JoinHandle};
-use tauri_plugin_log::log::{error, info, warn};
+use tauri::{AppHandle, Emitter};
+use tauri_plugin_log::log::{error, info};
 
 use crate::{
     dao::device::{Device, DeviceRepository},
@@ -17,37 +16,28 @@ use crate::{
     mtp::MTP_CLIENT_INST,
 };
 
-static DEVICE_WATCHER: LazyLock<Mutex<Option<JoinHandle<()>>>> = LazyLock::new(|| Mutex::new(None));
+pub fn start_device_watcher(app: AppHandle) {
+    info!("Starting device monitor...");
+    tauri::async_runtime::spawn(async move {
+        let mut devices: Vec<DeviceListItem> = Vec::new();
 
-pub async fn start_device_watcher(app: AppHandle) {
-    let mut watcher = DEVICE_WATCHER.lock().unwrap();
-    if watcher.is_some() {
-        warn!("Device monitor already running")
-    } else {
-        info!("Starting device monitor...");
-        *watcher = Some(tauri::async_runtime::spawn(async move {
-            let mut devices: Vec<DeviceListItem> = Vec::new();
-
-            match nusb::watch_devices() {
-                Ok(w) => {
-                    info!("Device monitor initialized");
-
-                    mtp_dev_check_and_sync(app.clone(), &mut devices).await;
-                    let mut watch = w;
-                    while let Some(event) = watch.next().await {
-                        match event {
-                            HotplugEvent::Connected(_) | HotplugEvent::Disconnected(_) => {
-                                mtp_dev_check_and_sync(app.clone(), &mut devices).await;
-                            }
+        match nusb::watch_devices() {
+            Ok(w) => {
+                mtp_dev_check_and_sync(app.clone(), &mut devices).await;
+                let mut watch = w;
+                while let Some(event) = watch.next().await {
+                    match event {
+                        HotplugEvent::Connected(_) | HotplugEvent::Disconnected(_) => {
+                            mtp_dev_check_and_sync(app.clone(), &mut devices).await;
                         }
                     }
                 }
-                Err(e) => {
-                    error!("Could not initialize device monitor: {e}");
-                }
-            };
-        }));
-    }
+            }
+            Err(e) => {
+                error!("Could not initialize device monitor: {e}");
+            }
+        };
+    });
 }
 
 async fn mtp_dev_check_and_sync(app: AppHandle, devices: &mut Vec<DeviceListItem>) {

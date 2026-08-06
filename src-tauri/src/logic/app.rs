@@ -9,18 +9,15 @@ use tauri_plugin_log::log::info;
 pub async fn notify_frontend_ready(app: AppHandle, webview_window: WebviewWindow) {
     info!("UI ready");
 
-    start_device_watcher(app.clone()).await;
+    start_device_watcher(app.clone());
 
     info!("Showing up main window...");
-    std::thread::spawn(move || {
-        std::thread::sleep(tokio::time::Duration::from_millis(200));
-        let _ = webview_window.set_title(&format!(
-            "{} v{}",
-            webview_window.title().unwrap(),
-            *constants::APP_VERSION
-        ));
-        let _ = webview_window.show();
-    });
+    let _ = webview_window.set_title(&format!(
+        "{} v{}",
+        webview_window.title().unwrap(),
+        *constants::APP_VERSION
+    ));
+    let _ = webview_window.show();
 }
 
 #[traced_command]
