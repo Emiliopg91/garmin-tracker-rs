@@ -13,7 +13,6 @@ export const TRANSLATIONS: Record<string, string> = {
 	"exercises": "Ejercicios",
 	"fat_mass": "Masa grasa",
 	"fat_ratio": "% grasa",
-	"heart_rate": "Frecuencia cardíaca",
 	"import_from_device": "Desde {}",
 	"import_sessions": "Importar sesiones",
 	"imported_from": "Importado desde",

@@ -4,11 +4,10 @@ import { SessionDetails, SessionSeriesUpdate } from "@/utils/backend/models";
 import { useContext, useEffect, useState } from "react";
 import { Button, Modal } from "react-bootstrap";
 import {
-  Area,
+  Bar,
+  BarChart,
   CartesianGrid,
-  ComposedChart,
-  Legend,
-  Line,
+  Rectangle,
   ResponsiveContainer,
   XAxis,
   YAxis,
@@ -25,17 +24,12 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
   const [originalSession] = useState(session);
   const [localSession, setLocalSession] = useState({ ...session });
   const [changed, setChanged] = useState(false);
-  const [minHr, setMinHr] = useState(0);
   const [hrData, setHrData] = useState<
     {
       idx: number;
       hr: number;
       avg: number;
-      z1: number;
-      z2: number;
-      z3: number;
-      z4: number;
-      z5: number;
+      color: string;
     }[]
   >([]);
 
@@ -44,41 +38,35 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
       idx: number;
       hr: number;
       avg: number;
-      z1: number;
-      z2: number;
-      z3: number;
-      z4: number;
-      z5: number;
+      color: string;
     }[] = [];
-    let minHr = 300;
 
     const maxHr = Math.max(189, session.max_heart_rate);
-    const zones = [
-      maxHr * 0.6,
-      maxHr * 0.7,
-      maxHr * 0.8,
-      maxHr * 0.9,
-      maxHr * 1,
-    ];
 
     if (session.heart_rates && session.heart_rates.length > 0) {
       session.heart_rates.forEach((hr, idx) => {
-        minHr = Math.min(minHr, hr);
+        let color = "red";
+
+        const rateVal = (hr * 1.0) / (maxHr * 1.0);
+        if (rateVal <= 0.6) {
+          color = "gray";
+        } else if (rateVal <= 0.7) {
+          color = "cyan";
+        } else if (rateVal <= 0.8) {
+          color = "green";
+        } else if (rateVal <= 0.9) {
+          color = "orange";
+        }
         hrData.push({
-          idx,
+          idx: idx * 2,
           hr,
           avg: session.avg_heart_rate,
-          z1: zones[0],
-          z2: zones[1] - zones[0],
-          z3: zones[2] - zones[1],
-          z4: zones[3] - zones[2],
-          z5: zones[4] - zones[3],
+          color,
         });
       });
     }
 
     setHrData(hrData);
-    setMinHr(minHr);
   }, []);
 
   const updateSerieReps = (exercise: string, idx: number, newVal: string) => {
@@ -175,93 +163,26 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
           {hrData.length > 0 && (
             <div style={{ width: "100%", height: 200 }}>
               <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart
+                <BarChart
                   data={hrData}
                   margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
+                  barCategoryGap={0}
                 >
                   <CartesianGrid stroke="#80808000" strokeDasharray="5 5" />
-                  <XAxis
-                    dataKey="idx"
-                    type="number"
-                    domain={["dataMin", "dataMax"]}
-                    stroke="#fff"
-                    tick={false}
-                    height={0}
-                  />
-                  <YAxis
-                    stroke="#fff"
-                    width={0}
-                    domain={[0.75 * minHr, session.max_heart_rate]}
-                    allowDataOverflow={true}
-                    tick={false}
-                  />{" "}
-                  <Line
-                    type="monotone"
-                    name={translate("heart_rate")}
+                  <XAxis dataKey="idx" tick={false} />
+                  <YAxis width="auto" />
+                  <Bar
                     dataKey="hr"
-                    stroke="white"
-                    width={10}
-                    dot={false}
                     isAnimationActive={false}
-                    activeDot={false}
+                    shape={(props) => (
+                      <Rectangle
+                        {...props}
+                        fill={props.payload.color}
+                        stroke={props.payload.color}
+                      />
+                    )}
                   />
-                  <Area
-                    dataKey="z1"
-                    stackId="1"
-                    stroke="none"
-                    type="monotone"
-                    legendType="none"
-                    fill="gray"
-                    dot={false}
-                    isAnimationActive={false}
-                    activeDot={false}
-                  />
-                  <Area
-                    dataKey="z2"
-                    stackId="1"
-                    stroke="none"
-                    type="monotone"
-                    legendType="none"
-                    fill="cyan"
-                    dot={false}
-                    isAnimationActive={false}
-                    activeDot={false}
-                  />
-                  <Area
-                    dataKey="z3"
-                    stackId="1"
-                    stroke="none"
-                    type="monotone"
-                    legendType="none"
-                    fill="green"
-                    dot={false}
-                    isAnimationActive={false}
-                    activeDot={false}
-                  />
-                  <Area
-                    dataKey="z4"
-                    stackId="1"
-                    stroke="none"
-                    type="monotone"
-                    legendType="none"
-                    fill="gold"
-                    dot={false}
-                    isAnimationActive={false}
-                    activeDot={false}
-                  />
-                  <Area
-                    dataKey="z5"
-                    stackId="1"
-                    stroke="none"
-                    type="monotone"
-                    legendType="none"
-                    fill="red"
-                    dot={false}
-                    isAnimationActive={false}
-                    activeDot={false}
-                  />
-                  <Legend />
-                </ComposedChart>
+                </BarChart>
               </ResponsiveContainer>
             </div>
           )}
