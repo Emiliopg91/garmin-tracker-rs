@@ -198,5 +198,8 @@ fn generate_translations_typescript(translations: HashMap<String, String>) {
     if !fs::exists(&utils_dir).unwrap() {
         fs::create_dir_all(&utils_dir).unwrap();
     }
-    fs::write(utils_dir.join("translations.ts"), content).unwrap();
+    let translations_ts_path = utils_dir.join("translations.ts");
+    if fs::read_to_string(&translations_ts_path).ok().as_deref() != Some(content.as_str()) {
+        fs::write(translations_ts_path, content).unwrap();
+    }
 }
