@@ -182,7 +182,7 @@ fn get_sets(grouped: &GroupedEntries, timestamp: &DateTime<Local>) -> errors::Re
 fn get_heart_rate(records: &[&FitDataRecord]) -> errors::Result<Vec<u8>> {
     let mut hrs = Vec::new();
 
-    records.iter().step_by(2).for_each(|entry| {
+    records.iter().step_by(4).for_each(|entry| {
         if let Ok(val) = get_u8("heart_rate", entry.fields()) {
             hrs.push(val);
         }
