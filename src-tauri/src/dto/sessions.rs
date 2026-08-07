@@ -52,6 +52,8 @@ impl Hash for SessionListItem {
 
 #[derive(Serialize, Deserialize)]
 pub struct SessionSerie {
+    pub ex_cat: String,
+    pub ex_id: u16,
     pub idx: u8,
     pub reps: u16,
     pub weight: f64,
@@ -60,6 +62,8 @@ pub struct SessionSerie {
 impl From<&Serie> for SessionSerie {
     fn from(value: &Serie) -> Self {
         Self {
+            ex_cat: value.ex_cat.clone(),
+            ex_id: value.ex_id,
             idx: value.idx,
             reps: value.reps,
             weight: value.weight,

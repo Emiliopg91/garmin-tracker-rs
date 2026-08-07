@@ -168,6 +168,7 @@ pub fn save_session_changes(details: SessionSeriesUpdate) -> Result<(), String> 
             .to_rfc3339()
     );
     let res = DATABASE_INST.lock().unwrap().run_in_tx(|tx| {
+        let mut exercises = HashSet::new();
         for serie in &details.series {
             SerieRepository::update()
                 .set(entity::columns::REPS, serie.reps.into())
@@ -177,8 +178,9 @@ pub fn save_session_changes(details: SessionSeriesUpdate) -> Result<(), String> 
                     Where::Eq(entity::columns::IDX, serie.idx.into()),
                 ]))
                 .execute_in_tx(tx)?;
+            exercises.insert((serie.ex_cat.clone(), serie.ex_id));
         }
-        update_prs(tx)?;
+        update_prs(tx, exercises)?;
         Ok(())
     });
 
@@ -273,6 +275,7 @@ where
     F: AsRef<Path>,
 {
     let mut success = 0_u16;
+    let mut handled_exercises = HashSet::new();
 
     let mut latest: Option<i64> = None;
     for file in files {
@@ -297,8 +300,9 @@ where
                     for serie in &session.series {
                         let exercise = serie.exercise.clone().unwrap();
                         if seen.insert(exercise.clone()) {
-                            insert = insert.item(exercise);
+                            insert = insert.item(exercise.clone());
                         }
+                        handled_exercises.insert((exercise.category, exercise.id));
                     }
                     if !seen.is_empty() {
                         insert.execute_in_tx(tx)?;
@@ -338,10 +342,6 @@ where
             }
         };
 
-        if success > 0 {
-            update_prs(tx)?;
-        }
-
         match res {
             Ok(added) if added => {
                 info!("Session imported succesfully");
@@ -365,42 +365,56 @@ where
         }
     }
 
+    if success > 0 {
+        update_prs(tx, handled_exercises)?;
+    }
+
     Ok(success)
 }
 
 fn update_prs(
     tx: &rusqlite_orm::rusqlite::Transaction,
+    exercises: HashSet<(String, u16)>,
 ) -> rusqlite_orm::database::errors::Result<()> {
-    let mut update_conditions = vec![];
-    let exercises = ExerciseRepository::select()
-        .order_by(OrderBy::Asc(exercise::entity::columns::NAME))
-        .fetch_in_tx(tx)?;
+    let mut update_false_conditions = vec![];
+    let mut update_true_conditions = vec![];
     for exer in &exercises {
-        if let Some(pr) = SerieRepository::select_by_exercise_in_tx(
-            tx,
-            &exer.category,
-            exer.id,
-            Some(&[
-                OrderBy::Desc(entity::columns::WEIGHT),
-                OrderBy::Desc(entity::columns::REPS),
-                OrderBy::Asc(entity::columns::SESSION),
-            ]),
-        )?
-        .first()
+        update_false_conditions.push(vec![exer.0.clone().into(), exer.1.into()]);
+        if let Some(pr) = SerieRepository::select()
+            .where_(Where::And(vec![
+                Where::Eq(serie::entity::columns::EX_CAT, exer.0.clone().into()),
+                Where::Eq(serie::entity::columns::EX_ID, exer.1.into()),
+            ]))
+            .order_by(OrderBy::Desc(entity::columns::WEIGHT))
+            .order_by(OrderBy::Desc(entity::columns::REPS))
+            .order_by(OrderBy::Asc(entity::columns::SESSION))
+            .order_by(OrderBy::Asc(entity::columns::IDX))
+            .limit(1)
+            .fetch_one_in_tx(tx)?
         {
-            update_conditions.push(vec![pr.session.into(), pr.idx.into()]);
+            update_true_conditions.push(vec![pr.session.into(), pr.idx.into()]);
         }
     }
 
-    if !update_conditions.is_empty() {
+    if !update_true_conditions.is_empty() {
         SerieRepository::update()
             .set(serie::entity::columns::PR, false.into())
+            .where_(Where::And(vec![
+                Where::InMultiple(
+                    vec![
+                        serie::entity::columns::EX_CAT,
+                        serie::entity::columns::EX_ID,
+                    ],
+                    update_false_conditions,
+                ),
+                Where::Eq(serie::entity::columns::PR, true.into()),
+            ]))
             .execute_in_tx(tx)?;
         SerieRepository::update()
             .set(serie::entity::columns::PR, true.into())
             .where_(Where::InMultiple(
                 vec![serie::entity::columns::SESSION, serie::entity::columns::IDX],
-                update_conditions,
+                update_true_conditions,
             ))
             .execute_in_tx(tx)?;
     }
