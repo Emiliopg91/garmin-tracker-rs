@@ -1,10 +1,10 @@
 import { BackendClient } from "@/utils/backend/client";
 import { useContext, useEffect, useState } from "react";
 import { AppContext } from "@/context/AppContext";
-import { UserListItem } from "@/utils/backend/models";
-import { UserDetailsModal } from "./UserDetailsModal";
+import { BodyMetricListItem } from "@/utils/backend/models";
+import { BodyMetricsDetailsModal } from "./BodyMetricsDetailsModal";
 import { Button } from "react-bootstrap";
-import { UserAddModal } from "./UserAddModal";
+import { BodyMetricsAddModal } from "./BodyMetricsAddModal";
 import {
   CartesianGrid,
   Legend,
@@ -22,13 +22,13 @@ type ChartDataType = {
   weight: number;
 }[];
 
-export function UserList() {
+export function BodyMetricList() {
   const { startLoading, finishLoading, translate } = useContext(AppContext);
 
-  const [userMeasures, setUserMeasures] = useState<UserListItem[]>([]);
+  const [bodyMetrics, setBodyMetrics] = useState<BodyMetricListItem[]>([]);
   const [addingNew, setAddingNew] = useState(false);
   const [measureDetails, setMeasureDetails] = useState<
-    UserListItem | undefined
+    BodyMetricListItem | undefined
   >(undefined);
 
   const [chartData, setChartData] = useState<ChartDataType>([]);
@@ -47,9 +47,9 @@ export function UserList() {
 
   const refreshList = () => {
     startLoading();
-    BackendClient.getUserMeasures()
+    BackendClient.getBodyMeasures()
       .then((data) => {
-        setUserMeasures(data);
+        setBodyMetrics(data);
         const newChartData: ChartDataType = [];
         const data_c = [...data];
         data_c.reverse();
@@ -109,13 +109,13 @@ export function UserList() {
     refreshList();
   }, []);
 
-  const openModal = (details: UserListItem) => {
+  const openModal = (details: BodyMetricListItem) => {
     setMeasureDetails(details);
   };
 
   return (
     <>
-      {userMeasures.length > 0 && (
+      {bodyMetrics.length > 0 && (
         <>
           <div style={{ width: "100%", height: 200 }}>
             <ResponsiveContainer width="100%" height="100%">
@@ -204,7 +204,7 @@ export function UserList() {
             </tr>
           </thead>
           <tbody>
-            {userMeasures.map((measure, idx) => (
+            {bodyMetrics.map((measure, idx) => (
               <tr
                 key={idx}
                 style={{ cursor: "pointer" }}
@@ -223,18 +223,18 @@ export function UserList() {
 
       <div>
         {measureDetails && (
-          <UserDetailsModal
+          <BodyMetricsDetailsModal
             measures={measureDetails}
             onClose={() => setMeasureDetails(undefined)}
           />
         )}
         {addingNew && (
-          <UserAddModal
+          <BodyMetricsAddModal
             onClose={() => {
               setAddingNew(false);
               refreshList();
             }}
-            latest={userMeasures.length > 0 ? userMeasures[0] : undefined}
+            latest={bodyMetrics.length > 0 ? bodyMetrics[0] : undefined}
           />
         )}
       </div>

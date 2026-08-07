@@ -8,22 +8,22 @@ use rusqlite_orm::{
 use tauri_plugin_log::log::{error, info};
 
 use crate::{
-    dao::user::{self, User, UserRepository},
+    dao::body_metrics::{self, BodyMetrics, BodyMetricsRepository},
     dto::{
+        body_metrics::BodyMetricListItem,
         notifications::{NotificationDefinition, NotificationKind},
-        user::UserListItem,
     },
     logic::notifications::show_notification,
 };
 
 #[traced_command]
 #[tauri::command]
-pub fn get_user_measures() -> Result<Vec<UserListItem>, String> {
-    info!("Getting user measures list...");
+pub fn get_body_measures() -> Result<Vec<BodyMetricListItem>, String> {
+    info!("Getting body measures list...");
 
     let res = DATABASE_INST.lock().unwrap().run_in_tx(|tx| {
-        let regs = UserRepository::select()
-            .order_by(OrderBy::Desc(user::entity::columns::DATE))
+        let regs = BodyMetricsRepository::select()
+            .order_by(OrderBy::Desc(body_metrics::entity::columns::DATE))
             .fetch_in_tx(tx)?;
 
         Ok(regs)
@@ -33,8 +33,8 @@ pub fn get_user_measures() -> Result<Vec<UserListItem>, String> {
         Ok(regs) => {
             let res = regs
                 .iter()
-                .map(UserListItem::from)
-                .collect::<Vec<UserListItem>>();
+                .map(BodyMetricListItem::from)
+                .collect::<Vec<BodyMetricListItem>>();
 
             info!("Retrieved {} measures", res.len());
             Ok(res)
@@ -42,7 +42,7 @@ pub fn get_user_measures() -> Result<Vec<UserListItem>, String> {
         Err(DatabaseError::Transaction(e)) => {
             error!("Error getting measures list: {}", e);
             show_notification(NotificationDefinition {
-                title: translate!("error_measures_list"),
+                title: translate!("error_body_measures_list"),
                 body: e.deref().to_string(),
                 kind: NotificationKind::Persistant,
             });
@@ -54,13 +54,15 @@ pub fn get_user_measures() -> Result<Vec<UserListItem>, String> {
 
 #[traced_command]
 #[tauri::command]
-pub fn add_user_measures(measures: UserListItem) -> Result<(), String> {
-    info!("Adding user measures list...");
+pub fn add_body_measures(measures: BodyMetricListItem) -> Result<(), String> {
+    info!("Adding body measures list...");
 
     let res = DATABASE_INST.lock().unwrap().run_in_tx(|tx| {
-        let entry = User::try_from(&measures).map_err(DatabaseError::Transaction)?;
+        let entry = BodyMetrics::try_from(&measures).map_err(DatabaseError::Transaction)?;
 
-        UserRepository::insert().item(entry).execute_in_tx(tx)?;
+        BodyMetricsRepository::insert()
+            .item(entry)
+            .execute_in_tx(tx)?;
 
         Ok(())
     });
@@ -73,7 +75,7 @@ pub fn add_user_measures(measures: UserListItem) -> Result<(), String> {
         Err(DatabaseError::Transaction(e)) => {
             error!("Error adding measures: {}", e);
             show_notification(NotificationDefinition {
-                title: translate!("error_adding_measures"),
+                title: translate!("error_adding_body_measures"),
                 body: e.deref().to_string(),
                 kind: NotificationKind::Persistant,
             });

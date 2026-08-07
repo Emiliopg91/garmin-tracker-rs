@@ -28,10 +28,10 @@ ok_update_session:
 error_update_session:
   en: Error updating session
   es: Error actualizando sesión
-error_measures_list:
+error_body_measures_list:
   en: Error getting measures list
   es: Error obteniendo lista de mediciones
-error_adding_measures:
+error_adding_body_measures:
   en: Error adding measures
   es: Error añadiendo mediciones
 error_workout_details:
@@ -46,9 +46,9 @@ sessions:
 workouts:
   en: Workouts
   en: Entrenamientos
-user:
-  en: User
-  en: Usuario
+body_metrics:
+  en: Body
+  en: Físico
 workload:
   en: Workload
   es: Carga

@@ -1,18 +1,18 @@
 import { AppContext } from "@/context/AppContext";
 import { BackendClient } from "@/utils/backend/client";
-import { UserListItem } from "@/utils/backend/models";
+import { BodyMetricListItem } from "@/utils/backend/models";
 import { useContext, useState } from "react";
 import { Button, Modal } from "react-bootstrap";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
 type Props = {
-  latest: UserListItem | undefined;
+  latest: BodyMetricListItem | undefined;
   onClose: () => void;
 };
 
-type UserListItemForm = Omit<
-  UserListItem,
+type BodyMetricsListItemForm = Omit<
+  BodyMetricListItem,
   "date" | "weight" | "fat_ratio" | "lean_mass" | "water_ratio"
 > & {
   date: Date;
@@ -22,9 +22,9 @@ type UserListItemForm = Omit<
   water_ratio: string;
 };
 
-export function UserAddModal({ latest, onClose }: Props) {
+export function BodyMetricsAddModal({ latest, onClose }: Props) {
   const { translate } = useContext(AppContext);
-  const [data, setData] = useState<UserListItemForm>(
+  const [data, setData] = useState<BodyMetricsListItemForm>(
     latest
       ? {
           date: new Date(),
@@ -42,7 +42,7 @@ export function UserAddModal({ latest, onClose }: Props) {
         },
   );
 
-  const onPropChange = <K extends keyof UserListItemForm>(
+  const onPropChange = <K extends keyof BodyMetricsListItemForm>(
     e: string | Date,
     prop: K,
   ) => {
@@ -65,7 +65,7 @@ export function UserAddModal({ latest, onClose }: Props) {
 
   const onSave = () => {
     const dateStr = `00:00 ${String(data.date.getDate()).padStart(2, "0")}/${String(data.date.getMonth() + 1).padStart(2, "0")}/${data.date.getFullYear()}`;
-    BackendClient.addUserMeasures({
+    BackendClient.addBodyMeasures({
       date: dateStr,
       weight: parseFloat(data.weight),
       fat_ratio: parseFloat(data.fat_ratio),

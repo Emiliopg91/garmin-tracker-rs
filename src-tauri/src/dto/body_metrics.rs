@@ -1,10 +1,10 @@
 use chrono::{DateTime, Local, NaiveDateTime, TimeZone};
 use serde::{Deserialize, Serialize};
 
-use crate::{dao::user::User, utils::date_time_utils::DateTimeUtils};
+use crate::{dao::body_metrics::BodyMetrics, utils::date_time_utils::DateTimeUtils};
 
 #[derive(Serialize, Deserialize)]
-pub struct UserListItem {
+pub struct BodyMetricListItem {
     pub date: String,
     pub weight: f32,
     pub fat_ratio: f32,
@@ -12,8 +12,8 @@ pub struct UserListItem {
     pub water_ratio: f32,
 }
 
-impl From<&User> for UserListItem {
-    fn from(value: &User) -> Self {
+impl From<&BodyMetrics> for BodyMetricListItem {
+    fn from(value: &BodyMetrics) -> Self {
         Self {
             date: DateTimeUtils::format_date(value.date),
             weight: value.weight,
@@ -24,10 +24,10 @@ impl From<&User> for UserListItem {
     }
 }
 
-impl TryFrom<&UserListItem> for User {
+impl TryFrom<&BodyMetricListItem> for BodyMetrics {
     type Error = Box<dyn std::error::Error>;
 
-    fn try_from(value: &UserListItem) -> Result<Self, Self::Error> {
+    fn try_from(value: &BodyMetricListItem) -> Result<Self, Self::Error> {
         let naive = NaiveDateTime::parse_from_str(&value.date, "%H:%M %d/%m/%Y")?;
         let local: DateTime<Local> = Local
             .from_local_datetime(&naive)

@@ -2,15 +2,21 @@
 
 import { invoke, InvokeArgs } from "@tauri-apps/api/core";
 
-import { AppEnvironment, ExerciseDetails, ExerciseListItem, SessionDetails, SessionListItem, SessionSeriesUpdate, UserListItem, WorkoutDetails, WorkoutListItem } from "./models";
+import { AppEnvironment, BodyMetricListItem, ExerciseDetails, ExerciseListItem, SessionDetails, SessionListItem, SessionSeriesUpdate, WorkoutDetails, WorkoutListItem } from "./models";
 
 export class BackendClient {
 
     private static DONT_LOG_COMMANDS: string[] = [];
 
-	// From src-tauri/src/logic/user.rs:57
-	public static addUserMeasures(measures: UserListItem): Promise<void> {
-	  return BackendClient.inner_invoke("add_user_measures", { measures }); 
+	// From src-tauri/src/logic/body_metrics.rs:57
+	public static addBodyMeasures(measures: BodyMetricListItem): Promise<void> {
+	  return BackendClient.inner_invoke("add_body_measures", { measures }); 
+	}
+	
+
+	// From src-tauri/src/logic/body_metrics.rs:21
+	public static getBodyMeasures(): Promise<BodyMetricListItem[]> {
+	  return BackendClient.inner_invoke("get_body_measures"); 
 	}
 	
 
@@ -41,12 +47,6 @@ export class BackendClient {
 	// From src-tauri/src/logic/sessions.rs:38
 	public static getSessions(): Promise<SessionListItem[]> {
 	  return BackendClient.inner_invoke("get_sessions"); 
-	}
-	
-
-	// From src-tauri/src/logic/user.rs:21
-	public static getUserMeasures(): Promise<UserListItem[]> {
-	  return BackendClient.inner_invoke("get_user_measures"); 
 	}
 	
 

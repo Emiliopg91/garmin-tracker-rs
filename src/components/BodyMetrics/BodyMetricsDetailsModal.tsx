@@ -1,14 +1,14 @@
 import { AppContext } from "@/context/AppContext";
-import { UserListItem } from "@/utils/backend/models";
+import { BodyMetricListItem } from "@/utils/backend/models";
 import { useContext } from "react";
 import { Modal } from "react-bootstrap";
 
 type Props = {
-  measures: UserListItem;
+  measures: BodyMetricListItem;
   onClose: () => void;
 };
 
-export function UserDetailsModal({ measures, onClose }: Props) {
+export function BodyMetricsDetailsModal({ measures, onClose }: Props) {
   const { translate } = useContext(AppContext);
   return (
     <div

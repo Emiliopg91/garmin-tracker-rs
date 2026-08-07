@@ -2,6 +2,6 @@ export enum Tabs {
   SESSIONS = 0,
   WORKOUTS,
   EXERCISES,
-  USER,
+  BODY_METRICS,
   OPTIONS,
 }

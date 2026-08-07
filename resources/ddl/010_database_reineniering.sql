@@ -1,4 +1,4 @@
---- Move heart rate data to session table
+--- Database reingeniering
 ALTER TABLE session ADD COLUMN heart_rates BLOB;
 
 UPDATE session
@@ -10,3 +10,5 @@ SET heart_rates = (
 WHERE date IN (SELECT DISTINCT session FROM heart_rate);
 
 DROP TABLE heart_rate;
+
+ALTER TABLE USER RENAME TO BODY_METRICS;

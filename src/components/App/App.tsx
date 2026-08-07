@@ -5,7 +5,7 @@ import "@/styles/app.css";
 import { Tabs } from "@/models/tabs";
 import { SessionsList } from "../Sessions/SessionList";
 import { ExercisesList } from "../Exercises/ExercisesList";
-import { UserList } from "../User/UserList";
+import { BodyMetricList } from "../BodyMetrics/BodyMetricList";
 import { Loading } from "../Loading/Loading";
 import { WorkoutsList } from "../Workouts/WorkoutList";
 
@@ -35,11 +35,11 @@ export function App(): JSX.Element {
       selected: tab == Tabs.EXERCISES,
     },
     {
-      label: translate("user"),
+      label: translate("body_metrics"),
       onSelected: () => {
-        setTab(Tabs.USER);
+        setTab(Tabs.BODY_METRICS);
       },
-      selected: tab == Tabs.USER,
+      selected: tab == Tabs.BODY_METRICS,
     },
   ];
 
@@ -56,7 +56,7 @@ export function App(): JSX.Element {
               {tab == Tabs.SESSIONS && <SessionsList />}
               {tab == Tabs.EXERCISES && <ExercisesList />}
               {tab == Tabs.WORKOUTS && <WorkoutsList />}
-              {tab == Tabs.USER && <UserList />}
+              {tab == Tabs.BODY_METRICS && <BodyMetricList />}
             </div>
           </>
         )}

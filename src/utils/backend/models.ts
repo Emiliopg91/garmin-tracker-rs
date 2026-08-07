@@ -6,6 +6,15 @@ export enum AppEnvironment {
 	Release = "Release",
 }
 
+// From src-tauri/src/dto/body_metrics.rs:7
+export interface BodyMetricListItem {
+  date: string;
+  fat_ratio: number;
+  lean_mass: number;
+  water_ratio: number;
+  weight: number;
+}
+
 // From src-tauri/src/dto/devices.rs:7
 export interface DeviceListItem {
   manufacturer: string;
@@ -78,15 +87,6 @@ export interface SessionSerie {
 export interface SessionSeriesUpdate {
   series: SessionSerie[];
   timestamp: string;
-}
-
-// From src-tauri/src/dto/user.rs:7
-export interface UserListItem {
-  date: string;
-  fat_ratio: number;
-  lean_mass: number;
-  water_ratio: number;
-  weight: number;
 }
 
 // From src-tauri/src/dto/workouts.rs:39

@@ -1,8 +1,9 @@
 use rusqlite_orm_macros::Entity;
 
 #[derive(Entity)]
+#[entity("body_metrics")]
 #[primary_key(date)]
-pub struct User {
+pub struct BodyMetrics {
     pub date: i64,
     pub weight: f32,
     pub fat_ratio: f32,
