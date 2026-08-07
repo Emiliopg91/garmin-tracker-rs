@@ -6,6 +6,7 @@ use std::{
 
 use chrono::{DateTime, Local};
 use fitparser::{FitDataField, FitDataRecord, Value, de::DecodeOption, profile};
+use garmin_tracker_rs_macros::translate;
 
 use crate::dao::{exercise::Exercise, serie::Serie, session::Session};
 
@@ -212,9 +213,10 @@ fn get_steps(
                 .get(&(ex_id, ex_cat.as_str()))
                 .map(|e| Some((*e).clone()))
                 .ok_or_else(|| {
-                    ParseFitFileError::GenericError(format!(
-                        "Unknown exercise with category {} and id {}",
-                        ex_cat, ex_id
+                    ParseFitFileError::GenericError(translate!(
+                        "error_parser_unknown_exercise",
+                        ex_cat,
+                        ex_id
                     ))
                 })
         })

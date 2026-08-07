@@ -190,3 +190,45 @@ error_parsing_session:
 imported_from:
   en: Imported from
   es: Importado desde
+error_mtp_list_devices:
+  en: "Cannot list devices: {}"
+  es: "No se pueden listar los dispositivos: {}"
+error_mtp_open_device:
+  en: "Cannot open device {}: {}"
+  es: "No se puede abrir el dispositivo {}: {}"
+error_mtp_storage:
+  en: "Cannot access storage: {}"
+  es: "No se puede acceder al almacenamiento: {}"
+error_mtp_list_files:
+  en: "Cannot list files: {}"
+  es: "No se pueden listar los archivos: {}"
+error_mtp_download_file:
+  en: "Cannot download file GARMIN/Activity/{}: {}"
+  es: "No se puede descargar el archivo GARMIN/Activity/{}: {}"
+error_mtp_write_data:
+  en: "Cannot write data to {}: {}"
+  es: "No se pueden escribir datos en {}: {}"
+error_mtp_missing_device:
+  en: Cannot find device with serial number {}
+  es: No se encuentra el dispositivo con número de serie {}
+error_mtp_no_storage_device:
+  en: No storage for device with serial number {}
+  es: No hay almacenamiento para el dispositivo con número de serie {}
+error_mtp_creating_download_folder:
+  en: "Error creating download folder {}: {}"
+  es: "Error creando la carpeta de descarga {}: {}"
+error_parser_file_opening:
+  en: "Error while opening file {}: {}"
+  es: "Error al abrir el archivo {}: {}"
+error_parser_file_reading:
+  en: "Error while reading file {}: {}"
+  es: "Error al leer el archivo {}: {}"
+error_parser_missing_field:
+  en: Missing {} field
+  es: Falta el campo {}
+error_parser_invalid_field_value:
+  en: "Invalid {} field format: expected {}"
+  es: "Formato de campo {} inválido: se esperaba {}"
+error_parser_unknown_exercise:
+  en: Unknown exercise with category {} and id {}
+  es: Ejercicio desconocido con categoría {} e id {}

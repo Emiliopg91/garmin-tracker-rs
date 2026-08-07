@@ -27,7 +27,16 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
   const [changed, setChanged] = useState(false);
   const [minHr, setMinHr] = useState(0);
   const [hrData, setHrData] = useState<
-    { idx: number; hr: number; avg: number }[]
+    {
+      idx: number;
+      hr: number;
+      avg: number;
+      z1: number;
+      z2: number;
+      z3: number;
+      z4: number;
+      z5: number;
+    }[]
   >([]);
 
   useEffect(() => {
