@@ -8,7 +8,7 @@ use chrono::{DateTime, Local};
 use fitparser::{FitDataField, FitDataRecord, Value, de::DecodeOption, profile};
 use garmin_tracker_rs_macros::translate;
 
-use crate::dao::{exercise::Exercise, serie::Serie, session::Session};
+use crate::dao::{exercise::Exercise, heart_rate::HeartRate, serie::Serie, session::Session};
 
 use self::errors::ParseFitFileError;
 
@@ -94,7 +94,7 @@ where
     } else {
         Vec::new()
     };
-    let heart_rates = get_heart_rate(&grouped.records)?;
+    let heart_rates = get_heart_rate(&timestamp, &grouped.records)?;
 
     Ok(Session {
         workout,
@@ -179,7 +179,10 @@ fn get_sets(grouped: &GroupedEntries, timestamp: &DateTime<Local>) -> errors::Re
     Ok(sets)
 }
 
-fn get_heart_rate(records: &[&FitDataRecord]) -> errors::Result<Vec<u8>> {
+fn get_heart_rate(
+    timestamp: &DateTime<Local>,
+    records: &[&FitDataRecord],
+) -> errors::Result<Option<HeartRate>> {
     let mut hrs = Vec::new();
 
     records.iter().step_by(4).for_each(|entry| {
@@ -188,7 +191,14 @@ fn get_heart_rate(records: &[&FitDataRecord]) -> errors::Result<Vec<u8>> {
         }
     });
 
-    Ok(hrs)
+    Ok(if hrs.is_empty() {
+        None
+    } else {
+        Some(HeartRate {
+            session: timestamp.timestamp(),
+            records: hrs,
+        })
+    })
 }
 
 fn get_steps(

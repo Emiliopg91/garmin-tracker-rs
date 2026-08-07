@@ -20,6 +20,7 @@ use crate::{
     dao::{
         device::{Device, DeviceRepository},
         exercise::{self, Exercise, ExerciseRepository},
+        heart_rate::HeartRateRepository,
         serie::{self, Serie, SerieRepository, entity},
         session::{self, SessionRepository},
     },
@@ -99,6 +100,7 @@ pub fn get_session_details(timestamp: i64) -> Result<SessionDetails, String> {
         if session.device.is_some() {
             session.fetch_device_obj_relationship_in_tx(tx)?;
         }
+        session.fetch_heart_rates_relationship_in_tx(tx)?;
 
         let condition_set: HashSet<(_, _)> = session
             .series
@@ -316,6 +318,12 @@ where
                     }
                     if count > 0 {
                         insert.execute_in_tx(tx)?;
+                    }
+
+                    if let Some(heart_rates) = session.heart_rates {
+                        HeartRateRepository::insert()
+                            .item(heart_rates.clone())
+                            .execute_in_tx(tx)?;
                     }
 
                     true

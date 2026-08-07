@@ -51,7 +51,7 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
         if (rateVal <= 0.6) {
           color = "gray";
         } else if (rateVal <= 0.7) {
-          color = "cyan";
+          color = "turquoise";
         } else if (rateVal <= 0.8) {
           color = "green";
         } else if (rateVal <= 0.9) {

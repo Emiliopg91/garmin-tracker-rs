@@ -1,14 +1,23 @@
 --- Database reingeniering
-ALTER TABLE session ADD COLUMN heart_rates BLOB;
 
-UPDATE session
-SET heart_rates = (
-    SELECT unhex(GROUP_CONCAT(printf('%02x', hr), '' ORDER BY idx))
-    FROM heart_rate
-    WHERE heart_rate.session = session.date
-)
-WHERE date IN (SELECT DISTINCT session FROM heart_rate);
+ALTER TABLE HEART_RATE RENAME TO OLD_HEART_RATE;
 
-DROP TABLE heart_rate;
+CREATE TABLE IF NOT EXISTS HEART_RATE(
+    session INTEGER NOT NULL,
+    records BLOB NOT NULL,
+
+    PRIMARY KEY(session),
+
+    FOREIGN KEY(session) REFERENCES SESSION(date) ON DELETE CASCADE
+);
+
+INSERT INTO HEART_RATE (session, records)
+SELECT
+    session,
+    unhex(GROUP_CONCAT(printf('%02x', hr), '' ORDER BY idx))
+FROM OLD_HEART_RATE
+GROUP BY session;
+
+DROP TABLE OLD_HEART_RATE;
 
 ALTER TABLE USER RENAME TO BODY_METRICS;

@@ -2,6 +2,7 @@ use rusqlite_orm_macros::Entity;
 
 use crate::dao::{
     device::{self, Device},
+    heart_rate::{self, HeartRate},
     serie,
 };
 
@@ -22,11 +23,13 @@ pub struct Session {
     pub training_load: f64,
     pub sub_sport: String,
     pub device: Option<String>,
-    pub heart_rates: Vec<u8>,
 
     #[relationship((date, serie::entity::columns::SESSION))]
     pub series: Vec<Serie>,
 
     #[relationship((device, device::entity::columns::SERIAL))]
     pub device_obj: Option<Device>,
+
+    #[relationship((date, heart_rate::entity::columns::SESSION))]
+    pub heart_rates: Option<HeartRate>,
 }

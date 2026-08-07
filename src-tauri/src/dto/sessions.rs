@@ -118,6 +118,11 @@ impl From<(&Session, &IndexMap<Exercise, Vec<Serie>>)> for SessionDetails {
             .as_ref()
             .map(|dev| format!("Garmin {}", dev.model));
 
+        let mut heart_rates = Vec::new();
+        if let Some(hr_dao) = value.0.heart_rates.clone() {
+            heart_rates = hr_dao.records.clone();
+        }
+
         Self {
             name: value.0.workout.clone(),
             date: DateTimeUtils::format_time_date(value.0.date),
@@ -132,7 +137,7 @@ impl From<(&Session, &IndexMap<Exercise, Vec<Serie>>)> for SessionDetails {
             sub_sport: value.0.sub_sport.clone(),
             exercises,
             series: series_d,
-            heart_rates: value.0.heart_rates.clone(),
+            heart_rates,
             device,
         }
     }
