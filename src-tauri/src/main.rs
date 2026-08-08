@@ -9,7 +9,7 @@ fn main() {
             std::env::set_var("GTRS-UNWRAP-PATH", args.get(2).unwrap());
         }
     } else {
-        if std::env::var("IN_DEBUG").is_ok() {
+        if std::env::var("IN_DEBUG").is_err() {
             tauri_rs_ts_ipc::build();
         }
     }

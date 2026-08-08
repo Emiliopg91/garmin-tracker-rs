@@ -23,6 +23,7 @@ pub struct Session {
     pub training_load: f64,
     pub sub_sport: String,
     pub device: Option<String>,
+    pub volume: f64,
 
     #[relationship((date, serie::entity::columns::SESSION))]
     pub series: Vec<Serie>,

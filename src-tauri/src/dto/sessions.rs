@@ -21,18 +21,12 @@ pub struct SessionListItem {
 
 impl From<&Session> for SessionListItem {
     fn from(value: &Session) -> Self {
-        let mut volume = 0_f64;
-
-        for serie in &value.series {
-            volume += (serie.reps as f64) * serie.weight
-        }
-
         Self {
             name: value.workout.clone(),
             date: DateTimeUtils::format_time_date(value.date),
             timestamp: value.date,
             active_calories: value.total_calories - value.metabolic_calories,
-            volume,
+            volume: value.volume,
             training_load: value.training_load.round() as u16,
             sub_sport: value.sub_sport.clone(),
         }

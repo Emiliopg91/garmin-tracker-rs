@@ -39,27 +39,9 @@ use crate::{
 pub fn get_sessions() -> Result<Vec<SessionListItem>, String> {
     info!("Getting sessions list...");
     let res = DATABASE_INST.lock().unwrap().run_in_tx(|tx| {
-        let mut sessions = SessionRepository::select()
+        let sessions = SessionRepository::select()
             .order_by(OrderBy::Desc(session::entity::columns::DATE))
             .fetch_in_tx(tx)?;
-
-        let series = SerieRepository::select()
-            .where_(Where::In(
-                serie::entity::columns::SESSION,
-                sessions
-                    .iter()
-                    .map(|s| s.date.into())
-                    .collect::<Vec<Value>>(),
-            ))
-            .fetch_in_tx(tx)?;
-
-        for session in &mut sessions {
-            session.series = series
-                .iter()
-                .filter(|s| s.session == session.date)
-                .cloned()
-                .collect::<Vec<Serie>>()
-        }
 
         Ok(sessions
             .into_iter()
@@ -182,6 +164,16 @@ pub fn save_session_changes(details: SessionSeriesUpdate) -> Result<(), String> 
                 .execute_in_tx(tx)?;
             exercises.insert((serie.ex_cat.clone(), serie.ex_id));
         }
+
+        let mut session = SessionRepository::select_by_id_in_tx(tx, details.timestamp)?.unwrap();
+        session.fetch_series_relationship_in_tx(tx)?;
+
+        session.volume = 0_f64;
+        for ser in &session.series {
+            session.volume += ser.weight * (ser.reps as f64)
+        }
+        session.update_by_id_in_tx(tx)?;
+
         update_prs(tx, exercises)?;
         Ok(())
     });

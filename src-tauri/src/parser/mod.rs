@@ -96,6 +96,11 @@ where
     };
     let heart_rates = get_heart_rate(&timestamp, &grouped.records)?;
 
+    let mut volume = 0_f64;
+    for ser in &series {
+        volume += ser.weight * (ser.reps as f64);
+    }
+
     Ok(Session {
         workout,
         date: timestamp.timestamp(),
@@ -111,6 +116,7 @@ where
         device: None,
         device_obj: None,
         heart_rates,
+        volume,
     })
 }
 
