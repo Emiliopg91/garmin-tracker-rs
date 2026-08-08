@@ -2,19 +2,13 @@ use std::{collections::HashMap, ops::Deref};
 
 use garmin_tracker_rs_macros::{traced_command, translate};
 use rusqlite_orm::{
-    dao::{
-        Repository,
-        helpers::types::{order_by::OrderBy, value::Value, where_clause::Where},
-    },
+    dao::{Repository, helpers::types::order_by::OrderBy},
     database::{DATABASE_INST, errors::DatabaseError},
 };
 use tauri_plugin_log::log::{error, info};
 
 use crate::{
-    dao::{
-        serie::{self, SerieRepository},
-        session::{SessionRepository, entity},
-    },
+    dao::session::{SessionRepository, entity},
     dto::{
         notifications::{NotificationDefinition, NotificationKind},
         workouts::{WorkoutDetails, WorkoutListItem, WorkoutSession},
@@ -80,7 +74,7 @@ pub fn get_workout_details(name: &str) -> Result<WorkoutDetails, String> {
     let res = DATABASE_INST.lock().unwrap().run_in_tx(|tx| {
         info!("Getting details for workout {}", name);
 
-        let mut sessions = SessionRepository::select_by_workout_in_tx(
+        let sessions = SessionRepository::select_by_workout_in_tx(
             tx,
             name,
             Some(&[OrderBy::Desc(entity::columns::DATE)]),
