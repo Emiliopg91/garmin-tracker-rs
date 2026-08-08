@@ -102,7 +102,10 @@ avg_heart_rate:
   es: Frecuencia cardiaca media
 max_heart_rate:
   en: Max heart rate
-  es: Frecuencia cardiaca maxima
+  es: Frecuencia cardiaca máxima
+min_heart_rate:
+  en: Min heart rate
+  es: Frecuencia cardiaca mínima
 exercise:
   en: Exercise
   es: Ejercicio

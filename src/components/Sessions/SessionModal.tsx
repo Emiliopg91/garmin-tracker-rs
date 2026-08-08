@@ -7,10 +7,12 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
+  ReferenceLine,
   Rectangle,
   ResponsiveContainer,
   XAxis,
   YAxis,
+  Legend,
 } from "recharts";
 
 type Props = {
@@ -24,6 +26,7 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
   const [originalSession] = useState(session);
   const [localSession, setLocalSession] = useState({ ...session });
   const [changed, setChanged] = useState(false);
+  const [minHr, setMinHr] = useState(0);
   const [hrData, setHrData] = useState<
     {
       idx: number;
@@ -67,6 +70,9 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
     }
 
     setHrData(hrData);
+    if (session.heart_rates && session.heart_rates.length > 0) {
+      setMinHr(Math.min(...session.heart_rates));
+    }
   }, []);
 
   const updateSerieReps = (exercise: string, idx: number, newVal: string) => {
@@ -168,9 +174,40 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                   margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
                   barCategoryGap={0}
                 >
+                  <Legend
+                    position={"top"}
+                    content={() => (
+                      <div style={{ textAlign: "center", fontWeight: "bold" }}>
+                        {translate("heart_rate")}
+                      </div>
+                    )}
+                  />
                   <CartesianGrid stroke="#80808000" strokeDasharray="5 5" />
                   <XAxis dataKey="idx" tick={false} />
-                  <YAxis width="auto" />
+                  <YAxis
+                    width="auto"
+                    domain={[(3 * minHr) / 4, session.max_heart_rate]}
+                    ticks={[
+                      minHr,
+                      session.avg_heart_rate,
+                      session.max_heart_rate,
+                    ]}
+                  />
+                  <ReferenceLine
+                    y={session.avg_heart_rate}
+                    stroke="white"
+                    strokeDasharray="3 3"
+                  />
+                  <ReferenceLine
+                    y={minHr}
+                    stroke="white"
+                    strokeDasharray="3 3"
+                  />
+                  <ReferenceLine
+                    y={session.max_heart_rate}
+                    stroke="white"
+                    strokeDasharray="3 3"
+                  />
                   <Bar
                     dataKey="hr"
                     isAnimationActive={false}
@@ -216,12 +253,16 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                 </td>
               </tr>
               <tr>
+                <td>{translate("max_heart_rate")}:</td>
+                <td>{localSession.max_heart_rate} BPM</td>
+              </tr>
+              <tr>
                 <td>{translate("avg_heart_rate")}:</td>
                 <td> {localSession.avg_heart_rate} BPM</td>
               </tr>
               <tr>
-                <td>{translate("max_heart_rate")}:</td>
-                <td>{localSession.max_heart_rate} BPM</td>
+                <td>{translate("min_heart_rate")}:</td>
+                <td>{minHr} BPM</td>
               </tr>
               <tr>
                 <td>{translate("workout_load")}:</td>
