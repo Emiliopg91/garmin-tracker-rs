@@ -20,15 +20,9 @@ pub struct WorkoutSession {
 
 impl From<&Session> for WorkoutSession {
     fn from(value: &Session) -> Self {
-        let mut volume = 0_f64;
-
-        for serie in &value.series {
-            volume += (serie.reps as f64) * serie.weight
-        }
-
         WorkoutSession {
             date: DateTimeUtils::format_time_date(value.date),
-            volume,
+            volume: value.volume,
             time: DateTimeUtils::format_duration(value.total_elapsed_time as u64),
             vol_diff: "-".to_string(),
         }

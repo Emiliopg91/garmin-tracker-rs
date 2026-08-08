@@ -91,33 +91,13 @@ pub fn get_workout_details(name: &str) -> Result<WorkoutDetails, String> {
         let mut time = 0_f64;
         let mut volume = 0_f64;
 
-        let series = SerieRepository::select()
-            .where_(Where::In(
-                serie::entity::columns::SESSION,
-                sessions
-                    .iter()
-                    .map(|s| s.date.into())
-                    .collect::<Vec<Value>>(),
-            ))
-            .fetch_in_tx(tx)?;
-
-        sessions.iter_mut().for_each(|s| {
+        sessions.iter().for_each(|s| {
             if s.date > latest.date {
                 latest = s.clone();
             }
             count += 1;
             time += s.total_elapsed_time;
-
-            let series = series
-                .iter()
-                .filter(|sr| sr.session == s.date)
-                .cloned()
-                .collect::<Vec<_>>();
-
-            for serie in &series {
-                volume += (serie.reps as f64) * serie.weight
-            }
-            s.series = series;
+            volume += s.volume
         });
 
         let mut details = WorkoutDetails {

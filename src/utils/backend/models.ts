@@ -91,7 +91,7 @@ export interface SessionSeriesUpdate {
   timestamp: string;
 }
 
-// From src-tauri/src/dto/workouts.rs:39
+// From src-tauri/src/dto/workouts.rs:33
 export interface WorkoutDetails {
   avg_time: string;
   avg_volume: number;
