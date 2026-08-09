@@ -4,11 +4,10 @@ import { SessionDetails, SessionSeriesUpdate } from "@/utils/backend/models";
 import { useContext, useEffect, useState } from "react";
 import { Button, Modal } from "react-bootstrap";
 import {
-  Bar,
-  BarChart,
+  Area,
+  AreaChart,
   CartesianGrid,
   ReferenceLine,
-  Rectangle,
   ResponsiveContainer,
   XAxis,
   YAxis,
@@ -44,25 +43,22 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
       color: string;
     }[] = [];
 
-    const maxHr = Math.max(189, session.max_heart_rate);
-
     if (session.heart_rates && session.heart_rates.length > 0) {
-      session.heart_rates.forEach((hr, idx) => {
+      session.heart_rates.forEach((entry, idx) => {
         let color = "red";
 
-        const rateVal = (hr * 1.0) / (maxHr * 1.0);
-        if (rateVal <= 0.6) {
+        if (entry.zone == 1) {
           color = "gray";
-        } else if (rateVal <= 0.7) {
+        } else if (entry.zone == 2) {
           color = "turquoise";
-        } else if (rateVal <= 0.8) {
+        } else if (entry.zone == 3) {
           color = "green";
-        } else if (rateVal <= 0.9) {
+        } else if (entry.zone == 4) {
           color = "orange";
         }
         hrData.push({
           idx: idx * 2,
-          hr,
+          hr: entry.value,
           avg: session.avg_heart_rate,
           color,
         });
@@ -71,7 +67,7 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
 
     setHrData(hrData);
     if (session.heart_rates && session.heart_rates.length > 0) {
-      setMinHr(Math.min(...session.heart_rates));
+      setMinHr(Math.min(...session.heart_rates.map((entry) => entry.value)));
     }
   }, []);
 
@@ -166,66 +162,9 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
         </Modal.Header>
 
         <Modal.Body>
-          {hrData.length > 0 && (
-            <div style={{ width: "100%", height: 200 }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={hrData}
-                  margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
-                  barCategoryGap={0}
-                >
-                  <Legend
-                    position={"top"}
-                    content={() => (
-                      <div style={{ textAlign: "center", fontWeight: "bold" }}>
-                        {translate("heart_rate")}
-                      </div>
-                    )}
-                  />
-                  <CartesianGrid stroke="#80808000" strokeDasharray="5 5" />
-                  <XAxis dataKey="idx" tick={false} />
-                  <YAxis
-                    width="auto"
-                    domain={[(3 * minHr) / 4, session.max_heart_rate]}
-                    ticks={[
-                      minHr,
-                      session.avg_heart_rate,
-                      session.max_heart_rate,
-                    ]}
-                  />
-                  <ReferenceLine
-                    y={session.avg_heart_rate}
-                    stroke="white"
-                    strokeDasharray="3 3"
-                  />
-                  <ReferenceLine
-                    y={minHr}
-                    stroke="white"
-                    strokeDasharray="3 3"
-                  />
-                  <ReferenceLine
-                    y={session.max_heart_rate}
-                    stroke="white"
-                    strokeDasharray="3 3"
-                  />
-                  <Bar
-                    dataKey="hr"
-                    isAnimationActive={false}
-                    shape={(props) => (
-                      <Rectangle
-                        {...props}
-                        fill={props.payload.color}
-                        stroke={props.payload.color}
-                      />
-                    )}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          )}
           <table id="session-details-table">
             <colgroup>
-              <col style={{ width: "250px" }} />
+              <col style={{ width: "200px" }} />
               <col style={{ width: "150px" }} />
               <col />
             </colgroup>
@@ -253,18 +192,6 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                 </td>
               </tr>
               <tr>
-                <td>{translate("max_heart_rate")}:</td>
-                <td>{localSession.max_heart_rate} BPM</td>
-              </tr>
-              <tr>
-                <td>{translate("avg_heart_rate")}:</td>
-                <td> {localSession.avg_heart_rate} BPM</td>
-              </tr>
-              <tr>
-                <td>{translate("min_heart_rate")}:</td>
-                <td>{minHr} BPM</td>
-              </tr>
-              <tr>
                 <td>{translate("workout_load")}:</td>
                 <td>{localSession.training_load}</td>
               </tr>
@@ -282,10 +209,82 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
               )}
             </tbody>
           </table>
+          {hrData.length > 0 && (
+            <div style={{ width: "100%", height: 200 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart
+                  data={hrData}
+                  margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
+                >
+                  <defs>
+                    <linearGradient id="hrColor" x1="0" y1="0" x2="1" y2="0">
+                      {hrData.flatMap((point, i) => {
+                        const start = (i / hrData.length) * 100;
+                        const end = ((i + 1) / hrData.length) * 100;
+                        return [
+                          <stop
+                            key={`${i}-start`}
+                            offset={`${start}%`}
+                            stopColor={point.color}
+                          />,
+                          <stop
+                            key={`${i}-end`}
+                            offset={`${end}%`}
+                            stopColor={point.color}
+                          />,
+                        ];
+                      })}
+                    </linearGradient>
+                  </defs>
+                  <Legend
+                    position={"top"}
+                    content={() => (
+                      <div style={{ textAlign: "center", fontWeight: "bold" }}>
+                        {translate("heart_rate")}
+                      </div>
+                    )}
+                  />
+                  <CartesianGrid stroke="#80808000" strokeDasharray="5 5" />
+                  <XAxis dataKey="idx" tick={false} />
+                  <YAxis
+                    width="auto"
+                    domain={[(4 * minHr) / 5, session.max_heart_rate]}
+                    ticks={[
+                      minHr,
+                      session.avg_heart_rate,
+                      session.max_heart_rate,
+                    ]}
+                  />
+                  <ReferenceLine
+                    y={session.avg_heart_rate}
+                    stroke="white"
+                    strokeDasharray="3 3"
+                  />
+                  <ReferenceLine
+                    y={minHr}
+                    stroke="white"
+                    strokeDasharray="3 3"
+                  />
+                  <ReferenceLine
+                    y={session.max_heart_rate}
+                    stroke="white"
+                    strokeDasharray="3 3"
+                  />
+                  <Area
+                    dataKey="hr"
+                    type="monotone"
+                    isAnimationActive={false}
+                    stroke="url(#hrColor)"
+                    fill="url(#hrColor)"
+                    fillOpacity={1}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          )}
           {session.sub_sport == "strength_training" &&
             Object.keys(localSession.series).length > 0 && (
-              <>
-                <hr />
+              <div>
                 <table>
                   <colgroup>
                     <col style={{ width: "350px" }} />
@@ -293,7 +292,7 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                   </colgroup>
 
                   <thead>
-                    <tr>
+                    <tr style={{ borderBottom: "1px solid #e4e4e430" }}>
                       <th>{translate("exercise")}:</th>
                       <th>{translate("series")}:</th>
                     </tr>
@@ -369,7 +368,7 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                     {translate("update_sets")}
                   </Button>
                 </div>
-              </>
+              </div>
             )}
         </Modal.Body>
       </Modal>

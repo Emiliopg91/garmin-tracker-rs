@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     dao::{exercise::Exercise, serie::Serie, session::Session},
+    dto::heart_rate::HeartRateData,
     utils::date_time_utils::DateTimeUtils,
 };
 
@@ -74,6 +75,7 @@ pub struct SessionDetails {
 
     pub total_elapsed_time: String,
     pub active_time: String,
+    pub zones_times: HashMap<u8, String>,
 
     pub total_calories: u16,
     pub metabolic_calories: u16,
@@ -86,7 +88,7 @@ pub struct SessionDetails {
 
     pub exercises: Vec<String>,
     pub series: HashMap<String, Vec<SessionSerie>>,
-    pub heart_rates: Vec<u8>,
+    pub heart_rates: Vec<HeartRateData>,
 
     pub device: Option<String>,
 }
@@ -113,8 +115,46 @@ impl From<(&Session, &IndexMap<Exercise, Vec<Serie>>)> for SessionDetails {
             .map(|dev| format!("Garmin {}", dev.model));
 
         let mut heart_rates = Vec::new();
+        let mut zones_times = HashMap::new();
         if let Some(hr_dao) = value.0.heart_rates.clone() {
-            heart_rates = hr_dao.records.clone();
+            heart_rates = hr_dao
+                .records
+                .into_iter()
+                .map(HeartRateData::from)
+                .collect::<Vec<_>>();
+
+            let time_fraction = value.0.total_elapsed_time / (heart_rates.len() as f64);
+            let mut num_zones_times = HashMap::new();
+            for zone in 1..6 {
+                let entries = heart_rates.iter().filter(|e| e.zone == zone).count();
+                let time = time_fraction * (entries as f64);
+                num_zones_times.insert(zone, time);
+            }
+
+            let mut int_times: HashMap<u8, i64> = num_zones_times
+                .iter()
+                .map(|(z, t)| (*z, t.round() as i64))
+                .collect();
+
+            let acc: i64 = int_times.values().sum();
+            let total_secs = value.0.total_elapsed_time.round() as i64;
+            let diff = total_secs - acc;
+            *int_times.entry(1).or_default() += diff;
+
+            zones_times = int_times
+                .into_iter()
+                .map(|(zone, secs)| {
+                    if secs <= 0 {
+                        (zone, "0:00".to_string())
+                    } else {
+                        let mut r = DateTimeUtils::format_duration(secs as u64);
+                        if !r.contains(':') {
+                            r = format!("0:{}", r);
+                        }
+                        (zone, r)
+                    }
+                })
+                .collect();
         }
 
         Self {
@@ -122,6 +162,7 @@ impl From<(&Session, &IndexMap<Exercise, Vec<Serie>>)> for SessionDetails {
             date: DateTimeUtils::format_time_date(value.0.date),
             timestamp: value.0.date,
             active_time: DateTimeUtils::format_duration(value.0.active_time as u64),
+            zones_times,
             avg_heart_rate: value.0.avg_heart_rate,
             max_heart_rate: value.0.max_heart_rate,
             metabolic_calories: value.0.metabolic_calories,
