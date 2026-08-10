@@ -284,6 +284,7 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                       stroke="url(#hrColor)"
                       fill="url(#hrColor)"
                       fillOpacity={1}
+                      activeDot={false}
                     />
                   </AreaChart>
                 </ResponsiveContainer>
@@ -298,17 +299,20 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                     <table>
                       <tr>
                         <td>
-                          {translate("hr_zone_1")}: {localSession.zones_times[0]}
+                          {translate("hr_zone_1")}:{" "}
+                          {localSession.zones_times[0]}
                         </td>
                       </tr>
                       <tr>
                         <td>
-                          {translate("hr_zone_2")}: {localSession.zones_times[1]}
+                          {translate("hr_zone_2")}:{" "}
+                          {localSession.zones_times[1]}
                         </td>
                       </tr>
                       <tr>
                         <td>
-                          {translate("hr_zone_3")}: {localSession.zones_times[2]}
+                          {translate("hr_zone_3")}:{" "}
+                          {localSession.zones_times[2]}
                         </td>
                       </tr>
                     </table>
@@ -317,12 +321,14 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                     <table>
                       <tr>
                         <td>
-                          {translate("hr_zone_4")}: {localSession.zones_times[3]}
+                          {translate("hr_zone_4")}:{" "}
+                          {localSession.zones_times[3]}
                         </td>
                       </tr>
                       <tr>
                         <td>
-                          {translate("hr_zone_5")}: {localSession.zones_times[4]}
+                          {translate("hr_zone_5")}:{" "}
+                          {localSession.zones_times[4]}
                         </td>
                       </tr>
                     </table>
