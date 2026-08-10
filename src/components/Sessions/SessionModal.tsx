@@ -43,22 +43,25 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
       color: string;
     }[] = [];
 
+    const maxHr = Math.max(189, session.max_heart_rate);
+
     if (session.heart_rates && session.heart_rates.length > 0) {
-      session.heart_rates.forEach((entry, idx) => {
+      session.heart_rates.forEach((hr, idx) => {
         let color = "red";
 
-        if (entry.zone == 1) {
+        const rateVal = (hr * 1.0) / (maxHr * 1.0);
+        if (rateVal <= 0.6) {
           color = "gray";
-        } else if (entry.zone == 2) {
+        } else if (rateVal <= 0.7) {
           color = "turquoise";
-        } else if (entry.zone == 3) {
+        } else if (rateVal <= 0.8) {
           color = "green";
-        } else if (entry.zone == 4) {
+        } else if (rateVal <= 0.9) {
           color = "orange";
         }
         hrData.push({
           idx: idx * 2,
-          hr: entry.value,
+          hr,
           avg: session.avg_heart_rate,
           color,
         });
@@ -67,7 +70,7 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
 
     setHrData(hrData);
     if (session.heart_rates && session.heart_rates.length > 0) {
-      setMinHr(Math.min(...session.heart_rates.map((entry) => entry.value)));
+      setMinHr(Math.min(...session.heart_rates));
     }
   }, []);
 
@@ -210,81 +213,128 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
             </tbody>
           </table>
           {hrData.length > 0 && (
-            <div style={{ width: "100%", height: 200 }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart
-                  data={hrData}
-                  margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
-                >
-                  <defs>
-                    <linearGradient id="hrColor" x1="0" y1="0" x2="1" y2="0">
-                      {hrData.flatMap((point, i) => {
-                        const start = (i / hrData.length) * 100;
-                        const end = ((i + 1) / hrData.length) * 100;
-                        return [
-                          <stop
-                            key={`${i}-start`}
-                            offset={`${start}%`}
-                            stopColor={point.color}
-                          />,
-                          <stop
-                            key={`${i}-end`}
-                            offset={`${end}%`}
-                            stopColor={point.color}
-                          />,
-                        ];
-                      })}
-                    </linearGradient>
-                  </defs>
-                  <Legend
-                    position={"top"}
-                    content={() => (
-                      <div style={{ textAlign: "center", fontWeight: "bold" }}>
-                        {translate("heart_rate")}
-                      </div>
-                    )}
-                  />
-                  <CartesianGrid stroke="#80808000" strokeDasharray="5 5" />
-                  <XAxis dataKey="idx" tick={false} />
-                  <YAxis
-                    width="auto"
-                    domain={[(4 * minHr) / 5, session.max_heart_rate]}
-                    ticks={[
-                      minHr,
-                      session.avg_heart_rate,
-                      session.max_heart_rate,
-                    ]}
-                  />
-                  <ReferenceLine
-                    y={session.avg_heart_rate}
-                    stroke="white"
-                    strokeDasharray="3 3"
-                  />
-                  <ReferenceLine
-                    y={minHr}
-                    stroke="white"
-                    strokeDasharray="3 3"
-                  />
-                  <ReferenceLine
-                    y={session.max_heart_rate}
-                    stroke="white"
-                    strokeDasharray="3 3"
-                  />
-                  <Area
-                    dataKey="hr"
-                    type="monotone"
-                    isAnimationActive={false}
-                    stroke="url(#hrColor)"
-                    fill="url(#hrColor)"
-                    fillOpacity={1}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
+            <>
+              <hr />
+              <div style={{ width: "100%", height: 200 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart
+                    data={hrData}
+                    margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
+                  >
+                    <defs>
+                      <linearGradient id="hrColor" x1="0" y1="0" x2="1" y2="0">
+                        {hrData.flatMap((point, i) => {
+                          const start = (i / hrData.length) * 100;
+                          const end = ((i + 1) / hrData.length) * 100;
+                          return [
+                            <stop
+                              key={`${i}-start`}
+                              offset={`${start}%`}
+                              stopColor={point.color}
+                            />,
+                            <stop
+                              key={`${i}-end`}
+                              offset={`${end}%`}
+                              stopColor={point.color}
+                            />,
+                          ];
+                        })}
+                      </linearGradient>
+                    </defs>
+                    <Legend
+                      position={"top"}
+                      content={() => (
+                        <div
+                          style={{ textAlign: "center", fontWeight: "bold" }}
+                        >
+                          {translate("heart_rate")}
+                        </div>
+                      )}
+                    />
+                    <CartesianGrid stroke="#80808000" strokeDasharray="5 5" />
+                    <XAxis dataKey="idx" tick={false} />
+                    <YAxis
+                      width="auto"
+                      domain={[(4 * minHr) / 5, session.max_heart_rate]}
+                      ticks={[
+                        minHr,
+                        session.avg_heart_rate,
+                        session.max_heart_rate,
+                      ]}
+                    />
+                    <ReferenceLine
+                      y={session.avg_heart_rate}
+                      stroke="white"
+                      strokeDasharray="3 3"
+                    />
+                    <ReferenceLine
+                      y={minHr}
+                      stroke="white"
+                      strokeDasharray="3 3"
+                    />
+                    <ReferenceLine
+                      y={session.max_heart_rate}
+                      stroke="white"
+                      strokeDasharray="3 3"
+                    />
+                    <Area
+                      dataKey="hr"
+                      type="monotone"
+                      isAnimationActive={false}
+                      stroke="url(#hrColor)"
+                      fill="url(#hrColor)"
+                      fillOpacity={1}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+              <table style={{ position: "relative", top: "-20px" }}>
+                <colgroup>
+                  <col style={{ width: "250px" }} />
+                  <col style={{ width: "250px" }} />
+                </colgroup>
+                <tr>
+                  <td>
+                    <table>
+                      <tr>
+                        <td>
+                          {translate("hr_zone_1")}: {localSession.zones_times[0]}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>
+                          {translate("hr_zone_2")}: {localSession.zones_times[1]}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>
+                          {translate("hr_zone_3")}: {localSession.zones_times[2]}
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                  <td>
+                    <table>
+                      <tr>
+                        <td>
+                          {translate("hr_zone_4")}: {localSession.zones_times[3]}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>
+                          {translate("hr_zone_5")}: {localSession.zones_times[4]}
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+              <br />
+            </>
           )}
           {session.sub_sport == "strength_training" &&
             Object.keys(localSession.series).length > 0 && (
-              <div>
+              <div style={{ position: "relative", top: "-20px" }}>
                 <table>
                   <colgroup>
                     <col style={{ width: "350px" }} />

@@ -235,3 +235,18 @@ error_parser_invalid_field_value:
 error_parser_unknown_exercise:
   en: Unknown exercise with category {} and id {}
   es: Ejercicio desconocido con categoría {} e id {}
+hr_zone_1:
+  en: Warm up
+  es: Calentamiento
+hr_zone_2:
+  en: Easy
+  es: Suave
+hr_zone_3:
+  en: Aerobic
+  es: Aeróbico
+hr_zone_4:
+  en: Threshold
+  es: Umbral
+hr_zone_5:
+  en: Maximum
+  es: Máximo
