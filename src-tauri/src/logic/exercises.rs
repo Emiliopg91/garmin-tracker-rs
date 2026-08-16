@@ -32,34 +32,37 @@ use crate::{
 #[tauri::command]
 pub fn get_exercises() -> Result<Vec<ExerciseListItem>, String> {
     info!("Getting exercises list...");
-    let res = DATABASE_INST.lock().unwrap().run_in_tx(|tx| {
-        let mut result = Vec::new();
+    let res = DATABASE_INST
+        .get()
+        .expect("Database not initialized")
+        .run(|tx| {
+            let mut result = Vec::new();
 
-        let exercises = ExerciseRepository::select()
-            .order_by(OrderBy::Asc(exercise::entity::columns::NAME))
-            .fetch_in_tx(tx)?;
+            let exercises = ExerciseRepository::select()
+                .order_by(OrderBy::Asc(exercise::entity::columns::NAME))
+                .fetch_in_tx(tx)?;
 
-        let prs = SerieRepository::select_by_personal_records_in_tx(tx, true, None)?;
+            let prs = SerieRepository::select_by_personal_records_in_tx(tx, true, None)?;
 
-        for exercise in exercises {
-            let pr = prs
-                .iter()
-                .find(|pr| pr.ex_cat == exercise.category && pr.ex_id == exercise.id)
-                .unwrap();
+            for exercise in exercises {
+                let pr = prs
+                    .iter()
+                    .find(|pr| pr.ex_cat == exercise.category && pr.ex_id == exercise.id)
+                    .unwrap();
 
-            result.push(ExerciseListItem {
-                category: exercise.category,
-                id: exercise.id,
-                name: exercise.name,
-                reps: pr.reps,
-                weight: pr.weight,
-                rm: get_1rm_estimation(pr.weight, pr.reps as f64),
-                date: DateTimeUtils::format_time_date(pr.session),
-            });
-        }
+                result.push(ExerciseListItem {
+                    category: exercise.category,
+                    id: exercise.id,
+                    name: exercise.name,
+                    reps: pr.reps,
+                    weight: pr.weight,
+                    rm: get_1rm_estimation(pr.weight, pr.reps as f64),
+                    date: DateTimeUtils::format_time_date(pr.session),
+                });
+            }
 
-        Ok(result)
-    });
+            Ok(result)
+        });
 
     match res {
         Ok(l) => {
@@ -86,61 +89,64 @@ pub fn get_exercise_details(category: &str, id: u16) -> Result<ExerciseDetails, 
         "Getting details for exercise with category {} and id {}...",
         category, id
     );
-    let res = DATABASE_INST.lock().unwrap().run_in_tx(|tx| {
-        let exercise = ExerciseRepository::select_by_id_in_tx(tx, category, id)?.unwrap();
-        let mut res = ExerciseDetails::from(&exercise);
+    let res = DATABASE_INST
+        .get()
+        .expect("Database not initialized")
+        .run(|tx| {
+            let exercise = ExerciseRepository::select_by_id_in_tx(tx, category, id)?.unwrap();
+            let mut res = ExerciseDetails::from(&exercise);
 
-        let series = SerieRepository::select_by_exercise_in_tx(
-            tx,
-            category,
-            id,
-            Some(&[OrderBy::Desc(serie::entity::columns::SESSION)]),
-        )?;
+            let series = SerieRepository::select_by_exercise_in_tx(
+                tx,
+                category,
+                id,
+                Some(&[OrderBy::Desc(serie::entity::columns::SESSION)]),
+            )?;
 
-        let pr = series.iter().filter(|s| s.pr).collect::<Vec<_>>();
-        let pr = pr.first().unwrap();
+            let pr = series.iter().filter(|s| s.pr).collect::<Vec<_>>();
+            let pr = pr.first().unwrap();
 
-        res.reps = pr.reps;
-        res.weight = pr.weight;
-        res.rm = get_1rm_estimation(pr.weight, pr.reps as f64);
-        res.pr_date = DateTimeUtils::format_time_date(pr.session);
+            res.reps = pr.reps;
+            res.weight = pr.weight;
+            res.rm = get_1rm_estimation(pr.weight, pr.reps as f64);
+            res.pr_date = DateTimeUtils::format_time_date(pr.session);
 
-        let mut timestamps = HashSet::new();
-        series.iter().map(|s| s.session).for_each(|t| {
-            timestamps.insert(t);
-        });
+            let mut timestamps = HashSet::new();
+            series.iter().map(|s| s.session).for_each(|t| {
+                timestamps.insert(t);
+            });
 
-        let workouts = SessionRepository::select()
-            .where_(Where::In(
-                session::entity::columns::DATE,
-                timestamps
-                    .into_iter()
-                    .map(|t| t.into())
-                    .collect::<Vec<Value>>(),
-            ))
-            .fetch_in_tx(tx)?
-            .iter()
-            .map(|s| (s.date, s.workout.clone()))
-            .collect::<HashMap<_, _>>();
+            let workouts = SessionRepository::select()
+                .where_(Where::In(
+                    session::entity::columns::DATE,
+                    timestamps
+                        .into_iter()
+                        .map(|t| t.into())
+                        .collect::<Vec<Value>>(),
+                ))
+                .fetch_in_tx(tx)?
+                .iter()
+                .map(|s| (s.date, s.workout.clone()))
+                .collect::<HashMap<_, _>>();
 
-        for serie in series {
-            let wk = SessionSerie::from(&serie);
-            let ex_str = format!(
-                "{}\n{}",
-                workouts.get(&serie.session).unwrap(),
-                DateTimeUtils::format_time_date(serie.session)
-            );
+            for serie in series {
+                let wk = SessionSerie::from(&serie);
+                let ex_str = format!(
+                    "{}\n{}",
+                    workouts.get(&serie.session).unwrap(),
+                    DateTimeUtils::format_time_date(serie.session)
+                );
 
-            if !res.workouts.contains(&ex_str) {
-                res.workouts.push(ex_str.clone());
+                if !res.workouts.contains(&ex_str) {
+                    res.workouts.push(ex_str.clone());
+                }
+
+                let entry = res.series.entry(ex_str).or_default();
+                entry.push(wk);
             }
 
-            let entry = res.series.entry(ex_str).or_default();
-            entry.push(wk);
-        }
-
-        Ok(res)
-    });
+            Ok(res)
+        });
 
     match res {
         Ok(l) => {

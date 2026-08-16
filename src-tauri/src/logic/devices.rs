@@ -49,55 +49,70 @@ async fn mtp_dev_check_and_sync(app: AppHandle, devices: &mut Vec<DeviceListItem
         .await
         .map_err(|e| e.to_string())
     {
-        let _ = DATABASE_INST.lock().unwrap().run_in_tx(
-            |tx: &mut rusqlite_orm::rusqlite::Transaction<'_>| {
-                for device in &cur_dev {
-                    if !devices
-                        .iter()
-                        .any(|e| e.serial_number == device.serial_number)
-                    {
-                        let enrol_err =
-                            match DeviceRepository::select_by_id_in_tx(tx, &device.serial_number) {
-                                Ok(None) => DeviceRepository::insert()
-                                    .item(Device::from(device))
-                                    .execute_in_tx(tx)
-                                    .err(),
-                                Ok(Some(_)) => None,
-                                Err(e) => Some(e),
-                            };
+        let already_known: Vec<String> = devices.iter().map(|d| d.serial_number.clone()).collect();
+        let cur_dev_owned = cur_dev.clone();
 
-                        if let Some(e) = enrol_err {
-                            error!(
-                                "Error enrolling {} {} ({}): {}",
-                                device.manufacturer, device.model, device.serial_number, e
-                            )
-                        } else {
-                            info!(
-                                "Connected {} {} ({})",
-                                device.manufacturer, device.model, device.serial_number
-                            );
-                            devices.push(device.clone());
+        let (newly_enrolled, enroll_errors): (Vec<DeviceListItem>, Vec<(DeviceListItem, String)>) =
+            tokio::task::spawn_blocking(move || {
+                let mut enrolled = Vec::new();
+                let mut errors = Vec::new();
 
-                            let payload: DeviceListItem = device.clone();
-                            let _ = app.emit("device_connected", payload);
+                let _ = DATABASE_INST.get().expect("Database not initialized").run(
+                    |tx: &mut rusqlite_orm::rusqlite::Transaction<'_>| {
+                        for device in &cur_dev_owned {
+                            if !already_known.contains(&device.serial_number) {
+                                let enrol_err = match DeviceRepository::select_by_id_in_tx(
+                                    tx,
+                                    &device.serial_number,
+                                ) {
+                                    Ok(None) => DeviceRepository::insert()
+                                        .item(Device::from(device))
+                                        .execute_in_tx(tx)
+                                        .err(),
+                                    Ok(Some(_)) => None,
+                                    Err(e) => Some(e),
+                                };
 
-                            devs_to_sync.push(device.serial_number.clone());
-                            show_notification(NotificationDefinition {
-                                title: translate!("device_connected"),
-                                body: translate!(
-                                    "syncing_device",
-                                    device.manufacturer,
-                                    device.model
-                                ),
-                                kind: NotificationKind::Temporal,
-                            });
+                                match enrol_err {
+                                    Some(e) => errors.push((device.clone(), e.to_string())),
+                                    None => enrolled.push(device.clone()),
+                                }
+                            }
                         }
-                    }
-                }
 
-                Ok(())
-            },
-        );
+                        Ok(())
+                    },
+                );
+
+                (enrolled, errors)
+            })
+            .await
+            .expect("blocking DB task panicked");
+
+        for (device, e) in &enroll_errors {
+            error!(
+                "Error enrolling {} {} ({}): {}",
+                device.manufacturer, device.model, device.serial_number, e
+            );
+        }
+
+        for device in &newly_enrolled {
+            info!(
+                "Connected {} {} ({})",
+                device.manufacturer, device.model, device.serial_number
+            );
+            devices.push(device.clone());
+
+            let payload: DeviceListItem = device.clone();
+            let _ = app.emit("device_connected", payload);
+
+            devs_to_sync.push(device.serial_number.clone());
+            show_notification(NotificationDefinition {
+                title: translate!("device_connected"),
+                body: translate!("syncing_device", device.manufacturer, device.model),
+                kind: NotificationKind::Temporal,
+            });
+        }
 
         for device in devices.iter() {
             if !cur_dev

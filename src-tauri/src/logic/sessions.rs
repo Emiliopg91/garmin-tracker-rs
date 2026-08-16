@@ -38,7 +38,7 @@ use crate::{
 #[tauri::command]
 pub fn get_sessions() -> Result<Vec<SessionListItem>, String> {
     info!("Getting sessions list...");
-    let res = DATABASE_INST.lock().unwrap().run_in_tx(|tx| {
+    let res = DATABASE_INST.get().expect("Database not initialized").run(|tx| {
         let sessions = SessionRepository::select()
             .order_by(OrderBy::Desc(session::entity::columns::DATE))
             .fetch_in_tx(tx)?;
@@ -75,7 +75,7 @@ pub fn get_session_details(timestamp: i64) -> Result<SessionDetails, String> {
         Local.timestamp_opt(timestamp, 0).unwrap().to_rfc3339()
     );
 
-    let res = DATABASE_INST.lock().unwrap().run_in_tx(|tx| {
+    let res = DATABASE_INST.get().expect("Database not initialized").run(|tx| {
         let mut session = SessionRepository::select_by_id_in_tx(tx, timestamp)?.unwrap();
 
         session.fetch_series_relationship_in_tx(tx)?;
@@ -151,7 +151,7 @@ pub fn save_session_changes(details: SessionSeriesUpdate) -> Result<(), String> 
             .unwrap()
             .to_rfc3339()
     );
-    let res = DATABASE_INST.lock().unwrap().run_in_tx(|tx| {
+    let res = DATABASE_INST.get().expect("Database not initialized").run(|tx| {
         let mut exercises = HashSet::new();
         for serie in &details.series {
             SerieRepository::update()
@@ -239,19 +239,26 @@ pub async fn _import_from_device(serial: &str) -> Result<u16, String> {
         .await
         .map_err(|e| e.to_string())?;
 
-    let res = DATABASE_INST.lock().unwrap().run_in_tx(|tx| {
-        let res = if !activities.is_empty() {
-            info!("Fetched {} activity files", activities.len());
-            import_file_list(tx, &activities, &device)
-        } else {
-            Ok(0_u16)
-        }?;
+    let res = tokio::task::spawn_blocking(move || {
+        DATABASE_INST
+            .get()
+            .expect("Database not initialized")
+            .run(|tx| {
+                let res = if !activities.is_empty() {
+                    info!("Fetched {} activity files", activities.len());
+                    import_file_list(tx, &activities, &device)
+                } else {
+                    Ok(0_u16)
+                }?;
 
-        device.last_sync = Some(Local::now().timestamp());
-        device.update_by_id_in_tx(tx)?;
+                device.last_sync = Some(Local::now().timestamp());
+                device.update_by_id_in_tx(tx)?;
 
-        Ok(res)
-    });
+                Ok(res)
+            })
+    })
+    .await
+    .expect("blocking DB task panicked");
 
     match res {
         Ok(res) => Ok(res),

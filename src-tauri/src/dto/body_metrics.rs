@@ -25,7 +25,7 @@ impl From<&BodyMetrics> for BodyMetricListItem {
 }
 
 impl TryFrom<&BodyMetricListItem> for BodyMetrics {
-    type Error = Box<dyn std::error::Error>;
+    type Error = Box<dyn std::error::Error + Send + Sync>;
 
     fn try_from(value: &BodyMetricListItem) -> Result<Self, Self::Error> {
         let naive = NaiveDateTime::parse_from_str(&value.date, "%H:%M %d/%m/%Y")?;

@@ -2,8 +2,8 @@
 
 // From src-tauri/src/dto/app.rs:4
 export enum AppEnvironment {
-  Debug = "Debug",
-  Release = "Release",
+	Debug = "Debug",
+	Release = "Release",
 }
 
 // From src-tauri/src/dto/body_metrics.rs:7
@@ -117,3 +117,4 @@ export interface WorkoutSession {
   vol_diff: string;
   volume: number;
 }
+

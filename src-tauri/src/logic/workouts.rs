@@ -21,7 +21,7 @@ use crate::{
 #[tauri::command]
 pub fn get_workout_list() -> Result<Vec<WorkoutListItem>, String> {
     info!("Getting workouts list...");
-    let res = DATABASE_INST.lock().unwrap().run_in_tx(|tx| {
+    let res = DATABASE_INST.get().expect("Database not initialized").run(|tx| {
         let sessions = SessionRepository::select()
             .order_by(OrderBy::Desc(entity::columns::DATE))
             .fetch_in_tx(tx)?;
@@ -71,7 +71,7 @@ pub fn get_workout_list() -> Result<Vec<WorkoutListItem>, String> {
 #[traced_command]
 #[tauri::command]
 pub fn get_workout_details(name: &str) -> Result<WorkoutDetails, String> {
-    let res = DATABASE_INST.lock().unwrap().run_in_tx(|tx| {
+    let res = DATABASE_INST.get().expect("Database not initialized").run(|tx| {
         info!("Getting details for workout {}", name);
 
         let sessions = SessionRepository::select_by_workout_in_tx(

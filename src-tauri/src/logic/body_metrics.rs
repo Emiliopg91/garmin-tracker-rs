@@ -21,13 +21,16 @@ use crate::{
 pub fn get_body_measures() -> Result<Vec<BodyMetricListItem>, String> {
     info!("Getting body measures list...");
 
-    let res = DATABASE_INST.lock().unwrap().run_in_tx(|tx| {
-        let regs = BodyMetricsRepository::select()
-            .order_by(OrderBy::Desc(body_metrics::entity::columns::DATE))
-            .fetch_in_tx(tx)?;
+    let res = DATABASE_INST
+        .get()
+        .expect("Database not initialized")
+        .run(|tx| {
+            let regs = BodyMetricsRepository::select()
+                .order_by(OrderBy::Desc(body_metrics::entity::columns::DATE))
+                .fetch_in_tx(tx)?;
 
-        Ok(regs)
-    });
+            Ok(regs)
+        });
 
     match res {
         Ok(regs) => {
@@ -57,15 +60,18 @@ pub fn get_body_measures() -> Result<Vec<BodyMetricListItem>, String> {
 pub fn add_body_measures(measures: BodyMetricListItem) -> Result<(), String> {
     info!("Adding body measures list...");
 
-    let res = DATABASE_INST.lock().unwrap().run_in_tx(|tx| {
-        let entry = BodyMetrics::try_from(&measures).map_err(DatabaseError::Transaction)?;
+    let res = DATABASE_INST
+        .get()
+        .expect("Database not initialized")
+        .run(|tx| {
+            let entry = BodyMetrics::try_from(&measures).map_err(DatabaseError::Transaction)?;
 
-        BodyMetricsRepository::insert()
-            .item(entry)
-            .execute_in_tx(tx)?;
+            BodyMetricsRepository::insert()
+                .item(entry)
+                .execute_in_tx(tx)?;
 
-        Ok(())
-    });
+            Ok(())
+        });
 
     match res {
         Ok(_) => {
