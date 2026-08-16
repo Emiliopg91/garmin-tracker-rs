@@ -23,6 +23,7 @@ makedepends=(
   'pnpm'
   'python-toml'
   'python-yaml'
+  'sccache'
 )
 
 install=${pkgname}.install
