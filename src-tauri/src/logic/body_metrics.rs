@@ -24,7 +24,7 @@ pub fn get_body_measures() -> Result<Vec<BodyMetricListItem>, String> {
     let res = Database::run_in_connection(|conn| {
         let regs = BodyMetricsRepository::select()
             .order_by(OrderBy::Desc(body_metrics::entity::columns::DATE))
-            .fetch_in_conn(conn)?;
+            .fetch_in(conn)?;
 
         Ok(regs)
     });
@@ -60,9 +60,7 @@ pub fn add_body_measures(measures: BodyMetricListItem) -> Result<(), String> {
     let res = Database::run_in_transaction(|tx| {
         let entry = BodyMetrics::try_from(&measures).map_err(DatabaseError::Transaction)?;
 
-        BodyMetricsRepository::insert()
-            .item(entry)
-            .execute_in_conn(tx)?;
+        BodyMetricsRepository::insert().item(entry).execute_in(tx)?;
 
         Ok(())
     });

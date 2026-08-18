@@ -24,7 +24,7 @@ pub fn get_workout_list() -> Result<Vec<WorkoutListItem>, String> {
     let res = Database::run_in_connection(|conn| {
         let sessions = SessionRepository::select()
             .order_by(OrderBy::Desc(entity::columns::DATE))
-            .fetch_in_conn(conn)?;
+            .fetch_in(conn)?;
 
         let mut workout_stats = HashMap::new();
         sessions.iter().for_each(|s| {

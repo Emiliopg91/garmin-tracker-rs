@@ -4,9 +4,12 @@
 fn main() {
     let args = std::env::args().collect::<Vec<String>>();
     #[cfg(debug_assertions)]
-    if args.len() == 3 && args.get(1).unwrap() == "--unwrap" {
+    if args.len() >= 3 && args.get(1).unwrap() == "--unwrap" {
         unsafe {
-            std::env::set_var("GTRS-UNWRAP-PATH", args.get(2).unwrap());
+            std::env::set_var(
+                "GTRS-UNWRAP-PATH",
+                serde_json::to_string(&args[2..]).unwrap(),
+            );
         }
     } else {
         if std::env::var("IN_DEBUG").is_err() {

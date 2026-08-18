@@ -61,13 +61,13 @@ async fn mtp_dev_check_and_sync(app: AppHandle, devices: &mut Vec<DeviceListItem
                     |tx: &mut rusqlite_orm::rusqlite::Transaction<'_>| {
                         for device in &cur_dev_owned {
                             if !already_known.contains(&device.serial_number) {
-                                let enrol_err = match DeviceRepository::select_by_id_in_conn(
+                                let enrol_err = match DeviceRepository::select_by_id_in(
                                     tx,
                                     &device.serial_number,
                                 ) {
                                     Ok(None) => DeviceRepository::insert()
                                         .item(Device::from(device))
-                                        .execute_in_conn(tx)
+                                        .execute_in(tx)
                                         .err(),
                                     Ok(Some(_)) => None,
                                     Err(e) => Some(e),

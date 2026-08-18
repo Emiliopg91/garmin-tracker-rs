@@ -37,7 +37,7 @@ pub fn get_exercises() -> Result<Vec<ExerciseListItem>, String> {
 
         let exercises = ExerciseRepository::select()
             .order_by(OrderBy::Asc(exercise::entity::columns::NAME))
-            .fetch_in_conn(conn)?;
+            .fetch_in(conn)?;
 
         let prs = SerieRepository::select_by_personal_records_in_conn(conn, true, None)?;
 
@@ -87,7 +87,7 @@ pub fn get_exercise_details(category: &str, id: u16) -> Result<ExerciseDetails, 
         category, id
     );
     let res = Database::run_in_connection(|conn| {
-        let exercise = ExerciseRepository::select_by_id_in_conn(conn, category, id)?.unwrap();
+        let exercise = ExerciseRepository::select_by_id_in(conn, category, id)?.unwrap();
         let mut res = ExerciseDetails::from(&exercise);
 
         let series = SerieRepository::select_by_exercise_in_conn(
@@ -118,7 +118,7 @@ pub fn get_exercise_details(category: &str, id: u16) -> Result<ExerciseDetails, 
                     .map(|t| t.into())
                     .collect::<Vec<Value>>(),
             ))
-            .fetch_in_conn(conn)?
+            .fetch_in(conn)?
             .iter()
             .map(|s| (s.date, s.workout.clone()))
             .collect::<HashMap<_, _>>();

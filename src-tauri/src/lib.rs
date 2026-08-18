@@ -34,9 +34,12 @@ dlls!("../resources/ddl");
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     #[cfg(debug_assertions)]
-    if let Ok(path) = std::env::var("GTRS-UNWRAP-PATH") {
-        let entries = read_from_file(&path).unwrap();
-        debug_dump(&path, &entries);
+    if let Ok(paths) = std::env::var("GTRS-UNWRAP-PATH") {
+        let paths = serde_json::from_str::<Vec<String>>(&paths).unwrap();
+        for path in paths {
+            let entries = read_from_file(&path).unwrap();
+            debug_dump(&path, &entries);
+        }
         exit(0);
     }
 
