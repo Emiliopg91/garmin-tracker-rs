@@ -3,7 +3,7 @@ use std::ops::Deref;
 use garmin_tracker_rs_macros::{traced_command, translate};
 use rusqlite_orm::{
     dao::{Repository, helpers::types::order_by::OrderBy},
-    database::{DATABASE_INST, errors::DatabaseError},
+    database::{Database, errors::DatabaseError},
 };
 use tauri_plugin_log::log::{error, info};
 
@@ -21,16 +21,13 @@ use crate::{
 pub fn get_body_measures() -> Result<Vec<BodyMetricListItem>, String> {
     info!("Getting body measures list...");
 
-    let res = DATABASE_INST
-        .get()
-        .expect("Database not initialized")
-        .run(|tx| {
-            let regs = BodyMetricsRepository::select()
-                .order_by(OrderBy::Desc(body_metrics::entity::columns::DATE))
-                .fetch_in_tx(tx)?;
+    let res = Database::run_in_connection(|conn| {
+        let regs = BodyMetricsRepository::select()
+            .order_by(OrderBy::Desc(body_metrics::entity::columns::DATE))
+            .fetch_in_conn(conn)?;
 
-            Ok(regs)
-        });
+        Ok(regs)
+    });
 
     match res {
         Ok(regs) => {
@@ -60,18 +57,15 @@ pub fn get_body_measures() -> Result<Vec<BodyMetricListItem>, String> {
 pub fn add_body_measures(measures: BodyMetricListItem) -> Result<(), String> {
     info!("Adding body measures list...");
 
-    let res = DATABASE_INST
-        .get()
-        .expect("Database not initialized")
-        .run(|tx| {
-            let entry = BodyMetrics::try_from(&measures).map_err(DatabaseError::Transaction)?;
+    let res = Database::run_in_transaction(|tx| {
+        let entry = BodyMetrics::try_from(&measures).map_err(DatabaseError::Transaction)?;
 
-            BodyMetricsRepository::insert()
-                .item(entry)
-                .execute_in_tx(tx)?;
+        BodyMetricsRepository::insert()
+            .item(entry)
+            .execute_in_conn(tx)?;
 
-            Ok(())
-        });
+        Ok(())
+    });
 
     match res {
         Ok(_) => {

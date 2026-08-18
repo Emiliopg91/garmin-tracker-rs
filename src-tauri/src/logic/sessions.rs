@@ -12,7 +12,7 @@ use rusqlite_orm::{
         Repository,
         helpers::types::{order_by::OrderBy, value::Value, where_clause::Where},
     },
-    database::{DATABASE_INST, errors::DatabaseError},
+    database::{Database, errors::DatabaseError},
 };
 use tauri_plugin_log::log::{error, info, warn};
 
@@ -38,10 +38,10 @@ use crate::{
 #[tauri::command]
 pub fn get_sessions() -> Result<Vec<SessionListItem>, String> {
     info!("Getting sessions list...");
-    let res = DATABASE_INST.get().expect("Database not initialized").run(|tx| {
+    let res = Database::run_in_connection(|conn| {
         let sessions = SessionRepository::select()
             .order_by(OrderBy::Desc(session::entity::columns::DATE))
-            .fetch_in_tx(tx)?;
+            .fetch_in_conn(conn)?;
 
         Ok(sessions
             .into_iter()
@@ -75,14 +75,14 @@ pub fn get_session_details(timestamp: i64) -> Result<SessionDetails, String> {
         Local.timestamp_opt(timestamp, 0).unwrap().to_rfc3339()
     );
 
-    let res = DATABASE_INST.get().expect("Database not initialized").run(|tx| {
-        let mut session = SessionRepository::select_by_id_in_tx(tx, timestamp)?.unwrap();
+    let res = Database::run_in_connection(|conn| {
+        let mut session = SessionRepository::select_by_id_in_conn(conn, timestamp)?.unwrap();
 
-        session.fetch_series_relationship_in_tx(tx)?;
+        session.fetch_series_relationship_in_conn(conn)?;
         if session.device.is_some() {
-            session.fetch_device_obj_relationship_in_tx(tx)?;
+            session.fetch_device_obj_relationship_in_conn(conn)?;
         }
-        session.fetch_heart_rates_relationship_in_tx(tx)?;
+        session.fetch_heart_rates_relationship_in_conn(conn)?;
 
         let condition_set: HashSet<(_, _)> = session
             .series
@@ -103,7 +103,7 @@ pub fn get_session_details(timestamp: i64) -> Result<SessionDetails, String> {
                 ],
                 in_conditions,
             ))
-            .fetch_in_tx(tx)?;
+            .fetch_in_conn(conn)?;
 
         let exercise_by_key: HashMap<(_, _), &Exercise> = exercises
             .iter()
@@ -151,7 +151,7 @@ pub fn save_session_changes(details: SessionSeriesUpdate) -> Result<(), String> 
             .unwrap()
             .to_rfc3339()
     );
-    let res = DATABASE_INST.get().expect("Database not initialized").run(|tx| {
+    let res = Database::run_in_transaction(|tx| {
         let mut exercises = HashSet::new();
         for serie in &details.series {
             SerieRepository::update()
@@ -161,18 +161,18 @@ pub fn save_session_changes(details: SessionSeriesUpdate) -> Result<(), String> 
                     Where::Eq(entity::columns::SESSION, details.timestamp.into()),
                     Where::Eq(entity::columns::IDX, serie.idx.into()),
                 ]))
-                .execute_in_tx(tx)?;
+                .execute_in_conn(tx)?;
             exercises.insert((serie.ex_cat.clone(), serie.ex_id));
         }
 
-        let mut session = SessionRepository::select_by_id_in_tx(tx, details.timestamp)?.unwrap();
-        session.fetch_series_relationship_in_tx(tx)?;
+        let mut session = SessionRepository::select_by_id_in_conn(tx, details.timestamp)?.unwrap();
+        session.fetch_series_relationship_in_conn(tx)?;
 
         session.volume = 0_f64;
         for ser in &session.series {
             session.volume += ser.weight * (ser.reps as f64)
         }
-        session.update_by_id_in_tx(tx)?;
+        session.update_by_id_in_conn(tx)?;
 
         update_prs(tx, exercises)?;
         Ok(())
@@ -240,22 +240,19 @@ pub async fn _import_from_device(serial: &str) -> Result<u16, String> {
         .map_err(|e| e.to_string())?;
 
     let res = tokio::task::spawn_blocking(move || {
-        DATABASE_INST
-            .get()
-            .expect("Database not initialized")
-            .run(|tx| {
-                let res = if !activities.is_empty() {
-                    info!("Fetched {} activity files", activities.len());
-                    import_file_list(tx, &activities, &device)
-                } else {
-                    Ok(0_u16)
-                }?;
+        Database::run_in_transaction(|tx| {
+            let res = if !activities.is_empty() {
+                info!("Fetched {} activity files", activities.len());
+                import_file_list(tx, &activities, &device)
+            } else {
+                Ok(0_u16)
+            }?;
 
-                device.last_sync = Some(Local::now().timestamp());
-                device.update_by_id_in_tx(tx)?;
+            device.last_sync = Some(Local::now().timestamp());
+            device.update_by_id_in_conn(tx)?;
 
-                Ok(res)
-            })
+            Ok(res)
+        })
     })
     .await
     .expect("blocking DB task panicked");
@@ -283,7 +280,7 @@ where
         info!("Importing file {}", file.as_ref().display());
         let res = match load_from_file(file.as_ref()) {
             Ok(mut session) => {
-                let added = if SessionRepository::exists_in_tx(tx, session.date)? {
+                let added = if SessionRepository::exists_in_conn(tx, session.date)? {
                     let msg = format!(
                         "Session with date {} already exists",
                         DateTimeUtils::format_time_date(session.date)
@@ -294,7 +291,7 @@ where
                     session.device = Some(device.serial.to_string());
                     SessionRepository::insert()
                         .item(session.clone())
-                        .execute_in_tx(tx)?;
+                        .execute_in_conn(tx)?;
 
                     let mut insert = ExerciseRepository::insert().or_ignore(true);
                     let mut seen = HashSet::new();
@@ -306,7 +303,7 @@ where
                         handled_exercises.insert((exercise.category, exercise.id));
                     }
                     if !seen.is_empty() {
-                        insert.execute_in_tx(tx)?;
+                        insert.execute_in_conn(tx)?;
                     }
 
                     let mut insert = SerieRepository::insert();
@@ -316,13 +313,13 @@ where
                         count += 1;
                     }
                     if count > 0 {
-                        insert.execute_in_tx(tx)?;
+                        insert.execute_in_conn(tx)?;
                     }
 
                     if let Some(heart_rates) = session.heart_rates {
                         HeartRateRepository::insert()
                             .item(heart_rates.clone())
-                            .execute_in_tx(tx)?;
+                            .execute_in_conn(tx)?;
                     }
 
                     true
@@ -397,7 +394,7 @@ fn update_prs(
             .order_by(OrderBy::Asc(entity::columns::SESSION))
             .order_by(OrderBy::Asc(entity::columns::IDX))
             .limit(1)
-            .fetch_one_in_tx(tx)?
+            .fetch_one_in_conn(tx)?
         {
             update_true_conditions.push(vec![pr.session.into(), pr.idx.into()]);
         }
@@ -416,14 +413,14 @@ fn update_prs(
                 ),
                 Where::Eq(serie::entity::columns::PR, true.into()),
             ]))
-            .execute_in_tx(tx)?;
+            .execute_in_conn(tx)?;
         SerieRepository::update()
             .set(serie::entity::columns::PR, true.into())
             .where_(Where::InMultiple(
                 vec![serie::entity::columns::SESSION, serie::entity::columns::IDX],
                 update_true_conditions,
             ))
-            .execute_in_tx(tx)?;
+            .execute_in_conn(tx)?;
     }
 
     Ok(())

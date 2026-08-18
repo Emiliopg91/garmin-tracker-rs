@@ -3350,7 +3350,7 @@ dependencies = [
 
 [[package]]
 name = "rusqlite_orm"
-version = "0.4.2"
+version = "0.4.3"
 dependencies = [
  "log",
  "r2d2",
@@ -3360,7 +3360,7 @@ dependencies = [
 
 [[package]]
 name = "rusqlite_orm_macros"
-version = "0.4.1"
+version = "0.4.3"
 dependencies = [
  "proc-macro2",
  "quote",

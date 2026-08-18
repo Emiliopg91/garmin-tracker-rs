@@ -3,7 +3,7 @@ use std::{collections::HashMap, ops::Deref};
 use garmin_tracker_rs_macros::{traced_command, translate};
 use rusqlite_orm::{
     dao::{Repository, helpers::types::order_by::OrderBy},
-    database::{DATABASE_INST, errors::DatabaseError},
+    database::{Database, errors::DatabaseError},
 };
 use tauri_plugin_log::log::{error, info};
 
@@ -21,10 +21,10 @@ use crate::{
 #[tauri::command]
 pub fn get_workout_list() -> Result<Vec<WorkoutListItem>, String> {
     info!("Getting workouts list...");
-    let res = DATABASE_INST.get().expect("Database not initialized").run(|tx| {
+    let res = Database::run_in_connection(|conn| {
         let sessions = SessionRepository::select()
             .order_by(OrderBy::Desc(entity::columns::DATE))
-            .fetch_in_tx(tx)?;
+            .fetch_in_conn(conn)?;
 
         let mut workout_stats = HashMap::new();
         sessions.iter().for_each(|s| {
@@ -71,11 +71,11 @@ pub fn get_workout_list() -> Result<Vec<WorkoutListItem>, String> {
 #[traced_command]
 #[tauri::command]
 pub fn get_workout_details(name: &str) -> Result<WorkoutDetails, String> {
-    let res = DATABASE_INST.get().expect("Database not initialized").run(|tx| {
+    let res = Database::run_in_connection(|conn| {
         info!("Getting details for workout {}", name);
 
-        let sessions = SessionRepository::select_by_workout_in_tx(
-            tx,
+        let sessions = SessionRepository::select_by_workout_in_conn(
+            conn,
             name,
             Some(&[OrderBy::Desc(entity::columns::DATE)]),
         )?;

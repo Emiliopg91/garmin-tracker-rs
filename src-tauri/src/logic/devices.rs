@@ -1,6 +1,6 @@
 use garmin_tracker_rs_macros::translate;
 use nusb::hotplug::HotplugEvent;
-use rusqlite_orm::{dao::Repository, database::DATABASE_INST};
+use rusqlite_orm::{dao::Repository, database::Database};
 use tokio_stream::StreamExt;
 
 use tauri::{AppHandle, Emitter};
@@ -57,17 +57,17 @@ async fn mtp_dev_check_and_sync(app: AppHandle, devices: &mut Vec<DeviceListItem
                 let mut enrolled = Vec::new();
                 let mut errors = Vec::new();
 
-                let _ = DATABASE_INST.get().expect("Database not initialized").run(
+                let _ = Database::run_in_transaction(
                     |tx: &mut rusqlite_orm::rusqlite::Transaction<'_>| {
                         for device in &cur_dev_owned {
                             if !already_known.contains(&device.serial_number) {
-                                let enrol_err = match DeviceRepository::select_by_id_in_tx(
+                                let enrol_err = match DeviceRepository::select_by_id_in_conn(
                                     tx,
                                     &device.serial_number,
                                 ) {
                                     Ok(None) => DeviceRepository::insert()
                                         .item(Device::from(device))
-                                        .execute_in_tx(tx)
+                                        .execute_in_conn(tx)
                                         .err(),
                                     Ok(Some(_)) => None,
                                     Err(e) => Some(e),

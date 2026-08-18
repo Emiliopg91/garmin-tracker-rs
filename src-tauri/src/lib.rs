@@ -7,7 +7,7 @@ mod utils;
 
 use std::process::exit;
 
-use rusqlite_orm::database::DATABASE_INST;
+use rusqlite_orm::database::Database;
 use rusqlite_orm_macros::dlls;
 use tauri::Manager;
 use tauri_plugin_log::{
@@ -85,19 +85,12 @@ pub fn run() {
             );
 
             debug!("Initializing database...");
-            let db = match rusqlite_orm::database::Database::open(constants::DB_FILE.clone()) {
-                Ok(db) => db,
-                Err(e) => {
-                    error!("Could not open database: {}", e);
-                    exit(constants::ExitCodes::DbError.into())
-                }
-            };
-            if let Err(e) = db.create_schema(&DDLS) {
-                error!("Could not initialize database: {}", e);
+            if let Err(e) = Database::initialize(constants::DB_FILE.clone()) {
+                error!("Could not open database: {}", e);
                 exit(constants::ExitCodes::DbError.into())
-            }
-            if DATABASE_INST.set(db).is_err() {
-                error!("Database was already initialized");
+            };
+            if let Err(e) = Database::create_schema(&DDLS) {
+                error!("Could not initialize database: {}", e);
                 exit(constants::ExitCodes::DbError.into())
             }
 
