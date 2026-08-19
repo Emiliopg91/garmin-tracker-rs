@@ -2,13 +2,19 @@ use std::{collections::HashMap, ops::Deref};
 
 use garmin_tracker_rs_macros::{traced_command, translate};
 use rusqlite_orm::{
-    dao::{Repository, helpers::types::order_by::OrderBy},
+    dao::{
+        Repository,
+        helpers::types::{order_by::OrderBy, value::Value, where_clause::Where},
+    },
     database::{Database, errors::DatabaseError},
 };
 use tauri_plugin_log::log::{error, info};
 
 use crate::{
-    dao::session::{SessionRepository, entity},
+    dao::{
+        serie::{self, SerieRepository},
+        session::{SessionRepository, entity},
+    },
     dto::{
         notifications::{NotificationDefinition, NotificationKind},
         workouts::{WorkoutDetails, WorkoutListItem, WorkoutSession},
@@ -85,17 +91,25 @@ pub fn get_workout_details(name: &str) -> Result<WorkoutDetails, String> {
         let mut time = 0_f64;
         let mut volume = 0_f64;
 
+        let series = SerieRepository::select()
+            .where_(Where::In(
+                serie::entity::columns::SESSION,
+                sessions.iter().map(|s| Value::from(s.date)).collect(),
+            ))
+            .fetch_in(conn)?;
+
         let mut session_list = Vec::new();
         for session in &sessions {
-            let mut session = session.clone();
+            let session = session.clone();
             if session.date > latest.date {
                 latest = session.clone();
             }
             count += 1;
             time += session.total_elapsed_time;
-            session.fetch_series_relationship_in_conn(conn)?;
+
+            let session_series = series.iter().filter(|s| s.session == session.date);
             let mut local_volume = 0_f64;
-            for serie in &session.series {
+            for serie in session_series {
                 local_volume += (serie.reps as f64) * serie.weight;
             }
             volume += local_volume;
