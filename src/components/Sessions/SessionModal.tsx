@@ -3,13 +3,7 @@ import { BackendClient } from "@/utils/backend/client";
 import { SessionDetails, SessionSeriesUpdate } from "@/utils/backend/models";
 import { useContext, useEffect, useState } from "react";
 import { Button, Modal } from "react-bootstrap";
-import {
-  MapContainer,
-  Marker,
-  Polyline,
-  Popup,
-  TileLayer,
-} from "react-leaflet";
+import { MapContainer, Marker, Polyline, TileLayer } from "react-leaflet";
 import {
   Area,
   AreaChart,
