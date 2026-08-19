@@ -31,8 +31,13 @@ install=${pkgname}.install
 build() {
   cd "$srcdir/${pkgname}"
 
-  if [ "$GITHUB_ACTIONS" != "true" ]; then
-    export RUSTFLAGS="-C target-cpu=native"
+  export RUSTC_WRAPPER=sccache
+  export CARGO_BUILD_JOBS=$(nproc)
+
+  if [ -z "$GITHUB_ACTIONS" ] && [ -z "$CI" ]; then
+    export RUSTFLAGS="-C target-cpu=native -C link-arg=-fuse-ld=mold"
+  else
+    export RUSTFLAGS="-C link-arg=-fuse-ld=mold"
   fi
 
   make build
