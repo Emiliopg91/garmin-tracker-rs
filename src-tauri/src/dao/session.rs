@@ -22,7 +22,7 @@ pub struct Session {
     pub avg_heart_rate: u8,
     pub max_heart_rate: u8,
     pub training_load: f64,
-    pub sub_sport: String,
+    pub sport: String,
     pub device: Option<String>,
     pub volume: f64,
 

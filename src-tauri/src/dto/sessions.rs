@@ -16,7 +16,7 @@ pub struct SessionListItem {
     pub volume: f64,
     pub active_calories: u16,
     pub training_load: u16,
-    pub sub_sport: String,
+    pub sport: String,
 }
 
 impl From<&Session> for SessionListItem {
@@ -28,7 +28,7 @@ impl From<&Session> for SessionListItem {
             active_calories: value.total_calories - value.metabolic_calories,
             volume: value.volume,
             training_load: value.training_load.round() as u16,
-            sub_sport: value.sub_sport.clone(),
+            sport: value.sport.clone(),
         }
     }
 }
@@ -83,7 +83,7 @@ pub struct SessionDetails {
 
     pub avg_heart_rate: u8,
     pub max_heart_rate: u8,
-    pub sub_sport: String,
+    pub sport: String,
 
     pub exercises: Vec<String>,
     pub series: HashMap<String, Vec<SessionSerie>>,
@@ -119,7 +119,7 @@ impl From<(&Session, &IndexMap<Exercise, Vec<Serie>>)> for SessionDetails {
         if let Some(hr_dao) = value.0.heart_rates.clone()
             && !hr_dao.records.is_empty()
         {
-            heart_rates = hr_dao.records.clone();
+            heart_rates = hr_dao.records.clone().into_iter().collect();
 
             let time_fraction = value.0.total_elapsed_time / (heart_rates.len() as f64);
             let mut num_zones_times = Vec::new();
@@ -209,7 +209,7 @@ impl From<(&Session, &IndexMap<Exercise, Vec<Serie>>)> for SessionDetails {
             total_calories: value.0.total_calories,
             total_elapsed_time: DateTimeUtils::format_duration(value.0.total_elapsed_time as u64),
             training_load: value.0.training_load.round() as u16,
-            sub_sport: value.0.sub_sport.clone(),
+            sport: value.0.sport.clone(),
             exercises,
             series: series_d,
             heart_rates,

@@ -79,12 +79,8 @@ where
         .ok_or_else(|| ParseFitFileError::MissingField("session".to_string()))?;
 
     let timestamp = get_timestamp("timestamp", session_entry.fields())?;
-    let sub_sport = get_string("sub_sport", session_entry.fields())?;
-    let workout = if sub_sport == "strength_training" {
-        get_workout_name(grouped.workout)?
-    } else {
-        "".to_string()
-    };
+    let sport = get_string("sport_profile_name", session_entry.fields())?;
+    let workout = get_workout_name(grouped.workout).unwrap_or_default();
     let total_elapsed_time = get_f64("total_elapsed_time", session_entry.fields())?;
     let active_time = get_f64("active_time", session_entry.fields()).unwrap_or(0.0);
     let training_load = get_f64("training_load_peak", session_entry.fields())?;
@@ -92,11 +88,7 @@ where
     let metabolic_calories = get_u16("metabolic_calories", session_entry.fields())?;
     let avg_heart_rate = get_u8("avg_heart_rate", session_entry.fields())?;
     let max_heart_rate = get_u8("max_heart_rate", session_entry.fields())?;
-    let series = if sub_sport == "strength_training" {
-        get_sets(&grouped, &timestamp)?
-    } else {
-        Vec::new()
-    };
+    let series = get_sets(&grouped, &timestamp).unwrap_or_default();
     let heart_rates = get_heart_rate(&timestamp, &grouped.records)?;
     let gps_coordinates = get_gps_coordinates(&timestamp, &grouped.records)?;
 
@@ -116,7 +108,7 @@ where
         max_heart_rate,
         series,
         training_load,
-        sub_sport,
+        sport,
         device: None,
         device_obj: None,
         heart_rates,
@@ -196,7 +188,7 @@ fn get_heart_rate(
 ) -> errors::Result<Option<HeartRate>> {
     let mut hrs = Vec::new();
 
-    records.iter().step_by(4).for_each(|entry| {
+    records.iter().for_each(|entry| {
         if let Ok(val) = get_u8("heart_rate", entry.fields()) {
             hrs.push(val);
         }
@@ -218,7 +210,7 @@ fn get_gps_coordinates(
 ) -> errors::Result<Option<GpsCoordinates>> {
     let mut coords = Vec::new();
 
-    records.iter().step_by(4).for_each(|entry| {
+    records.iter().for_each(|entry| {
         if let Ok(latitude) = get_i32("position_lat", entry.fields())
             && let Ok(longitude) = get_i32("position_long", entry.fields())
         {

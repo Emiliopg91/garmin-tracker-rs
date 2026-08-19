@@ -2,8 +2,8 @@
 
 // From src-tauri/src/dto/app.rs:4
 export enum AppEnvironment {
-  Debug = "Debug",
-  Release = "Release",
+	Debug = "Debug",
+	Release = "Release",
 }
 
 // From src-tauri/src/dto/body_metrics.rs:7
@@ -59,7 +59,7 @@ export interface SessionDetails {
   metabolic_calories: number;
   name: string;
   series: Record<string, SessionSerie[]>;
-  sub_sport: string;
+  sport: string;
   timestamp: string;
   total_calories: number;
   total_elapsed_time: string;
@@ -72,7 +72,7 @@ export interface SessionListItem {
   active_calories: number;
   date: string;
   name: string;
-  sub_sport: string;
+  sport: string;
   timestamp: string;
   training_load: number;
   volume: number;
@@ -118,3 +118,4 @@ export interface WorkoutSession {
   vol_diff: string;
   volume: number;
 }
+

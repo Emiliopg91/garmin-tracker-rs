@@ -271,6 +271,7 @@ export function SessionsList() {
           <thead>
             <tr>
               <th style={{ textAlign: "center" }}>{translate("date")}</th>
+              <th style={{ textAlign: "center" }}>{translate("sport")}</th>
               <th style={{ textAlign: "center" }}>{translate("workout")}</th>
               <th style={{ textAlign: "center" }}>{translate("volume")}</th>
               <th style={{ textAlign: "center" }}>
@@ -290,18 +291,10 @@ export function SessionsList() {
                 style={{ cursor: "pointer" }}
               >
                 <td>{session.date}</td>
+                <td>{session.sport}</td>
+                <td>{session.name}</td>
                 <td>
-                  {session.sub_sport == "strength_training" && (
-                    <span>{session.name}</span>
-                  )}
-                  {session.sub_sport != "strength_training" && (
-                    <span>{translate("other")}</span>
-                  )}
-                </td>
-                <td>
-                  {session.sub_sport == "strength_training" && (
-                    <span>{session.volume} Kg</span>
-                  )}
+                  {session.volume > 0 && <span>{session.volume} Kg</span>}
                 </td>
                 <td>{session.active_calories}</td>
                 <td>{session.training_load}</td>

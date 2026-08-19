@@ -156,16 +156,53 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
       <Modal show={true} onHide={onClose} data-bs-theme="dark">
         <Modal.Header closeButton>
           <Modal.Title>
-            {session.sub_sport == "strength_training"
-              ? localSession.name
-              : translate("other")}
-            <small style={{ fontSize: "17px", marginLeft: "30px" }}>
-              {localSession.date}
-            </small>
+            {localSession.sport}
+            <>
+              {localSession.name.length > 0 && (
+                <span>
+                  :{" "}
+                  <span style={{ marginLeft: "10px" }}>
+                    {localSession.name}
+                  </span>
+                </span>
+              )}
+            </>
           </Modal.Title>
         </Modal.Header>
 
         <Modal.Body>
+          {localSession.gps_coordinates.length > 0 && (
+            <>
+              <MapContainer
+                bounds={localSession.gps_coordinates}
+                boundsOptions={{ padding: [25, 25] }}
+                attributionControl={false}
+                style={{ height: "200px", width: "100%" }}
+              >
+                <TileLayer
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  attribution={""}
+                />
+
+                <Polyline
+                  positions={localSession.gps_coordinates}
+                  color="blue"
+                  weight={4}
+                />
+
+                <Marker position={localSession.gps_coordinates[0]}></Marker>
+
+                <Marker
+                  position={
+                    localSession.gps_coordinates[
+                      localSession.gps_coordinates.length - 1
+                    ]
+                  }
+                ></Marker>
+              </MapContainer>
+              <hr />
+            </>
+          )}
           <table id="session-details-table">
             <colgroup>
               <col style={{ width: "200px" }} />
@@ -174,10 +211,14 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
             </colgroup>
             <tbody>
               <tr>
+                <td>{translate("date")}:</td>
+                <td>{localSession.date}</td>
+              </tr>
+              <tr>
                 <td>{translate("total_time")}:</td>
                 <td>{localSession.total_elapsed_time}</td>
               </tr>
-              {session.sub_sport == "strength_training" && (
+              {localSession.active_time && (
                 <tr>
                   <td>{translate("active_time")}:</td>
                   <td>{localSession.active_time}</td>
@@ -199,7 +240,7 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                 <td>{translate("workout_load")}:</td>
                 <td>{localSession.training_load}</td>
               </tr>
-              {session.sub_sport == "strength_training" && (
+              {getVolume() > 0 && (
                 <tr>
                   <td>{translate("volume")}:</td>
                   <td>{getVolume()} Kg</td>
@@ -339,38 +380,7 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
               <br />
             </>
           )}
-          {localSession.gps_coordinates.length > 0 && (
-            <div style={{ position: "relative", top: "-20px" }}>
-              <hr />
-              <MapContainer
-                center={localSession.gps_coordinates[0]}
-                zoom={13}
-                style={{ height: "200px", width: "100%" }}
-              >
-                <TileLayer
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  attribution="&copy; OpenStreetMap contributors"
-                />
-
-                <Polyline
-                  positions={localSession.gps_coordinates}
-                  color="blue"
-                  weight={4}
-                />
-
-                <Marker position={localSession.gps_coordinates[0]}></Marker>
-
-                <Marker
-                  position={
-                    localSession.gps_coordinates[
-                      localSession.gps_coordinates.length - 1
-                    ]
-                  }
-                ></Marker>
-              </MapContainer>
-            </div>
-          )}
-          {session.sub_sport == "strength_training" &&
+          {localSession.series &&
             Object.keys(localSession.series).length > 0 && (
               <div style={{ position: "relative", top: "-20px" }}>
                 <table>
