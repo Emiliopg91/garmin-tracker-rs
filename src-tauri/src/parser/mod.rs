@@ -8,7 +8,10 @@ use chrono::{DateTime, Local};
 use fitparser::{FitDataField, FitDataRecord, Value, de::DecodeOption, profile};
 use garmin_tracker_rs_macros::translate;
 
-use crate::dao::{exercise::Exercise, heart_rate::HeartRate, serie::Serie, session::Session};
+use crate::dao::{
+    exercise::Exercise, gps_coordinates::GpsCoordinates, heart_rate::HeartRate, serie::Serie,
+    session::Session,
+};
 
 use self::errors::ParseFitFileError;
 
@@ -95,6 +98,7 @@ where
         Vec::new()
     };
     let heart_rates = get_heart_rate(&timestamp, &grouped.records)?;
+    let gps_coordinates = get_gps_coordinates(&timestamp, &grouped.records)?;
 
     let mut volume = 0_f64;
     for ser in &series {
@@ -117,6 +121,7 @@ where
         device_obj: None,
         heart_rates,
         volume,
+        gps_coordinates,
     })
 }
 
@@ -207,6 +212,31 @@ fn get_heart_rate(
     })
 }
 
+fn get_gps_coordinates(
+    timestamp: &DateTime<Local>,
+    records: &[&FitDataRecord],
+) -> errors::Result<Option<GpsCoordinates>> {
+    let mut coords = Vec::new();
+
+    records.iter().step_by(4).for_each(|entry| {
+        if let Ok(latitude) = get_i32("position_lat", entry.fields())
+            && let Ok(longitude) = get_i32("position_long", entry.fields())
+        {
+            coords.extend_from_slice(&latitude.to_be_bytes());
+            coords.extend_from_slice(&longitude.to_be_bytes());
+        }
+    });
+
+    Ok(if coords.is_empty() {
+        None
+    } else {
+        Some(GpsCoordinates {
+            session: timestamp.timestamp(),
+            records: coords,
+        })
+    })
+}
+
 fn get_steps(
     workout_steps: &[&FitDataRecord],
     exercises: &[Exercise],
@@ -272,6 +302,7 @@ typed_getter!(get_u8, UInt8, u8, "u8");
 typed_getter!(get_timestamp, Timestamp, DateTime<Local>, "timestamp");
 typed_getter!(get_string, String, String, "string");
 typed_getter!(get_i64, SInt64, i64, "i64");
+typed_getter!(get_i32, SInt32, i32, "i32");
 
 fn get_field<'a>(name: &str, entries: &'a [FitDataField]) -> errors::Result<&'a Value> {
     entries

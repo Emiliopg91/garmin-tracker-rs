@@ -2,6 +2,7 @@ use rusqlite_orm_macros::Entity;
 
 use crate::dao::{
     device::{self, Device},
+    gps_coordinates::{self, GpsCoordinates},
     heart_rate::{self, HeartRate},
     serie,
 };
@@ -33,4 +34,7 @@ pub struct Session {
 
     #[relationship((date, heart_rate::entity::columns::SESSION))]
     pub heart_rates: Option<HeartRate>,
+
+    #[relationship((date, gps_coordinates::entity::columns::SESSION))]
+    pub gps_coordinates: Option<GpsCoordinates>,
 }

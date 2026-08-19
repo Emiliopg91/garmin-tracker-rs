@@ -20,6 +20,7 @@ use crate::{
     dao::{
         device::{Device, DeviceRepository},
         exercise::{self, Exercise, ExerciseRepository},
+        gps_coordinates::GpsCoordinatesRepository,
         heart_rate::HeartRateRepository,
         serie::{self, Serie, SerieRepository, entity},
         session::{self, SessionRepository},
@@ -83,6 +84,7 @@ pub fn get_session_details(timestamp: i64) -> Result<SessionDetails, String> {
             session.fetch_device_obj_relationship_in_conn(conn)?;
         }
         session.fetch_heart_rates_relationship_in_conn(conn)?;
+        session.fetch_gps_coordinates_relationship_in_conn(conn)?;
 
         let condition_set: HashSet<(_, _)> = session
             .series
@@ -321,6 +323,12 @@ where
                     if let Some(heart_rates) = session.heart_rates {
                         HeartRateRepository::insert()
                             .item(heart_rates.clone())
+                            .execute_in(&sp)?;
+                    }
+
+                    if let Some(coordinates) = session.gps_coordinates {
+                        GpsCoordinatesRepository::insert()
+                            .item(coordinates.clone())
                             .execute_in(&sp)?;
                     }
 

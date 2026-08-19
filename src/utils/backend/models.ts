@@ -53,6 +53,7 @@ export interface SessionDetails {
   date: string;
   device: string | null;
   exercises: string[];
+  gps_coordinates: [number, number][];
   heart_rates: number[];
   max_heart_rate: number;
   metabolic_calories: number;
@@ -86,7 +87,7 @@ export interface SessionSerie {
   weight: number;
 }
 
-// From src-tauri/src/dto/sessions.rs:198
+// From src-tauri/src/dto/sessions.rs:223
 export interface SessionSeriesUpdate {
   series: SessionSerie[];
   timestamp: string;

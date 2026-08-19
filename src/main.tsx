@@ -3,6 +3,7 @@ import App from "@/components/App/App";
 
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min";
+import "leaflet/dist/leaflet.css";
 
 import "@/styles/main.css";
 import { AppProvider } from "./context/AppProvider";

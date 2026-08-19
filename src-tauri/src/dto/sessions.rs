@@ -88,6 +88,7 @@ pub struct SessionDetails {
     pub exercises: Vec<String>,
     pub series: HashMap<String, Vec<SessionSerie>>,
     pub heart_rates: Vec<u8>,
+    pub gps_coordinates: Vec<(f64, f64)>,
 
     pub device: Option<String>,
 }
@@ -173,6 +174,29 @@ impl From<(&Session, &IndexMap<Exercise, Vec<Serie>>)> for SessionDetails {
                 .collect();
         }
 
+        let mut gps_coordinates = Vec::new();
+        if let Some(coords) = value.0.gps_coordinates.clone() {
+            const SEMICIRCLE_TO_DEGREES: f64 = 180.0 / (2_i64.pow(31) as f64);
+
+            fn semicircles_to_degrees(semicircles: i32) -> f64 {
+                semicircles as f64 * SEMICIRCLE_TO_DEGREES
+            }
+
+            let mut idx = 0;
+            while idx < coords.records.len() {
+                let lat = semicircles_to_degrees(i32::from_be_bytes(
+                    coords.records[idx..idx + 4].try_into().unwrap(),
+                ));
+                let lon = semicircles_to_degrees(i32::from_be_bytes(
+                    coords.records[idx + 4..idx + 8].try_into().unwrap(),
+                ));
+
+                gps_coordinates.push((lat, lon));
+
+                idx += 8;
+            }
+        }
+
         Self {
             name: value.0.workout.clone(),
             date: DateTimeUtils::format_time_date(value.0.date),
@@ -190,6 +214,7 @@ impl From<(&Session, &IndexMap<Exercise, Vec<Serie>>)> for SessionDetails {
             series: series_d,
             heart_rates,
             device,
+            gps_coordinates,
         }
     }
 }

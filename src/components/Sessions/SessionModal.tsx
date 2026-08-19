@@ -4,6 +4,13 @@ import { SessionDetails, SessionSeriesUpdate } from "@/utils/backend/models";
 import { useContext, useEffect, useState } from "react";
 import { Button, Modal } from "react-bootstrap";
 import {
+  MapContainer,
+  Marker,
+  Polyline,
+  Popup,
+  TileLayer,
+} from "react-leaflet";
+import {
   Area,
   AreaChart,
   CartesianGrid,
@@ -165,6 +172,37 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
         </Modal.Header>
 
         <Modal.Body>
+          {localSession.gps_coordinates && (
+            <>
+              <MapContainer
+                center={localSession.gps_coordinates[0]}
+                zoom={13}
+                style={{ height: "200px", width: "100%" }}
+              >
+                <TileLayer
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  attribution="&copy; OpenStreetMap contributors"
+                />
+
+                <Polyline
+                  positions={localSession.gps_coordinates}
+                  color="blue"
+                  weight={4}
+                />
+
+                <Marker position={localSession.gps_coordinates[0]}></Marker>
+
+                <Marker
+                  position={
+                    localSession.gps_coordinates[
+                      localSession.gps_coordinates.length - 1
+                    ]
+                  }
+                ></Marker>
+              </MapContainer>
+              <hr />
+            </>
+          )}
           <table id="session-details-table">
             <colgroup>
               <col style={{ width: "200px" }} />

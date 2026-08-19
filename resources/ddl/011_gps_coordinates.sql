@@ -1,0 +1,10 @@
+--- GPS coordinates
+
+CREATE TABLE IF NOT EXISTS GPS_COORDINATES(
+    session INTEGER NOT NULL,
+    records BLOB NOT NULL,
+
+    PRIMARY KEY(session),
+
+    FOREIGN KEY(session) REFERENCES SESSION(date) ON DELETE CASCADE
+);
