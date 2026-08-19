@@ -55,7 +55,7 @@ pub fn get_sessions() -> Result<Vec<SessionListItem>, String> {
             info!("Retreived {} sessions", l.len());
             Ok(l)
         }
-        Err(DatabaseError::Transaction(e)) => {
+        Err(DatabaseError::RunningOnConnection(e)) => {
             error!("Error getting sessions list: {}", e);
             show_notification(NotificationDefinition {
                 title: translate!("error_session_list"),
@@ -130,7 +130,7 @@ pub fn get_session_details(timestamp: i64) -> Result<SessionDetails, String> {
             );
             Ok(details)
         }
-        Err(DatabaseError::Transaction(e)) => {
+        Err(DatabaseError::RunningOnConnection(e)) => {
             error!("Error getting session details: {}", e);
             show_notification(NotificationDefinition {
                 title: translate!("error_session_details"),

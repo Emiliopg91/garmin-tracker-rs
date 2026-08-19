@@ -39,7 +39,7 @@ pub fn get_body_measures() -> Result<Vec<BodyMetricListItem>, String> {
             info!("Retrieved {} measures", res.len());
             Ok(res)
         }
-        Err(DatabaseError::Transaction(e)) => {
+        Err(DatabaseError::RunningOnConnection(e)) => {
             error!("Error getting measures list: {}", e);
             show_notification(NotificationDefinition {
                 title: translate!("error_body_measures_list"),

@@ -1,6 +1,7 @@
 import { AppContext } from "@/context/AppContext";
 import { BackendClient } from "@/utils/backend/client";
 import { SessionDetails, SessionSeriesUpdate } from "@/utils/backend/models";
+import L from "leaflet";
 import { useContext, useEffect, useState } from "react";
 import { Button, Modal } from "react-bootstrap";
 import { MapContainer, Marker, Polyline, TileLayer } from "react-leaflet";
@@ -20,6 +21,21 @@ type Props = {
   onClose: () => void;
   onUpdate: () => void;
 };
+
+const makeMarkerIcon = (color: string) =>
+  L.divIcon({
+    className: "",
+    html: `<svg width="25" height="41" viewBox="0 0 25 41" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12.5 0C5.6 0 0 5.6 0 12.5c0 9.4 12.5 28.5 12.5 28.5S25 21.9 25 12.5C25 5.6 19.4 0 12.5 0z" fill="${color}" stroke="white" stroke-width="1.5"/>
+      <circle cx="12.5" cy="12.5" r="4.5" fill="white"/>
+    </svg>`,
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+  });
+
+const startIcon = makeMarkerIcon("#2ecc71");
+const endIcon = makeMarkerIcon("#e74c3c");
 
 export function SessionModal({ session, onClose, onUpdate }: Props) {
   const { startLoading, finishLoading, translate } = useContext(AppContext);
@@ -175,7 +191,7 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
             <>
               <MapContainer
                 bounds={localSession.gps_coordinates}
-                boundsOptions={{ padding: [25, 25] }}
+                boundsOptions={{ padding: [20, 20] }}
                 attributionControl={false}
                 style={{ height: "200px", width: "100%" }}
               >
@@ -190,7 +206,10 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                   weight={4}
                 />
 
-                <Marker position={localSession.gps_coordinates[0]}></Marker>
+                <Marker
+                  position={localSession.gps_coordinates[0]}
+                  icon={startIcon}
+                ></Marker>
 
                 <Marker
                   position={
@@ -198,6 +217,7 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                       localSession.gps_coordinates.length - 1
                     ]
                   }
+                  icon={endIcon}
                 ></Marker>
               </MapContainer>
               <hr />

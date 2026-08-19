@@ -66,7 +66,7 @@ pub fn get_exercises() -> Result<Vec<ExerciseListItem>, String> {
             info!("Retreived {} exercises", l.len());
             Ok(l)
         }
-        Err(DatabaseError::Transaction(e)) => {
+        Err(DatabaseError::RunningOnConnection(e)) => {
             error!("Error getting exercises list: {}", e);
             show_notification(NotificationDefinition {
                 title: translate!("error_exercise_list"),
@@ -147,7 +147,7 @@ pub fn get_exercise_details(category: &str, id: u16) -> Result<ExerciseDetails, 
             info!("Found details for exercise {}", l.name);
             Ok(l)
         }
-        Err(DatabaseError::Transaction(e)) => {
+        Err(DatabaseError::RunningOnConnection(e)) => {
             error!("Error getting exercise details: {}", e);
             show_notification(NotificationDefinition {
                 title: translate!("error_exercise_details"),
