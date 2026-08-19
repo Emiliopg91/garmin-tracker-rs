@@ -86,16 +86,9 @@ where
     let training_load = get_f64("training_load_peak", session_entry.fields())?;
     let total_calories = get_u16("total_calories", session_entry.fields())?;
     let metabolic_calories = get_u16("metabolic_calories", session_entry.fields())?;
-    let avg_heart_rate = get_u8("avg_heart_rate", session_entry.fields())?;
-    let max_heart_rate = get_u8("max_heart_rate", session_entry.fields())?;
     let series = get_sets(&grouped, &timestamp).unwrap_or_default();
     let heart_rates = get_heart_rate(&timestamp, &grouped.records)?;
     let gps_coordinates = get_gps_coordinates(&timestamp, &grouped.records)?;
-
-    let mut volume = 0_f64;
-    for ser in &series {
-        volume += ser.weight * (ser.reps as f64);
-    }
 
     Ok(Session {
         workout,
@@ -104,15 +97,12 @@ where
         active_time,
         total_calories,
         metabolic_calories,
-        avg_heart_rate,
-        max_heart_rate,
         series,
         training_load,
         sport,
         device: None,
         device_obj: None,
         heart_rates,
-        volume,
         gps_coordinates,
     })
 }

@@ -169,11 +169,6 @@ pub fn save_session_changes(details: SessionSeriesUpdate) -> Result<(), String> 
 
         let mut session = SessionRepository::select_by_id_in(tx, details.timestamp)?.unwrap();
         session.fetch_series_relationship_in_conn(tx)?;
-
-        session.volume = 0_f64;
-        for ser in &session.series {
-            session.volume += ser.weight * (ser.reps as f64)
-        }
         session.update_by_id_in(tx)?;
 
         update_prs(tx, exercises)?;

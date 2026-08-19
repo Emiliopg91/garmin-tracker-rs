@@ -85,14 +85,24 @@ pub fn get_workout_details(name: &str) -> Result<WorkoutDetails, String> {
         let mut time = 0_f64;
         let mut volume = 0_f64;
 
-        sessions.iter().for_each(|s| {
-            if s.date > latest.date {
-                latest = s.clone();
+        let mut session_list = Vec::new();
+        for session in &sessions {
+            let mut session = session.clone();
+            if session.date > latest.date {
+                latest = session.clone();
             }
             count += 1;
-            time += s.total_elapsed_time;
-            volume += s.volume
-        });
+            time += session.total_elapsed_time;
+            session.fetch_series_relationship_in_conn(conn)?;
+            let mut local_volume = 0_f64;
+            for serie in &session.series {
+                local_volume += (serie.reps as f64) * serie.weight;
+            }
+            volume += local_volume;
+            let mut wk_sess = WorkoutSession::from(&session);
+            wk_sess.volume = local_volume;
+            session_list.push(wk_sess);
+        }
 
         let mut details = WorkoutDetails {
             name: name.to_string(),
@@ -100,7 +110,7 @@ pub fn get_workout_details(name: &str) -> Result<WorkoutDetails, String> {
             latest_session: DateTimeUtils::format_time_date(latest.date),
             avg_volume: volume / (sessions.len() as f64),
             session_count: count,
-            sessions: sessions.iter().map(WorkoutSession::from).collect(),
+            sessions: session_list,
         };
 
         for i in 0..details.sessions.len().saturating_sub(1) {

@@ -13,7 +13,6 @@ pub struct SessionListItem {
     pub name: String,
     pub date: String,
     pub timestamp: i64,
-    pub volume: f64,
     pub active_calories: u16,
     pub training_load: u16,
     pub sport: String,
@@ -26,7 +25,6 @@ impl From<&Session> for SessionListItem {
             date: DateTimeUtils::format_time_date(value.date),
             timestamp: value.date,
             active_calories: value.total_calories - value.metabolic_calories,
-            volume: value.volume,
             training_load: value.training_load.round() as u16,
             sport: value.sport.clone(),
         }
@@ -80,9 +78,6 @@ pub struct SessionDetails {
     pub metabolic_calories: u16,
 
     pub training_load: u16,
-
-    pub avg_heart_rate: u8,
-    pub max_heart_rate: u8,
     pub sport: String,
 
     pub exercises: Vec<String>,
@@ -203,8 +198,6 @@ impl From<(&Session, &IndexMap<Exercise, Vec<Serie>>)> for SessionDetails {
             timestamp: value.0.date,
             active_time: DateTimeUtils::format_duration(value.0.active_time as u64),
             zones_times,
-            avg_heart_rate: value.0.avg_heart_rate,
-            max_heart_rate: value.0.max_heart_rate,
             metabolic_calories: value.0.metabolic_calories,
             total_calories: value.0.total_calories,
             total_elapsed_time: DateTimeUtils::format_duration(value.0.total_elapsed_time as u64),

@@ -43,6 +43,8 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
   const [localSession, setLocalSession] = useState({ ...session });
   const [changed, setChanged] = useState(false);
   const [minHr, setMinHr] = useState(0);
+  const [maxHr, setMaxHr] = useState(0);
+  const [avgHr, setAvgHr] = useState(0);
   const [hrData, setHrData] = useState<
     {
       idx: number;
@@ -60,7 +62,13 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
       color: string;
     }[] = [];
 
-    const maxHr = Math.max(189, session.max_heart_rate);
+    const maxHr = Math.max(189, Math.max(...session.heart_rates));
+    setMaxHr(Math.max(...session.heart_rates));
+    const avgHr = Math.round(
+      session.heart_rates.reduce((acc, valor) => acc + valor, 0) /
+        session.heart_rates.length,
+    );
+    setAvgHr(avgHr);
 
     if (session.heart_rates && session.heart_rates.length > 0) {
       session.heart_rates.forEach((hr, idx) => {
@@ -79,7 +87,7 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
         hrData.push({
           idx: idx * 2,
           hr,
-          avg: session.avg_heart_rate,
+          avg: avgHr,
           color,
         });
       });
@@ -317,15 +325,11 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                     <XAxis dataKey="idx" tick={false} />
                     <YAxis
                       width="auto"
-                      domain={[(4 * minHr) / 5, session.max_heart_rate]}
-                      ticks={[
-                        minHr,
-                        session.avg_heart_rate,
-                        session.max_heart_rate,
-                      ]}
+                      domain={[(4 * minHr) / 5, maxHr]}
+                      ticks={[minHr, avgHr, maxHr]}
                     />
                     <ReferenceLine
-                      y={session.avg_heart_rate}
+                      y={avgHr}
                       stroke="white"
                       strokeDasharray="3 3"
                     />
@@ -335,7 +339,7 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                       strokeDasharray="3 3"
                     />
                     <ReferenceLine
-                      y={session.max_heart_rate}
+                      y={maxHr}
                       stroke="white"
                       strokeDasharray="3 3"
                     />

@@ -2,8 +2,8 @@
 
 // From src-tauri/src/dto/app.rs:4
 export enum AppEnvironment {
-  Debug = "Debug",
-  Release = "Release",
+	Debug = "Debug",
+	Release = "Release",
 }
 
 // From src-tauri/src/dto/body_metrics.rs:7
@@ -46,16 +46,14 @@ export interface ExerciseListItem {
   weight: number;
 }
 
-// From src-tauri/src/dto/sessions.rs:69
+// From src-tauri/src/dto/sessions.rs:67
 export interface SessionDetails {
   active_time: string;
-  avg_heart_rate: number;
   date: string;
   device: string | null;
   exercises: string[];
   gps_coordinates: [number, number][];
   heart_rates: number[];
-  max_heart_rate: number;
   metabolic_calories: number;
   name: string;
   series: Record<string, SessionSerie[]>;
@@ -75,10 +73,9 @@ export interface SessionListItem {
   sport: string;
   timestamp: string;
   training_load: number;
-  volume: number;
 }
 
-// From src-tauri/src/dto/sessions.rs:48
+// From src-tauri/src/dto/sessions.rs:46
 export interface SessionSerie {
   ex_cat: string;
   ex_id: number;
@@ -87,7 +84,7 @@ export interface SessionSerie {
   weight: number;
 }
 
-// From src-tauri/src/dto/sessions.rs:223
+// From src-tauri/src/dto/sessions.rs:216
 export interface SessionSeriesUpdate {
   series: SessionSerie[];
   timestamp: string;
@@ -118,3 +115,4 @@ export interface WorkoutSession {
   vol_diff: string;
   volume: number;
 }
+

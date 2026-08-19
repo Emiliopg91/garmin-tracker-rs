@@ -19,12 +19,9 @@ pub struct Session {
     pub active_time: f64,
     pub total_calories: u16,
     pub metabolic_calories: u16,
-    pub avg_heart_rate: u8,
-    pub max_heart_rate: u8,
     pub training_load: f64,
     pub sport: String,
     pub device: Option<String>,
-    pub volume: f64,
 
     #[relationship((date, serie::entity::columns::SESSION))]
     pub series: Vec<Serie>,

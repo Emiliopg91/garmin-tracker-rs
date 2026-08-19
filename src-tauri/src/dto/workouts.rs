@@ -22,7 +22,7 @@ impl From<&Session> for WorkoutSession {
     fn from(value: &Session) -> Self {
         WorkoutSession {
             date: DateTimeUtils::format_time_date(value.date),
-            volume: value.volume,
+            volume: 0_f64,
             time: DateTimeUtils::format_duration(value.total_elapsed_time as u64),
             vol_diff: "-".to_string(),
         }
