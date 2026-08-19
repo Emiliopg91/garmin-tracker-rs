@@ -30,7 +30,12 @@ install=${pkgname}.install
 
 build() {
   cd "$srcdir/${pkgname}"
-  RUSTFLAGS="" make build
+
+  if [ "$GITHUB_ACTIONS" != "true" ]; then
+    export RUSTFLAGS="-C target-cpu=native"
+  fi
+
+  make build
 }
 
 package() {
