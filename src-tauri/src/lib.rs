@@ -17,7 +17,7 @@ use tauri_plugin_log::{
 use crate::{
     logic::{
         app::{get_environment, notify_frontend_ready},
-        body_metrics::{add_body_measures, get_body_measures},
+        body_metrics::{add_body_measures, delete_body_metric, get_body_measures},
         exercises::{get_exercise_details, get_exercises},
         sessions::{get_session_details, get_sessions, import_from_device, save_session_changes},
         workouts::{get_workout_details, get_workout_list},
@@ -110,6 +110,7 @@ pub fn run() {
             get_body_measures,
             add_body_measures,
             get_environment,
+            delete_body_metric,
         ])
         .run(tauri::generate_context!());
 

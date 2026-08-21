@@ -82,3 +82,37 @@ pub fn add_body_measures(measures: BodyMetricListItem) -> Result<(), String> {
         _ => unreachable!(),
     }
 }
+
+#[traced_command]
+#[tauri::command]
+pub fn delete_body_metric(date: i32) -> Result<(), String> {
+    let res = Database::run_in_transaction(|tx| {
+        if let Some(entry) = BodyMetricsRepository::select_by_id_in(tx, date as i64)? {
+            entry.delete_by_id_in(tx)?;
+        }
+
+        Ok(())
+    });
+
+    match res {
+        Ok(_) => {
+            info!("Measures deleted succesfully");
+            show_notification(NotificationDefinition {
+                title: translate!("ok_delete_body_entry"),
+                body: "".to_string(),
+                kind: NotificationKind::Temporal,
+            });
+            Ok(())
+        }
+        Err(DatabaseError::Transaction(e)) => {
+            error!("Error deleting measures: {}", e);
+            show_notification(NotificationDefinition {
+                title: translate!("error_deleting_body_measures"),
+                body: e.deref().to_string(),
+                kind: NotificationKind::Persistant,
+            });
+            Err(e.deref().to_string())
+        }
+        _ => unreachable!(),
+    }
+}

@@ -225,7 +225,10 @@ export function BodyMetricList() {
         {measureDetails && (
           <BodyMetricsDetailsModal
             measures={measureDetails}
-            onClose={() => setMeasureDetails(undefined)}
+            onClose={() => {
+              setMeasureDetails(undefined);
+            }}
+            onDelete={refreshList}
           />
         )}
         {addingNew && (

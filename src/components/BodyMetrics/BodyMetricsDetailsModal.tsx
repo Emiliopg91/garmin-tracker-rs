@@ -1,16 +1,35 @@
 import { AppContext } from "@/context/AppContext";
+import { BackendClient } from "@/utils/backend/client";
 import { BodyMetricListItem } from "@/utils/backend/models";
 import { TimeUtils } from "@/utils/TimeUtils";
 import { useContext } from "react";
-import { Modal } from "react-bootstrap";
+import { Button, Modal } from "react-bootstrap";
 
 type Props = {
   measures: BodyMetricListItem;
   onClose: () => void;
+  onDelete: () => void;
 };
 
-export function BodyMetricsDetailsModal({ measures, onClose }: Props) {
-  const { translate } = useContext(AppContext);
+export function BodyMetricsDetailsModal({
+  measures,
+  onClose,
+  onDelete,
+}: Props) {
+  const { translate, startLoading, finishLoading } = useContext(AppContext);
+
+  const deleteEntry = () => {
+    startLoading();
+    BackendClient.deleteBodyMetric(measures.date)
+      .then(() => {
+        onDelete();
+        onClose();
+      })
+      .finally(() => {
+        finishLoading();
+      });
+  };
+
   return (
     <div
       className="modal show"
@@ -60,6 +79,17 @@ export function BodyMetricsDetailsModal({ measures, onClose }: Props) {
               </tr>
             </tbody>
           </table>
+          <div>
+            <hr />
+            <Button
+              id="import-button"
+              style={{ width: "100%" }}
+              variant="danger"
+              onClick={deleteEntry}
+            >
+              {translate("delete_entry")}
+            </Button>
+          </div>
         </Modal.Body>
       </Modal>
     </div>

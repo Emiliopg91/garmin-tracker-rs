@@ -34,6 +34,9 @@ error_body_measures_list:
 error_adding_body_measures:
   en: Error adding measures
   es: Error añadiendo mediciones
+error_deleting_body_measures:
+  en: Error deleting measures
+  es: Error borrando mediciones
 error_workout_details:
   en: Error getting workout details
   es: Error obteniendo detalles del entrenamiento
@@ -256,3 +259,9 @@ sport:
 distance:
   en: Distance
   es: Distancia
+delete_entry:
+  en: Delete entry
+  es: Borrar entrada
+ok_delete_body_entry:
+  en: Entry deleted succesfully
+  es: Entrada eliminada con éxito

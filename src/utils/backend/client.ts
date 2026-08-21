@@ -14,6 +14,12 @@ export class BackendClient {
 	}
 	
 
+	// From src-tauri/src/logic/body_metrics.rs:88
+	public static deleteBodyMetric(date: number): Promise<void> {
+	  return BackendClient.inner_invoke("delete_body_metric", { date }); 
+	}
+	
+
 	// From src-tauri/src/logic/body_metrics.rs:21
 	public static getBodyMeasures(): Promise<BodyMetricListItem[]> {
 	  return BackendClient.inner_invoke("get_body_measures"); 

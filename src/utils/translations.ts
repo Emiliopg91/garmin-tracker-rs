@@ -8,6 +8,7 @@ export const TRANSLATIONS: Record<string, string> = {
 	"body_metrics": "Físico",
 	"body_weight": "Masa coporal",
 	"date": "Fecha",
+	"delete_entry": "Borrar entrada",
 	"distance": "Distancia",
 	"exercise": "Ejercicio",
 	"exercises": "Ejercicios",
