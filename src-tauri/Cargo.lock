@@ -495,9 +495,9 @@ dependencies = [
 
 [[package]]
 name = "cc"
-version = "1.4.3"
+version = "1.4.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "509591b7bcd67f4ef775afad7662703b4935daaa6ec0e5605cfb1090b32a2b6d"
+checksum = "0ad534f4357a5264cce5019c989cf66a4f0dc4e0d1b1d15f8aacec0ff7360273"
 dependencies = [
  "find-msvc-tools",
  "shlex",
@@ -3350,9 +3350,9 @@ dependencies = [
 
 [[package]]
 name = "rusqlite_orm"
-version = "0.4.4"
+version = "0.4.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8d7ffe779a37fe9a1206cc57428b80b607709b102e703c78f5240044ab6894da"
+checksum = "595641eb18bde5fe3e957bd742ead2618f1016f1f6e33420c325202518ae22f6"
 dependencies = [
  "log",
  "r2d2",
@@ -3362,9 +3362,9 @@ dependencies = [
 
 [[package]]
 name = "rusqlite_orm_macros"
-version = "0.4.4"
+version = "0.4.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cb28fbea537663108d51ead09627f2dee1b7940b3d3f9ead2a82e6ea86c4261c"
+checksum = "07b02c12a17f83faf0242dc485752fbdba89ed0012c1c25f267e83cba192a8cf"
 dependencies = [
  "proc-macro2",
  "quote",
