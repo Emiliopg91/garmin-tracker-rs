@@ -9,7 +9,6 @@ use std::process::exit;
 
 use rusqlite_orm::database::Database;
 use rusqlite_orm_macros::dlls;
-use tauri::Manager;
 use tauri_plugin_log::{
     Target, TargetKind,
     log::{LevelFilter, debug, error, info},
@@ -23,7 +22,7 @@ use crate::{
         sessions::{get_session_details, get_sessions, import_from_device, save_session_changes},
         workouts::{get_workout_details, get_workout_list},
     },
-    utils::constants,
+    utils::{constants, single_instance::SingleInstance},
 };
 
 #[cfg(debug_assertions)]
@@ -33,6 +32,8 @@ dlls!("../resources/ddl");
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    let single_instance = SingleInstance::acquire();
+
     #[cfg(debug_assertions)]
     if let Ok(paths) = std::env::var("GTRS-UNWRAP-PATH") {
         let paths = serde_json::from_str::<Vec<String>>(&paths).unwrap();
@@ -74,11 +75,6 @@ pub fn run() {
                 })
                 .build(),
         )
-        .plugin(tauri_plugin_single_instance::init(|app, _, _| {
-            let window = app.get_webview_window("main").expect("no main window");
-            let _ = window.unminimize();
-            let _ = window.set_focus();
-        }))
         .plugin(tauri_plugin_opener::init())
         .setup(move |_| {
             info!(
@@ -114,10 +110,19 @@ pub fn run() {
             add_body_measures,
             get_environment,
         ])
-        .run(tauri::generate_context!());
+        .build(tauri::generate_context!());
 
-    if let Err(e) = res {
-        eprintln!("Error while running tauri application {}", e);
-        exit(constants::ExitCodes::TauriError.into())
+    match res {
+        Ok(app) => {
+            app.run(move |_, event| {
+                if let tauri::RunEvent::ExitRequested { .. } = event {
+                    single_instance.release();
+                }
+            });
+        }
+        Err(e) => {
+            eprintln!("Error while running tauri application {}", e);
+            exit(constants::ExitCodes::TauriError.into())
+        }
     }
 }
