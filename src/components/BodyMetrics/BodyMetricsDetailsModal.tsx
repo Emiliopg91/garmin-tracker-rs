@@ -1,5 +1,6 @@
 import { AppContext } from "@/context/AppContext";
 import { BodyMetricListItem } from "@/utils/backend/models";
+import { TimeUtils } from "@/utils/TimeUtils";
 import { useContext } from "react";
 import { Modal } from "react-bootstrap";
 
@@ -17,7 +18,7 @@ export function BodyMetricsDetailsModal({ measures, onClose }: Props) {
     >
       <Modal show={true} onHide={onClose} data-bs-theme="dark">
         <Modal.Header closeButton>
-          <Modal.Title>{measures.date}</Modal.Title>
+          <Modal.Title>{TimeUtils.formatDate(measures.date)}</Modal.Title>
         </Modal.Header>
 
         <Modal.Body>

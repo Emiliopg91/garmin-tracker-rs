@@ -15,6 +15,7 @@ import {
   YAxis,
 } from "recharts";
 import { BackendListener } from "@/utils/backend/listener";
+import { TimeUtils } from "@/utils/TimeUtils";
 
 type WorkoutLoad = {
   date: number;
@@ -65,8 +66,7 @@ export function SessionsList() {
           let working_data = Array.from(
             data
               .map((s) => {
-                const [dd, mm, yyyy] = s.date
-                  .split(" ")[1]
+                const [dd, mm, yyyy] = TimeUtils.formatDate(s.timestamp)
                   .split("/")
                   .map(Number);
                 const date = new Date(yyyy, mm - 1, dd).getTime();
@@ -182,7 +182,7 @@ export function SessionsList() {
       });
   };
 
-  const getSessionDetails = (timestamp: string) => {
+  const getSessionDetails = (timestamp: number) => {
     startLoading();
     BackendClient.getSessionDetails(timestamp)
       .then((details) => {
@@ -289,7 +289,7 @@ export function SessionsList() {
                 onClick={() => getSessionDetails(session.timestamp)}
                 style={{ cursor: "pointer" }}
               >
-                <td>{session.date}</td>
+                <td>{TimeUtils.formatTimeDate(session.timestamp)}</td>
                 <td>{session.sport}</td>
                 <td>{session.name}</td>
                 <td>{session.active_calories}</td>

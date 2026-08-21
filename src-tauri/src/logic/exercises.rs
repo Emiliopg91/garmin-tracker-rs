@@ -25,7 +25,6 @@ use crate::{
         sessions::SessionSerie,
     },
     logic::notifications::show_notification,
-    utils::date_time_utils::DateTimeUtils,
 };
 
 #[traced_command]
@@ -54,7 +53,7 @@ pub fn get_exercises() -> Result<Vec<ExerciseListItem>, String> {
                 reps: pr.reps,
                 weight: pr.weight,
                 rm: get_1rm_estimation(pr.weight, pr.reps as f64),
-                date: DateTimeUtils::format_time_date(pr.session),
+                date: pr.session as i32,
             });
         }
 
@@ -103,7 +102,7 @@ pub fn get_exercise_details(category: &str, id: u16) -> Result<ExerciseDetails, 
         res.reps = pr.reps;
         res.weight = pr.weight;
         res.rm = get_1rm_estimation(pr.weight, pr.reps as f64);
-        res.pr_date = DateTimeUtils::format_time_date(pr.session);
+        res.pr_date = pr.session as i32;
 
         let mut timestamps = HashSet::new();
         series.iter().map(|s| s.session).for_each(|t| {
@@ -128,7 +127,7 @@ pub fn get_exercise_details(category: &str, id: u16) -> Result<ExerciseDetails, 
             let ex_str = format!(
                 "{}\n{}",
                 workouts.get(&serie.session).unwrap(),
-                DateTimeUtils::format_time_date(serie.session)
+                serie.session
             );
 
             if !res.workouts.contains(&ex_str) {

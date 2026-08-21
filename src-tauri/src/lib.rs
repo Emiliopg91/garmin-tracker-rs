@@ -32,7 +32,7 @@ dlls!("../resources/ddl");
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    let single_instance = SingleInstance::acquire();
+    SingleInstance::acquire();
 
     #[cfg(debug_assertions)]
     if let Ok(paths) = std::env::var("GTRS-UNWRAP-PATH") {
@@ -78,9 +78,10 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .setup(move |_| {
             info!(
-                "Starting {} v{}",
+                "Starting {} v{} with PID {}",
                 *constants::APP_NAME,
-                *constants::APP_VERSION
+                *constants::APP_VERSION,
+                *constants::PID
             );
 
             debug!("Initializing database...");
@@ -110,19 +111,10 @@ pub fn run() {
             add_body_measures,
             get_environment,
         ])
-        .build(tauri::generate_context!());
+        .run(tauri::generate_context!());
 
-    match res {
-        Ok(app) => {
-            app.run(move |_, event| {
-                if let tauri::RunEvent::ExitRequested { .. } = event {
-                    single_instance.release();
-                }
-            });
-        }
-        Err(e) => {
-            eprintln!("Error while running tauri application {}", e);
-            exit(constants::ExitCodes::TauriError.into())
-        }
+    if let Err(e) = res {
+        eprintln!("Error while running tauri application {}", e);
+        exit(constants::ExitCodes::TauriError.into())
     }
 }

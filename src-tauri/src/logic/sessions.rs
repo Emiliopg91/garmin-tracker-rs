@@ -32,7 +32,6 @@ use crate::{
     logic::notifications::show_notification,
     mtp::MTP_CLIENT_INST,
     parser::load_from_file,
-    utils::date_time_utils::DateTimeUtils,
 };
 
 #[traced_command]
@@ -70,7 +69,8 @@ pub fn get_sessions() -> Result<Vec<SessionListItem>, String> {
 
 #[traced_command]
 #[tauri::command]
-pub fn get_session_details(timestamp: i64) -> Result<SessionDetails, String> {
+pub fn get_session_details(timestamp: i32) -> Result<SessionDetails, String> {
+    let timestamp = timestamp as i64;
     info!(
         "Getting details for session {}",
         Local.timestamp_opt(timestamp, 0).unwrap().to_rfc3339()
@@ -125,8 +125,8 @@ pub fn get_session_details(timestamp: i64) -> Result<SessionDetails, String> {
     match res {
         Ok(details) => {
             info!(
-                "Found details for session {} - {}",
-                details.name, details.date
+                "Found details for session {} @ {}",
+                details.sport, details.timestamp
             );
             Ok(details)
         }
@@ -149,7 +149,7 @@ pub fn save_session_changes(details: SessionSeriesUpdate) -> Result<(), String> 
     info!(
         "Saving changes on session {}...",
         Local
-            .timestamp_opt(details.timestamp, 0)
+            .timestamp_opt(details.timestamp as i64, 0)
             .unwrap()
             .to_rfc3339()
     );
@@ -167,7 +167,8 @@ pub fn save_session_changes(details: SessionSeriesUpdate) -> Result<(), String> 
             exercises.insert((serie.ex_cat.clone(), serie.ex_id));
         }
 
-        let mut session = SessionRepository::select_by_id_in(tx, details.timestamp)?.unwrap();
+        let mut session =
+            SessionRepository::select_by_id_in(tx, details.timestamp as i64)?.unwrap();
         session.fetch_series_relationship_in_conn(tx)?;
         session.update_by_id_in(tx)?;
 
@@ -278,19 +279,14 @@ where
         let res = match load_from_file(file.as_ref()) {
             Ok(mut session) => {
                 let added = if SessionRepository::exists_in(tx, session.date)? {
-                    let msg = format!(
-                        "Session with date {} already exists",
-                        DateTimeUtils::format_time_date(session.date)
-                    );
+                    let msg = format!("Session with date {} already exists", session.date);
                     warn!("{}", msg);
                     false
                 } else {
-                    let sp = tx.savepoint().map_err(DatabaseError::Savepoint)?;
-
                     session.device = Some(device.serial.to_string());
                     SessionRepository::insert()
                         .item(session.clone())
-                        .execute_in(&sp)?;
+                        .execute_in(tx)?;
 
                     let mut insert = ExerciseRepository::insert().or_ignore(true);
                     let mut seen = HashSet::new();
@@ -302,7 +298,7 @@ where
                         handled_exercises.insert((exercise.category, exercise.id));
                     }
                     if !seen.is_empty() {
-                        insert.execute_in(&sp)?;
+                        insert.execute_in(tx)?;
                     }
 
                     let mut insert = SerieRepository::insert();
@@ -312,22 +308,20 @@ where
                         count += 1;
                     }
                     if count > 0 {
-                        insert.execute_in(&sp)?;
+                        insert.execute_in(tx)?;
                     }
 
                     if let Some(heart_rates) = session.heart_rates {
                         HeartRateRepository::insert()
                             .item(heart_rates.clone())
-                            .execute_in(&sp)?;
+                            .execute_in(tx)?;
                     }
 
                     if let Some(coordinates) = session.gps_coordinates {
                         GpsCoordinatesRepository::insert()
                             .item(coordinates.clone())
-                            .execute_in(&sp)?;
+                            .execute_in(tx)?;
                     }
-
-                    sp.commit().map_err(DatabaseError::Savepoint)?;
 
                     true
                 };

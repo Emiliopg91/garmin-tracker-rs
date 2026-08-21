@@ -6,9 +6,9 @@ export enum AppEnvironment {
 	Release = "Release",
 }
 
-// From src-tauri/src/dto/body_metrics.rs:7
+// From src-tauri/src/dto/body_metrics.rs:6
 export interface BodyMetricListItem {
-  date: string;
+  date: number;
   fat_ratio: number;
   lean_mass: number;
   water_ratio: number;
@@ -27,7 +27,7 @@ export interface ExerciseDetails {
   category: string;
   id: number;
   name: string;
-  pr_date: string;
+  pr_date: number;
   reps: number;
   rm: number;
   series: Record<string, SessionSerie[]>;
@@ -38,7 +38,7 @@ export interface ExerciseDetails {
 // From src-tauri/src/dto/exercises.rs:8
 export interface ExerciseListItem {
   category: string;
-  date: string;
+  date: number;
   id: number;
   name: string;
   reps: number;
@@ -46,10 +46,9 @@ export interface ExerciseListItem {
   weight: number;
 }
 
-// From src-tauri/src/dto/sessions.rs:67
+// From src-tauri/src/dto/sessions.rs:62
 export interface SessionDetails {
-  active_time: string;
-  date: string;
+  active_time: number;
   device: string | null;
   exercises: string[];
   gps_coordinates: [number, number][];
@@ -58,24 +57,23 @@ export interface SessionDetails {
   name: string;
   series: Record<string, SessionSerie[]>;
   sport: string;
-  timestamp: string;
+  timestamp: number;
   total_calories: number;
-  total_elapsed_time: string;
+  total_elapsed_time: number;
   training_load: number;
-  zones_times: string[];
+  zones_times: number[];
 }
 
-// From src-tauri/src/dto/sessions.rs:12
+// From src-tauri/src/dto/sessions.rs:9
 export interface SessionListItem {
   active_calories: number;
-  date: string;
   name: string;
   sport: string;
-  timestamp: string;
+  timestamp: number;
   training_load: number;
 }
 
-// From src-tauri/src/dto/sessions.rs:46
+// From src-tauri/src/dto/sessions.rs:41
 export interface SessionSerie {
   ex_cat: string;
   ex_id: number;
@@ -84,17 +82,17 @@ export interface SessionSerie {
   weight: number;
 }
 
-// From src-tauri/src/dto/sessions.rs:216
+// From src-tauri/src/dto/sessions.rs:196
 export interface SessionSeriesUpdate {
   series: SessionSerie[];
-  timestamp: string;
+  timestamp: number;
 }
 
 // From src-tauri/src/dto/workouts.rs:33
 export interface WorkoutDetails {
-  avg_time: string;
+  avg_time: number;
   avg_volume: number;
-  latest_session: string;
+  latest_session: number;
   name: string;
   session_count: number;
   sessions: WorkoutSession[];
@@ -102,16 +100,16 @@ export interface WorkoutDetails {
 
 // From src-tauri/src/dto/workouts.rs:6
 export interface WorkoutListItem {
-  avg_time: string;
-  latest_session: string;
+  avg_time: number;
+  latest_session: number;
   name: string;
   sessions: number;
 }
 
 // From src-tauri/src/dto/workouts.rs:14
 export interface WorkoutSession {
-  date: string;
-  time: string;
+  date: number;
+  time: number;
   vol_diff: string;
   volume: number;
 }

@@ -3,6 +3,7 @@ import { ExerciseModal } from "./ExerciseModal";
 import { useContext, useEffect, useState } from "react";
 import { BackendClient } from "@/utils/backend/client";
 import { AppContext } from "@/context/AppContext";
+import { TimeUtils } from "@/utils/TimeUtils";
 
 export function ExercisesList() {
   const { startLoading, finishLoading, translate } = useContext(AppContext);
@@ -59,7 +60,7 @@ export function ExercisesList() {
               <td style={{ textAlign: "left" }}>{exercise.name}</td>
               <td>{exercise.reps + "x" + exercise.weight + " Kg"}</td>
               <td>{Math.floor(exercise.rm!) + " Kg"}</td>
-              <td>{exercise.date.split(" ")[1]}</td>
+              <td>{TimeUtils.formatDate(exercise.date)}</td>
             </tr>
           ))}
         </tbody>

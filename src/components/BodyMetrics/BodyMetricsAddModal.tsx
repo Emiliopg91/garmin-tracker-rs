@@ -64,9 +64,8 @@ export function BodyMetricsAddModal({ latest, onClose }: Props) {
   };
 
   const onSave = () => {
-    const dateStr = `00:00 ${String(data.date.getDate()).padStart(2, "0")}/${String(data.date.getMonth() + 1).padStart(2, "0")}/${data.date.getFullYear()}`;
     BackendClient.addBodyMeasures({
-      date: dateStr,
+      date: Math.floor(data.date.getTime() / 1000),
       weight: parseFloat(data.weight),
       fat_ratio: parseFloat(data.fat_ratio),
       lean_mass: parseFloat(data.lean_mass),

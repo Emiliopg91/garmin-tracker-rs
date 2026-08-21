@@ -1,5 +1,6 @@
 import { AppContext } from "@/context/AppContext";
 import { ExerciseDetails } from "@/utils/backend/models";
+import { TimeUtils } from "@/utils/TimeUtils";
 import { useContext, useEffect, useState } from "react";
 import { Modal } from "react-bootstrap";
 import {
@@ -29,12 +30,7 @@ export function ExerciseModal({ exercise, onClose }: Props) {
   useEffect(() => {
     const data: { date: number; volume: number; reps: number }[] = [];
     Object.keys(exercise.series).forEach((k) => {
-      const [dd, mm, yyyy] = k
-        .split("\n")[1]
-        .split(" ")[1]
-        .split("/")
-        .map(Number);
-      const date = new Date(yyyy, mm - 1, dd);
+      const date = new Date(parseInt(k.split("\n")[1]));
 
       let count = 0;
       let weight = 0;
@@ -85,7 +81,7 @@ export function ExerciseModal({ exercise, onClose }: Props) {
               </tr>
               <tr>
                 <td>{translate("record_date")}:</td>
-                <td>{exercise.pr_date}</td>
+                <td>{TimeUtils.formatTimeDate(exercise.pr_date)}</td>
               </tr>
               <tr>
                 <td>{translate("rm")}:</td>
@@ -176,7 +172,9 @@ export function ExerciseModal({ exercise, onClose }: Props) {
                           >
                             {workout.split("\n")[0]}
                             <br />
-                            {workout.split("\n")[1]}
+                            {TimeUtils.formatTimeDate(
+                              parseInt(workout.split("\n")[1]),
+                            )}
                           </td>
                         )}
 

@@ -1339,6 +1339,7 @@ dependencies = [
  "fitparser",
  "garmin-tracker-rs-macros",
  "indexmap 2.14.0",
+ "libc",
  "mtp-rs",
  "nusb",
  "rusqlite_orm",
@@ -3350,8 +3351,6 @@ dependencies = [
 [[package]]
 name = "rusqlite_orm"
 version = "0.4.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8d7ffe779a37fe9a1206cc57428b80b607709b102e703c78f5240044ab6894da"
 dependencies = [
  "log",
  "r2d2",
@@ -3362,8 +3361,6 @@ dependencies = [
 [[package]]
 name = "rusqlite_orm_macros"
 version = "0.4.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cb28fbea537663108d51ead09627f2dee1b7940b3d3f9ead2a82e6ea86c4261c"
 dependencies = [
  "proc-macro2",
  "quote",

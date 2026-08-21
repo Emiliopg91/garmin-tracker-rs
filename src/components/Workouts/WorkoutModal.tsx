@@ -1,5 +1,6 @@
 import { AppContext } from "@/context/AppContext";
 import { WorkoutDetails } from "@/utils/backend/models";
+import { TimeUtils } from "@/utils/TimeUtils";
 import { useContext, useEffect, useState } from "react";
 import { Modal } from "react-bootstrap";
 import {
@@ -30,7 +31,10 @@ export function WorkoutModal({ workout, onClose }: Props) {
 
   useEffect(() => {
     const data = [...workout.sessions].reverse().map((ws) => {
-      const [dd, mm, yyyy] = ws.date.split(" ")[1].split("/").map(Number);
+      const [dd, mm, yyyy] = TimeUtils.formatTimeDate(ws.date)
+        .split(" ")[1]
+        .split("/")
+        .map(Number);
       const date = new Date(yyyy, mm - 1, dd);
       return {
         date: date.getTime(),
@@ -77,7 +81,7 @@ export function WorkoutModal({ workout, onClose }: Props) {
               </tr>
               <tr>
                 <td>{translate("latest_session")}</td>
-                <td>{workout.latest_session}</td>
+                <td>{TimeUtils.formatTimeDate(workout.latest_session)}</td>
               </tr>
               <tr>
                 <td>{translate("average_time")}</td>
@@ -175,8 +179,8 @@ export function WorkoutModal({ workout, onClose }: Props) {
                         borderBottom: "1px solid #e4e4e430",
                       }}
                     >
-                      <td>{session.date}</td>
-                      <td>{session.time}</td>
+                      <td>{TimeUtils.formatTimeDate(session.date)}</td>
+                      <td>{TimeUtils.formatDuration(session.time)}</td>
                       {workout.name.length > 0 && (
                         <td>
                           {session.volume} Kg{" "}

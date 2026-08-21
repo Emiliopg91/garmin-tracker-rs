@@ -3,16 +3,12 @@ use std::{collections::HashMap, hash::Hash};
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    dao::{exercise::Exercise, serie::Serie, session::Session},
-    utils::date_time_utils::DateTimeUtils,
-};
+use crate::dao::{exercise::Exercise, serie::Serie, session::Session};
 
 #[derive(Serialize, Default)]
 pub struct SessionListItem {
     pub name: String,
-    pub date: String,
-    pub timestamp: i64,
+    pub timestamp: i32,
     pub active_calories: u16,
     pub training_load: u16,
     pub sport: String,
@@ -22,8 +18,7 @@ impl From<&Session> for SessionListItem {
     fn from(value: &Session) -> Self {
         Self {
             name: value.workout.clone(),
-            date: DateTimeUtils::format_time_date(value.date),
-            timestamp: value.date,
+            timestamp: value.date as i32,
             active_calories: value.total_calories - value.metabolic_calories,
             training_load: value.training_load.round() as u16,
             sport: value.sport.clone(),
@@ -67,12 +62,11 @@ impl From<&Serie> for SessionSerie {
 pub struct SessionDetails {
     pub name: String,
 
-    pub date: String,
-    pub timestamp: i64,
+    pub timestamp: i32,
 
-    pub total_elapsed_time: String,
-    pub active_time: String,
-    pub zones_times: Vec<String>,
+    pub total_elapsed_time: i32,
+    pub active_time: i32,
+    pub zones_times: Vec<i32>,
 
     pub total_calories: u16,
     pub metabolic_calories: u16,
@@ -153,20 +147,7 @@ impl From<(&Session, &IndexMap<Exercise, Vec<Serie>>)> for SessionDetails {
             let diff = total_secs - acc;
             int_times[0] += diff;
 
-            zones_times = int_times
-                .into_iter()
-                .map(|v| {
-                    if v <= 0 {
-                        "0:00".to_string()
-                    } else {
-                        let mut r = DateTimeUtils::format_duration(v as u64);
-                        if !r.contains(':') {
-                            r = format!("0:{}", r);
-                        }
-                        r
-                    }
-                })
-                .collect();
+            zones_times = int_times.into_iter().map(|v| v as i32).collect();
         }
 
         let mut gps_coordinates = Vec::new();
@@ -194,13 +175,12 @@ impl From<(&Session, &IndexMap<Exercise, Vec<Serie>>)> for SessionDetails {
 
         Self {
             name: value.0.workout.clone(),
-            date: DateTimeUtils::format_time_date(value.0.date),
-            timestamp: value.0.date,
-            active_time: DateTimeUtils::format_duration(value.0.active_time as u64),
+            timestamp: value.0.date as i32,
+            total_elapsed_time: value.0.total_elapsed_time.round() as i32,
+            active_time: value.0.active_time.round() as i32,
             zones_times,
             metabolic_calories: value.0.metabolic_calories,
             total_calories: value.0.total_calories,
-            total_elapsed_time: DateTimeUtils::format_duration(value.0.total_elapsed_time as u64),
             training_load: value.0.training_load.round() as u16,
             sport: value.0.sport.clone(),
             exercises,
@@ -214,6 +194,6 @@ impl From<(&Session, &IndexMap<Exercise, Vec<Serie>>)> for SessionDetails {
 
 #[derive(Deserialize, Serialize)]
 pub struct SessionSeriesUpdate {
-    pub timestamp: i64,
+    pub timestamp: i32,
     pub series: Vec<SessionSerie>,
 }

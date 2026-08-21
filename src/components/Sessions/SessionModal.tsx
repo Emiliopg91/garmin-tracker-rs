@@ -1,5 +1,6 @@
 import { AppContext } from "@/context/AppContext";
 import { BackendClient } from "@/utils/backend/client";
+import { TimeUtils } from "@/utils/TimeUtils";
 import { SessionDetails, SessionSeriesUpdate } from "@/utils/backend/models";
 import L from "leaflet";
 import { useContext, useEffect, useState } from "react";
@@ -45,6 +46,8 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
   const [minHr, setMinHr] = useState(0);
   const [maxHr, setMaxHr] = useState(0);
   const [avgHr, setAvgHr] = useState(0);
+  const [distance, setDistance] = useState(0);
+  const [volume, setVolume] = useState(0);
   const [hrData, setHrData] = useState<
     {
       idx: number;
@@ -69,8 +72,9 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
         session.heart_rates.length,
     );
     setAvgHr(avgHr);
+    setMinHr(Math.min(...session.heart_rates));
 
-    if (session.heart_rates && session.heart_rates.length > 0) {
+    if (session.heart_rates.length > 0) {
       session.heart_rates.forEach((hr, idx) => {
         let color = "red";
 
@@ -93,10 +97,42 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
       });
     }
 
-    setHrData(hrData);
-    if (session.heart_rates && session.heart_rates.length > 0) {
-      setMinHr(Math.min(...session.heart_rates));
+    if (session.gps_coordinates.length > 0) {
+      function toRadians(grados: number): number {
+        return (grados * Math.PI) / 180;
+      }
+
+      let dist = 0.0;
+      for (let i = 0; i < session.gps_coordinates.length - 1; i++) {
+        const p1 = session.gps_coordinates[i];
+        const p2 = session.gps_coordinates[i + 1];
+
+        const lat1 = toRadians(p1[0]);
+        const lat2 = toRadians(p2[0]);
+        const dLat = toRadians(p2[0] - p1[0]);
+        const dLon = toRadians(p2[1] - p1[1]);
+
+        const a =
+          Math.sin(dLat / 2) ** 2 +
+          Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) ** 2;
+        const c = 2 * Math.asin(Math.sqrt(a));
+
+        dist += 6371 * c;
+      }
+      setDistance(dist);
     }
+
+    if (Object.entries(session.series).length > 0) {
+      let vol = 0;
+      Object.entries(localSession.series).map(([, series]) => {
+        series.forEach((serie) => {
+          vol += serie.reps * serie.weight!;
+        });
+      });
+      setVolume(vol);
+    }
+
+    setHrData(hrData);
   }, []);
 
   const updateSerieReps = (exercise: string, idx: number, newVal: string) => {
@@ -133,17 +169,6 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
     };
     setLocalSession(newObj);
     setChanged(JSON.stringify(newObj) != JSON.stringify(session));
-  };
-
-  const getVolume = () => {
-    let volume = 0;
-    Object.entries(localSession.series).map(([, series]) => {
-      series.forEach((serie) => {
-        volume += serie.reps * serie.weight!;
-      });
-    });
-
-    return volume;
   };
 
   const saveChanges = () => {
@@ -240,16 +265,18 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
             <tbody>
               <tr>
                 <td>{translate("date")}:</td>
-                <td>{localSession.date}</td>
+                <td>{TimeUtils.formatTimeDate(localSession.timestamp)}</td>
               </tr>
               <tr>
                 <td>{translate("total_time")}:</td>
-                <td>{localSession.total_elapsed_time}</td>
+                <td>
+                  {TimeUtils.formatDuration(localSession.total_elapsed_time)}
+                </td>
               </tr>
-              {localSession.active_time && (
+              {localSession.active_time > 0 && (
                 <tr>
                   <td>{translate("active_time")}:</td>
-                  <td>{localSession.active_time}</td>
+                  <td>{TimeUtils.formatDuration(localSession.active_time)}</td>
                 </tr>
               )}
               <tr>
@@ -268,10 +295,16 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                 <td>{translate("workout_load")}:</td>
                 <td>{localSession.training_load}</td>
               </tr>
-              {getVolume() > 0 && (
+              {distance > 0 && (
+                <tr>
+                  <td>{translate("distance")}:</td>
+                  <td>{distance.toFixed(2)} Km</td>
+                </tr>
+              )}
+              {volume > 0 && (
                 <tr>
                   <td>{translate("volume")}:</td>
-                  <td>{getVolume()} Kg</td>
+                  <td>{volume.toFixed(1)} Kg</td>
                 </tr>
               )}
               {localSession.device && (
@@ -366,19 +399,25 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                       <tr>
                         <td>
                           {translate("hr_zone_1")}:{" "}
-                          {localSession.zones_times[0]}
+                          {TimeUtils.formatDuration(
+                            localSession.zones_times[0],
+                          )}
                         </td>
                       </tr>
                       <tr>
                         <td>
                           {translate("hr_zone_2")}:{" "}
-                          {localSession.zones_times[1]}
+                          {TimeUtils.formatDuration(
+                            localSession.zones_times[1],
+                          )}
                         </td>
                       </tr>
                       <tr>
                         <td>
                           {translate("hr_zone_3")}:{" "}
-                          {localSession.zones_times[2]}
+                          {TimeUtils.formatDuration(
+                            localSession.zones_times[2],
+                          )}
                         </td>
                       </tr>
                     </table>
@@ -388,13 +427,17 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                       <tr>
                         <td>
                           {translate("hr_zone_4")}:{" "}
-                          {localSession.zones_times[3]}
+                          {TimeUtils.formatDuration(
+                            localSession.zones_times[3],
+                          )}
                         </td>
                       </tr>
                       <tr>
                         <td>
                           {translate("hr_zone_5")}:{" "}
-                          {localSession.zones_times[4]}
+                          {TimeUtils.formatDuration(
+                            localSession.zones_times[4],
+                          )}
                         </td>
                       </tr>
                     </table>

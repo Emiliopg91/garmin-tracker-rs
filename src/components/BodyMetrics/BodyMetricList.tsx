@@ -14,6 +14,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { TimeUtils } from "@/utils/TimeUtils";
 
 type ChartDataType = {
   date: number;
@@ -60,8 +61,7 @@ export function BodyMetricList() {
         let lMinLean = 99999;
         let lMaxLean = 0;
         data_c.forEach((data) => {
-          const [dd, mm, yyyy] = data.date.split("/").map(Number);
-          const date = new Date(yyyy, mm - 1, dd);
+          const date = new Date(data.date * 1000);
           newChartData.push({
             date: date.getTime(),
             fat: data.fat_ratio,
@@ -210,7 +210,7 @@ export function BodyMetricList() {
                 style={{ cursor: "pointer" }}
                 onClick={() => openModal(measure)}
               >
-                <td>{measure.date}</td>
+                <td>{TimeUtils.formatDate(measure.date)}</td>
                 <td>{measure.weight.toFixed(1)} Kg</td>
                 <td>{measure.fat_ratio.toFixed(1)}%</td>
                 <td>{measure.lean_mass.toFixed(1)} Kg</td>

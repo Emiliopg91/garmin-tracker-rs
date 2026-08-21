@@ -12,7 +12,7 @@ pub struct ExerciseListItem {
     pub reps: u16,
     pub weight: f64,
     pub rm: f64,
-    pub date: String,
+    pub date: i32,
 }
 
 impl From<&Exercise> for ExerciseListItem {
@@ -24,7 +24,7 @@ impl From<&Exercise> for ExerciseListItem {
             reps: 0,
             weight: 0_f64,
             rm: 0_f64,
-            date: "".to_string(),
+            date: 0,
         }
     }
 }
@@ -39,7 +39,7 @@ pub struct ExerciseDetails {
     pub rm: f64,
     pub workouts: Vec<String>,
     pub series: HashMap<String, Vec<SessionSerie>>,
-    pub pr_date: String,
+    pub pr_date: i32,
 }
 
 impl From<&Exercise> for ExerciseDetails {
@@ -53,7 +53,7 @@ impl From<&Exercise> for ExerciseDetails {
             rm: 0_f64,
             workouts: Vec::new(),
             series: HashMap::new(),
-            pr_date: "".to_string(),
+            pr_date: 0,
         }
     }
 }

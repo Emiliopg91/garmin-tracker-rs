@@ -3,6 +3,7 @@ import { WorkoutModal } from "./WorkoutModal";
 import { BackendClient } from "@/utils/backend/client";
 import { useContext, useEffect, useState } from "react";
 import { AppContext } from "@/context/AppContext";
+import { TimeUtils } from "@/utils/TimeUtils";
 
 export function WorkoutsList() {
   const { startLoading, finishLoading, translate } = useContext(AppContext);
@@ -71,9 +72,9 @@ export function WorkoutsList() {
                 {workout.name.length > 0 && <span>{workout.name}</span>}
                 {workout.name.length == 0 && <span>{translate("other")}</span>}
               </td>
-              <td>{workout.latest_session}</td>
+              <td>{TimeUtils.formatTimeDate(workout.latest_session)}</td>
               <td>{workout.sessions}</td>
-              <td>{workout.avg_time}</td>
+              <td>{TimeUtils.formatDuration(workout.avg_time)}</td>
             </tr>
           ))}
         </tbody>

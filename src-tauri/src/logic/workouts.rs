@@ -20,7 +20,6 @@ use crate::{
         workouts::{WorkoutDetails, WorkoutListItem, WorkoutSession},
     },
     logic::notifications::show_notification,
-    utils::date_time_utils::DateTimeUtils,
 };
 
 #[traced_command]
@@ -47,8 +46,8 @@ pub fn get_workout_list() -> Result<Vec<WorkoutListItem>, String> {
             .map(|wd| WorkoutListItem {
                 name: wd.0,
                 sessions: wd.1.0,
-                avg_time: DateTimeUtils::format_duration((wd.1.1 / (wd.1.0 as f64)) as u64),
-                latest_session: DateTimeUtils::format_time_date(wd.1.2),
+                avg_time: (wd.1.1 / (wd.1.0 as f64)).round() as i32,
+                latest_session: wd.1.2 as i32,
             })
             .collect::<Vec<_>>();
 
@@ -120,8 +119,8 @@ pub fn get_workout_details(name: &str) -> Result<WorkoutDetails, String> {
 
         let mut details = WorkoutDetails {
             name: name.to_string(),
-            avg_time: DateTimeUtils::format_duration((time / (sessions.len() as f64)) as u64),
-            latest_session: DateTimeUtils::format_time_date(latest.date),
+            avg_time: (time / (sessions.len() as f64)).round() as i32,
+            latest_session: latest.date as i32,
             avg_volume: volume / (sessions.len() as f64),
             session_count: count,
             sessions: session_list,

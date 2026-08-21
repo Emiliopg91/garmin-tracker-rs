@@ -8,7 +8,7 @@ pub static APP_NAME: LazyLock<String> = LazyLock::new(|| env!("CARGO_PKG_NAME").
 pub static APP_VERSION: LazyLock<String> = LazyLock::new(|| env!("CARGO_PKG_VERSION").to_string());
 pub static LIB_NAME: LazyLock<String> =
     LazyLock::new(|| format!("{}_lib", APP_NAME.replace('-', "_")));
-pub static PID: LazyLock<u32> = LazyLock::new(|| std::process::id());
+pub static PID: LazyLock<u32> = LazyLock::new(std::process::id);
 pub static LOCK_FILE: LazyLock<PathBuf> = LazyLock::new(|| {
     let run_dir = std::env::var("XDG_RUNTIME_DIR").expect("Could not get runtime dir");
     PathBuf::from(run_dir).join(format!("{}.lock", *APP_NAME))
