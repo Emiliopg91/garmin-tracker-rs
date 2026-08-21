@@ -22,6 +22,18 @@ export interface DeviceListItem {
   serial_number: string;
 }
 
+// From src-tauri/src/dto/app.rs:14
+export enum DistanceUnit {
+	Kilometers = "Kilometers",
+	Miles = "Miles",
+}
+
+// From src-tauri/src/dto/settings.rs:8
+export enum DistanceUnit {
+	Meter = "Meter",
+	Mile = "Mile",
+}
+
 // From src-tauri/src/dto/exercises.rs:33
 export interface ExerciseDetails {
   category: string;
@@ -86,6 +98,30 @@ export interface SessionSerie {
 export interface SessionSeriesUpdate {
   series: SessionSerie[];
   timestamp: number;
+}
+
+// From src-tauri/src/dto/app.rs:26
+export interface Settings {
+  distance_unit: DistanceUnit;
+  weight_unit: WeightUnit;
+}
+
+// From src-tauri/src/dto/settings.rs:20
+export interface Settings {
+  distance_unit: DistanceUnit;
+  weight_unit: WeightUnit;
+}
+
+// From src-tauri/src/dto/settings.rs:14
+export enum WeightUnit {
+	Kilogram = "Kilogram",
+	Pounds = "Pounds",
+}
+
+// From src-tauri/src/dto/app.rs:20
+export enum WeightUnit {
+	Kilograms = "Kilograms",
+	Pounds = "Pounds",
 }
 
 // From src-tauri/src/dto/workouts.rs:33

@@ -1,5 +1,11 @@
 import { Tabs } from "@/models/tabs";
-import { AppEnvironment, DeviceListItem } from "@/utils/backend/models";
+import {
+  AppEnvironment,
+  DeviceListItem,
+  DistanceUnit,
+  Settings,
+  WeightUnit,
+} from "@/utils/backend/models";
 import { createContext } from "react";
 
 interface AppContexType {
@@ -11,6 +17,7 @@ interface AppContexType {
   finishLoading: () => void;
   availableDevices: DeviceListItem[];
   environment: AppEnvironment;
+  settings: Settings;
   translate: (key: string, replacements?: string[]) => string;
 }
 
@@ -31,6 +38,10 @@ const defaultValue: AppContexType = {
   environment: AppEnvironment.Release,
   translate: () => {
     return "";
+  },
+  settings: {
+    distance_unit: DistanceUnit.Kilometers,
+    weight_unit: WeightUnit.Kilograms,
   },
 };
 

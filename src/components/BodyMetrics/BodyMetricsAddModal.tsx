@@ -1,6 +1,7 @@
 import { AppContext } from "@/context/AppContext";
 import { BackendClient } from "@/utils/backend/client";
 import { BodyMetricListItem } from "@/utils/backend/models";
+import { UnitUtils } from "@/utils/UnitUtils";
 import { useContext, useState } from "react";
 import { Button, Modal } from "react-bootstrap";
 import DatePicker from "react-datepicker";
@@ -23,7 +24,7 @@ type BodyMetricsListItemForm = Omit<
 };
 
 export function BodyMetricsAddModal({ latest, onClose }: Props) {
-  const { translate } = useContext(AppContext);
+  const { translate, settings } = useContext(AppContext);
   const [data, setData] = useState<BodyMetricsListItemForm>(
     latest
       ? {
@@ -66,9 +67,12 @@ export function BodyMetricsAddModal({ latest, onClose }: Props) {
   const onSave = () => {
     BackendClient.addBodyMeasures({
       date: Math.floor(data.date.getTime() / 1000),
-      weight: parseFloat(data.weight),
+      weight: UnitUtils.toKg(parseFloat(data.weight), settings.weight_unit),
       fat_ratio: parseFloat(data.fat_ratio),
-      lean_mass: parseFloat(data.lean_mass),
+      lean_mass: UnitUtils.toKg(
+        parseFloat(data.lean_mass),
+        settings.weight_unit,
+      ),
       water_ratio: parseFloat(data.water_ratio),
     }).then(() => {
       onClose();

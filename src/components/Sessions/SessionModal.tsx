@@ -16,6 +16,7 @@ import {
   YAxis,
   Legend,
 } from "recharts";
+import { UnitUtils } from "@/utils/UnitUtils";
 
 type Props = {
   session: SessionDetails;
@@ -39,7 +40,8 @@ const startIcon = makeMarkerIcon("#2ecc71");
 const endIcon = makeMarkerIcon("#e74c3c");
 
 export function SessionModal({ session, onClose, onUpdate }: Props) {
-  const { startLoading, finishLoading, translate } = useContext(AppContext);
+  const { startLoading, finishLoading, translate, settings } =
+    useContext(AppContext);
   const [originalSession] = useState(session);
   const [localSession, setLocalSession] = useState({ ...session });
   const [changed, setChanged] = useState(false);
@@ -64,6 +66,28 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
       avg: number;
       color: string;
     }[] = [];
+
+    if (Object.entries(session.series).length > 0) {
+      const localLocalSession = { ...session };
+      Object.keys(localLocalSession.series).forEach((key) => {
+        localLocalSession.series[key].forEach((_, idx) => {
+          const copy = { ...localLocalSession.series[key][idx] };
+          copy.weight = Number(
+            UnitUtils.fromKg(copy.weight, settings.weight_unit).toFixed(1),
+          );
+          localLocalSession.series[key][idx] = copy;
+        });
+      });
+      setLocalSession(localLocalSession);
+
+      let vol = 0;
+      Object.entries(localLocalSession.series).map(([, series]) => {
+        series.forEach((serie) => {
+          vol += serie.reps * serie.weight!;
+        });
+      });
+      setVolume(vol);
+    }
 
     const maxHr = Math.max(189, Math.max(...session.heart_rates));
     setMaxHr(Math.max(...session.heart_rates));
@@ -96,6 +120,7 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
         });
       });
     }
+    setHrData(hrData);
 
     if (session.gps_coordinates.length > 0) {
       function toRadians(grados: number): number {
@@ -121,18 +146,6 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
       }
       setDistance(dist);
     }
-
-    if (Object.entries(session.series).length > 0) {
-      let vol = 0;
-      Object.entries(localSession.series).map(([, series]) => {
-        series.forEach((serie) => {
-          vol += serie.reps * serie.weight!;
-        });
-      });
-      setVolume(vol);
-    }
-
-    setHrData(hrData);
   }, []);
 
   const updateSerieReps = (exercise: string, idx: number, newVal: string) => {
@@ -183,7 +196,10 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
           originalSession.series[ex][serIdx].reps != serie.reps ||
           originalSession.series[ex][serIdx].weight != serie.weight
         ) {
-          update.series.push(serie);
+          update.series.push({
+            ...serie,
+            weight: UnitUtils.toKg(serie.weight, settings.weight_unit),
+          });
         }
       });
     });
@@ -296,15 +312,36 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                 <td>{localSession.training_load}</td>
               </tr>
               {distance > 0 && (
-                <tr>
-                  <td>{translate("distance")}:</td>
-                  <td>{distance.toFixed(2)} Km</td>
-                </tr>
+                <>
+                  <tr>
+                    <td>{translate("distance")}:</td>
+                    <td>
+                      {UnitUtils.fromKm(
+                        distance,
+                        settings.distance_unit,
+                      ).toFixed(2)}{" "}
+                      {UnitUtils.getUnit(settings.distance_unit)}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>{translate("speed")}:</td>
+                    <td>
+                      {UnitUtils.fromKm(
+                        distance / (localSession.total_elapsed_time / 3600),
+                        settings.distance_unit,
+                      ).toFixed(2)}{" "}
+                      {UnitUtils.getUnit(settings.distance_unit)}/h
+                    </td>
+                  </tr>
+                </>
               )}
               {volume > 0 && (
                 <tr>
                   <td>{translate("volume")}:</td>
-                  <td>{volume.toFixed(1)} Kg</td>
+                  <td>
+                    {UnitUtils.fromKg(volume, settings.weight_unit).toFixed(1)}{" "}
+                    {UnitUtils.getUnit(settings.weight_unit)}
+                  </td>
                 </tr>
               )}
               {localSession.device && (
@@ -507,7 +544,7 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                               value={serie.weight?.toString()}
                               className="no-spinner"
                               min={0}
-                              style={{ width: "3em", textAlign: "center" }}
+                              style={{ width: "3.5em", textAlign: "center" }}
                               onChange={(e) => {
                                 updateSerieWeight(
                                   exercise,
@@ -516,7 +553,7 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                                 );
                               }}
                             />
-                            Kg
+                            {" " + UnitUtils.getUnit(settings.weight_unit)}
                           </td>
                         </tr>
                       )),

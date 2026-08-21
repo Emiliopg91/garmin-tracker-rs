@@ -1,8 +1,22 @@
+use std::sync::OnceLock;
+
 use garmin_tracker_rs_macros::traced_command;
 use tauri::{AppHandle, WebviewWindow};
 
-use crate::{constants, dto::app::AppEnvironment, logic::devices::start_device_watcher};
+use crate::{
+    constants,
+    dto::app::{AppEnvironment, Settings},
+    logic::devices::start_device_watcher,
+};
 use tauri_plugin_log::log::info;
+
+pub static SETTINGS_INST: OnceLock<Settings> = OnceLock::new();
+
+#[traced_command]
+#[tauri::command]
+pub fn get_settings() -> Settings {
+    (*SETTINGS_INST.get().unwrap()).clone()
+}
 
 #[traced_command]
 #[tauri::command]

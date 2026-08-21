@@ -265,3 +265,6 @@ delete_entry:
 ok_delete_body_entry:
   en: Entry deleted succesfully
   es: Entrada eliminada con éxito
+speed:
+  en: Speed
+  es: Velocidad

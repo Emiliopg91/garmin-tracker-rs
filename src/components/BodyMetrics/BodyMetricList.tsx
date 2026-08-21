@@ -15,6 +15,7 @@ import {
   YAxis,
 } from "recharts";
 import { TimeUtils } from "@/utils/TimeUtils";
+import { UnitUtils } from "@/utils/UnitUtils";
 
 type ChartDataType = {
   date: number;
@@ -24,7 +25,8 @@ type ChartDataType = {
 }[];
 
 export function BodyMetricList() {
-  const { startLoading, finishLoading, translate } = useContext(AppContext);
+  const { startLoading, finishLoading, translate, settings } =
+    useContext(AppContext);
 
   const [bodyMetrics, setBodyMetrics] = useState<BodyMetricListItem[]>([]);
   const [addingNew, setAddingNew] = useState(false);
@@ -211,9 +213,21 @@ export function BodyMetricList() {
                 onClick={() => openModal(measure)}
               >
                 <td>{TimeUtils.formatDate(measure.date)}</td>
-                <td>{measure.weight.toFixed(1)} Kg</td>
+                <td>
+                  {UnitUtils.fromKg(
+                    measure.weight,
+                    settings.weight_unit,
+                  ).toFixed(1)}{" "}
+                  {UnitUtils.getUnit(settings.weight_unit)}
+                </td>
                 <td>{measure.fat_ratio.toFixed(1)}%</td>
-                <td>{measure.lean_mass.toFixed(1)} Kg</td>
+                <td>
+                  {UnitUtils.fromKg(
+                    measure.lean_mass,
+                    settings.weight_unit,
+                  ).toFixed(1)}{" "}
+                  {UnitUtils.getUnit(settings.weight_unit)}
+                </td>
                 <td>{measure.water_ratio.toFixed(1)}%</td>
               </tr>
             ))}

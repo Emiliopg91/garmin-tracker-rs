@@ -37,6 +37,7 @@ export const TRANSLATIONS: Record<string, string> = {
 	"series": "Series",
 	"session_count": "Número de sesiones",
 	"sessions": "Sesiones",
+	"speed": "Velocidad",
 	"sport": "Deporte",
 	"time": "Tiempo",
 	"total_calories": "Calorias totales",

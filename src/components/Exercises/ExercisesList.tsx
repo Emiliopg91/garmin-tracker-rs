@@ -4,9 +4,11 @@ import { useContext, useEffect, useState } from "react";
 import { BackendClient } from "@/utils/backend/client";
 import { AppContext } from "@/context/AppContext";
 import { TimeUtils } from "@/utils/TimeUtils";
+import { UnitUtils } from "@/utils/UnitUtils";
 
 export function ExercisesList() {
-  const { startLoading, finishLoading, translate } = useContext(AppContext);
+  const { startLoading, finishLoading, translate, settings } =
+    useContext(AppContext);
   const [exercises, setExercises] = useState<ExerciseListItem[]>([]);
   const [exerciseDetails, setExerciseDetails] = useState<
     ExerciseDetails | undefined
@@ -58,8 +60,23 @@ export function ExercisesList() {
               onClick={() => getExerciseDetails(exercise.category, exercise.id)}
             >
               <td style={{ textAlign: "left" }}>{exercise.name}</td>
-              <td>{exercise.reps + "x" + exercise.weight + " Kg"}</td>
-              <td>{Math.floor(exercise.rm!) + " Kg"}</td>
+              <td>
+                {exercise.reps +
+                  "x" +
+                  UnitUtils.fromKg(
+                    exercise.weight,
+                    settings.weight_unit,
+                  ).toFixed(1) +
+                  " " +
+                  UnitUtils.getUnit(settings.weight_unit)}
+              </td>
+              <td>
+                {UnitUtils.fromKg(exercise.rm, settings.weight_unit).toFixed(
+                  1,
+                ) +
+                  " " +
+                  UnitUtils.getUnit(settings.weight_unit)}
+              </td>
               <td>{TimeUtils.formatDate(exercise.date)}</td>
             </tr>
           ))}

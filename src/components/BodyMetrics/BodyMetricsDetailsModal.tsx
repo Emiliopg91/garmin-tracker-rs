@@ -2,6 +2,7 @@ import { AppContext } from "@/context/AppContext";
 import { BackendClient } from "@/utils/backend/client";
 import { BodyMetricListItem } from "@/utils/backend/models";
 import { TimeUtils } from "@/utils/TimeUtils";
+import { UnitUtils } from "@/utils/UnitUtils";
 import { useContext } from "react";
 import { Button, Modal } from "react-bootstrap";
 
@@ -16,7 +17,8 @@ export function BodyMetricsDetailsModal({
   onClose,
   onDelete,
 }: Props) {
-  const { translate, startLoading, finishLoading } = useContext(AppContext);
+  const { translate, startLoading, finishLoading, settings } =
+    useContext(AppContext);
 
   const deleteEntry = () => {
     startLoading();
@@ -50,7 +52,13 @@ export function BodyMetricsDetailsModal({
             <tbody>
               <tr>
                 <td>{translate("weight")}:</td>
-                <td>{measures.weight} Kg</td>
+                <td>
+                  {UnitUtils.fromKg(
+                    measures.weight,
+                    settings.weight_unit,
+                  ).toFixed(1)}{" "}
+                  {UnitUtils.getUnit(settings.weight_unit)}
+                </td>
               </tr>
               <tr>
                 <td>{translate("fat_ratio")}:</td>
@@ -59,12 +67,22 @@ export function BodyMetricsDetailsModal({
               <tr>
                 <td>{translate("fat_mass")}:</td>
                 <td>
-                  {(measures.weight * (measures.fat_ratio / 100)).toFixed(1)} Kg
+                  {UnitUtils.fromKg(
+                    measures.weight * (measures.fat_ratio / 100),
+                    settings.weight_unit,
+                  ).toFixed(1)}{" "}
+                  {UnitUtils.getUnit(settings.weight_unit)}
                 </td>
               </tr>
               <tr>
                 <td>{translate("lean_mass")}:</td>
-                <td>{measures.lean_mass} Kg</td>
+                <td>
+                  {UnitUtils.fromKg(
+                    measures.lean_mass,
+                    settings.weight_unit,
+                  ).toFixed(1)}{" "}
+                  {UnitUtils.getUnit(settings.weight_unit)}
+                </td>
               </tr>
               <tr>
                 <td>{translate("water_ratio")}:</td>
@@ -73,8 +91,11 @@ export function BodyMetricsDetailsModal({
               <tr>
                 <td>{translate("water_mass")}:</td>
                 <td>
-                  {(measures.weight * (measures.water_ratio / 100)).toFixed(1)}{" "}
-                  Kg
+                  {UnitUtils.fromKg(
+                    measures.weight * (measures.water_ratio / 100),
+                    settings.weight_unit,
+                  ).toFixed(1)}{" "}
+                  {UnitUtils.getUnit(settings.weight_unit)}
                 </td>
               </tr>
             </tbody>

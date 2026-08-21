@@ -1,28 +1,22 @@
-use serde::{Deserialize, Serialize};
-
-#[derive(Serialize)]
-pub enum AppEnvironment {
-    Debug,
-    Release,
-}
-
 use std::fs;
+
+use serde::{Deserialize, Serialize};
 
 use crate::utils::constants;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub enum DistanceUnit {
-    Kilometers,
-    Miles,
+    Meter,
+    Mile,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub enum WeightUnit {
-    Kilograms,
+    Kilogram,
     Pounds,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Settings {
     pub distance_unit: DistanceUnit,
     pub weight_unit: WeightUnit,
@@ -31,8 +25,8 @@ pub struct Settings {
 impl Default for Settings {
     fn default() -> Self {
         Self {
-            distance_unit: DistanceUnit::Kilometers,
-            weight_unit: WeightUnit::Kilograms,
+            distance_unit: DistanceUnit::Meter,
+            weight_unit: WeightUnit::Kilogram,
         }
     }
 }
@@ -48,12 +42,5 @@ impl Settings {
         }
 
         Ok(result)
-    }
-
-    pub fn save(&self) -> Result<(), Box<dyn std::error::Error>> {
-        let content = serde_yaml::to_string(self).unwrap();
-        let path = (*constants::SETTINGS_FILE).clone();
-        fs::write(path, content).unwrap();
-        Ok(())
     }
 }

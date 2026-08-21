@@ -2,7 +2,7 @@
 
 import { invoke, InvokeArgs } from "@tauri-apps/api/core";
 
-import { AppEnvironment, BodyMetricListItem, ExerciseDetails, ExerciseListItem, SessionDetails, SessionListItem, SessionSeriesUpdate, WorkoutDetails, WorkoutListItem } from "./models";
+import { AppEnvironment, BodyMetricListItem, ExerciseDetails, ExerciseListItem, SessionDetails, SessionListItem, SessionSeriesUpdate, Settings, WorkoutDetails, WorkoutListItem } from "./models";
 
 export class BackendClient {
 
@@ -26,7 +26,7 @@ export class BackendClient {
 	}
 	
 
-	// From src-tauri/src/logic/app.rs:25
+	// From src-tauri/src/logic/app.rs:39
 	public static getEnvironment(): Promise<AppEnvironment> {
 	  return BackendClient.inner_invoke("get_environment"); 
 	}
@@ -56,6 +56,18 @@ export class BackendClient {
 	}
 	
 
+	// From src-tauri/src/logic/app.rs:17
+	public static getSettings(): Promise<Settings> {
+	  return BackendClient.inner_invoke("get_settings"); 
+	}
+	
+
+	// From src-tauri/src/logic/settings.rs:11
+	public static getSettings(): Promise<Settings> {
+	  return BackendClient.inner_invoke("get_settings"); 
+	}
+	
+
 	// From src-tauri/src/logic/workouts.rs:78
 	public static getWorkoutDetails(name: string): Promise<WorkoutDetails> {
 	  return BackendClient.inner_invoke("get_workout_details", { name }); 
@@ -74,7 +86,7 @@ export class BackendClient {
 	}
 	
 
-	// From src-tauri/src/logic/app.rs:9
+	// From src-tauri/src/logic/app.rs:23
 	public static notifyFrontendReady(): Promise<void> {
 	  return BackendClient.inner_invoke("notify_frontend_ready"); 
 	}

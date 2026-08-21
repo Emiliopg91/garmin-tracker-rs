@@ -1,7 +1,13 @@
 import { Tabs } from "@/models/tabs";
 import { BackendClient } from "@/utils/backend/client";
 import { BackendListener } from "@/utils/backend/listener";
-import { AppEnvironment, DeviceListItem } from "@/utils/backend/models";
+import {
+  AppEnvironment,
+  DeviceListItem,
+  DistanceUnit,
+  Settings,
+  WeightUnit,
+} from "@/utils/backend/models";
 import { TRANSLATIONS } from "@/utils/translations";
 import { useEffect, useRef, useState } from "react";
 import { JSX } from "react/jsx-runtime";
@@ -20,6 +26,10 @@ export function AppProvider({
   );
   const availableDevicesRef = useRef<DeviceListItem[]>([]);
   const [loadingCount, setLoadingCount] = useState(0);
+  const [settings, setSettings] = useState<Settings>({
+    distance_unit: DistanceUnit.Kilometers,
+    weight_unit: WeightUnit.Kilograms,
+  });
 
   const startLoading = () => {
     setLoadingCount((previous) => previous + 1);
@@ -85,9 +95,15 @@ export function AppProvider({
         }
       })
       .finally(() => {
-        BackendClient.notifyFrontendReady().then(() => {
-          setAppReady(true);
-        });
+        BackendClient.getSettings()
+          .then((settings) => {
+            setSettings(settings);
+          })
+          .finally(() => {
+            BackendClient.notifyFrontendReady().then(() => {
+              setAppReady(true);
+            });
+          });
       });
 
     return () => {
@@ -110,6 +126,7 @@ export function AppProvider({
         appReady,
         environment,
         translate,
+        settings,
       }}
     >
       {children}

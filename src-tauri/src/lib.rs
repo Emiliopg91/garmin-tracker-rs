@@ -15,8 +15,9 @@ use tauri_plugin_log::{
 };
 
 use crate::{
+    dto::app::Settings,
     logic::{
-        app::{get_environment, notify_frontend_ready},
+        app::{SETTINGS_INST, get_environment, get_settings, notify_frontend_ready},
         body_metrics::{add_body_measures, delete_body_metric, get_body_measures},
         exercises::{get_exercise_details, get_exercises},
         sessions::{get_session_details, get_sessions, import_from_device, save_session_changes},
@@ -84,6 +85,17 @@ pub fn run() {
                 *constants::PID
             );
 
+            debug!("Loading settings...");
+            match Settings::initialize() {
+                Ok(settings) => {
+                    SETTINGS_INST.set(settings).unwrap();
+                }
+                Err(e) => {
+                    error!("Could not load settings: {}", e);
+                    exit(constants::ExitCodes::SettingsError.into());
+                }
+            }
+
             debug!("Initializing database...");
             if let Err(e) = Database::initialize(constants::DB_FILE.clone()) {
                 error!("Could not open database: {}", e);
@@ -111,6 +123,7 @@ pub fn run() {
             add_body_measures,
             get_environment,
             delete_body_metric,
+            get_settings
         ])
         .run(tauri::generate_context!());
 

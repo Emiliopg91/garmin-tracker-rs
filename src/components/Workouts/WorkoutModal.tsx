@@ -1,6 +1,7 @@
 import { AppContext } from "@/context/AppContext";
-import { WorkoutDetails } from "@/utils/backend/models";
+import { WeightUnit, WorkoutDetails } from "@/utils/backend/models";
 import { TimeUtils } from "@/utils/TimeUtils";
+import { UnitUtils } from "@/utils/UnitUtils";
 import { useContext, useEffect, useState } from "react";
 import { Modal } from "react-bootstrap";
 import {
@@ -20,7 +21,7 @@ type Props = {
 };
 
 export function WorkoutModal({ workout, onClose }: Props) {
-  const { translate } = useContext(AppContext);
+  const { translate, settings } = useContext(AppContext);
   const [chartData, setChartData] = useState<
     { date: number; volume: number }[]
   >([]);
@@ -85,12 +86,18 @@ export function WorkoutModal({ workout, onClose }: Props) {
               </tr>
               <tr>
                 <td>{translate("average_time")}</td>
-                <td>{workout.avg_time}</td>
+                <td>{TimeUtils.formatDuration(workout.avg_time)}</td>
               </tr>
               {workout.name.length > 0 && (
                 <tr>
                   <td>{translate("average_volume")}:</td>
-                  <td>{Math.floor(workout.avg_volume)} Kg</td>
+                  <td>
+                    {UnitUtils.fromKg(
+                      workout.avg_volume,
+                      settings.weight_unit,
+                    ).toFixed(1)}{" "}
+                    {UnitUtils.getUnit(settings.weight_unit)}
+                  </td>
                 </tr>
               )}
             </tbody>
@@ -183,7 +190,11 @@ export function WorkoutModal({ workout, onClose }: Props) {
                       <td>{TimeUtils.formatDuration(session.time)}</td>
                       {workout.name.length > 0 && (
                         <td>
-                          {session.volume} Kg{" "}
+                          {UnitUtils.fromKg(
+                            session.volume,
+                            settings.weight_unit,
+                          ).toFixed(1)}{" "}
+                          {UnitUtils.getUnit(settings.weight_unit)}{" "}
                           {session.vol_diff != "-" &&
                             "(" + session.vol_diff + ")"}
                         </td>
