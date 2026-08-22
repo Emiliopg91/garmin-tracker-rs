@@ -2,6 +2,7 @@ use std::sync::OnceLock;
 
 use garmin_tracker_rs_macros::traced_command;
 use tauri::{AppHandle, WebviewWindow};
+use tokio::sync::RwLock;
 
 use crate::{
     constants,
@@ -10,12 +11,12 @@ use crate::{
 };
 use tauri_plugin_log::log::info;
 
-pub static SETTINGS_INST: OnceLock<Settings> = OnceLock::new();
+pub static SETTINGS_INST: OnceLock<RwLock<Settings>> = OnceLock::new();
 
 #[traced_command]
 #[tauri::command]
-pub fn get_settings() -> Settings {
-    (*SETTINGS_INST.get().unwrap()).clone()
+pub async fn get_settings() -> Settings {
+    SETTINGS_INST.get().unwrap().read().await.clone()
 }
 
 #[traced_command]

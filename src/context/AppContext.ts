@@ -42,6 +42,7 @@ const defaultValue: AppContexType = {
   settings: {
     distance_unit: DistanceUnit.Kilometers,
     weight_unit: WeightUnit.Kilograms,
+    auto_sync: true,
   },
 };
 

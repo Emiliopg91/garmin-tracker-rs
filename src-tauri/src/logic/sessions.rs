@@ -288,7 +288,7 @@ where
                         .item(session.clone())
                         .execute_in(tx)?;
 
-                    let mut insert = ExerciseRepository::insert().or_ignore(true);
+                    let mut insert = ExerciseRepository::insert().or_ignore();
                     let mut seen = HashSet::new();
                     for serie in &session.series {
                         let exercise = serie.exercise.clone().unwrap();

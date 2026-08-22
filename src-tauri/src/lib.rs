@@ -13,6 +13,7 @@ use tauri_plugin_log::{
     Target, TargetKind,
     log::{LevelFilter, debug, error, info},
 };
+use tokio::sync::RwLock;
 
 use crate::{
     dto::app::Settings,
@@ -85,17 +86,6 @@ pub fn run() {
                 *constants::PID
             );
 
-            debug!("Loading settings...");
-            match Settings::initialize() {
-                Ok(settings) => {
-                    SETTINGS_INST.set(settings).unwrap();
-                }
-                Err(e) => {
-                    error!("Could not load settings: {}", e);
-                    exit(constants::ExitCodes::SettingsError.into());
-                }
-            }
-
             debug!("Initializing database...");
             if let Err(e) = Database::initialize(constants::DB_FILE.clone()) {
                 error!("Could not open database: {}", e);
@@ -105,6 +95,9 @@ pub fn run() {
                 error!("Could not initialize database: {}", e);
                 exit(constants::ExitCodes::DbError.into())
             }
+
+            debug!("Loading settings...");
+            SETTINGS_INST.set(RwLock::new(Settings::load())).unwrap();
 
             debug!("Setup finished");
             Ok(())

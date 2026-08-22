@@ -6,54 +6,21 @@ pub enum AppEnvironment {
     Release,
 }
 
-use std::fs;
-
-use crate::utils::constants;
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum DistanceUnit {
-    Kilometers,
-    Miles,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum WeightUnit {
-    Kilograms,
-    Pounds,
-}
+use crate::dao::settings::{DistanceUnit, WeightUnit};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Settings {
     pub distance_unit: DistanceUnit,
     pub weight_unit: WeightUnit,
-}
-
-impl Default for Settings {
-    fn default() -> Self {
-        Self {
-            distance_unit: DistanceUnit::Kilometers,
-            weight_unit: WeightUnit::Kilograms,
-        }
-    }
+    pub auto_sync: bool,
 }
 
 impl Settings {
-    pub fn initialize() -> Result<Self, Box<dyn std::error::Error>> {
-        let mut result = Self::default();
-
-        let path = (*constants::SETTINGS_FILE).clone();
-        if fs::exists(&path).unwrap() {
-            let content = fs::read_to_string(&path).unwrap();
-            result = serde_yaml::from_str(&content).unwrap();
+    pub fn load() -> Self {
+        Self {
+            auto_sync: crate::dao::settings::Settings::get_auto_sync(),
+            distance_unit: crate::dao::settings::Settings::get_distance_unit(),
+            weight_unit: crate::dao::settings::Settings::get_weight_unit(),
         }
-
-        Ok(result)
-    }
-
-    pub fn save(&self) -> Result<(), Box<dyn std::error::Error>> {
-        let content = serde_yaml::to_string(self).unwrap();
-        let path = (*constants::SETTINGS_FILE).clone();
-        fs::write(path, content).unwrap();
-        Ok(())
     }
 }

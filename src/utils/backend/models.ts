@@ -22,16 +22,10 @@ export interface DeviceListItem {
   serial_number: string;
 }
 
-// From src-tauri/src/dto/app.rs:14
+// From src-tauri/src/dao/settings.rs:76
 export enum DistanceUnit {
 	Kilometers = "Kilometers",
 	Miles = "Miles",
-}
-
-// From src-tauri/src/dto/settings.rs:8
-export enum DistanceUnit {
-	Meter = "Meter",
-	Mile = "Mile",
 }
 
 // From src-tauri/src/dto/exercises.rs:33
@@ -100,25 +94,14 @@ export interface SessionSeriesUpdate {
   timestamp: number;
 }
 
-// From src-tauri/src/dto/app.rs:26
+// From src-tauri/src/dto/app.rs:12
 export interface Settings {
+  auto_sync: boolean;
   distance_unit: DistanceUnit;
   weight_unit: WeightUnit;
 }
 
-// From src-tauri/src/dto/settings.rs:20
-export interface Settings {
-  distance_unit: DistanceUnit;
-  weight_unit: WeightUnit;
-}
-
-// From src-tauri/src/dto/settings.rs:14
-export enum WeightUnit {
-	Kilogram = "Kilogram",
-	Pounds = "Pounds",
-}
-
-// From src-tauri/src/dto/app.rs:20
+// From src-tauri/src/dao/settings.rs:104
 export enum WeightUnit {
 	Kilograms = "Kilograms",
 	Pounds = "Pounds",

@@ -12,7 +12,7 @@ use crate::{
         devices::DeviceListItem,
         notifications::{NotificationDefinition, NotificationKind},
     },
-    logic::{notifications::show_notification, sessions::_import_from_device},
+    logic::{app::SETTINGS_INST, notifications::show_notification, sessions::_import_from_device},
     mtp::MTP_CLIENT_INST,
 };
 
@@ -106,12 +106,20 @@ async fn mtp_dev_check_and_sync(app: AppHandle, devices: &mut Vec<DeviceListItem
             let payload: DeviceListItem = device.clone();
             let _ = app.emit("device_connected", payload);
 
-            devs_to_sync.push(device.serial_number.clone());
-            show_notification(NotificationDefinition {
-                title: translate!("device_connected"),
-                body: translate!("syncing_device", device.manufacturer, device.model),
-                kind: NotificationKind::Temporal,
-            });
+            if SETTINGS_INST.get().unwrap().read().await.auto_sync {
+                devs_to_sync.push(device.serial_number.clone());
+                show_notification(NotificationDefinition {
+                    title: translate!("device_connected"),
+                    body: translate!("syncing_device", device.manufacturer, device.model),
+                    kind: NotificationKind::Temporal,
+                });
+            } else {
+                show_notification(NotificationDefinition {
+                    title: translate!("device_connected"),
+                    body: format!("{} {}", device.manufacturer, device.model),
+                    kind: NotificationKind::Temporal,
+                });
+            }
         }
 
         for device in devices.iter() {

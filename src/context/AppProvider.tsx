@@ -29,6 +29,7 @@ export function AppProvider({
   const [settings, setSettings] = useState<Settings>({
     distance_unit: DistanceUnit.Kilometers,
     weight_unit: WeightUnit.Kilograms,
+    auto_sync: true,
   });
 
   const startLoading = () => {
