@@ -44,3 +44,28 @@ pub async fn get_environment() -> AppEnvironment {
         AppEnvironment::Release
     }
 }
+
+#[traced_command]
+#[tauri::command]
+pub async fn update_settings_value(name: &str, value: &str) -> Result<(), String> {
+    match name {
+        crate::dao::settings::settings_keys::AUTO_SYNC => {
+            let value = value == "true";
+            crate::dao::settings::Settings::set_auto_sync(value).map_err(|e| e.to_string())?;
+            SETTINGS_INST.get().unwrap().write().await.auto_sync = value;
+        }
+        crate::dao::settings::settings_keys::DISTANCE_UNIT => {
+            let value = value.try_into()?;
+            crate::dao::settings::Settings::set_distance_unit(&value).map_err(|e| e.to_string())?;
+            SETTINGS_INST.get().unwrap().write().await.distance_unit = value;
+        }
+        crate::dao::settings::settings_keys::WEIGHT_UNIT => {
+            let value = value.try_into()?;
+            crate::dao::settings::Settings::set_weight_unit(&value).map_err(|e| e.to_string())?;
+            SETTINGS_INST.get().unwrap().write().await.weight_unit = value;
+        }
+        _ => unreachable!(),
+    }
+
+    Ok(())
+}

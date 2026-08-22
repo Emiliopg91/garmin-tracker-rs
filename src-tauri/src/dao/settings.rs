@@ -3,7 +3,7 @@ use rusqlite_orm_macros::Entity;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
-mod settings_keys {
+pub mod settings_keys {
     pub const WEIGHT_UNIT: &str = "weight_unit";
     pub const DISTANCE_UNIT: &str = "distance_unit";
     pub const AUTO_SYNC: &str = "auto_sync";
@@ -12,8 +12,8 @@ mod settings_keys {
 #[derive(Entity)]
 #[primary_key(name)]
 pub struct Settings {
-    name: String,
-    value: String,
+    pub name: String,
+    pub value: String,
 }
 
 impl Settings {
@@ -24,7 +24,7 @@ impl Settings {
             .and_then(|r| WeightUnit::try_from(r.value.as_str()).ok())
             .unwrap_or(WeightUnit::Kilograms)
     }
-    pub fn set_weight_unit(value: WeightUnit) -> rusqlite_orm::database::errors::Result<()> {
+    pub fn set_weight_unit(value: &WeightUnit) -> rusqlite_orm::database::errors::Result<()> {
         SettingsRepository::insert()
             .or_replace()
             .item(Settings {
@@ -42,7 +42,7 @@ impl Settings {
             .and_then(|r| DistanceUnit::try_from(r.value.as_str()).ok())
             .unwrap_or(DistanceUnit::Kilometers)
     }
-    pub fn set_distance_unit(value: DistanceUnit) -> rusqlite_orm::database::errors::Result<()> {
+    pub fn set_distance_unit(value: &DistanceUnit) -> rusqlite_orm::database::errors::Result<()> {
         SettingsRepository::insert()
             .or_replace()
             .item(Settings {

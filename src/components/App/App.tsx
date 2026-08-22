@@ -8,6 +8,7 @@ import { ExercisesList } from "../Exercises/ExercisesList";
 import { BodyMetricList } from "../BodyMetrics/BodyMetricList";
 import { Loading } from "../Loading/Loading";
 import { WorkoutsList } from "../Workouts/WorkoutList";
+import { Settings } from "../Settings/Settings";
 
 export function App(): JSX.Element {
   const { tab, setTab, loading, appReady, translate } = useContext(AppContext);
@@ -43,6 +44,16 @@ export function App(): JSX.Element {
     },
   ];
 
+  const rightNavBarItems = [
+    {
+      label: translate("settings"),
+      onSelected: () => {
+        setTab(Tabs.SETTINGS);
+      },
+      selected: tab == Tabs.SETTINGS,
+    },
+  ];
+
   return (
     <>
       <div id="viewport">
@@ -50,13 +61,14 @@ export function App(): JSX.Element {
 
         {appReady && (
           <>
-            <NavBar leftItems={leftNavBarItems} rightItems={[]} />
+            <NavBar leftItems={leftNavBarItems} rightItems={rightNavBarItems} />
 
             <div id="list-layer">
               {tab == Tabs.SESSIONS && <SessionsList />}
               {tab == Tabs.EXERCISES && <ExercisesList />}
               {tab == Tabs.WORKOUTS && <WorkoutsList />}
               {tab == Tabs.BODY_METRICS && <BodyMetricList />}
+              {tab == Tabs.SETTINGS && <Settings />}
             </div>
           </>
         )}

@@ -92,6 +92,12 @@ export class BackendClient {
 	}
 	
 
+	// From src-tauri/src/logic/app.rs:50
+	public static updateSettingsValue(name: string, value: string): Promise<void> {
+	  return BackendClient.inner_invoke("update_settings_value", { name, value }); 
+	}
+	
+
   
 	private static inner_invoke<R>(method: string, payload?: InvokeArgs): Promise<R> {
 		return new Promise<R>((resolve,reject)=>{

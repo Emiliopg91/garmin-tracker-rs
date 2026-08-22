@@ -33,11 +33,15 @@ pub fn traced_command(_attrs: TokenStream, item: TokenStream) -> TokenStream {
         .collect();
 
     let param_keys: Vec<_> = param_names.iter().map(|p| p.to_string()).collect();
+    let output_ty = match &sig.output {
+        syn::ReturnType::Default => quote! { () },
+        syn::ReturnType::Type(_, ty) => quote! { #ty },
+    };
 
     let call = if is_async {
-        quote! { (async move || #block)().await }
+        quote! { (async move || -> #output_ty #block)().await }
     } else {
-        quote! { (|| #block)() }
+        quote! { (move || -> #output_ty #block)() }
     };
 
     let result_json_code = if last_segment_is_return(&sig.output, "Result") {
@@ -78,7 +82,7 @@ pub fn traced_command(_attrs: TokenStream, item: TokenStream) -> TokenStream {
                 );
             }
 
-            let result = #call;
+            let result: #output_ty = #call;
 
             if __debug_enabled {
                 #result_json_code

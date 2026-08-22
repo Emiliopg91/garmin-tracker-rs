@@ -268,3 +268,36 @@ ok_delete_body_entry:
 speed:
   en: Speed
   es: Velocidad
+settings:
+  en: Settings
+  es: Configuración
+weight_unit:
+  en: Weight unit
+  es: Unidad de peso
+weight_unit_kilograms:
+  en: Kilograms
+  es: Kilogramos
+weight_unit_pounds:
+  en: Pounds
+  es: Libras
+distance_unit:
+  en: Distance unit
+  es: Unidad de distancia
+distance_unit_kilometers:
+  en: Kilometers
+  es: Kilómetros
+distance_unit_miles:
+  en: Miles
+  es: Millas
+auto_sync:
+  en: Sync devices
+  es: Sincronizar dispositivos
+auto_sync_true:
+  en: Automatically
+  es: Automaticamente
+auto_sync_false:
+  en: Manually
+  es: Manualmente
+pace:
+  en: Pace
+  es: Ritmo

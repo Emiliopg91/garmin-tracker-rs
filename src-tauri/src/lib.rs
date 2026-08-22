@@ -18,7 +18,10 @@ use tokio::sync::RwLock;
 use crate::{
     dto::app::Settings,
     logic::{
-        app::{SETTINGS_INST, get_environment, get_settings, notify_frontend_ready},
+        app::{
+            SETTINGS_INST, get_environment, get_settings, notify_frontend_ready,
+            update_settings_value,
+        },
         body_metrics::{add_body_measures, delete_body_metric, get_body_measures},
         exercises::{get_exercise_details, get_exercises},
         sessions::{get_session_details, get_sessions, import_from_device, save_session_changes},
@@ -116,7 +119,8 @@ pub fn run() {
             add_body_measures,
             get_environment,
             delete_body_metric,
-            get_settings
+            get_settings,
+            update_settings_value
         ])
         .run(tauri::generate_context!());
 

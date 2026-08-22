@@ -333,6 +333,16 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                       {UnitUtils.getUnit(settings.distance_unit)}/h
                     </td>
                   </tr>
+                  <tr>
+                    <td>{translate("pace")}:</td>
+                    <td>
+                      {UnitUtils.fromKm(
+                        localSession.total_elapsed_time / 60 / distance,
+                        settings.distance_unit,
+                      ).toFixed(2)}{" "}
+                      min/{UnitUtils.getUnit(settings.distance_unit)}
+                    </td>
+                  </tr>
                 </>
               )}
               {volume > 0 && (
