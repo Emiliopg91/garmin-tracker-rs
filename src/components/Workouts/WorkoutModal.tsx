@@ -1,5 +1,5 @@
 import { AppContext } from "@/context/AppContext";
-import { WeightUnit, WorkoutDetails } from "@/utils/backend/models";
+import { WorkoutDetails } from "@/utils/backend/models";
 import { TimeUtils } from "@/utils/TimeUtils";
 import { UnitUtils } from "@/utils/UnitUtils";
 import { useContext, useEffect, useState } from "react";
