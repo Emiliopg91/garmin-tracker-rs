@@ -7,7 +7,11 @@ mod utils;
 
 use std::process::exit;
 
-use rusqlite_orm::database::Database;
+use garmin_tracker_rs_macros::translate;
+use rusqlite_orm::{
+    dao::{Repository, helpers::types::where_clause::Where},
+    database::Database,
+};
 use rusqlite_orm_macros::dlls;
 use tauri_plugin_log::{
     Target, TargetKind,
@@ -16,7 +20,14 @@ use tauri_plugin_log::{
 use tokio::sync::RwLock;
 
 use crate::{
-    dto::app::Settings,
+    dao::{
+        gps_coordinates::{self, GpsCoordinatesRepository},
+        session::{self, SessionRepository},
+    },
+    dto::{
+        app::Settings,
+        notifications::{NotificationDefinition, NotificationKind},
+    },
     logic::{
         app::{
             SETTINGS_INST, get_environment, get_settings, notify_frontend_ready,
@@ -24,7 +35,11 @@ use crate::{
         },
         body_metrics::{add_body_measures, delete_body_metric, get_body_measures},
         exercises::{get_exercise_details, get_exercises},
-        sessions::{get_session_details, get_sessions, import_from_device, save_session_changes},
+        notifications::show_notification,
+        sessions::{
+            get_location_from_coordinates, get_session_details, get_sessions, import_from_device,
+            save_session_changes,
+        },
         workouts::{get_workout_details, get_workout_list},
     },
     utils::{constants, single_instance::SingleInstance},
@@ -98,6 +113,46 @@ pub fn run() {
                 error!("Could not initialize database: {}", e);
                 exit(constants::ExitCodes::DbError.into())
             }
+
+            let _ = Database::run_in_transaction(|tx| {
+                let sessions = SessionRepository::select()
+                    .where_(Where::Eq(session::entity::columns::WORKOUT, "".into()))
+                    .fetch_in(tx)?;
+
+                if !sessions.is_empty() {
+                    let gps_coordinates = GpsCoordinatesRepository::select()
+                        .where_(Where::In(
+                            gps_coordinates::entity::columns::SESSION,
+                            sessions.iter().map(|s| s.date.into()).collect::<Vec<_>>(),
+                        ))
+                        .fetch_in(tx)?;
+
+                    if !gps_coordinates.is_empty() {
+                        show_notification(NotificationDefinition {
+                            title: translate!("aligning_database"),
+                            body: translate!("operation_may_last"),
+                            kind: NotificationKind::Temporal,
+                        });
+
+                        for gps_coords in gps_coordinates {
+                            let coords = gps_coords.normalize();
+                            if let Some(start_point) = coords.first() {
+                                let location =
+                                    get_location_from_coordinates(start_point.0, start_point.1);
+                                SessionRepository::update()
+                                    .set(session::entity::columns::WORKOUT, location.into())
+                                    .where_(Where::Eq(
+                                        session::entity::columns::DATE,
+                                        gps_coords.session.into(),
+                                    ))
+                                    .execute_in(tx)?;
+                            }
+                        }
+                    }
+                }
+
+                Ok(())
+            });
 
             debug!("Loading settings...");
             SETTINGS_INST.set(RwLock::new(Settings::load())).unwrap();

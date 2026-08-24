@@ -304,3 +304,9 @@ pace:
 name:
   en: Name
   es: Nombre
+aligning_database:
+  en: Aligning database content
+  es: Alineando contenido de la base de datos
+operation_may_last:
+  en: This operation may last a few seconds
+  es: Esta operacion puede demorarse unos segundos

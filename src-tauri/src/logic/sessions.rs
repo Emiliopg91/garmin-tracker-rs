@@ -43,29 +43,10 @@ pub fn get_sessions() -> Result<Vec<SessionListItem>, String> {
             .order_by(OrderBy::Desc(session::entity::columns::DATE))
             .fetch_in(tx)?;
 
-        let gps_coordinates = GpsCoordinatesRepository::select().fetch_in(tx)?;
-
-        let mut res = Vec::new();
-        for session in sessions {
-            let mut dto = SessionListItem::from(&session);
-            if dto.name.is_empty()
-                && let Some(gps_coords) = gps_coordinates.iter().find(|c| c.session == session.date)
-            {
-                let mut gps_coords = gps_coords.clone();
-                if gps_coords.location.is_none() {
-                    let coords = gps_coords.normalize();
-                    if let Some(start_point) = coords.first() {
-                        gps_coords.location =
-                            Some(get_location_from_coordinates(start_point.0, start_point.1));
-                        gps_coords.update_by_id_in(tx)?;
-                    }
-                }
-                dto.name = gps_coords.location.unwrap_or_default();
-            }
-            res.push(dto);
-        }
-
-        Ok(res)
+        Ok(sessions
+            .iter()
+            .map(SessionListItem::from)
+            .collect::<Vec<_>>())
     });
 
     match res {

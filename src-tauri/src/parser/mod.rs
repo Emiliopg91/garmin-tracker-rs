@@ -14,7 +14,6 @@ use crate::{
         session::Session,
     },
     logic::sessions::get_location_from_coordinates,
-    utils::constants,
 };
 
 use self::errors::ParseFitFileError;
@@ -84,7 +83,7 @@ where
 
     let timestamp = get_timestamp("timestamp", session_entry.fields())?;
     let sport = get_string("sport_profile_name", session_entry.fields())?;
-    let workout = get_workout_name(grouped.workout).unwrap_or_default();
+    let mut workout = get_workout_name(grouped.workout).unwrap_or_default();
     let total_elapsed_time = get_f64("total_elapsed_time", session_entry.fields())?;
     let active_time = get_f64("active_time", session_entry.fields()).unwrap_or(0.0);
     let training_load = get_f64("training_load_peak", session_entry.fields())?;
@@ -93,6 +92,14 @@ where
     let series = get_sets(&grouped, &timestamp).unwrap_or_default();
     let heart_rates = get_heart_rate(&timestamp, &grouped.records)?;
     let gps_coordinates = get_gps_coordinates(&timestamp, &grouped.records)?;
+    if workout.is_empty()
+        && let Some(coords) = gps_coordinates.clone()
+    {
+        let coords = coords.normalize();
+        if let Some(start_point) = coords.first() {
+            workout = get_location_from_coordinates(start_point.0, start_point.1)
+        }
+    }
 
     Ok(Session {
         workout,
@@ -221,18 +228,9 @@ fn get_gps_coordinates(
     Ok(if coords.is_empty() {
         None
     } else {
-        let location = Some(match start_point {
-            Some(start_point) => get_location_from_coordinates(
-                start_point.0 as f64 * constants::SEMICIRCLE_TO_DEGREES,
-                start_point.1 as f64 * constants::SEMICIRCLE_TO_DEGREES,
-            ),
-            None => "".to_string(),
-        });
-
         Some(GpsCoordinates {
             session: timestamp.timestamp(),
             records: coords,
-            location,
         })
     })
 }

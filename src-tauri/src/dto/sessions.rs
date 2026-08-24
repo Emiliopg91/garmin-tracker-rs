@@ -86,7 +86,6 @@ impl From<(&Session, &IndexMap<Exercise, Vec<Serie>>)> for SessionDetails {
     fn from(value: (&Session, &IndexMap<Exercise, Vec<Serie>>)) -> Self {
         let mut exercises = Vec::new();
         let mut series_d = HashMap::<String, Vec<SessionSerie>>::new();
-        let mut name = value.0.workout.clone();
 
         for (exercise, series) in value.1 {
             if !exercises.contains(&exercise.name) {
@@ -116,14 +115,10 @@ impl From<(&Session, &IndexMap<Exercise, Vec<Serie>>)> for SessionDetails {
         let mut gps_coordinates = Vec::new();
         if let Some(coords) = value.0.gps_coordinates.clone() {
             gps_coordinates = coords.normalize();
-            if let Some(location) = coords.location {
-                eprintln!("Location found");
-                name = location;
-            }
         }
 
         Self {
-            name,
+            name: value.0.workout.clone(),
             timestamp: value.0.date as i32,
             total_elapsed_time: value.0.total_elapsed_time.round() as i32,
             active_time: value.0.active_time.round() as i32,

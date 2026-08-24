@@ -8,7 +8,6 @@ use crate::utils::constants;
 pub struct GpsCoordinates {
     pub session: i64,
     pub records: Vec<u8>,
-    pub location: Option<String>,
 }
 
 impl GpsCoordinates {
