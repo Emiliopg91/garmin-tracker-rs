@@ -4,6 +4,7 @@ type UnitType = DistanceUnit | WeightUnit;
 export class UnitUtils {
   private static readonly KG_TO_LB = 2.20462;
   private static readonly KM_TO_MI = 0.621371;
+  public static readonly SEMICIRCLE_TO_DEGREES = 180.0 / 2 ** 31;
 
   public static fromKg(kg: number, unit: WeightUnit): number {
     switch (unit) {

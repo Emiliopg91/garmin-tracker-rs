@@ -16,6 +16,7 @@ import {
 } from "recharts";
 import { BackendListener } from "@/utils/backend/listener";
 import { TimeUtils } from "@/utils/TimeUtils";
+import { UnitUtils } from "@/utils/UnitUtils";
 
 type WorkoutLoad = {
   date: number;
@@ -26,7 +27,7 @@ type WorkoutLoad = {
 };
 
 export function SessionsList() {
-  const { startLoading, finishLoading, availableDevices, translate } =
+  const { startLoading, finishLoading, availableDevices, translate, settings } =
     useContext(AppContext);
 
   const [minDate, setMinDate] = useState(0);
@@ -186,6 +187,21 @@ export function SessionsList() {
     startLoading();
     BackendClient.getSessionDetails(timestamp)
       .then((details) => {
+        Object.keys(details.series).forEach((key) => {
+          details.series[key].forEach((_, idx) => {
+            const copy = { ...details.series[key][idx] };
+            copy.weight = Number(
+              UnitUtils.fromKg(copy.weight, settings.weight_unit).toFixed(1),
+            );
+            details.series[key][idx] = copy;
+          });
+        });
+        for (let i = 0; i < details.gps_coordinates.length; i++) {
+          details.gps_coordinates[i][0] =
+            details.gps_coordinates[i][0] * UnitUtils.SEMICIRCLE_TO_DEGREES;
+          details.gps_coordinates[i][1] =
+            details.gps_coordinates[i][1] * UnitUtils.SEMICIRCLE_TO_DEGREES;
+        }
         setSessionDetails(details);
       })
       .finally(() => {

@@ -68,20 +68,8 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
     }[] = [];
 
     if (Object.entries(session.series).length > 0) {
-      const localLocalSession = { ...session };
-      Object.keys(localLocalSession.series).forEach((key) => {
-        localLocalSession.series[key].forEach((_, idx) => {
-          const copy = { ...localLocalSession.series[key][idx] };
-          copy.weight = Number(
-            UnitUtils.fromKg(copy.weight, settings.weight_unit).toFixed(1),
-          );
-          localLocalSession.series[key][idx] = copy;
-        });
-      });
-      setLocalSession(localLocalSession);
-
       let vol = 0;
-      Object.entries(localLocalSession.series).map(([, series]) => {
+      Object.entries(session.series).map(([, series]) => {
         series.forEach((serie) => {
           vol += serie.reps * serie.weight!;
         });

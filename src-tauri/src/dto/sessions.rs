@@ -77,7 +77,7 @@ pub struct SessionDetails {
     pub exercises: Vec<String>,
     pub series: HashMap<String, Vec<SessionSerie>>,
     pub heart_rates: Vec<u8>,
-    pub gps_coordinates: Vec<(f64, f64)>,
+    pub gps_coordinates: Vec<(i32, i32)>,
 
     pub device: Option<String>,
 }

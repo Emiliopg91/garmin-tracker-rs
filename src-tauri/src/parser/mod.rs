@@ -14,6 +14,7 @@ use crate::{
         session::Session,
     },
     logic::sessions::get_location_from_coordinates,
+    utils::constants,
 };
 
 use self::errors::ParseFitFileError;
@@ -97,7 +98,10 @@ where
     {
         let coords = coords.normalize();
         if let Some(start_point) = coords.first() {
-            workout = get_location_from_coordinates(start_point.0, start_point.1)
+            workout = get_location_from_coordinates(
+                start_point.0 as f64 * constants::SEMICIRCLE_TO_DEGREES,
+                start_point.1 as f64 * constants::SEMICIRCLE_TO_DEGREES,
+            )
         }
     }
 

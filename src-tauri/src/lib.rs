@@ -137,8 +137,10 @@ pub fn run() {
                         for gps_coords in gps_coordinates {
                             let coords = gps_coords.normalize();
                             if let Some(start_point) = coords.first() {
-                                let location =
-                                    get_location_from_coordinates(start_point.0, start_point.1);
+                                let location = get_location_from_coordinates(
+                                    start_point.0 as f64 * constants::SEMICIRCLE_TO_DEGREES,
+                                    start_point.1 as f64 * constants::SEMICIRCLE_TO_DEGREES,
+                                );
                                 SessionRepository::update()
                                     .set(session::entity::columns::WORKOUT, location.into())
                                     .where_(Where::Eq(
