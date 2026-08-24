@@ -28,7 +28,7 @@ impl TryFrom<&BodyMetricListItem> for BodyMetrics {
 
     fn try_from(value: &BodyMetricListItem) -> Result<Self, Self::Error> {
         Ok(Self {
-            date: value.date as i64, //TODO
+            date: value.date as i64,
             weight: value.weight,
             fat_ratio: value.fat_ratio,
             lean_mass: value.lean_mass,
