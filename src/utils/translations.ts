@@ -28,6 +28,7 @@ export const TRANSLATIONS: Record<string, string> = {
 	"hr_zone_5": "Máximo",
 	"import_from_device": "Desde {}",
 	"import_sessions": "Importar sesiones",
+	"import_sessions_from_device": "Importar sesiones desde {}",
 	"imported_from": "Importado desde",
 	"latest_session": "Última sesión",
 	"lean_mass": "Masa magra",

@@ -105,7 +105,7 @@ export function WorkoutModal({ workout, onClose }: Props) {
           {workout.sessions.length > 0 && (
             <>
               <hr />
-              {workout.name.length > 0 && (
+              {workout.avg_volume > 0 && (
                 <>
                   <div style={{ width: "100%", height: 200 }}>
                     <ResponsiveContainer width="100%" height="100%">
@@ -159,23 +159,21 @@ export function WorkoutModal({ workout, onClose }: Props) {
                 <colgroup>
                   <col
                     style={{
-                      width: workout.name.length > 0 ? "230px" : "370px",
+                      width: workout.avg_volume > 0 ? "230px" : "370px",
                     }}
                   />
                   <col
                     style={{
-                      width: workout.name.length > 0 ? "120px" : "260px",
+                      width: workout.avg_volume > 0 ? "120px" : "260px",
                     }}
                   />
-                  {workout.name.length > 0 && (
-                    <col style={{ width: "280px" }} />
-                  )}
+                  {workout.avg_volume > 0 && <col style={{ width: "280px" }} />}
                 </colgroup>
                 <thead>
                   <tr>
                     <th>{translate("date")}</th>
                     <th>{translate("time")}</th>
-                    {workout.name.length > 0 && <th>{translate("volume")}</th>}
+                    {workout.avg_volume > 0 && <th>{translate("volume")}</th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -188,7 +186,7 @@ export function WorkoutModal({ workout, onClose }: Props) {
                     >
                       <td>{TimeUtils.formatTimeDate(session.date)}</td>
                       <td>{TimeUtils.formatDuration(session.time)}</td>
-                      {workout.name.length > 0 && (
+                      {workout.avg_volume > 0 && (
                         <td>
                           {UnitUtils.fromKg(
                             session.volume,

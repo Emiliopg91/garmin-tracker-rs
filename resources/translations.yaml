@@ -79,6 +79,9 @@ import_sessions:
 import_from_device:
   en: From {}
   es: Desde {}
+import_sessions_from_device:
+  en: Import sessions from {}
+  es: Importar sesiones desde {}
 imported_session:
   en: Session imported succesfully
   es: Sesión importada con éxito

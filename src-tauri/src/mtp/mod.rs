@@ -2,12 +2,12 @@ use std::{
     fs,
     path::PathBuf,
     sync::LazyLock,
-    time::{Duration, SystemTime, UNIX_EPOCH},
+    time::{SystemTime, UNIX_EPOCH},
 };
 
 use mtp_rs::MtpDevice;
 use tauri_plugin_log::log::{debug, info};
-use tokio::{sync::Mutex, time::sleep};
+use tokio::sync::Mutex;
 
 use crate::{
     dto::devices::DeviceListItem,

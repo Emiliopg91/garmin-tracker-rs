@@ -2,7 +2,7 @@ import { AppContext } from "@/context/AppContext";
 import { BackendClient } from "@/utils/backend/client";
 import { SessionDetails, SessionListItem } from "@/utils/backend/models";
 import { useContext, useEffect, useState } from "react";
-import { Dropdown } from "react-bootstrap";
+import { Button, Dropdown } from "react-bootstrap";
 import { SessionModal } from "./SessionModal";
 import {
   Area,
@@ -327,26 +327,42 @@ export function SessionsList() {
       </div>
       {availableDevices.length > 0 && (
         <div style={{ padding: "5px", width: "100%", marginTop: "auto" }}>
-          <Dropdown id="import-file-dropdown" className="w-100">
-            <Dropdown.Toggle id="import-file-toggle">
-              {translate("import_sessions")}
-            </Dropdown.Toggle>
+          {availableDevices.length == 1 && (
+            <Button
+              id="import-file-button"
+              onClick={() => {
+                importDevice(availableDevices[0].serial_number);
+              }}
+            >
+              {translate("import_sessions_from_device", [
+                availableDevices[0].manufacturer +
+                  " " +
+                  availableDevices[0].model,
+              ])}
+            </Button>
+          )}
+          {availableDevices.length > 1 && (
+            <Dropdown id="import-file-dropdown" className="w-100">
+              <Dropdown.Toggle id="import-file-toggle">
+                {translate("import_sessions")}
+              </Dropdown.Toggle>
 
-            <Dropdown.Menu id="import-file-menu">
-              {availableDevices.map((device, idx) => (
-                <Dropdown.Item
-                  key={"dev-" + idx}
-                  onClick={() => {
-                    importDevice(device.serial_number);
-                  }}
-                >
-                  {translate("import_from_device", [
-                    device.manufacturer + " " + device.model,
-                  ])}
-                </Dropdown.Item>
-              ))}
-            </Dropdown.Menu>
-          </Dropdown>
+              <Dropdown.Menu id="import-file-menu">
+                {availableDevices.map((device, idx) => (
+                  <Dropdown.Item
+                    key={"dev-" + idx}
+                    onClick={() => {
+                      importDevice(device.serial_number);
+                    }}
+                  >
+                    {translate("import_from_device", [
+                      device.manufacturer + " " + device.model,
+                    ])}
+                  </Dropdown.Item>
+                ))}
+              </Dropdown.Menu>
+            </Dropdown>
+          )}
         </div>
       )}
     </>
