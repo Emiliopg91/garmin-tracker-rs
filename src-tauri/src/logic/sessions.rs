@@ -453,8 +453,8 @@ pub fn get_location_from_coordinates(lat: f64, long: f64) -> String {
         lat, long
     );
 
-    if let Ok(response) = reqwest::blocking::Client::new().get(url).send()
-        && let Ok(json) = response.json::<serde_json::Value>()
+    if let Ok(response) = ureq::get(&url).call()
+        && let Ok(json) = response.into_json::<serde_json::Value>()
     {
         let city = json
             .get("city")
@@ -463,7 +463,7 @@ pub fn get_location_from_coordinates(lat: f64, long: f64) -> String {
 
         let locality = json.get("locality").and_then(|v| v.as_str());
 
-        location = city.or(locality).unwrap_or("Desconocido").to_string();
+        location = city.or(locality).unwrap_or_default().to_string();
     }
 
     location
