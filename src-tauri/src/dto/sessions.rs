@@ -86,6 +86,7 @@ impl From<(&Session, &IndexMap<Exercise, Vec<Serie>>)> for SessionDetails {
     fn from(value: (&Session, &IndexMap<Exercise, Vec<Serie>>)) -> Self {
         let mut exercises = Vec::new();
         let mut series_d = HashMap::<String, Vec<SessionSerie>>::new();
+        let mut name = value.0.workout.clone();
 
         for (exercise, series) in value.1 {
             if !exercises.contains(&exercise.name) {
@@ -109,72 +110,20 @@ impl From<(&Session, &IndexMap<Exercise, Vec<Serie>>)> for SessionDetails {
             && !hr_dao.records.is_empty()
         {
             heart_rates = hr_dao.records.clone().into_iter().collect();
-
-            let time_fraction = value.0.total_elapsed_time / (heart_rates.len() as f64);
-            let mut num_zones_times = Vec::new();
-            let max_hr = 189_u8.max(*heart_rates.iter().max().unwrap()) as f64;
-            for zone in 0..5 {
-                let entries = heart_rates
-                    .iter()
-                    .filter(|e| {
-                        let rate = (**e as f64) / max_hr;
-                        let local_zone = if rate < 0.6 {
-                            0
-                        } else {
-                            if rate < 0.7 {
-                                1
-                            } else {
-                                if rate < 0.8 {
-                                    2
-                                } else {
-                                    if rate < 0.9 { 3 } else { 4 }
-                                }
-                            }
-                        };
-                        local_zone == zone
-                    })
-                    .count();
-                let time = time_fraction * (entries as f64);
-                num_zones_times.push(time);
-            }
-
-            let mut int_times = num_zones_times
-                .iter()
-                .map(|s| s.round() as i64)
-                .collect::<Vec<_>>();
-            let acc: i64 = int_times.iter().sum();
-            let total_secs = value.0.total_elapsed_time.round() as i64;
-            let diff = total_secs - acc;
-            int_times[0] += diff;
-
-            zones_times = int_times.into_iter().map(|v| v as i32).collect();
+            zones_times = hr_dao.get_time_in_zones(value.0.total_elapsed_time);
         }
 
         let mut gps_coordinates = Vec::new();
         if let Some(coords) = value.0.gps_coordinates.clone() {
-            const SEMICIRCLE_TO_DEGREES: f64 = 180.0 / (2_i64.pow(31) as f64);
-
-            fn semicircles_to_degrees(semicircles: i32) -> f64 {
-                semicircles as f64 * SEMICIRCLE_TO_DEGREES
-            }
-
-            let mut idx = 0;
-            while idx < coords.records.len() {
-                let lat = semicircles_to_degrees(i32::from_be_bytes(
-                    coords.records[idx..idx + 4].try_into().unwrap(),
-                ));
-                let lon = semicircles_to_degrees(i32::from_be_bytes(
-                    coords.records[idx + 4..idx + 8].try_into().unwrap(),
-                ));
-
-                gps_coordinates.push((lat, lon));
-
-                idx += 8;
+            gps_coordinates = coords.normalize();
+            if let Some(location) = coords.location {
+                eprintln!("Location found");
+                name = location;
             }
         }
 
         Self {
-            name: value.0.workout.clone(),
+            name,
             timestamp: value.0.date as i32,
             total_elapsed_time: value.0.total_elapsed_time.round() as i32,
             active_time: value.0.active_time.round() as i32,

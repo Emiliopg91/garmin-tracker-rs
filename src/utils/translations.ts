@@ -32,6 +32,7 @@ export const TRANSLATIONS: Record<string, string> = {
 	"latest_session": "Última sesión",
 	"lean_mass": "Masa magra",
 	"loading": "Cargando...",
+	"name": "Nombre",
 	"other": "Otro",
 	"pace": "Ritmo",
 	"personal_record": "Record personal",

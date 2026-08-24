@@ -37,6 +37,7 @@ indexmap = { version = "^2", features = ["serde"] }
 libc = "^0"
 mtp-rs = "^0"
 nusb = "^0"
+reqwest = { version = "^0", features = ["blocking", "json"] }
 #rusqlite_orm = { path = "../rusqlite_orm/orm" }
 rusqlite_orm = "^0"
 #rusqlite_orm_macros = { path = "../rusqlite_orm/macros" }

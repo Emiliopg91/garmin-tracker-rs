@@ -38,15 +38,34 @@ use crate::{
 #[tauri::command]
 pub fn get_sessions() -> Result<Vec<SessionListItem>, String> {
     info!("Getting sessions list...");
-    let res = Database::run_in_connection(|conn| {
+    let res = Database::run_in_transaction(|tx| {
         let sessions = SessionRepository::select()
             .order_by(OrderBy::Desc(session::entity::columns::DATE))
-            .fetch_in(conn)?;
+            .fetch_in(tx)?;
 
-        Ok(sessions
-            .into_iter()
-            .map(|s| SessionListItem::from(&s))
-            .collect::<Vec<_>>())
+        let gps_coordinates = GpsCoordinatesRepository::select().fetch_in(tx)?;
+
+        let mut res = Vec::new();
+        for session in sessions {
+            let mut dto = SessionListItem::from(&session);
+            if dto.name.is_empty()
+                && let Some(gps_coords) = gps_coordinates.iter().find(|c| c.session == session.date)
+            {
+                let mut gps_coords = gps_coords.clone();
+                if gps_coords.location.is_none() {
+                    let coords = gps_coords.normalize();
+                    if let Some(start_point) = coords.first() {
+                        gps_coords.location =
+                            Some(get_location_from_coordinates(start_point.0, start_point.1));
+                        gps_coords.update_by_id_in(tx)?;
+                    }
+                }
+                dto.name = gps_coords.location.unwrap_or_default();
+            }
+            res.push(dto);
+        }
+
+        Ok(res)
     });
 
     match res {
@@ -425,4 +444,27 @@ fn update_prs(
     }
 
     Ok(())
+}
+
+pub fn get_location_from_coordinates(lat: f64, long: f64) -> String {
+    let mut location = "".to_string();
+    let url = format!(
+        "https://api.bigdatacloud.net/data/reverse-geocode-client?latitude={}&longitude={}&localityLanguage=es",
+        lat, long
+    );
+
+    if let Ok(response) = reqwest::blocking::Client::new().get(url).send()
+        && let Ok(json) = response.json::<serde_json::Value>()
+    {
+        let city = json
+            .get("city")
+            .and_then(|v| v.as_str())
+            .filter(|s| !s.is_empty());
+
+        let locality = json.get("locality").and_then(|v| v.as_str());
+
+        location = city.or(locality).unwrap_or("Desconocido").to_string();
+    }
+
+    location
 }

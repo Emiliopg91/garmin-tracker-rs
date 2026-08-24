@@ -8,9 +8,13 @@ use chrono::{DateTime, Local};
 use fitparser::{FitDataField, FitDataRecord, Value, de::DecodeOption, profile};
 use garmin_tracker_rs_macros::translate;
 
-use crate::dao::{
-    exercise::Exercise, gps_coordinates::GpsCoordinates, heart_rate::HeartRate, serie::Serie,
-    session::Session,
+use crate::{
+    dao::{
+        exercise::Exercise, gps_coordinates::GpsCoordinates, heart_rate::HeartRate, serie::Serie,
+        session::Session,
+    },
+    logic::sessions::get_location_from_coordinates,
+    utils::constants,
 };
 
 use self::errors::ParseFitFileError;
@@ -199,6 +203,7 @@ fn get_gps_coordinates(
     records: &[&FitDataRecord],
 ) -> errors::Result<Option<GpsCoordinates>> {
     let mut coords = Vec::new();
+    let mut start_point = None;
 
     records.iter().for_each(|entry| {
         if let Ok(latitude) = get_i32("position_lat", entry.fields())
@@ -206,15 +211,28 @@ fn get_gps_coordinates(
         {
             coords.extend_from_slice(&latitude.to_be_bytes());
             coords.extend_from_slice(&longitude.to_be_bytes());
+
+            if start_point.is_none() {
+                start_point = Some((latitude, longitude));
+            }
         }
     });
 
     Ok(if coords.is_empty() {
         None
     } else {
+        let location = Some(match start_point {
+            Some(start_point) => get_location_from_coordinates(
+                start_point.0 as f64 * constants::SEMICIRCLE_TO_DEGREES,
+                start_point.1 as f64 * constants::SEMICIRCLE_TO_DEGREES,
+            ),
+            None => "".to_string(),
+        });
+
         Some(GpsCoordinates {
             session: timestamp.timestamp(),
             records: coords,
+            location,
         })
     })
 }

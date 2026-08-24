@@ -272,7 +272,7 @@ export function SessionsList() {
             <tr>
               <th style={{ textAlign: "center" }}>{translate("date")}</th>
               <th style={{ textAlign: "center" }}>{translate("sport")}</th>
-              <th style={{ textAlign: "center" }}>{translate("workout")}</th>
+              <th style={{ textAlign: "center" }}>{translate("name")}</th>
               <th style={{ textAlign: "center" }}>
                 {translate("active_calories")}
               </th>

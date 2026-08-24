@@ -88,7 +88,7 @@ export interface SessionSerie {
   weight: number;
 }
 
-// From src-tauri/src/dto/sessions.rs:196
+// From src-tauri/src/dto/sessions.rs:145
 export interface SessionSeriesUpdate {
   series: SessionSerie[];
   timestamp: number;

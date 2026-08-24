@@ -301,3 +301,6 @@ auto_sync_false:
 pace:
   en: Pace
   es: Ritmo
+name:
+  en: Name
+  es: Nombre
