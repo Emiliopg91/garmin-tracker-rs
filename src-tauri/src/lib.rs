@@ -114,7 +114,7 @@ pub fn run() {
                 exit(constants::ExitCodes::DbError.into())
             }
 
-            let _ = Database::run_in_transaction(|tx| {
+            if let Err(e) = Database::run_in_transaction(|tx| {
                 let sessions = SessionRepository::select()
                     .where_(Where::Eq(session::entity::columns::WORKOUT, "".into()))
                     .fetch_in(tx)?;
@@ -152,7 +152,10 @@ pub fn run() {
                 }
 
                 Ok(())
-            });
+            }) {
+                error!("Error aligning database: {}", e);
+                exit(constants::ExitCodes::DbError.into())
+            }
 
             debug!("Loading settings...");
             SETTINGS_INST.set(RwLock::new(Settings::load())).unwrap();
