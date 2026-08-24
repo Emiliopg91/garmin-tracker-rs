@@ -44,6 +44,7 @@ rusqlite_orm_macros = "^0"
 serde = { version = "^1", features = ["derive"] }
 serde_json = "^1"
 tauri = { version = "^2", features = [] }
+tauri-plugin-autostart = "2"
 tauri-plugin-log = "^2"
 tauri-plugin-opener = "^2"
 #tauri-rs-ts-ipc = { path = "../../syn-test" }
@@ -70,6 +71,3 @@ panic = "abort"
 codegen-units = 256
 incremental = true
 strip = false
-
-[target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
-tauri-plugin-autostart = "2"
