@@ -5,6 +5,7 @@ use std::{
 };
 
 use chrono::{Datelike, Local, TimeZone, Timelike};
+use curl::easy::Easy;
 use garmin_tracker_rs_macros::{traced_command, translate};
 use indexmap::IndexMap;
 use rusqlite_orm::{
@@ -427,6 +428,23 @@ fn update_prs(
     Ok(())
 }
 
+fn get(url: &str) -> Result<String, curl::Error> {
+    let mut easy = Easy::new();
+    easy.url(url)?;
+
+    let mut data = Vec::new();
+    {
+        let mut transfer = easy.transfer();
+        transfer.write_function(|chunk| {
+            data.extend_from_slice(chunk);
+            Ok(chunk.len())
+        })?;
+        transfer.perform()?;
+    }
+
+    Ok(String::from_utf8_lossy(&data).to_string())
+}
+
 pub fn get_location_from_coordinates(lat: f64, long: f64) -> String {
     let mut location = "".to_string();
     let url = format!(
@@ -434,17 +452,25 @@ pub fn get_location_from_coordinates(lat: f64, long: f64) -> String {
         lat, long
     );
 
-    if let Ok(response) = ureq::get(&url).call()
-        && let Ok(json) = response.into_json::<serde_json::Value>()
-    {
-        let city = json
-            .get("city")
-            .and_then(|v| v.as_str())
-            .filter(|s| !s.is_empty());
+    match get(&url) {
+        Ok(response) => match serde_json::from_str::<serde_json::Value>(&response) {
+            Ok(json) => {
+                let city = json
+                    .get("city")
+                    .and_then(|v| v.as_str())
+                    .filter(|s| !s.is_empty());
 
-        let locality = json.get("locality").and_then(|v| v.as_str());
+                let locality = json.get("locality").and_then(|v| v.as_str());
 
-        location = city.or(locality).unwrap_or_default().to_string();
+                location = city.or(locality).unwrap_or_default().to_string();
+            }
+            Err(e) => {
+                error!("Error parsing response body: {}", e);
+            }
+        },
+        Err(e) => {
+            error!("Error getting location: {}", e)
+        }
     }
 
     location
