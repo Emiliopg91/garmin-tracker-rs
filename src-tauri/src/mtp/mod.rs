@@ -111,7 +111,6 @@ impl MtpClient {
                         } else {
                             info!("Downloading files...");
                             for obj in objs {
-                                sleep(Duration::from_millis(100)).await;
                                 let mut data = storage
                                     .download(obj.handle, mtp_rs::ByteRange::Full)
                                     .await

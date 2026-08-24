@@ -16,7 +16,7 @@ use tauri_plugin_log::log::{error, info};
 use crate::{
     dao::{
         exercise::{self, ExerciseRepository},
-        serie::{self, SerieRepository},
+        serie::{self, Serie, SerieRepository},
         session::{self, SessionRepository},
     },
     dto::{
@@ -39,12 +39,14 @@ pub fn get_exercises() -> Result<Vec<ExerciseListItem>, String> {
             .fetch_in(conn)?;
 
         let prs = SerieRepository::select_by_personal_records_in_conn(conn, true, None)?;
+        let pr_by_exercise: HashMap<(String, u16), &Serie> = prs
+            .iter()
+            .map(|pr| ((pr.ex_cat.clone(), pr.ex_id), pr))
+            .collect();
 
         for exercise in exercises {
-            let pr = prs
-                .iter()
-                .find(|pr| pr.ex_cat == exercise.category && pr.ex_id == exercise.id)
-                .unwrap();
+            let key = (exercise.category.clone(), exercise.id);
+            let pr = pr_by_exercise[&key];
 
             result.push(ExerciseListItem {
                 category: exercise.category,
@@ -120,6 +122,7 @@ pub fn get_exercise_details(category: &str, id: u16) -> Result<ExerciseDetails, 
             .map(|s| (s.date, s.workout.clone()))
             .collect::<HashMap<_, _>>();
 
+        let mut last_session = None;
         for serie in series {
             let wk = SessionSerie::from(&serie);
             let ex_str = format!(
@@ -128,8 +131,9 @@ pub fn get_exercise_details(category: &str, id: u16) -> Result<ExerciseDetails, 
                 serie.session
             );
 
-            if !res.workouts.contains(&ex_str) {
+            if last_session != Some(serie.session) {
                 res.workouts.push(ex_str.clone());
+                last_session = Some(serie.session);
             }
 
             let entry = res.series.entry(ex_str).or_default();

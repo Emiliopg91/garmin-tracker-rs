@@ -2,8 +2,8 @@
 
 // From src-tauri/src/dto/app.rs:4
 export enum AppEnvironment {
-  Debug = "Debug",
-  Release = "Release",
+	Debug = "Debug",
+	Release = "Release",
 }
 
 // From src-tauri/src/dto/body_metrics.rs:6
@@ -24,8 +24,8 @@ export interface DeviceListItem {
 
 // From src-tauri/src/dao/settings.rs:95
 export enum DistanceUnit {
-  Kilometers = "Kilometers",
-  Miles = "Miles",
+	Kilometers = "Kilometers",
+	Miles = "Miles",
 }
 
 // From src-tauri/src/dto/exercises.rs:33
@@ -104,8 +104,8 @@ export interface Settings {
 
 // From src-tauri/src/dao/settings.rs:123
 export enum WeightUnit {
-  Kilograms = "Kilograms",
-  Pounds = "Pounds",
+	Kilograms = "Kilograms",
+	Pounds = "Pounds",
 }
 
 // From src-tauri/src/dto/workouts.rs:33
@@ -133,3 +133,4 @@ export interface WorkoutSession {
   vol_diff: string;
   volume: number;
 }
+

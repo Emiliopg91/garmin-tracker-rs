@@ -97,6 +97,12 @@ pub fn get_workout_details(name: &str) -> Result<WorkoutDetails, String> {
             ))
             .fetch_in(conn)?;
 
+        let mut volume_by_session: HashMap<i64, f64> = HashMap::new();
+        for serie in &series {
+            *volume_by_session.entry(serie.session).or_insert(0.0) +=
+                (serie.reps as f64) * serie.weight;
+        }
+
         let mut session_list = Vec::new();
         for session in &sessions {
             if session.date > latest.date {
@@ -105,11 +111,7 @@ pub fn get_workout_details(name: &str) -> Result<WorkoutDetails, String> {
             count += 1;
             time += session.total_elapsed_time;
 
-            let session_series = series.iter().filter(|s| s.session == session.date);
-            let mut local_volume = 0_f64;
-            for serie in session_series {
-                local_volume += (serie.reps as f64) * serie.weight;
-            }
+            let local_volume = volume_by_session.get(&session.date).copied().unwrap_or(0.0);
             volume += local_volume;
             let mut wk_sess = WorkoutSession::from(session);
             wk_sess.volume = local_volume;
