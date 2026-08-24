@@ -30,6 +30,7 @@ export function AppProvider({
     distance_unit: DistanceUnit.Kilometers,
     weight_unit: WeightUnit.Kilograms,
     auto_sync: true,
+    start_boot: false,
   });
 
   const startLoading = () => {
