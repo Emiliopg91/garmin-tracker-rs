@@ -22,7 +22,7 @@ export interface DeviceListItem {
   serial_number: string;
 }
 
-// From src-tauri/src/dao/settings.rs:76
+// From src-tauri/src/dao/settings.rs:95
 export enum DistanceUnit {
 	Kilometers = "Kilometers",
 	Miles = "Miles",
@@ -98,10 +98,11 @@ export interface SessionSeriesUpdate {
 export interface Settings {
   auto_sync: boolean;
   distance_unit: DistanceUnit;
+  start_boot: boolean;
   weight_unit: WeightUnit;
 }
 
-// From src-tauri/src/dao/settings.rs:104
+// From src-tauri/src/dao/settings.rs:123
 export enum WeightUnit {
 	Kilograms = "Kilograms",
 	Pounds = "Pounds",

@@ -65,6 +65,7 @@ pub fn run() {
     }
 
     let res = tauri::Builder::default()
+        .plugin(tauri_plugin_autostart::Builder::new().build())
         .plugin(
             tauri_plugin_log::Builder::new()
                 .level(LevelFilter::Warn)
@@ -160,7 +161,14 @@ pub fn run() {
             }
 
             debug!("Loading settings...");
-            SETTINGS_INST.set(RwLock::new(Settings::load())).unwrap();
+            SETTINGS_INST
+                .set(RwLock::new(Settings {
+                    auto_sync: crate::dao::settings::Settings::get_auto_sync(),
+                    distance_unit: crate::dao::settings::Settings::get_distance_unit(),
+                    start_boot: crate::dao::settings::Settings::get_start_on_boot(),
+                    weight_unit: crate::dao::settings::Settings::get_weight_unit(),
+                }))
+                .unwrap();
 
             debug!("Setup finished");
             Ok(())

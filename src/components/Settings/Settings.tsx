@@ -1,15 +1,21 @@
 import { AppContext } from "@/context/AppContext";
 import { BackendClient } from "@/utils/backend/client";
-import { DistanceUnit, WeightUnit } from "@/utils/backend/models";
+import {
+  AppEnvironment,
+  DistanceUnit,
+  WeightUnit,
+} from "@/utils/backend/models";
 import { useContext, useState } from "react";
 import { Form } from "react-bootstrap";
 
 export function Settings() {
-  const { settings, translate } = useContext(AppContext);
+  const { environment, settings, translate } = useContext(AppContext);
+  console.log(environment);
 
   const [weightUnit, setWeightUnit] = useState(settings.weight_unit);
   const [distanceUnit, setDistanceUnit] = useState(settings.distance_unit);
   const [autoSync, setAutoSync] = useState(settings.auto_sync);
+  const [startOnBoot, setStartOnBoot] = useState(settings.start_boot);
 
   const updateWeightUnit = (value: WeightUnit) => {
     BackendClient.updateSettingsValue("weight_unit", value).then(() => {
@@ -31,6 +37,16 @@ export function Settings() {
       value ? "true" : "false",
     ).then(() => {
       setAutoSync(value);
+      settings.auto_sync = value;
+    });
+  };
+
+  const updateStartOnBoot = (value: boolean) => {
+    BackendClient.updateSettingsValue(
+      "start_boot",
+      value ? "true" : "false",
+    ).then(() => {
+      setStartOnBoot(value);
       settings.auto_sync = value;
     });
   };
@@ -81,6 +97,19 @@ export function Settings() {
             >
               <option value="true">{translate("auto_sync_true")}</option>
               <option value="false">{translate("auto_sync_false")}</option>
+            </Form.Select>
+          </td>
+        </tr>
+        <tr>
+          <td>{translate("start_on_boot")}</td>
+          <td>
+            <Form.Select
+              value={startOnBoot ? "true" : "false"}
+              onChange={(e) => updateStartOnBoot(e.target.value === "true")}
+              disabled={environment == AppEnvironment.Debug}
+            >
+              <option value="false">{translate("start_on_boot_false")}</option>
+              <option value="true">{translate("start_on_boot_true")}</option>
             </Form.Select>
           </td>
         </tr>

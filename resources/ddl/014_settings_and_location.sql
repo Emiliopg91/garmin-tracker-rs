@@ -7,6 +7,4 @@ CREATE TABLE IF NOT EXISTS SETTINGS(
     PRIMARY KEY(name)
 );
 
-INSERT INTO SETTINGS VALUES('auto_sync', 'true');
-INSERT INTO SETTINGS VALUES('distance_unit', 'Kilometers');
-INSERT INTO SETTINGS VALUES('weight_unit', 'Kilograms');
+INSERT INTO SETTINGS VALUES ('auto_sync', 'true'), ('distance_unit', 'Kilometers'), ('start_boot', 'false'), ('weight_unit', 'Kilograms');

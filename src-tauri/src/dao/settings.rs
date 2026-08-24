@@ -4,9 +4,10 @@ use serde::{Deserialize, Serialize};
 use std::fmt;
 
 pub mod settings_keys {
-    pub const WEIGHT_UNIT: &str = "weight_unit";
-    pub const DISTANCE_UNIT: &str = "distance_unit";
     pub const AUTO_SYNC: &str = "auto_sync";
+    pub const DISTANCE_UNIT: &str = "distance_unit";
+    pub const START_ON_BOOT: &str = "start_boot";
+    pub const WEIGHT_UNIT: &str = "weight_unit";
 }
 
 #[derive(Entity)]
@@ -65,6 +66,24 @@ impl Settings {
             .or_replace()
             .item(Settings {
                 name: settings_keys::AUTO_SYNC.to_string(),
+                value: value.to_string(),
+            })
+            .execute()
+            .map(|_| ())
+    }
+
+    pub fn get_start_on_boot() -> bool {
+        SettingsRepository::select_by_id(settings_keys::START_ON_BOOT)
+            .ok()
+            .flatten()
+            .and_then(|r| r.value.parse().ok())
+            .unwrap_or(false)
+    }
+    pub fn set_start_on_boot(value: bool) -> rusqlite_orm::database::errors::Result<()> {
+        SettingsRepository::insert()
+            .or_replace()
+            .item(Settings {
+                name: settings_keys::START_ON_BOOT.to_string(),
                 value: value.to_string(),
             })
             .execute()

@@ -310,3 +310,12 @@ aligning_database:
 operation_may_last:
   en: This operation may last a few seconds
   es: Esta operacion puede demorarse unos segundos
+start_on_boot:
+  en: Startup mode
+  es: Modo de inicio
+start_on_boot_true:
+  en: On boot
+  es: Al arrancar
+start_on_boot_false:
+  en: Manually
+  es: Manualmente

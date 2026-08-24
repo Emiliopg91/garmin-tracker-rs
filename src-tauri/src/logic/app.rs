@@ -2,6 +2,7 @@ use std::sync::OnceLock;
 
 use garmin_tracker_rs_macros::traced_command;
 use tauri::{AppHandle, WebviewWindow};
+use tauri_plugin_autostart::ManagerExt;
 use tokio::sync::RwLock;
 
 use crate::{
@@ -47,7 +48,7 @@ pub async fn get_environment() -> AppEnvironment {
 
 #[traced_command]
 #[tauri::command]
-pub async fn update_settings_value(name: &str, value: &str) -> Result<(), String> {
+pub async fn update_settings_value(app: AppHandle, name: &str, value: &str) -> Result<(), String> {
     match name {
         crate::dao::settings::settings_keys::AUTO_SYNC => {
             let value = value == "true";
@@ -58,6 +59,17 @@ pub async fn update_settings_value(name: &str, value: &str) -> Result<(), String
             let value = value.try_into()?;
             crate::dao::settings::Settings::set_distance_unit(&value).map_err(|e| e.to_string())?;
             SETTINGS_INST.get().unwrap().write().await.distance_unit = value;
+        }
+        crate::dao::settings::settings_keys::START_ON_BOOT => {
+            let value = value == "true";
+            crate::dao::settings::Settings::set_start_on_boot(value).map_err(|e| e.to_string())?;
+            if value {
+                app.autolaunch().enable()
+            } else {
+                app.autolaunch().disable()
+            }
+            .map_err(|e| e.to_string())?;
+            SETTINGS_INST.get().unwrap().write().await.start_boot = value;
         }
         crate::dao::settings::settings_keys::WEIGHT_UNIT => {
             let value = value.try_into()?;
