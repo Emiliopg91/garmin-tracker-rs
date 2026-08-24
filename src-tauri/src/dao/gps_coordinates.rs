@@ -12,19 +12,17 @@ pub struct GpsCoordinates {
 
 impl GpsCoordinates {
     pub fn normalize(&self) -> Vec<(f64, f64)> {
-        let mut gps_coordinates = Vec::new();
-        let mut idx = 0;
-        while idx < self.records.len() {
-            let lat = i32::from_be_bytes(self.records[idx..idx + 4].try_into().unwrap()) as f64
-                * constants::SEMICIRCLE_TO_DEGREES;
-
-            let lon = i32::from_be_bytes(self.records[idx + 4..idx + 8].try_into().unwrap()) as f64
-                * constants::SEMICIRCLE_TO_DEGREES;
-
-            gps_coordinates.push((lat, lon));
-
-            idx += 8;
-        }
-        gps_coordinates
+        self.records
+            .as_chunks::<8>()
+            .0
+            .iter()
+            .map(|chunk| {
+                let lat = i32::from_be_bytes(chunk[0..4].try_into().unwrap()) as f64
+                    * constants::SEMICIRCLE_TO_DEGREES;
+                let lon = i32::from_be_bytes(chunk[4..8].try_into().unwrap()) as f64
+                    * constants::SEMICIRCLE_TO_DEGREES;
+                (lat, lon)
+            })
+            .collect()
     }
 }

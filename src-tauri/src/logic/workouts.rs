@@ -99,7 +99,6 @@ pub fn get_workout_details(name: &str) -> Result<WorkoutDetails, String> {
 
         let mut session_list = Vec::new();
         for session in &sessions {
-            let session = session.clone();
             if session.date > latest.date {
                 latest = session.clone();
             }
@@ -112,7 +111,7 @@ pub fn get_workout_details(name: &str) -> Result<WorkoutDetails, String> {
                 local_volume += (serie.reps as f64) * serie.weight;
             }
             volume += local_volume;
-            let mut wk_sess = WorkoutSession::from(&session);
+            let mut wk_sess = WorkoutSession::from(session);
             wk_sess.volume = local_volume;
             session_list.push(wk_sess);
         }

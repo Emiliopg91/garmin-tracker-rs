@@ -108,8 +108,8 @@ impl From<(&Session, &IndexMap<Exercise, Vec<Serie>>)> for SessionDetails {
         if let Some(hr_dao) = value.0.heart_rates.clone()
             && !hr_dao.records.is_empty()
         {
-            heart_rates = hr_dao.records.clone().into_iter().collect();
             zones_times = hr_dao.get_time_in_zones(value.0.total_elapsed_time);
+            heart_rates = hr_dao.records.into_iter().collect();
         }
 
         let mut gps_coordinates = Vec::new();

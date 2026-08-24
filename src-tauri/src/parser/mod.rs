@@ -187,7 +187,7 @@ fn get_heart_rate(
     timestamp: &DateTime<Local>,
     records: &[&FitDataRecord],
 ) -> errors::Result<Option<HeartRate>> {
-    let mut hrs = Vec::new();
+    let mut hrs = Vec::with_capacity(records.len());
 
     records.iter().for_each(|entry| {
         if let Ok(val) = get_u8("heart_rate", entry.fields()) {
@@ -209,7 +209,7 @@ fn get_gps_coordinates(
     timestamp: &DateTime<Local>,
     records: &[&FitDataRecord],
 ) -> errors::Result<Option<GpsCoordinates>> {
-    let mut coords = Vec::new();
+    let mut coords = Vec::with_capacity(records.len());
     let mut start_point = None;
 
     records.iter().for_each(|entry| {

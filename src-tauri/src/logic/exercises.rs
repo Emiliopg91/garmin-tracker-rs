@@ -96,9 +96,7 @@ pub fn get_exercise_details(category: &str, id: u16) -> Result<ExerciseDetails, 
             Some(&[OrderBy::Desc(serie::entity::columns::SESSION)]),
         )?;
 
-        let pr = series.iter().filter(|s| s.pr).collect::<Vec<_>>();
-        let pr = pr.first().unwrap();
-
+        let pr = series.iter().find(|s| s.pr).unwrap();
         res.reps = pr.reps;
         res.weight = pr.weight;
         res.rm = get_1rm_estimation(pr.weight, pr.reps as f64);

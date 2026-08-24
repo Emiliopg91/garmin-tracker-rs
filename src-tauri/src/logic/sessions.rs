@@ -38,10 +38,10 @@ use crate::{
 #[tauri::command]
 pub fn get_sessions() -> Result<Vec<SessionListItem>, String> {
     info!("Getting sessions list...");
-    let res = Database::run_in_transaction(|tx| {
+    let res = Database::run_in_connection(|conn| {
         let sessions = SessionRepository::select()
             .order_by(OrderBy::Desc(session::entity::columns::DATE))
-            .fetch_in(tx)?;
+            .fetch_in(conn)?;
 
         Ok(sessions
             .iter()

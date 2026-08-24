@@ -2,13 +2,12 @@ use std::{
     fs,
     path::PathBuf,
     sync::LazyLock,
-    thread::sleep,
     time::{Duration, SystemTime, UNIX_EPOCH},
 };
 
 use mtp_rs::MtpDevice;
 use tauri_plugin_log::log::{debug, info};
-use tokio::sync::Mutex;
+use tokio::{sync::Mutex, time::sleep};
 
 use crate::{
     dto::devices::DeviceListItem,
@@ -93,7 +92,7 @@ impl MtpClient {
                         .map_err(MtpError::ListFiles)?;
 
                     info!("Found {} files", objs.len());
-                    objs.retain(|f| f.filename.split('.').nth(0).unwrap() > date.as_str());
+                    objs.retain(|f| f.filename.split('.').next().unwrap() > date.as_str());
 
                     if objs.is_empty() {
                         info!("No pending files to import");
@@ -112,7 +111,7 @@ impl MtpClient {
                         } else {
                             info!("Downloading files...");
                             for obj in objs {
-                                sleep(Duration::from_millis(100));
+                                sleep(Duration::from_millis(100)).await;
                                 let mut data = storage
                                     .download(obj.handle, mtp_rs::ByteRange::Full)
                                     .await
