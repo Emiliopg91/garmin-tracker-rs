@@ -22,7 +22,7 @@ use crate::{
     mtp::MTP_CLIENT_INST,
     parser::load_from_file,
 };
-use chrono::{Datelike, Local, TimeZone, Timelike};
+use chrono::{Datelike, Local, TimeZone, Timelike, offset::LocalResult};
 use curl::easy::Easy;
 use garmin_tracker_rs_macros::{traced_command, translate};
 use indexmap::IndexMap;
@@ -276,7 +276,7 @@ where
     let mut success = 0_u16;
     let mut handled_exercises = HashSet::new();
 
-    let sessions = files
+    let mut sessions = files
         .par_iter()
         .filter_map(|file| {
             info!("Parsing file {}", file.as_ref().display());
@@ -297,9 +297,16 @@ where
         })
         .collect::<Vec<_>>();
 
+    sessions.sort_by_key(|s| s.date);
+
     for mut session in sessions {
+        let formatted_time = match Local.timestamp_opt(session.date, 0) {
+            LocalResult::Single(fecha) => fecha.format("%H:%M:%S %d/%m/%Y").to_string(),
+            _ => "".to_string(),
+        };
+
         let res: Result<bool, String> = {
-            info!("Importing session {}", session.workout);
+            info!("Importing session {} - {}", session.workout, formatted_time);
             let added = if SessionRepository::exists_in(tx, session.date)? {
                 let msg = format!("Session with date {} already exists", session.date);
                 warn!("{}", msg);
@@ -357,7 +364,10 @@ where
                 info!("Session imported succesfully");
 
                 show_notification(NotificationDefinition {
-                    title: session.workout.to_string(),
+                    title: format!(
+                        "{} | {} | {}",
+                        session.sport, session.workout, formatted_time
+                    ),
                     body: translate!("imported_session"),
                     kind: NotificationKind::Temporal,
                 });
@@ -366,7 +376,10 @@ where
                 error!("  {}", e);
 
                 show_notification(NotificationDefinition {
-                    title: session.workout.to_string(),
+                    title: format!(
+                        "{} | {} | {}",
+                        session.sport, session.workout, formatted_time
+                    ),
                     body: e,
                     kind: NotificationKind::Persistant,
                 });
