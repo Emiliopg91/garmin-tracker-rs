@@ -1,6 +1,6 @@
 use std::{
     fs,
-    path::PathBuf,
+    path::{Path, PathBuf},
     sync::LazyLock,
     time::{SystemTime, UNIX_EPOCH},
 };
@@ -131,7 +131,7 @@ impl MtpClient {
 
 async fn download_files(
     objs: &[ObjectInfo],
-    tmp_dir: &PathBuf,
+    tmp_dir: &Path,
     storage: &Storage,
 ) -> Result<Vec<PathBuf>> {
     let mut paths = Vec::new();

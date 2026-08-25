@@ -357,7 +357,7 @@ where
                 info!("Session imported succesfully");
 
                 show_notification(NotificationDefinition {
-                    title: format!("{}", session.workout),
+                    title: session.workout.to_string(),
                     body: translate!("imported_session"),
                     kind: NotificationKind::Temporal,
                 });
@@ -366,7 +366,7 @@ where
                 error!("  {}", e);
 
                 show_notification(NotificationDefinition {
-                    title: format!("{}", session.workout),
+                    title: session.workout.to_string(),
                     body: e,
                     kind: NotificationKind::Persistant,
                 });
