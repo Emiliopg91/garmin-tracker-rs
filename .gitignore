@@ -26,5 +26,8 @@ dist-ssr
 activity.txt
 aur
 
+src/utils/backend
+src/utils/translations.ts
+
 src-tauri-macros/target
 rusqlite_orm
