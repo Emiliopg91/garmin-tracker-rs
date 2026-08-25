@@ -5,8 +5,8 @@ use std::{
     time::{SystemTime, UNIX_EPOCH},
 };
 
-use mtp_rs::MtpDevice;
-use tauri_plugin_log::log::{debug, info};
+use mtp_rs::{MtpDevice, ObjectInfo, Storage};
+use tauri_plugin_log::log::{debug, error, info};
 use tokio::sync::Mutex;
 
 use crate::{
@@ -50,13 +50,9 @@ impl MtpClient {
 
         let devices_info = MtpDevice::list_devices().map_err(MtpError::ListDevices)?;
         if let Some(device_info) = devices_info.iter().find(|d| {
-            if let Some(serial_n) = &d.serial_number
-                && serial_n == serial
-            {
-                true
-            } else {
-                false
-            }
+            d.serial_number
+                .as_ref()
+                .is_some_and(|serial_n| serial_n == serial)
         }) {
             let device = MtpDevice::open_by_location(device_info.location_id)
                 .await
@@ -110,22 +106,8 @@ impl MtpClient {
                             ))
                         } else {
                             info!("Downloading files...");
-                            for obj in objs {
-                                let mut data = storage
-                                    .download(obj.handle, mtp_rs::ByteRange::Full)
-                                    .await
-                                    .map_err(|e| MtpError::DownloadFile(obj.filename.clone(), e))?;
-                                let path = tmp_dir.join(obj.filename);
-                                let mut bytes = Vec::with_capacity(data.bytes_received() as usize);
-                                while let Some(window) = data.next_chunk().await
-                                    && let Ok(rec_bytes) = window
-                                {
-                                    bytes.extend_from_slice(&rec_bytes);
-                                }
-                                fs::write(&path, bytes).map_err(|e| {
-                                    MtpError::WriteData(path.display().to_string(), e)
-                                })?;
-                                result.push(path);
+                            if let Ok(paths) = download_files(&objs, &tmp_dir, storage).await {
+                                result = paths;
                             }
                             let _ = device.close().await;
 
@@ -145,4 +127,38 @@ impl MtpClient {
             Err(MtpError::MissingDevice(serial.to_string()))
         }
     }
+}
+
+async fn download_files(
+    objs: &[ObjectInfo],
+    tmp_dir: &PathBuf,
+    storage: &Storage,
+) -> Result<Vec<PathBuf>> {
+    let mut paths = Vec::new();
+    for obj in objs {
+        match storage.download(obj.handle, mtp_rs::ByteRange::Full).await {
+            Ok(mut data) => {
+                let path = tmp_dir.join(&obj.filename);
+                let mut bytes = Vec::with_capacity(data.bytes_received() as usize);
+                while let Some(window) = data.next_chunk().await {
+                    match window {
+                        Ok(rec_bytes) => {
+                            bytes.extend_from_slice(&rec_bytes);
+                        }
+                        Err(e) => {
+                            error!("Error downloading file {}: {}", obj.filename, e)
+                        }
+                    }
+                }
+                fs::write(&path, bytes)
+                    .map_err(|e| MtpError::WriteData(path.display().to_string(), e))?;
+                paths.push(path);
+            }
+            Err(e) => {
+                error!("Error downloading file {}: {}", obj.filename, e)
+            }
+        }
+    }
+
+    Ok(paths)
 }

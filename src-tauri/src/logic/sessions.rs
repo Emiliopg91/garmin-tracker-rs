@@ -2,20 +2,8 @@ use std::{
     collections::{HashMap, HashSet},
     ops::Deref,
     path::Path,
+    time::Instant,
 };
-
-use chrono::{Datelike, Local, TimeZone, Timelike};
-use curl::easy::Easy;
-use garmin_tracker_rs_macros::{traced_command, translate};
-use indexmap::IndexMap;
-use rusqlite_orm::{
-    dao::{
-        Repository,
-        helpers::types::{order_by::OrderBy, value::Value, where_clause::Where},
-    },
-    database::{Database, errors::DatabaseError},
-};
-use tauri_plugin_log::log::{error, info, warn};
 
 use crate::{
     dao::{
@@ -24,7 +12,7 @@ use crate::{
         gps_coordinates::GpsCoordinatesRepository,
         heart_rate::HeartRateRepository,
         serie::{self, Serie, SerieRepository, entity},
-        session::{self, SessionRepository},
+        session::{self, Session, SessionRepository},
     },
     dto::{
         notifications::{NotificationDefinition, NotificationKind},
@@ -34,6 +22,19 @@ use crate::{
     mtp::MTP_CLIENT_INST,
     parser::load_from_file,
 };
+use chrono::{Datelike, Local, TimeZone, Timelike};
+use curl::easy::Easy;
+use garmin_tracker_rs_macros::{traced_command, translate};
+use indexmap::IndexMap;
+use rayon::prelude::*;
+use rusqlite_orm::{
+    dao::{
+        Repository,
+        helpers::types::{order_by::OrderBy, value::Value, where_clause::Where},
+    },
+    database::{Database, errors::DatabaseError},
+};
+use tauri_plugin_log::log::{error, info, warn};
 
 #[traced_command]
 #[tauri::command]
@@ -269,83 +270,86 @@ fn import_file_list<F>(
     device: &Device,
 ) -> Result<u16, DatabaseError>
 where
-    F: AsRef<Path>,
+    F: AsRef<Path> + Sync,
 {
+    let t0 = Instant::now();
     let mut success = 0_u16;
     let mut handled_exercises = HashSet::new();
 
-    let mut latest: Option<i64> = None;
-    for file in files {
-        info!("Importing file {}", file.as_ref().display());
-        let res = match load_from_file(file.as_ref()) {
-            Ok(mut session) => {
-                let added = if SessionRepository::exists_in(tx, session.date)? {
-                    let msg = format!("Session with date {} already exists", session.date);
-                    warn!("{}", msg);
-                    false
-                } else {
-                    session.device = Some(device.serial.to_string());
-                    SessionRepository::insert()
-                        .item(session.clone())
-                        .execute_in(tx)?;
+    let sessions = files
+        .par_iter()
+        .filter_map(|file| {
+            info!("Parsing file {}", file.as_ref().display());
+            match load_from_file(file.as_ref()) {
+                Ok(session) => Some(session),
+                Err(e) => {
+                    error!("Error parsing session: {}", e);
 
-                    let mut insert = ExerciseRepository::insert().or_ignore();
-                    let mut seen = HashSet::new();
-                    for serie in &session.series {
-                        let exercise = serie.exercise.clone().unwrap();
-                        if seen.insert(exercise.clone()) {
-                            insert = insert.item(exercise.clone());
-                        }
-                        handled_exercises.insert((exercise.category, exercise.id));
-                    }
-                    if !seen.is_empty() {
-                        insert.execute_in(tx)?;
-                    }
+                    show_notification(NotificationDefinition {
+                        title: format!("{}", file.as_ref().file_name().unwrap().display()),
+                        body: translate!("error_parsing_session", e),
+                        kind: NotificationKind::Persistant,
+                    });
 
-                    let mut insert = SerieRepository::insert();
-                    let mut count = 0;
-                    for serie in &session.series {
-                        insert = insert.item(serie.clone());
-                        count += 1;
-                    }
-                    if count > 0 {
-                        insert.execute_in(tx)?;
-                    }
+                    None
+                }
+            }
+        })
+        .collect::<Vec<_>>();
 
-                    if let Some(heart_rates) = session.heart_rates {
-                        HeartRateRepository::insert()
-                            .item(heart_rates.clone())
-                            .execute_in(tx)?;
+    for mut session in sessions {
+        let res: Result<bool, String> = {
+            info!("Importing session {}", session.workout);
+            let added = if SessionRepository::exists_in(tx, session.date)? {
+                let msg = format!("Session with date {} already exists", session.date);
+                warn!("{}", msg);
+                false
+            } else {
+                session.device = Some(device.serial.to_string());
+                SessionRepository::insert()
+                    .item(session.clone())
+                    .execute_in(tx)?;
+
+                let mut insert = ExerciseRepository::insert().or_ignore();
+                let mut seen = HashSet::new();
+                for serie in &session.series {
+                    let exercise = serie.exercise.clone().unwrap();
+                    if seen.insert(exercise.clone()) {
+                        insert = insert.item(exercise.clone());
                     }
-
-                    if let Some(coordinates) = session.gps_coordinates {
-                        GpsCoordinatesRepository::insert()
-                            .item(coordinates.clone())
-                            .execute_in(tx)?;
-                    }
-
-                    true
-                };
-
-                if added {
-                    success += 1;
-                    latest = if let Some(latest_v) = latest {
-                        if session.date > latest_v {
-                            Some(session.date)
-                        } else {
-                            latest
-                        }
-                    } else {
-                        Some(session.date)
-                    };
+                    handled_exercises.insert((exercise.category, exercise.id));
+                }
+                if !seen.is_empty() {
+                    insert.execute_in(tx)?;
                 }
 
-                Ok(added)
-            }
-            Err(e) => {
-                error!("Error parsing session: {}", e);
-                Err(translate!("error_parsing_session", e))
-            }
+                let mut insert = SerieRepository::insert();
+                let mut count = 0;
+                for serie in &session.series {
+                    insert = insert.item(serie.clone());
+                    count += 1;
+                }
+                if count > 0 {
+                    insert.execute_in(tx)?;
+                }
+
+                if let Some(heart_rates) = session.heart_rates {
+                    HeartRateRepository::insert()
+                        .item(heart_rates.clone())
+                        .execute_in(tx)?;
+                }
+
+                if let Some(coordinates) = session.gps_coordinates {
+                    GpsCoordinatesRepository::insert()
+                        .item(coordinates.clone())
+                        .execute_in(tx)?;
+                }
+                success += 1;
+
+                true
+            };
+
+            Ok(added)
         };
 
         match res {
@@ -353,7 +357,7 @@ where
                 info!("Session imported succesfully");
 
                 show_notification(NotificationDefinition {
-                    title: format!("{}", file.as_ref().file_name().unwrap().display()),
+                    title: format!("{}", session.workout),
                     body: translate!("imported_session"),
                     kind: NotificationKind::Temporal,
                 });
@@ -362,7 +366,7 @@ where
                 error!("  {}", e);
 
                 show_notification(NotificationDefinition {
-                    title: format!("{}", file.as_ref().file_name().unwrap().display()),
+                    title: format!("{}", session.workout),
                     body: e,
                     kind: NotificationKind::Persistant,
                 });
@@ -374,6 +378,12 @@ where
     if success > 0 {
         update_prs(tx, handled_exercises)?;
     }
+
+    info!(
+        "Imported {} sessions in {:.3}s",
+        success,
+        t0.elapsed().as_secs_f64()
+    );
 
     Ok(success)
 }
