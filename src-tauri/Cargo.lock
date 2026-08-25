@@ -3494,9 +3494,9 @@ dependencies = [
 
 [[package]]
 name = "rusqlite_orm"
-version = "0.4.7"
+version = "0.4.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f2010e39707917b08e7609b3f0a2788dc495d7c9a5303bbc4615cf9ee6ad1413"
+checksum = "104fef0e6cff383556c468c3c11a2ce15cec45dc2f49792e3377b060bb3ff0ac"
 dependencies = [
  "log",
  "r2d2",
