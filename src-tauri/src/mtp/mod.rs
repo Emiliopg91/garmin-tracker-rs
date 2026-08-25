@@ -1,13 +1,12 @@
 use std::{
-    fs,
-    path::{Path, PathBuf},
+    path::PathBuf,
     sync::LazyLock,
-    time::{SystemTime, UNIX_EPOCH},
+    time::{Instant, SystemTime, UNIX_EPOCH},
 };
 
-use mtp_rs::{MtpDevice, ObjectInfo, Storage};
+use mtp_rs::MtpDevice;
 use tauri_plugin_log::log::{debug, error, info};
-use tokio::sync::Mutex;
+use tokio::{fs, sync::Mutex};
 
 use crate::{
     dto::devices::DeviceListItem,
@@ -99,19 +98,41 @@ impl MtpClient {
                         let tmp_dir =
                             PathBuf::from(format!("/tmp/garmin-tracker-rs-{}", now.as_millis()));
 
-                        if let Err(e) = fs::create_dir_all(&tmp_dir) {
+                        if let Err(e) = fs::create_dir_all(&tmp_dir).await {
                             Err(MtpError::ErrorCreatingDownloadFolder(
                                 tmp_dir.display().to_string(),
                                 e,
                             ))
                         } else {
                             info!("Downloading files...");
-                            if let Ok(paths) = download_files(&objs, &tmp_dir, storage).await {
-                                result = paths;
+                            let t0 = Instant::now();
+                            let mut size = 0_f64;
+                            let mut counter = 0_i64;
+                            for obj in objs {
+                                match storage.download_to_vec(obj.handle).await {
+                                    Ok(bytes) => {
+                                        let path = tmp_dir.join(&obj.filename);
+                                        fs::write(&path, &bytes).await.map_err(|e| {
+                                            MtpError::WriteData(path.display().to_string(), e)
+                                        })?;
+                                        size += bytes.len() as f64;
+                                        counter += 1;
+                                        result.push(path);
+                                    }
+                                    Err(e) => {
+                                        error!("Error downloading file {}: {}", obj.filename, e)
+                                    }
+                                }
                             }
                             let _ = device.close().await;
 
-                            info!("Files downloaded");
+                            let elapsed_secs = t0.elapsed().as_secs_f64();
+                            info!(
+                                "{} files downloaded in {:.3}s ({:.2} MB/s)",
+                                counter,
+                                elapsed_secs,
+                                (size / (1024 * 1024) as f64) / elapsed_secs
+                            );
                             Ok(result)
                         }
                     }
@@ -127,38 +148,4 @@ impl MtpClient {
             Err(MtpError::MissingDevice(serial.to_string()))
         }
     }
-}
-
-async fn download_files(
-    objs: &[ObjectInfo],
-    tmp_dir: &Path,
-    storage: &Storage,
-) -> Result<Vec<PathBuf>> {
-    let mut paths = Vec::new();
-    for obj in objs {
-        match storage.download(obj.handle, mtp_rs::ByteRange::Full).await {
-            Ok(mut data) => {
-                let path = tmp_dir.join(&obj.filename);
-                let mut bytes = Vec::with_capacity(data.bytes_received() as usize);
-                while let Some(window) = data.next_chunk().await {
-                    match window {
-                        Ok(rec_bytes) => {
-                            bytes.extend_from_slice(&rec_bytes);
-                        }
-                        Err(e) => {
-                            error!("Error downloading file {}: {}", obj.filename, e)
-                        }
-                    }
-                }
-                fs::write(&path, bytes)
-                    .map_err(|e| MtpError::WriteData(path.display().to_string(), e))?;
-                paths.push(path);
-            }
-            Err(e) => {
-                error!("Error downloading file {}: {}", obj.filename, e)
-            }
-        }
-    }
-
-    Ok(paths)
 }
