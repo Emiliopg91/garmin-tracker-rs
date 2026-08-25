@@ -7,7 +7,7 @@ node:
   '@tauri-apps/plugin-opener': 2.5.4
   '@types/leaflet': 1.9.22
   '@types/react': 19.2.18
-  '@types/react-dom': 19.2.4
+  '@types/react-dom': 19.2.5
   '@vitejs/plugin-react': 4.7.0
   bootstrap: 5.3.8
   eslint: 9.39.5
@@ -26,12 +26,14 @@ node:
   vite-plugin-checker: 0.14.5
 rust:
   chrono: 0.4.45
+  curl: 0.4.50
   fitparser: 0.11.0
   garmin-tracker-rs-macros: 0.1.0
   indexmap: 2.14.0
   libc: 0.2.189
   mtp-rs: 0.30.0
   nusb: 0.2.7
+  rayon: 1.12.0
   rusqlite_orm: 0.4.7
   rusqlite_orm_macros: 0.4.5
   serde: 1.0.229
@@ -51,5 +53,4 @@ rust:
   thiserror: 2.0.20
   tokio: 1.53.1
   tokio-stream: 0.1.19
-  ureq: 2.12.1
   walkdir: 2.5.0
