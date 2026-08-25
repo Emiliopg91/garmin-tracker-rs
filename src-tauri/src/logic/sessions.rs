@@ -12,7 +12,7 @@ use crate::{
         gps_coordinates::GpsCoordinatesRepository,
         heart_rate::HeartRateRepository,
         serie::{self, Serie, SerieRepository, entity},
-        session::{self, Session, SessionRepository},
+        session::{self, SessionRepository},
     },
     dto::{
         notifications::{NotificationDefinition, NotificationKind},

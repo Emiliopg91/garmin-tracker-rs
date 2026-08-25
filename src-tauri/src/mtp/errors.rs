@@ -11,8 +11,6 @@ pub enum MtpError {
     Storage(#[source] mtp_rs::Error),
     #[error("{}", translate!("error_mtp_list_files", .0))]
     ListFiles(#[source] mtp_rs::Error),
-    #[error("{}", translate!("error_mtp_download_file", .0, .1))]
-    DownloadFile(String, #[source] mtp_rs::Error),
     #[error("{}", translate!("error_mtp_write_data", .0, .1))]
     WriteData(String, #[source] std::io::Error),
     #[error("{}", translate!("error_mtp_missing_device", .0))]
