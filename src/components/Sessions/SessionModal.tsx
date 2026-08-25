@@ -4,7 +4,15 @@ import { TimeUtils } from "@/utils/TimeUtils";
 import { SessionDetails, SessionSeriesUpdate } from "@/utils/backend/models";
 import L from "leaflet";
 import { useContext, useEffect, useState } from "react";
-import { Button, Modal } from "react-bootstrap";
+import {
+  Button,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+  TextField,
+} from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 import { MapContainer, Marker, Polyline, TileLayer } from "react-leaflet";
 import {
   Area,
@@ -202,376 +210,364 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
   };
 
   return (
-    <div
-      className="modal show"
-      style={{ display: "block", position: "initial" }}
-    >
-      <Modal show={true} onHide={onClose} data-bs-theme="dark">
-        <Modal.Header closeButton>
-          <Modal.Title>
-            {localSession.sport}
-            <>
-              {localSession.name.length > 0 && (
-                <span>
-                  :{" "}
-                  <span style={{ marginLeft: "10px" }}>
-                    {localSession.name}
-                  </span>
-                </span>
-              )}
-            </>
-          </Modal.Title>
-        </Modal.Header>
-
-        <Modal.Body>
-          {localSession.gps_coordinates.length > 0 && (
-            <>
-              <MapContainer
-                bounds={localSession.gps_coordinates}
-                boundsOptions={{ padding: [20, 20] }}
-                attributionControl={false}
-                style={{ height: "200px", width: "100%" }}
-              >
-                <TileLayer
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  attribution={""}
-                />
-
-                <Polyline
-                  positions={localSession.gps_coordinates}
-                  color="blue"
-                  weight={4}
-                />
-
-                <Marker
-                  position={localSession.gps_coordinates[0]}
-                  icon={startIcon}
-                ></Marker>
-
-                <Marker
-                  position={
-                    localSession.gps_coordinates[
-                      localSession.gps_coordinates.length - 1
-                    ]
-                  }
-                  icon={endIcon}
-                ></Marker>
-              </MapContainer>
-              <hr />
-            </>
+    <Dialog open={true} onClose={onClose} fullWidth maxWidth="sm">
+      <DialogTitle>
+        {localSession.sport}
+        <>
+          {localSession.name.length > 0 && (
+            <span>
+              : <span style={{ marginLeft: "10px" }}>{localSession.name}</span>
+            </span>
           )}
-          <table id="session-details-table">
-            <colgroup>
-              <col style={{ width: "200px" }} />
-              <col style={{ width: "150px" }} />
-              <col />
-            </colgroup>
-            <tbody>
-              <tr>
-                <td>{translate("date")}:</td>
-                <td>{TimeUtils.formatTimeDate(localSession.timestamp)}</td>
-              </tr>
-              <tr>
-                <td>{translate("total_time")}:</td>
-                <td>
-                  {TimeUtils.formatDuration(localSession.total_elapsed_time)}
-                </td>
-              </tr>
-              {localSession.active_time > 0 && (
-                <tr>
-                  <td>{translate("active_time")}:</td>
-                  <td>{TimeUtils.formatDuration(localSession.active_time)}</td>
-                </tr>
-              )}
-              <tr>
-                <td>{translate("total_calories")}:</td>
-                <td>{localSession.total_calories} Kcal</td>
-              </tr>
-              <tr>
-                <td>{translate("active_calories")}:</td>
-                <td>
-                  {localSession.total_calories -
-                    localSession.metabolic_calories}{" "}
-                  Kcal
-                </td>
-              </tr>
-              <tr>
-                <td>{translate("workout_load")}:</td>
-                <td>{localSession.training_load}</td>
-              </tr>
-              {distance > 0 && (
-                <>
-                  <tr>
-                    <td>{translate("distance")}:</td>
-                    <td>
-                      {UnitUtils.fromKm(
-                        distance,
-                        settings.distance_unit,
-                      ).toFixed(2)}{" "}
-                      {UnitUtils.getUnit(settings.distance_unit)}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>{translate("speed")}:</td>
-                    <td>
-                      {UnitUtils.fromKm(
-                        distance / (localSession.total_elapsed_time / 3600),
-                        settings.distance_unit,
-                      ).toFixed(2)}{" "}
-                      {UnitUtils.getUnit(settings.distance_unit)}/h
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>{translate("pace")}:</td>
-                    <td>
-                      {UnitUtils.fromKm(
-                        localSession.total_elapsed_time / 60 / distance,
-                        settings.distance_unit,
-                      ).toFixed(2)}{" "}
-                      min/{UnitUtils.getUnit(settings.distance_unit)}
-                    </td>
-                  </tr>
-                </>
-              )}
-              {volume > 0 && (
-                <tr>
-                  <td>{translate("volume")}:</td>
-                  <td>
-                    {UnitUtils.fromKg(volume, settings.weight_unit).toFixed(1)}{" "}
-                    {UnitUtils.getUnit(settings.weight_unit)}
-                  </td>
-                </tr>
-              )}
-              {localSession.device && (
-                <tr>
-                  <td>{translate("imported_from")}:</td>
-                  <td>{localSession.device}</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-          {hrData.length > 0 && (
-            <>
-              <hr />
-              <div style={{ width: "100%", height: 200 }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart
-                    data={hrData}
-                    margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
-                  >
-                    <defs>
-                      <linearGradient id="hrColor" x1="0" y1="0" x2="1" y2="0">
-                        {hrData.flatMap((point, i) => {
-                          const start = (i / hrData.length) * 100;
-                          const end = ((i + 1) / hrData.length) * 100;
-                          return [
-                            <stop
-                              key={`${i}-start`}
-                              offset={`${start}%`}
-                              stopColor={point.color}
-                            />,
-                            <stop
-                              key={`${i}-end`}
-                              offset={`${end}%`}
-                              stopColor={point.color}
-                            />,
-                          ];
-                        })}
-                      </linearGradient>
-                    </defs>
-                    <Legend
-                      position={"top"}
-                      content={() => (
-                        <div
-                          style={{ textAlign: "center", fontWeight: "bold" }}
-                        >
-                          {translate("heart_rate")}
-                        </div>
-                      )}
-                    />
-                    <CartesianGrid stroke="#80808000" strokeDasharray="5 5" />
-                    <XAxis dataKey="idx" tick={false} />
-                    <YAxis
-                      width="auto"
-                      domain={[(4 * minHr) / 5, maxHr]}
-                      ticks={[minHr, avgHr, maxHr]}
-                    />
-                    <ReferenceLine
-                      y={avgHr}
-                      stroke="white"
-                      strokeDasharray="3 3"
-                    />
-                    <ReferenceLine
-                      y={minHr}
-                      stroke="white"
-                      strokeDasharray="3 3"
-                    />
-                    <ReferenceLine
-                      y={maxHr}
-                      stroke="white"
-                      strokeDasharray="3 3"
-                    />
-                    <Area
-                      dataKey="hr"
-                      type="monotone"
-                      isAnimationActive={false}
-                      stroke="url(#hrColor)"
-                      fill="url(#hrColor)"
-                      fillOpacity={1}
-                      activeDot={false}
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-              <table style={{ position: "relative", top: "-20px" }}>
-                <colgroup>
-                  <col style={{ width: "250px" }} />
-                  <col style={{ width: "250px" }} />
-                </colgroup>
-                <tr>
-                  <td>
-                    <table>
-                      <tr>
-                        <td>
-                          {translate("hr_zone_1")}:{" "}
-                          {TimeUtils.formatDuration(
-                            localSession.zones_times[0],
-                          )}
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          {translate("hr_zone_2")}:{" "}
-                          {TimeUtils.formatDuration(
-                            localSession.zones_times[1],
-                          )}
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          {translate("hr_zone_3")}:{" "}
-                          {TimeUtils.formatDuration(
-                            localSession.zones_times[2],
-                          )}
-                        </td>
-                      </tr>
-                    </table>
-                  </td>
-                  <td>
-                    <table>
-                      <tr>
-                        <td>
-                          {translate("hr_zone_4")}:{" "}
-                          {TimeUtils.formatDuration(
-                            localSession.zones_times[3],
-                          )}
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          {translate("hr_zone_5")}:{" "}
-                          {TimeUtils.formatDuration(
-                            localSession.zones_times[4],
-                          )}
-                        </td>
-                      </tr>
-                    </table>
-                  </td>
-                </tr>
-              </table>
-              <br />
-            </>
-          )}
-          {localSession.series &&
-            Object.keys(localSession.series).length > 0 && (
-              <div style={{ position: "relative", top: "-20px" }}>
-                <table>
-                  <colgroup>
-                    <col style={{ width: "350px" }} />
-                    <col style={{ width: "150px" }} />
-                  </colgroup>
+        </>
+        <IconButton
+          onClick={onClose}
+          sx={{ position: "absolute", right: 8, top: 8 }}
+        >
+          <CloseIcon />
+        </IconButton>
+      </DialogTitle>
 
-                  <thead>
-                    <tr style={{ borderBottom: "1px solid #e4e4e430" }}>
-                      <th>{translate("exercise")}:</th>
-                      <th>{translate("series")}:</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {localSession.exercises.map((exercise) =>
-                      localSession.series[exercise].map((serie, idx) => (
-                        <tr key={`${exercise}-${idx}`}>
-                          {idx === 0 && (
-                            <td
-                              style={{
-                                borderBottom:
-                                  idx === 0 ? "1px solid #e4e4e430" : "",
-                              }}
-                              rowSpan={localSession.series[exercise].length}
-                            >
-                              {exercise}
-                            </td>
-                          )}
+      <DialogContent dividers>
+        {localSession.gps_coordinates.length > 0 && (
+          <>
+            <MapContainer
+              bounds={localSession.gps_coordinates}
+              boundsOptions={{ padding: [20, 20] }}
+              attributionControl={false}
+              style={{ height: "200px", width: "100%" }}
+            >
+              <TileLayer
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                attribution={""}
+              />
 
-                          <td
-                            style={{
-                              borderBottom:
-                                idx === localSession.series[exercise].length - 1
-                                  ? "1px solid #e4e4e430"
-                                  : "",
-                              paddingBottom:
-                                idx === localSession.series[exercise].length - 1
-                                  ? "5px"
-                                  : "",
-                              paddingTop: idx === 0 ? "5px" : "",
-                            }}
-                          >
-                            <input
-                              type="number"
-                              value={serie.reps}
-                              className="no-spinner"
-                              min={0}
-                              style={{ width: "2em", textAlign: "center" }}
-                              onChange={(e) => {
-                                updateSerieReps(exercise, idx, e.target.value);
-                              }}
-                            />{" "}
-                            x{" "}
-                            <input
-                              type="number"
-                              value={serie.weight?.toString()}
-                              className="no-spinner"
-                              min={0}
-                              style={{ width: "3.5em", textAlign: "center" }}
-                              onChange={(e) => {
-                                updateSerieWeight(
-                                  exercise,
-                                  idx,
-                                  e.target.value,
-                                );
-                              }}
-                            />
-                            {" " + UnitUtils.getUnit(settings.weight_unit)}
-                          </td>
-                        </tr>
-                      )),
-                    )}
-                  </tbody>
-                </table>
-                <div style={{ padding: "5px" }}>
-                  <Button
-                    id="import-button"
-                    disabled={!changed}
-                    style={{ width: "100%" }}
-                    onClick={saveChanges}
-                  >
-                    {translate("update_sets")}
-                  </Button>
-                </div>
-              </div>
+              <Polyline
+                positions={localSession.gps_coordinates}
+                color="blue"
+                weight={4}
+              />
+
+              <Marker
+                position={localSession.gps_coordinates[0]}
+                icon={startIcon}
+              ></Marker>
+
+              <Marker
+                position={
+                  localSession.gps_coordinates[
+                    localSession.gps_coordinates.length - 1
+                  ]
+                }
+                icon={endIcon}
+              ></Marker>
+            </MapContainer>
+            <hr />
+          </>
+        )}
+        <table id="session-details-table">
+          <colgroup>
+            <col style={{ width: "200px" }} />
+            <col style={{ width: "150px" }} />
+            <col />
+          </colgroup>
+          <tbody>
+            <tr>
+              <td>{translate("date")}:</td>
+              <td>{TimeUtils.formatTimeDate(localSession.timestamp)}</td>
+            </tr>
+            <tr>
+              <td>{translate("total_time")}:</td>
+              <td>
+                {TimeUtils.formatDuration(localSession.total_elapsed_time)}
+              </td>
+            </tr>
+            {localSession.active_time > 0 && (
+              <tr>
+                <td>{translate("active_time")}:</td>
+                <td>{TimeUtils.formatDuration(localSession.active_time)}</td>
+              </tr>
             )}
-        </Modal.Body>
-      </Modal>
-    </div>
+            <tr>
+              <td>{translate("total_calories")}:</td>
+              <td>{localSession.total_calories} Kcal</td>
+            </tr>
+            <tr>
+              <td>{translate("active_calories")}:</td>
+              <td>
+                {localSession.total_calories - localSession.metabolic_calories}{" "}
+                Kcal
+              </td>
+            </tr>
+            <tr>
+              <td>{translate("workout_load")}:</td>
+              <td>{localSession.training_load}</td>
+            </tr>
+            {distance > 0 && (
+              <>
+                <tr>
+                  <td>{translate("distance")}:</td>
+                  <td>
+                    {UnitUtils.fromKm(distance, settings.distance_unit).toFixed(
+                      2,
+                    )}{" "}
+                    {UnitUtils.getUnit(settings.distance_unit)}
+                  </td>
+                </tr>
+                <tr>
+                  <td>{translate("speed")}:</td>
+                  <td>
+                    {UnitUtils.fromKm(
+                      distance / (localSession.total_elapsed_time / 3600),
+                      settings.distance_unit,
+                    ).toFixed(2)}{" "}
+                    {UnitUtils.getUnit(settings.distance_unit)}/h
+                  </td>
+                </tr>
+                <tr>
+                  <td>{translate("pace")}:</td>
+                  <td>
+                    {UnitUtils.fromKm(
+                      localSession.total_elapsed_time / 60 / distance,
+                      settings.distance_unit,
+                    ).toFixed(2)}{" "}
+                    min/{UnitUtils.getUnit(settings.distance_unit)}
+                  </td>
+                </tr>
+              </>
+            )}
+            {volume > 0 && (
+              <tr>
+                <td>{translate("volume")}:</td>
+                <td>
+                  {UnitUtils.fromKg(volume, settings.weight_unit).toFixed(1)}{" "}
+                  {UnitUtils.getUnit(settings.weight_unit)}
+                </td>
+              </tr>
+            )}
+            {localSession.device && (
+              <tr>
+                <td>{translate("imported_from")}:</td>
+                <td>{localSession.device}</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+        {hrData.length > 0 && (
+          <>
+            <hr />
+            <div style={{ width: "100%", height: 200 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart
+                  data={hrData}
+                  margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
+                >
+                  <defs>
+                    <linearGradient id="hrColor" x1="0" y1="0" x2="1" y2="0">
+                      {hrData.flatMap((point, i) => {
+                        const start = (i / hrData.length) * 100;
+                        const end = ((i + 1) / hrData.length) * 100;
+                        return [
+                          <stop
+                            key={`${i}-start`}
+                            offset={`${start}%`}
+                            stopColor={point.color}
+                          />,
+                          <stop
+                            key={`${i}-end`}
+                            offset={`${end}%`}
+                            stopColor={point.color}
+                          />,
+                        ];
+                      })}
+                    </linearGradient>
+                  </defs>
+                  <Legend
+                    position={"top"}
+                    content={() => (
+                      <div style={{ textAlign: "center", fontWeight: "bold" }}>
+                        {translate("heart_rate")}
+                      </div>
+                    )}
+                  />
+                  <CartesianGrid stroke="#80808000" strokeDasharray="5 5" />
+                  <XAxis dataKey="idx" tick={false} />
+                  <YAxis
+                    width="auto"
+                    domain={[(4 * minHr) / 5, maxHr]}
+                    ticks={[minHr, avgHr, maxHr]}
+                  />
+                  <ReferenceLine
+                    y={avgHr}
+                    stroke="white"
+                    strokeDasharray="3 3"
+                  />
+                  <ReferenceLine
+                    y={minHr}
+                    stroke="white"
+                    strokeDasharray="3 3"
+                  />
+                  <ReferenceLine
+                    y={maxHr}
+                    stroke="white"
+                    strokeDasharray="3 3"
+                  />
+                  <Area
+                    dataKey="hr"
+                    type="monotone"
+                    isAnimationActive={false}
+                    stroke="url(#hrColor)"
+                    fill="url(#hrColor)"
+                    fillOpacity={1}
+                    activeDot={false}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+            <table style={{ position: "relative", top: "-20px" }}>
+              <colgroup>
+                <col style={{ width: "250px" }} />
+                <col style={{ width: "250px" }} />
+              </colgroup>
+              <tr>
+                <td>
+                  <table>
+                    <tr>
+                      <td>
+                        {translate("hr_zone_1")}:{" "}
+                        {TimeUtils.formatDuration(localSession.zones_times[0])}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        {translate("hr_zone_2")}:{" "}
+                        {TimeUtils.formatDuration(localSession.zones_times[1])}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        {translate("hr_zone_3")}:{" "}
+                        {TimeUtils.formatDuration(localSession.zones_times[2])}
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+                <td>
+                  <table>
+                    <tr>
+                      <td>
+                        {translate("hr_zone_4")}:{" "}
+                        {TimeUtils.formatDuration(localSession.zones_times[3])}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        {translate("hr_zone_5")}:{" "}
+                        {TimeUtils.formatDuration(localSession.zones_times[4])}
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+            <br />
+          </>
+        )}
+        {localSession.series && Object.keys(localSession.series).length > 0 && (
+          <div style={{ position: "relative", top: "-20px" }}>
+            <table>
+              <colgroup>
+                <col style={{ width: "350px" }} />
+                <col style={{ width: "150px" }} />
+              </colgroup>
+
+              <thead>
+                <tr style={{ borderBottom: "1px solid #e4e4e430" }}>
+                  <th>{translate("exercise")}:</th>
+                  <th>{translate("series")}:</th>
+                </tr>
+              </thead>
+              <tbody>
+                {localSession.exercises.map((exercise) =>
+                  localSession.series[exercise].map((serie, idx) => (
+                    <tr key={`${exercise}-${idx}`}>
+                      {idx === 0 && (
+                        <td
+                          style={{
+                            borderBottom:
+                              idx === 0 ? "1px solid #e4e4e430" : "",
+                          }}
+                          rowSpan={localSession.series[exercise].length}
+                        >
+                          {exercise}
+                        </td>
+                      )}
+
+                      <td
+                        style={{
+                          borderBottom:
+                            idx === localSession.series[exercise].length - 1
+                              ? "1px solid #e4e4e430"
+                              : "",
+                          paddingBottom:
+                            idx === localSession.series[exercise].length - 1
+                              ? "5px"
+                              : "",
+                          paddingTop: idx === 0 ? "5px" : "",
+                        }}
+                      >
+                        <TextField
+                          variant="standard"
+                          type="number"
+                          value={serie.reps}
+                          slotProps={{
+                            htmlInput: {
+                              className: "no-spinner",
+                              min: 0,
+                              style: { width: "2em", textAlign: "center" },
+                            },
+                          }}
+                          onChange={(e) => {
+                            updateSerieReps(exercise, idx, e.target.value);
+                          }}
+                        />{" "}
+                        x{" "}
+                        <TextField
+                          variant="standard"
+                          type="number"
+                          value={serie.weight?.toString()}
+                          slotProps={{
+                            htmlInput: {
+                              className: "no-spinner",
+                              min: 0,
+                              style: { width: "3.5em", textAlign: "center" },
+                            },
+                          }}
+                          onChange={(e) => {
+                            updateSerieWeight(exercise, idx, e.target.value);
+                          }}
+                        />
+                        {" " + UnitUtils.getUnit(settings.weight_unit)}
+                      </td>
+                    </tr>
+                  )),
+                )}
+              </tbody>
+            </table>
+            <div style={{ padding: "5px" }}>
+              <Button
+                id="import-button"
+                variant="contained"
+                disabled={!changed}
+                style={{ width: "100%" }}
+                onClick={saveChanges}
+              >
+                {translate("update_sets")}
+              </Button>
+            </div>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }

@@ -3,7 +3,8 @@ import { WorkoutDetails } from "@/utils/backend/models";
 import { TimeUtils } from "@/utils/TimeUtils";
 import { UnitUtils } from "@/utils/UnitUtils";
 import { useContext, useEffect, useState } from "react";
-import { Modal } from "react-bootstrap";
+import { Dialog, DialogContent, DialogTitle, IconButton } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 import {
   CartesianGrid,
   Legend,
@@ -56,155 +57,151 @@ export function WorkoutModal({ workout, onClose }: Props) {
   }, []);
 
   return (
-    <div
-      className="modal show"
-      style={{ display: "block", position: "initial" }}
-    >
-      <Modal show={true} onHide={onClose} data-bs-theme="dark">
-        <Modal.Header closeButton>
-          <Modal.Title>
-            {workout.name.length > 0 && <span>{workout.name}</span>}
-            {workout.name.length == 0 && <span>{translate("other")}</span>}
-          </Modal.Title>
-        </Modal.Header>
+    <Dialog open={true} onClose={onClose} fullWidth maxWidth="md">
+      <DialogTitle>
+        {workout.name.length > 0 && <span>{workout.name}</span>}
+        {workout.name.length == 0 && <span>{translate("other")}</span>}
+        <IconButton
+          onClick={onClose}
+          sx={{ position: "absolute", right: 8, top: 8 }}
+        >
+          <CloseIcon />
+        </IconButton>
+      </DialogTitle>
 
-        <Modal.Body>
-          <table id="workout-details-table">
-            <colgroup>
-              <col style={{ width: "200px" }} />
-              <col style={{ width: "150px" }} />
-              <col />
-            </colgroup>
-            <tbody>
+      <DialogContent dividers>
+        <table id="workout-details-table">
+          <colgroup>
+            <col style={{ width: "200px" }} />
+            <col style={{ width: "150px" }} />
+            <col />
+          </colgroup>
+          <tbody>
+            <tr>
+              <td>{translate("sessions")}:</td>
+              <td>{workout.session_count}</td>
+            </tr>
+            <tr>
+              <td>{translate("latest_session")}</td>
+              <td>{TimeUtils.formatTimeDate(workout.latest_session)}</td>
+            </tr>
+            <tr>
+              <td>{translate("average_time")}</td>
+              <td>{TimeUtils.formatDuration(workout.avg_time)}</td>
+            </tr>
+            {workout.name.length > 0 && (
               <tr>
-                <td>{translate("sessions")}:</td>
-                <td>{workout.session_count}</td>
+                <td>{translate("average_volume")}:</td>
+                <td>
+                  {UnitUtils.fromKg(
+                    workout.avg_volume,
+                    settings.weight_unit,
+                  ).toFixed(1)}{" "}
+                  {UnitUtils.getUnit(settings.weight_unit)}
+                </td>
               </tr>
-              <tr>
-                <td>{translate("latest_session")}</td>
-                <td>{TimeUtils.formatTimeDate(workout.latest_session)}</td>
-              </tr>
-              <tr>
-                <td>{translate("average_time")}</td>
-                <td>{TimeUtils.formatDuration(workout.avg_time)}</td>
-              </tr>
-              {workout.name.length > 0 && (
-                <tr>
-                  <td>{translate("average_volume")}:</td>
-                  <td>
-                    {UnitUtils.fromKg(
-                      workout.avg_volume,
-                      settings.weight_unit,
-                    ).toFixed(1)}{" "}
-                    {UnitUtils.getUnit(settings.weight_unit)}
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-          {workout.sessions.length > 0 && (
-            <>
-              <hr />
-              {workout.avg_volume > 0 && (
-                <>
-                  <div style={{ width: "100%", height: 200 }}>
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart
-                        data={chartData}
-                        margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
-                      >
-                        <CartesianGrid
-                          stroke="#80808000"
-                          strokeDasharray="5 5"
-                        />
-                        <XAxis
-                          dataKey="date"
-                          stroke="#fff"
-                          type="number"
-                          domain={[minDate, maxDate]}
-                          tick={false}
-                          height={0}
-                        />
-                        <YAxis
-                          stroke="#fff"
-                          width={0}
-                          domain={[minVol * 0.9, maxVol * 1.1]}
-                          tick={false}
-                        />{" "}
-                        {/* ← número, no "auto" */}
-                        <Line
-                          name={translate("volume")}
-                          type="monotone"
-                          dataKey="volume"
-                          stroke="#0f0"
-                          dot={{ fill: "#0f0" }}
-                          activeDot={{ stroke: "#00ff0000" }}
-                          isAnimationActive={false}
-                        />
-                        <ReferenceLine
-                          y={(minVol + maxVol) / 2}
-                          stroke="#808080"
-                          strokeDasharray="10 5"
-                        />
-                        <Legend />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </div>
-                  <br />
-                  <hr />
-                </>
-              )}
-              <h5 style={{ textAlign: "center" }}>{translate("sessions")}</h5>
-              <table>
-                <colgroup>
-                  <col
-                    style={{
-                      width: workout.avg_volume > 0 ? "230px" : "370px",
-                    }}
-                  />
-                  <col
-                    style={{
-                      width: workout.avg_volume > 0 ? "120px" : "260px",
-                    }}
-                  />
-                  {workout.avg_volume > 0 && <col style={{ width: "280px" }} />}
-                </colgroup>
-                <thead>
-                  <tr>
-                    <th>{translate("date")}</th>
-                    <th>{translate("time")}</th>
-                    {workout.avg_volume > 0 && <th>{translate("volume")}</th>}
-                  </tr>
-                </thead>
-                <tbody>
-                  {workout.sessions.map((session, idx) => (
-                    <tr
-                      key={idx}
-                      style={{
-                        borderBottom: "1px solid #e4e4e430",
-                      }}
+            )}
+          </tbody>
+        </table>
+        {workout.sessions.length > 0 && (
+          <>
+            <hr />
+            {workout.avg_volume > 0 && (
+              <>
+                <div style={{ width: "100%", height: 200 }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart
+                      data={chartData}
+                      margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
                     >
-                      <td>{TimeUtils.formatTimeDate(session.date)}</td>
-                      <td>{TimeUtils.formatDuration(session.time)}</td>
-                      {workout.avg_volume > 0 && (
-                        <td>
-                          {UnitUtils.fromKg(
-                            session.volume,
-                            settings.weight_unit,
-                          ).toFixed(1)}{" "}
-                          {UnitUtils.getUnit(settings.weight_unit)}{" "}
-                          {session.vol_diff != "-" &&
-                            "(" + session.vol_diff + ")"}
-                        </td>
-                      )}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </>
-          )}
-        </Modal.Body>
-      </Modal>
-    </div>
+                      <CartesianGrid stroke="#80808000" strokeDasharray="5 5" />
+                      <XAxis
+                        dataKey="date"
+                        stroke="#fff"
+                        type="number"
+                        domain={[minDate, maxDate]}
+                        tick={false}
+                        height={0}
+                      />
+                      <YAxis
+                        stroke="#fff"
+                        width={0}
+                        domain={[minVol * 0.9, maxVol * 1.1]}
+                        tick={false}
+                      />{" "}
+                      {/* ← número, no "auto" */}
+                      <Line
+                        name={translate("volume")}
+                        type="monotone"
+                        dataKey="volume"
+                        stroke="#0f0"
+                        dot={{ fill: "#0f0" }}
+                        activeDot={{ stroke: "#00ff0000" }}
+                        isAnimationActive={false}
+                      />
+                      <ReferenceLine
+                        y={(minVol + maxVol) / 2}
+                        stroke="#808080"
+                        strokeDasharray="10 5"
+                      />
+                      <Legend />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+                <br />
+                <hr />
+              </>
+            )}
+            <h5 style={{ textAlign: "center" }}>{translate("sessions")}</h5>
+            <table>
+              <colgroup>
+                <col
+                  style={{
+                    width: workout.avg_volume > 0 ? "230px" : "370px",
+                  }}
+                />
+                <col
+                  style={{
+                    width: workout.avg_volume > 0 ? "120px" : "260px",
+                  }}
+                />
+                {workout.avg_volume > 0 && <col style={{ width: "280px" }} />}
+              </colgroup>
+              <thead>
+                <tr>
+                  <th>{translate("date")}</th>
+                  <th>{translate("time")}</th>
+                  {workout.avg_volume > 0 && <th>{translate("volume")}</th>}
+                </tr>
+              </thead>
+              <tbody>
+                {workout.sessions.map((session, idx) => (
+                  <tr
+                    key={idx}
+                    style={{
+                      borderBottom: "1px solid #e4e4e430",
+                    }}
+                  >
+                    <td>{TimeUtils.formatTimeDate(session.date)}</td>
+                    <td>{TimeUtils.formatDuration(session.time)}</td>
+                    {workout.avg_volume > 0 && (
+                      <td>
+                        {UnitUtils.fromKg(
+                          session.volume,
+                          settings.weight_unit,
+                        ).toFixed(1)}{" "}
+                        {UnitUtils.getUnit(settings.weight_unit)}{" "}
+                        {session.vol_diff != "-" &&
+                          "(" + session.vol_diff + ")"}
+                      </td>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }

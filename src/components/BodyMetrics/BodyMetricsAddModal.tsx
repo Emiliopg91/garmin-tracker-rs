@@ -3,9 +3,16 @@ import { BackendClient } from "@/utils/backend/client";
 import { BodyMetricListItem } from "@/utils/backend/models";
 import { UnitUtils } from "@/utils/UnitUtils";
 import { useContext, useState } from "react";
-import { Button, Modal } from "react-bootstrap";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+import {
+  Button,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+  TextField,
+} from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 
 type Props = {
   latest: BodyMetricListItem | undefined;
@@ -80,99 +87,106 @@ export function BodyMetricsAddModal({ latest, onClose }: Props) {
   };
 
   return (
-    <div
-      className="modal show"
-      style={{ display: "block", position: "initial" }}
-    >
-      <Modal show={true} onHide={onClose} data-bs-theme="dark">
-        <Modal.Header closeButton>
-          <Modal.Title>{translate("add_entry")}</Modal.Title>
-        </Modal.Header>
+    <Dialog open={true} onClose={onClose} fullWidth maxWidth="sm">
+      <DialogTitle>
+        {translate("add_entry")}
+        <IconButton
+          onClick={onClose}
+          sx={{ position: "absolute", right: 8, top: 8 }}
+        >
+          <CloseIcon />
+        </IconButton>
+      </DialogTitle>
 
-        <Modal.Body>
-          <table id="workout-details-table">
-            <colgroup>
-              <col style={{ alignContent: "right", width: "150px" }} />
-              <col />
-            </colgroup>
-            <tbody>
-              <tr>
-                <td>{translate("date")}:</td>
-                <td>
-                  <DatePicker
-                    onChange={(value: Date | null) => {
-                      if (value != null) {
-                        onPropChange(value, "date");
-                      }
-                    }}
-                    selected={data.date}
-                    dateFormat="dd/MM/yyyy"
-                  />
-                </td>
-              </tr>
-              <tr>
-                <td>{translate("weight")}:</td>
-                <td>
-                  <input
-                    type="text"
-                    value={data.weight}
-                    inputMode="decimal"
-                    onChange={(e) => {
-                      onPropChange(e.target.value, "weight");
-                    }}
-                  />
-                </td>
-              </tr>
-              <tr>
-                <td>{translate("fat_ratio")}:</td>
-                <td>
-                  <input
-                    type="text"
-                    value={data.fat_ratio}
-                    onChange={(e) => {
-                      onPropChange(e.target.value, "fat_ratio");
-                    }}
-                  />
-                </td>
-              </tr>
-              <tr>
-                <td>{translate("lean_mass")}:</td>
-                <td>
-                  <input
-                    type="text"
-                    value={data.lean_mass}
-                    onChange={(e) => {
-                      onPropChange(e.target.value, "lean_mass");
-                    }}
-                  />
-                </td>
-              </tr>
-              <tr>
-                <td>{translate("water_ratio")}:</td>
-                <td>
-                  <input
-                    type="text"
-                    value={data.water_ratio}
-                    onChange={(e) => {
-                      onPropChange(e.target.value, "water_ratio");
-                    }}
-                  />
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <hr />
-          <div>
-            <Button
-              id="save-measure-button"
-              style={{ width: "100%" }}
-              onClick={onSave}
-            >
-              {translate("save")}
-            </Button>
-          </div>
-        </Modal.Body>
-      </Modal>
-    </div>
+      <DialogContent dividers>
+        <table id="workout-details-table">
+          <colgroup>
+            <col style={{ alignContent: "right", width: "150px" }} />
+            <col />
+          </colgroup>
+          <tbody>
+            <tr>
+              <td>{translate("date")}:</td>
+              <td>
+                <DatePicker
+                  value={data.date}
+                  onChange={(value) => {
+                    if (value != null) {
+                      onPropChange(value, "date");
+                    }
+                  }}
+                  format="dd/MM/yyyy"
+                  slotProps={{ textField: { size: "small" } }}
+                />
+              </td>
+            </tr>
+            <tr>
+              <td>{translate("weight")}:</td>
+              <td>
+                <TextField
+                  size="small"
+                  fullWidth
+                  value={data.weight}
+                  slotProps={{ htmlInput: { inputMode: "decimal" } }}
+                  onChange={(e) => {
+                    onPropChange(e.target.value, "weight");
+                  }}
+                />
+              </td>
+            </tr>
+            <tr>
+              <td>{translate("fat_ratio")}:</td>
+              <td>
+                <TextField
+                  size="small"
+                  fullWidth
+                  value={data.fat_ratio}
+                  onChange={(e) => {
+                    onPropChange(e.target.value, "fat_ratio");
+                  }}
+                />
+              </td>
+            </tr>
+            <tr>
+              <td>{translate("lean_mass")}:</td>
+              <td>
+                <TextField
+                  size="small"
+                  fullWidth
+                  value={data.lean_mass}
+                  onChange={(e) => {
+                    onPropChange(e.target.value, "lean_mass");
+                  }}
+                />
+              </td>
+            </tr>
+            <tr>
+              <td>{translate("water_ratio")}:</td>
+              <td>
+                <TextField
+                  size="small"
+                  fullWidth
+                  value={data.water_ratio}
+                  onChange={(e) => {
+                    onPropChange(e.target.value, "water_ratio");
+                  }}
+                />
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <hr />
+        <div>
+          <Button
+            id="save-measure-button"
+            variant="contained"
+            style={{ width: "100%" }}
+            onClick={onSave}
+          >
+            {translate("save")}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }

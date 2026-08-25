@@ -6,7 +6,7 @@ import {
   WeightUnit,
 } from "@/utils/backend/models";
 import { useContext, useState } from "react";
-import { Form } from "react-bootstrap";
+import { MenuItem, Select } from "@mui/material";
 
 export function Settings() {
   const { environment, settings, translate } = useContext(AppContext);
@@ -57,60 +57,72 @@ export function Settings() {
         <tr>
           <td>{translate("weight_unit")}</td>
           <td>
-            <Form.Select
+            <Select
+              size="small"
+              fullWidth
               value={weightUnit}
               onChange={(e) => updateWeightUnit(e.target.value as WeightUnit)}
             >
-              <option value={WeightUnit.Kilograms}>
+              <MenuItem value={WeightUnit.Kilograms}>
                 {translate("weight_unit_kilograms")}
-              </option>
-              <option value={WeightUnit.Pounds}>
+              </MenuItem>
+              <MenuItem value={WeightUnit.Pounds}>
                 {translate("weight_unit_pounds")}
-              </option>
-            </Form.Select>
+              </MenuItem>
+            </Select>
           </td>
         </tr>
         <tr>
           <td>{translate("distance_unit")}</td>
           <td>
-            <Form.Select
+            <Select
+              size="small"
+              fullWidth
               value={distanceUnit}
               onChange={(e) =>
                 updateDistanceUnit(e.target.value as DistanceUnit)
               }
             >
-              <option value={DistanceUnit.Kilometers}>
+              <MenuItem value={DistanceUnit.Kilometers}>
                 {translate("distance_unit_kilometers")}
-              </option>
-              <option value={DistanceUnit.Miles}>
+              </MenuItem>
+              <MenuItem value={DistanceUnit.Miles}>
                 {translate("distance_unit_miles")}
-              </option>
-            </Form.Select>
+              </MenuItem>
+            </Select>
           </td>
         </tr>
         <tr>
           <td>{translate("auto_sync")}</td>
           <td>
-            <Form.Select
+            <Select
+              size="small"
+              fullWidth
               value={autoSync ? "true" : "false"}
               onChange={(e) => updateAutoSync(e.target.value === "true")}
             >
-              <option value="true">{translate("auto_sync_true")}</option>
-              <option value="false">{translate("auto_sync_false")}</option>
-            </Form.Select>
+              <MenuItem value="true">{translate("auto_sync_true")}</MenuItem>
+              <MenuItem value="false">{translate("auto_sync_false")}</MenuItem>
+            </Select>
           </td>
         </tr>
         <tr>
           <td>{translate("start_on_boot")}</td>
           <td>
-            <Form.Select
+            <Select
+              size="small"
+              fullWidth
               value={startOnBoot ? "true" : "false"}
               onChange={(e) => updateStartOnBoot(e.target.value === "true")}
               disabled={environment == AppEnvironment.Debug}
             >
-              <option value="false">{translate("start_on_boot_false")}</option>
-              <option value="true">{translate("start_on_boot_true")}</option>
-            </Form.Select>
+              <MenuItem value="false">
+                {translate("start_on_boot_false")}
+              </MenuItem>
+              <MenuItem value="true">
+                {translate("start_on_boot_true")}
+              </MenuItem>
+            </Select>
           </td>
         </tr>
       </table>

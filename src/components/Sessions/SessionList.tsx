@@ -2,7 +2,7 @@ import { AppContext } from "@/context/AppContext";
 import { BackendClient } from "@/utils/backend/client";
 import { SessionDetails, SessionListItem } from "@/utils/backend/models";
 import { useContext, useEffect, useState } from "react";
-import { Button, Dropdown } from "react-bootstrap";
+import { Button, Menu, MenuItem } from "@mui/material";
 import { SessionModal } from "./SessionModal";
 import {
   Area,
@@ -36,6 +36,9 @@ export function SessionsList() {
   const [sessionDetails, setSessionDetails] = useState<
     SessionDetails | undefined
   >(undefined);
+  const [importMenuAnchor, setImportMenuAnchor] = useState<HTMLElement | null>(
+    null,
+  );
 
   const refreshList = () => {
     startLoading();
@@ -330,6 +333,8 @@ export function SessionsList() {
           {availableDevices.length == 1 && (
             <Button
               id="import-file-button"
+              variant="contained"
+              style={{ width: "100%" }}
               onClick={() => {
                 importDevice(availableDevices[0].serial_number);
               }}
@@ -342,26 +347,36 @@ export function SessionsList() {
             </Button>
           )}
           {availableDevices.length > 1 && (
-            <Dropdown id="import-file-dropdown" className="w-100">
-              <Dropdown.Toggle id="import-file-toggle">
+            <>
+              <Button
+                id="import-file-toggle"
+                variant="contained"
+                style={{ width: "100%" }}
+                onClick={(e) => setImportMenuAnchor(e.currentTarget)}
+              >
                 {translate("import_sessions")}
-              </Dropdown.Toggle>
-
-              <Dropdown.Menu id="import-file-menu">
+              </Button>
+              <Menu
+                id="import-file-menu"
+                anchorEl={importMenuAnchor}
+                open={Boolean(importMenuAnchor)}
+                onClose={() => setImportMenuAnchor(null)}
+              >
                 {availableDevices.map((device, idx) => (
-                  <Dropdown.Item
+                  <MenuItem
                     key={"dev-" + idx}
                     onClick={() => {
+                      setImportMenuAnchor(null);
                       importDevice(device.serial_number);
                     }}
                   >
                     {translate("import_from_device", [
                       device.manufacturer + " " + device.model,
                     ])}
-                  </Dropdown.Item>
+                  </MenuItem>
                 ))}
-              </Dropdown.Menu>
-            </Dropdown>
+              </Menu>
+            </>
           )}
         </div>
       )}

@@ -3,7 +3,7 @@ import { useContext, useEffect, useState } from "react";
 import { AppContext } from "@/context/AppContext";
 import { BodyMetricListItem } from "@/utils/backend/models";
 import { BodyMetricsDetailsModal } from "./BodyMetricsDetailsModal";
-import { Button } from "react-bootstrap";
+import { Button } from "@mui/material";
 import { BodyMetricsAddModal } from "./BodyMetricsAddModal";
 import {
   CartesianGrid,
@@ -258,6 +258,7 @@ export function BodyMetricList() {
       <div style={{ padding: "5px", width: "100%", marginTop: "auto" }}>
         <Button
           id="add-measure-button"
+          variant="contained"
           style={{ width: "100%" }}
           onClick={() => {
             setAddingNew(true);

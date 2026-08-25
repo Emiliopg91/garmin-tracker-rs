@@ -1,8 +1,11 @@
 import ReactDOM from "react-dom/client";
 import App from "@/components/App/App";
+import { ThemeProvider } from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { theme } from "@/theme";
 
-import "bootstrap/dist/css/bootstrap.min.css";
-import "bootstrap/dist/js/bootstrap.bundle.min";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
@@ -21,7 +24,12 @@ L.Icon.Default.mergeOptions({
 });
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
-  <AppProvider>
-    <App />
-  </AppProvider>,
+  <ThemeProvider theme={theme}>
+    <CssBaseline />
+    <LocalizationProvider dateAdapter={AdapterDateFns}>
+      <AppProvider>
+        <App />
+      </AppProvider>
+    </LocalizationProvider>
+  </ThemeProvider>,
 );
