@@ -112,9 +112,9 @@ impl From<(&Session, &IndexMap<Exercise, Vec<Serie>>)> for SessionDetails {
             heart_rates = hr_dao.records.into_iter().collect();
         }
 
-        let mut gps_coordinates = Vec::new();
+        let mut gps_coordinates: Vec<(i32, i32)> = Vec::new();
         if let Some(coords) = value.0.gps_coordinates.clone() {
-            gps_coordinates = coords.normalize();
+            gps_coordinates = (&coords).into()
         }
 
         Self {

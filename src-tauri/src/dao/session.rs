@@ -1,4 +1,5 @@
 use rusqlite_orm_macros::Entity;
+use serde::{Deserialize, Serialize};
 
 use crate::dao::{
     device::{self, Device},
@@ -9,7 +10,7 @@ use crate::dao::{
 
 use super::serie::Serie;
 
-#[derive(Entity, Clone)]
+#[derive(Entity, Clone, Serialize, Deserialize)]
 #[primary_key(date)]
 #[index("workout", (workout))]
 pub struct Session {

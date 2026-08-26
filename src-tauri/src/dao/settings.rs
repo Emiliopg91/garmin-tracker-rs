@@ -10,7 +10,7 @@ pub mod settings_keys {
     pub const WEIGHT_UNIT: &str = "weight_unit";
 }
 
-#[derive(Entity)]
+#[derive(Entity, Serialize, Deserialize)]
 #[primary_key(name)]
 pub struct Settings {
     pub name: String,

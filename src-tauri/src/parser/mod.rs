@@ -96,7 +96,7 @@ where
     if workout.is_empty()
         && let Some(coords) = gps_coordinates.clone()
     {
-        let coords = coords.normalize();
+        let coords: Vec<(i32, i32)> = (&coords).into();
         if let Some(start_point) = coords.first() {
             workout = get_location_from_coordinates(
                 start_point.0 as f64 * constants::SEMICIRCLE_TO_DEGREES,

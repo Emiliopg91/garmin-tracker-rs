@@ -1,16 +1,18 @@
 use rusqlite_orm_macros::Entity;
+use serde::{Deserialize, Serialize};
 
 use crate::dao::exercise::{self};
 
 use super::exercise::Exercise;
 
-#[derive(Entity, Clone)]
+#[derive(Entity, Clone, Serialize, Deserialize)]
 #[primary_key(session, idx)]
 #[index("session", (session))]
 #[index("personal_records", (pr))]
 #[index("exercise", (ex_cat, ex_id))]
 #[unique("exercise_personal_record", (ex_cat, ex_id), (pr=true))]
 pub struct Serie {
+    #[serde(skip)]
     pub session: i64,
     pub idx: u8,
     #[column("exercise_category")]

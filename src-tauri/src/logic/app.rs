@@ -1,4 +1,4 @@
-use std::sync::OnceLock;
+use std::{fs, sync::OnceLock};
 
 use garmin_tracker_rs_macros::traced_command;
 use tauri::{AppHandle, WebviewWindow};
@@ -7,7 +7,10 @@ use tokio::sync::RwLock;
 
 use crate::{
     constants,
-    dto::app::{AppEnvironment, Settings},
+    dto::{
+        app::{AppEnvironment, Settings},
+        export::Export,
+    },
     logic::devices::start_device_watcher,
 };
 use tauri_plugin_log::log::info;
@@ -78,6 +81,16 @@ pub async fn update_settings_value(app: AppHandle, name: &str, value: &str) -> R
         }
         _ => unreachable!(),
     }
+
+    Ok(())
+}
+
+#[traced_command]
+#[tauri::command]
+pub fn export_database() -> Result<(), String> {
+    let export = Export::from_database().map_err(|e| e.to_string())?;
+    let json = export.to_json().map_err(|e| e.to_string())?;
+    fs::write(constants::HOME_DIR.join(format!("{}.json",*constants::APP_NAME)), json).map_err(|e| e.to_string())?;
 
     Ok(())
 }

@@ -30,7 +30,7 @@ use crate::{
     },
     logic::{
         app::{
-            SETTINGS_INST, get_environment, get_settings, notify_frontend_ready,
+            SETTINGS_INST, export_database, get_environment, get_settings, notify_frontend_ready,
             update_settings_value,
         },
         body_metrics::{add_body_measures, delete_body_metric, get_body_measures},
@@ -136,7 +136,7 @@ pub fn run() {
                         });
 
                         for gps_coords in gps_coordinates {
-                            let coords = gps_coords.normalize();
+                            let coords: Vec<(i32, i32)> = (&gps_coords).into();
                             if let Some(start_point) = coords.first() {
                                 let location = get_location_from_coordinates(
                                     start_point.0 as f64 * constants::SEMICIRCLE_TO_DEGREES,
@@ -188,7 +188,8 @@ pub fn run() {
             get_environment,
             delete_body_metric,
             get_settings,
-            update_settings_value
+            update_settings_value,
+            export_database
         ])
         .run(tauri::generate_context!());
 

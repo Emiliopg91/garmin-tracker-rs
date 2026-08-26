@@ -1,6 +1,7 @@
 use rusqlite_orm_macros::Entity;
+use serde::{Deserialize, Serialize};
 
-#[derive(Entity)]
+#[derive(Entity, Serialize, Deserialize)]
 #[entity("body_metrics")]
 #[primary_key(date)]
 pub struct BodyMetrics {

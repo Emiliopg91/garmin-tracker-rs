@@ -15,10 +15,11 @@ pub static LOCK_FILE: LazyLock<PathBuf> = LazyLock::new(|| {
 });
 
 // Dir block
+pub static HOME_DIR: LazyLock<PathBuf> =
+    LazyLock::new(|| PathBuf::from(std::env::var("HOME").expect("Could not get home folder")));
 pub static DATA_LOCAL_DIR: LazyLock<PathBuf> = LazyLock::new(|| {
-    let home = std::env::var("HOME").expect("Could not get local data folder");
     ensure_dir(
-        PathBuf::from(home)
+        HOME_DIR
             .join(".local")
             .join("share")
             .join(APP_NAME.as_str()),
