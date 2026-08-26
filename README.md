@@ -15,11 +15,14 @@ Garmin Tracker is a cross-platform desktop application built with [Tauri](https:
 
 ## Features
 
-- **Device sync over USB (MTP)** — Detects connected Garmin devices and downloads new activities directly from the watch's storage.
+- **Device sync over USB (MTP)** — Detects connected Garmin devices and downloads new activities directly from the watch's storage, with parallelized parsing and optimized transfers for faster syncs. Auto-sync on connect can be toggled off in favor of manual imports.
 - **Manual import** — Import activity files from disk if you prefer not to connect a device.
-- **`.FIT` file parsing** — Parses Garmin `.FIT` activity files into structured session and series data.
+- **`.FIT` file parsing** — Parses Garmin `.FIT` activity files into structured session, series, heart rate, and GPS data.
 - **Strength training tracking** — Review/edit recorded sessions and their series (sets, reps, weight, etc.).
-- **Body measurements** — Log and track user body measures over time.
+- **GPS route tracking** — Displays the recorded route on an interactive map (start/end markers, route line) for outdoor activities. Unnamed GPS sessions are automatically labeled with the start location, resolved via reverse geocoding.
+- **Heart-rate zones** — Visualizes heart rate over a session as a color-coded chart and breaks down time spent in each HR zone.
+- **Body measurements** — Log, review, and delete body measures over time.
+- **Configurable app settings** — Choose weight/distance units, toggle launch on system boot, and enable/disable automatic sync on device connect.
 - **Local database** — All data is persisted in a local SQLite database (schema managed via versioned DDL migrations, applied automatically at startup).
 - **Desktop notifications** — Native, localized (English/Spanish) notifications for background events (e.g. device connected/disconnected, sync completed, update available).
 - **Single instance** — Prevents multiple copies of the app from running at once, avoiding database corruption.
@@ -31,7 +34,7 @@ Garmin Tracker is a cross-platform desktop application built with [Tauri](https:
 | -------------------- | ---------------------------------------------------------------------------------------------------------- |
 | Shell                | [Tauri 2](https://tauri.app/)                                                                              |
 | Backend              | Rust (2024 edition)                                                                                        |
-| Frontend             | React 19 + TypeScript, Vite, React Bootstrap, Recharts                                                     |
+| Frontend             | React 19 + TypeScript, Vite, MUI, Recharts, React Leaflet                                                  |
 | Database             | SQLite, via [`rusqlite_orm`](https://crates.io/crates/rusqlite_orm) (custom ORM crate)                     |
 | Backend <-> frontend | Typed IPC — TypeScript client/models auto-generated from the Rust `dto`/`logic` code via `tauri-rs-ts-ipc` |
 | Codegen              | In-repo proc-macro crate `garmin-tracker-rs-macros` — command call tracing/logging, compile-time i18n      |
@@ -85,14 +88,15 @@ resources/
   scripts/                Python helper scripts (release/versioning/dependency management)
   PKGBUILD, *.rules       Linux packaging assets
 src/                      React + TypeScript frontend
-  components/             UI screens (App, Exercises, Sessions, User, Workouts, NavBar, Loading)
+  components/             UI screens (App, BodyMetrics, Exercises, Sessions, Settings, Workouts, NavBar, Loading)
   context/                React context/providers
   utils/backend/          Auto-generated Tauri IPC client and models (do not edit manually)
 src-tauri/                Rust backend (Tauri application)
-  src/dao/                SQLite access layer (devices, exercises, heart rate, series, sessions, users)
+  src/dao/                SQLite access layer (body metrics, devices, exercises, GPS coordinates,
+                           heart rate, series, sessions, settings)
   src/dto/                Data transfer objects shared with the frontend (via generated TS types)
-  src/logic/               Business logic backing the Tauri commands (app, devices, exercises,
-                           notifications, sessions, user, workouts)
+  src/logic/               Business logic backing the Tauri commands (app, body metrics, devices,
+                           exercises, notifications, sessions, workouts)
   src/mtp/                Garmin device discovery & activity download over MTP/USB
   src/parser/              .FIT file parsing
   src/utils/               Shared constants and date/time helpers

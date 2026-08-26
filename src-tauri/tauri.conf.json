@@ -14,8 +14,8 @@
     "windows": [
       {
         "title": "Garmin Tracker",
-        "width": 930,
-        "height": 850,
+        "width": 950,
+        "height": 900,
         "visible": false
       }
     ],

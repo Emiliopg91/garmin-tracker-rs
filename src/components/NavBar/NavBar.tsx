@@ -1,5 +1,5 @@
 import { JSX } from "react";
-import "@/styles/navbar.css";
+import { Box } from "@mui/material";
 
 type NavBarItem = {
   label: string;
@@ -14,29 +14,34 @@ export function NavBar({
   leftItems: NavBarItem[];
   rightItems: NavBarItem[];
 }): JSX.Element {
+  const renderItem = (item: NavBarItem) => (
+    <Box
+      key={item.label}
+      onClick={item.onSelected}
+      sx={{
+        padding: "10px",
+        cursor: "pointer",
+        bgcolor: item.selected ? "primary.main" : "transparent",
+      }}
+    >
+      {item.label}
+    </Box>
+  );
+
   return (
-    <div id="navbar">
-      {leftItems.map((item) => (
-        <div
-          key={item.label}
-          className={`navbar-item ${item.selected ? "selected" : ""}`}
-          onClick={item.onSelected}
-        >
-          {item.label}
-        </div>
-      ))}
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "row",
+        borderBottom: 1,
+        borderColor: "primary.main",
+      }}
+    >
+      {leftItems.map(renderItem)}
       {leftItems.length > 0 && rightItems.length > 0 && (
-        <div key={`separator`} className="navbar-separator" />
+        <Box key="separator" sx={{ flex: 1 }} />
       )}
-      {rightItems.map((item) => (
-        <div
-          key={item.label}
-          className={`navbar-item ${item.selected ? "selected" : ""}`}
-          onClick={item.onSelected}
-        >
-          {item.label}
-        </div>
-      ))}
-    </div>
+      {rightItems.map(renderItem)}
+    </Box>
   );
 }
