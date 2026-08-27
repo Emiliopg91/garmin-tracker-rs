@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize)]
@@ -6,7 +8,10 @@ pub enum AppEnvironment {
     Release,
 }
 
-use crate::dao::settings::{DistanceUnit, WeightUnit};
+use crate::{
+    dao::settings::{DistanceUnit, WeightUnit},
+    utils::translations::Languages,
+};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Settings {
@@ -14,4 +19,11 @@ pub struct Settings {
     pub weight_unit: WeightUnit,
     pub auto_sync: bool,
     pub start_boot: bool,
+    pub language: Languages,
+}
+
+#[derive(Serialize)]
+pub struct LanguagesOptions {
+    pub translations: HashMap<String, HashMap<String, String>>,
+    pub default_language: Languages,
 }

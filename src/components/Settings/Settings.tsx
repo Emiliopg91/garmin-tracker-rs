@@ -3,6 +3,7 @@ import { BackendClient } from "@/utils/backend/client";
 import {
   AppEnvironment,
   DistanceUnit,
+  Languages,
   WeightUnit,
 } from "@/utils/backend/models";
 import { useContext, useState } from "react";
@@ -17,6 +18,7 @@ export function Settings() {
   const [distanceUnit, setDistanceUnit] = useState(settings.distance_unit);
   const [autoSync, setAutoSync] = useState(settings.auto_sync);
   const [startOnBoot, setStartOnBoot] = useState(settings.start_boot);
+  const [language, setLanguage] = useState(settings.language);
 
   const updateWeightUnit = (value: WeightUnit) => {
     startLoading();
@@ -66,6 +68,18 @@ export function Settings() {
       });
   };
 
+  const updateLanguage = (value: Languages) => {
+    startLoading();
+    BackendClient.updateSettingsValue("language", value)
+      .then(() => {
+        setLanguage(value);
+        settings.language = value;
+      })
+      .finally(() => {
+        finishLoading();
+      });
+  };
+
   const exportDatabase = () => {
     startLoading();
     BackendClient.exportDatabase().finally(() => {
@@ -76,6 +90,24 @@ export function Settings() {
   return (
     <>
       <table>
+        <tr>
+          <td>{translate("language")}</td>
+          <td>
+            <Select
+              size="small"
+              fullWidth
+              value={language}
+              onChange={(e) => updateLanguage(e.target.value as Languages)}
+            >
+              <MenuItem value={Languages.English}>
+                {translate("lang_en")}
+              </MenuItem>
+              <MenuItem value={Languages.Spanish}>
+                {translate("lang_es")}
+              </MenuItem>
+            </Select>
+          </td>
+        </tr>
         <tr>
           <td>{translate("weight_unit")}</td>
           <td>

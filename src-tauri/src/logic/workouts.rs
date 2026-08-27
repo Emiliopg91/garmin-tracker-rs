@@ -1,6 +1,6 @@
 use std::{collections::HashMap, ops::Deref};
 
-use garmin_tracker_rs_macros::{traced_command, translate};
+use garmin_tracker_rs_macros::traced_command;
 use rusqlite_orm::{
     dao::{
         Repository,
@@ -20,6 +20,7 @@ use crate::{
         workouts::{WorkoutDetails, WorkoutListItem, WorkoutSession},
     },
     logic::notifications::show_notification,
+    utils::translations::translate,
 };
 
 #[traced_command]
@@ -63,7 +64,7 @@ pub fn get_workout_list() -> Result<Vec<WorkoutListItem>, String> {
         Err(DatabaseError::RunningOnConnection(e)) => {
             error!("Error getting workouts list: {}", e);
             show_notification(NotificationDefinition {
-                title: translate!("error_workout_list"),
+                title: translate("error_workout_list"),
                 body: e.deref().to_string(),
                 kind: NotificationKind::Persistant,
             });
@@ -150,7 +151,7 @@ pub fn get_workout_details(name: &str) -> Result<WorkoutDetails, String> {
         Err(DatabaseError::RunningOnConnection(e)) => {
             error!("Error getting workout details: {}", e);
             show_notification(NotificationDefinition {
-                title: translate!("error_workout_details"),
+                title: translate("error_workout_details"),
                 body: e.deref().to_string(),
                 kind: NotificationKind::Persistant,
             });

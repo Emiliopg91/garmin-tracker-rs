@@ -3,9 +3,12 @@ use rusqlite_orm_macros::Entity;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
+use crate::utils::{constants, translations::Languages};
+
 pub mod settings_keys {
     pub const AUTO_SYNC: &str = "auto_sync";
     pub const DISTANCE_UNIT: &str = "distance_unit";
+    pub const LANGUAGE: &str = "language";
     pub const START_ON_BOOT: &str = "start_boot";
     pub const WEIGHT_UNIT: &str = "weight_unit";
 }
@@ -48,6 +51,24 @@ impl Settings {
             .or_replace()
             .item(Settings {
                 name: settings_keys::DISTANCE_UNIT.to_string(),
+                value: value.to_string(),
+            })
+            .execute()
+            .map(|_| ())
+    }
+
+    pub fn get_language() -> Languages {
+        SettingsRepository::select_by_id(settings_keys::LANGUAGE)
+            .ok()
+            .flatten()
+            .and_then(|r| Some(Languages::from(r.value.as_str())))
+            .unwrap_or((*constants::SYSTEM_LANGUAGE).clone())
+    }
+    pub fn set_language(value: &Languages) -> rusqlite_orm::database::errors::Result<()> {
+        SettingsRepository::insert()
+            .or_replace()
+            .item(Settings {
+                name: settings_keys::LANGUAGE.to_string(),
                 value: value.to_string(),
             })
             .execute()

@@ -1,6 +1,6 @@
 //Auto generated file, do not edit manually
 
-// From src-tauri/src/dto/app.rs:4
+// From src-tauri/src/dto/app.rs:6
 export enum AppEnvironment {
 	Debug = "Debug",
 	Release = "Release",
@@ -22,7 +22,7 @@ export interface DeviceListItem {
   serial_number: string;
 }
 
-// From src-tauri/src/dao/settings.rs:95
+// From src-tauri/src/dao/settings.rs:116
 export enum DistanceUnit {
 	Kilometers = "Kilometers",
 	Miles = "Miles",
@@ -50,6 +50,18 @@ export interface ExerciseListItem {
   reps: number;
   rm: number;
   weight: number;
+}
+
+// From src-tauri/src/utils/translations.rs:10
+export enum Languages {
+	Spanish = "Spanish",
+	English = "English",
+}
+
+// From src-tauri/src/dto/app.rs:26
+export interface LanguagesOptions {
+  default_language: Languages;
+  translations: Record<string, Record<string, string>>;
 }
 
 // From src-tauri/src/dto/sessions.rs:62
@@ -93,15 +105,16 @@ export interface SessionSeriesUpdate {
   timestamp: number;
 }
 
-// From src-tauri/src/dto/app.rs:12
+// From src-tauri/src/dto/app.rs:17
 export interface Settings {
   auto_sync: boolean;
   distance_unit: DistanceUnit;
+  language: Languages;
   start_boot: boolean;
   weight_unit: WeightUnit;
 }
 
-// From src-tauri/src/dao/settings.rs:123
+// From src-tauri/src/dao/settings.rs:144
 export enum WeightUnit {
 	Kilograms = "Kilograms",
 	Pounds = "Pounds",

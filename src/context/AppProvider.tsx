@@ -5,10 +5,10 @@ import {
   AppEnvironment,
   DeviceListItem,
   DistanceUnit,
+  Languages,
   Settings,
   WeightUnit,
 } from "@/utils/backend/models";
-import { TRANSLATIONS } from "@/utils/translations";
 import { useEffect, useRef, useState } from "react";
 import { JSX } from "react/jsx-runtime";
 import { AppContext } from "./AppContext";
@@ -31,7 +31,12 @@ export function AppProvider({
     weight_unit: WeightUnit.Kilograms,
     auto_sync: true,
     start_boot: false,
+    language: Languages.English,
   });
+  const [defaultLanguage, setDefaultLanguage] = useState(Languages.English);
+  const [translations, setTranslations] = useState<
+    Record<string, Record<string, string>>
+  >({});
 
   const startLoading = () => {
     setLoadingCount((previous) => previous + 1);
@@ -44,11 +49,29 @@ export function AppProvider({
   const loading = loadingCount > 0;
 
   const translate = (key: string, replacements?: string[]) => {
-    if (!TRANSLATIONS[key]) {
+    if (!translations[key]) {
       console.warn("Missing translation", key);
       return key;
     }
-    let translation = TRANSLATIONS[key];
+
+    const lang_map = translations[key];
+    let translation = lang_map[defaultLanguage];
+
+    if (!lang_map[settings.language]) {
+      console.warn(
+        "Missing translation for " +
+          settings.language +
+          ", fallback to " +
+          defaultLanguage,
+      );
+    } else {
+      translation = lang_map[settings.language];
+    }
+
+    if (!translation) {
+      translation = key;
+    }
+
     if (replacements) {
       replacements.forEach((r) => {
         translation = translation.replace("{}", r);
@@ -102,9 +125,16 @@ export function AppProvider({
             setSettings(settings);
           })
           .finally(() => {
-            BackendClient.notifyFrontendReady().then(() => {
-              setAppReady(true);
-            });
+            BackendClient.getLanguagesConfig()
+              .then((config) => {
+                setDefaultLanguage(config.default_language);
+                setTranslations(config.translations);
+              })
+              .finally(() => {
+                BackendClient.notifyFrontendReady().then(() => {
+                  setAppReady(true);
+                });
+              });
           });
       });
 
@@ -129,6 +159,7 @@ export function AppProvider({
         environment,
         translate,
         settings,
+        defaultLanguage,
       }}
     >
       {children}

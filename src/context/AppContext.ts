@@ -3,6 +3,7 @@ import {
   AppEnvironment,
   DeviceListItem,
   DistanceUnit,
+  Languages,
   Settings,
   WeightUnit,
 } from "@/utils/backend/models";
@@ -19,6 +20,7 @@ interface AppContexType {
   environment: AppEnvironment;
   settings: Settings;
   translate: (key: string, replacements?: string[]) => string;
+  defaultLanguage: Languages;
 }
 
 const defaultValue: AppContexType = {
@@ -44,7 +46,9 @@ const defaultValue: AppContexType = {
     weight_unit: WeightUnit.Kilograms,
     auto_sync: true,
     start_boot: false,
+    language: Languages.English,
   },
+  defaultLanguage: Languages.English,
 };
 
 export const AppContext = createContext(defaultValue);

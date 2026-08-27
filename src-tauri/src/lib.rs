@@ -5,9 +5,8 @@ mod mtp;
 mod parser;
 mod utils;
 
-use std::process::exit;
+use std::{process::exit, sync::RwLock};
 
-use garmin_tracker_rs_macros::translate;
 use rusqlite_orm::{
     dao::{Repository, helpers::types::where_clause::Where},
     database::Database,
@@ -17,7 +16,6 @@ use tauri_plugin_log::{
     Target, TargetKind,
     log::{LevelFilter, debug, error, info},
 };
-use tokio::sync::RwLock;
 
 use crate::{
     dao::{
@@ -30,8 +28,8 @@ use crate::{
     },
     logic::{
         app::{
-            SETTINGS_INST, export_database, get_environment, get_settings, notify_frontend_ready,
-            update_settings_value,
+            SETTINGS_INST, export_database, get_environment, get_languages_config, get_settings,
+            notify_frontend_ready, update_settings_value,
         },
         body_metrics::{add_body_measures, delete_body_metric, get_body_measures},
         exercises::{get_exercise_details, get_exercises},
@@ -42,7 +40,7 @@ use crate::{
         },
         workouts::{get_workout_details, get_workout_list},
     },
-    utils::{constants, single_instance::SingleInstance},
+    utils::{constants, single_instance::SingleInstance, translations::translate},
 };
 
 #[cfg(debug_assertions)]
@@ -114,7 +112,6 @@ pub fn run() {
                 error!("Could not initialize database: {}", e);
                 exit(constants::ExitCodes::DbError.into())
             }
-
             if let Err(e) = Database::run_in_transaction(|tx| {
                 let sessions = SessionRepository::select()
                     .where_(Where::Eq(session::entity::columns::WORKOUT, "".into()))
@@ -130,10 +127,17 @@ pub fn run() {
 
                     if !gps_coordinates.is_empty() {
                         show_notification(NotificationDefinition {
-                            title: translate!("aligning_database"),
-                            body: translate!("operation_may_last"),
+                            title: translate("aligning_database"),
+                            body: translate("operation_may_last"),
                             kind: NotificationKind::Temporal,
                         });
+                        let lang = SETTINGS_INST
+                            .get()
+                            .unwrap()
+                            .read()
+                            .unwrap()
+                            .language
+                            .to_string();
 
                         for gps_coords in gps_coordinates {
                             let coords: Vec<(i32, i32)> = (&gps_coords).into();
@@ -141,6 +145,7 @@ pub fn run() {
                                 let location = get_location_from_coordinates(
                                     start_point.0 as f64 * constants::SEMICIRCLE_TO_DEGREES,
                                     start_point.1 as f64 * constants::SEMICIRCLE_TO_DEGREES,
+                                    &lang,
                                 );
                                 SessionRepository::update()
                                     .set(session::entity::columns::WORKOUT, location.into())
@@ -165,6 +170,7 @@ pub fn run() {
                 .set(RwLock::new(Settings {
                     auto_sync: crate::dao::settings::Settings::get_auto_sync(),
                     distance_unit: crate::dao::settings::Settings::get_distance_unit(),
+                    language: crate::dao::settings::Settings::get_language(),
                     start_boot: crate::dao::settings::Settings::get_start_on_boot(),
                     weight_unit: crate::dao::settings::Settings::get_weight_unit(),
                 }))
@@ -190,6 +196,7 @@ pub fn run() {
             get_settings,
             update_settings_value,
             export_database,
+            get_languages_config
         ])
         .run(tauri::generate_context!());
 

@@ -1,4 +1,3 @@
-use garmin_tracker_rs_macros::translate;
 use nusb::hotplug::HotplugEvent;
 use rusqlite_orm::{dao::Repository, database::Database};
 use tokio_stream::StreamExt;
@@ -14,6 +13,7 @@ use crate::{
     },
     logic::{app::SETTINGS_INST, notifications::show_notification, sessions::_import_from_device},
     mtp::MTP_CLIENT_INST,
+    utils::translations::{translate, translate_and_replace},
 };
 
 pub fn start_device_watcher(app: AppHandle) {
@@ -106,16 +106,19 @@ async fn mtp_dev_check_and_sync(app: AppHandle, devices: &mut Vec<DeviceListItem
             let payload: DeviceListItem = device.clone();
             let _ = app.emit("device_connected", payload);
 
-            if SETTINGS_INST.get().unwrap().read().await.auto_sync {
+            if SETTINGS_INST.get().unwrap().read().unwrap().auto_sync {
                 devs_to_sync.push(device.serial_number.clone());
                 show_notification(NotificationDefinition {
-                    title: translate!("device_connected"),
-                    body: translate!("syncing_device", device.manufacturer, device.model),
+                    title: translate("device_connected"),
+                    body: translate_and_replace(
+                        "syncing_device",
+                        &[&device.manufacturer, &device.model],
+                    ),
                     kind: NotificationKind::Temporal,
                 });
             } else {
                 show_notification(NotificationDefinition {
-                    title: translate!("device_connected"),
+                    title: translate("device_connected"),
                     body: format!("{} {}", device.manufacturer, device.model),
                     kind: NotificationKind::Temporal,
                 });
@@ -135,7 +138,7 @@ async fn mtp_dev_check_and_sync(app: AppHandle, devices: &mut Vec<DeviceListItem
                     device.manufacturer, device.model, device.serial_number
                 );
                 show_notification(NotificationDefinition {
-                    title: translate!("device_disconnected"),
+                    title: translate("device_disconnected"),
                     body: format!("{} {}", device.manufacturer, device.model),
                     kind: NotificationKind::Temporal,
                 });

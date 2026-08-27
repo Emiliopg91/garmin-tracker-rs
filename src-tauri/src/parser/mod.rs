@@ -6,7 +6,6 @@ use std::{
 
 use chrono::{DateTime, Local};
 use fitparser::{FitDataField, FitDataRecord, Value, de::DecodeOption, profile};
-use garmin_tracker_rs_macros::translate;
 
 use crate::{
     dao::{
@@ -14,7 +13,7 @@ use crate::{
         session::Session,
     },
     logic::sessions::get_location_from_coordinates,
-    utils::constants,
+    utils::{constants, translations::translate_and_replace},
 };
 
 use self::errors::ParseFitFileError;
@@ -54,7 +53,7 @@ impl<'a> GroupedEntries<'a> {
     }
 }
 
-pub(crate) fn load_from_file<P>(path: P) -> errors::Result<Session>
+pub(crate) fn load_from_file<P>(path: P, lang: &str) -> errors::Result<Session>
 where
     P: AsRef<Path>,
 {
@@ -101,6 +100,7 @@ where
             workout = get_location_from_coordinates(
                 start_point.0 as f64 * constants::SEMICIRCLE_TO_DEGREES,
                 start_point.1 as f64 * constants::SEMICIRCLE_TO_DEGREES,
+                lang,
             )
         }
     }
@@ -261,10 +261,9 @@ fn get_steps(
                 .get(&(ex_id, ex_cat.as_str()))
                 .map(|e| Some((*e).clone()))
                 .ok_or_else(|| {
-                    ParseFitFileError::GenericError(translate!(
+                    ParseFitFileError::GenericError(translate_and_replace(
                         "error_parser_unknown_exercise",
-                        ex_cat,
-                        ex_id
+                        &[&ex_cat, &ex_id.to_string()],
                     ))
                 })
         })

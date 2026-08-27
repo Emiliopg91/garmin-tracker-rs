@@ -1,6 +1,6 @@
 use std::ops::Deref;
 
-use garmin_tracker_rs_macros::{traced_command, translate};
+use garmin_tracker_rs_macros::traced_command;
 use rusqlite_orm::{
     dao::{Repository, helpers::types::order_by::OrderBy},
     database::{Database, errors::DatabaseError},
@@ -14,6 +14,7 @@ use crate::{
         notifications::{NotificationDefinition, NotificationKind},
     },
     logic::notifications::show_notification,
+    utils::translations::translate,
 };
 
 #[traced_command]
@@ -42,7 +43,7 @@ pub fn get_body_measures() -> Result<Vec<BodyMetricListItem>, String> {
         Err(DatabaseError::RunningOnConnection(e)) => {
             error!("Error getting measures list: {}", e);
             show_notification(NotificationDefinition {
-                title: translate!("error_body_measures_list"),
+                title: translate("error_body_measures_list"),
                 body: e.deref().to_string(),
                 kind: NotificationKind::Persistant,
             });
@@ -73,7 +74,7 @@ pub fn add_body_measures(measures: BodyMetricListItem) -> Result<(), String> {
         Err(DatabaseError::Transaction(e)) => {
             error!("Error adding measures: {}", e);
             show_notification(NotificationDefinition {
-                title: translate!("error_adding_body_measures"),
+                title: translate("error_adding_body_measures"),
                 body: e.deref().to_string(),
                 kind: NotificationKind::Persistant,
             });
@@ -98,7 +99,7 @@ pub fn delete_body_metric(date: i32) -> Result<(), String> {
         Ok(_) => {
             info!("Measures deleted succesfully");
             show_notification(NotificationDefinition {
-                title: translate!("ok_delete_body_entry"),
+                title: translate("ok_delete_body_entry"),
                 body: "".to_string(),
                 kind: NotificationKind::Temporal,
             });
@@ -107,7 +108,7 @@ pub fn delete_body_metric(date: i32) -> Result<(), String> {
         Err(DatabaseError::Transaction(e)) => {
             error!("Error deleting measures: {}", e);
             show_notification(NotificationDefinition {
-                title: translate!("error_deleting_body_measures"),
+                title: translate("error_deleting_body_measures"),
                 body: e.deref().to_string(),
                 kind: NotificationKind::Persistant,
             });

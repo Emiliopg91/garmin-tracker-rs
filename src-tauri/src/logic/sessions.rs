@@ -18,13 +18,14 @@ use crate::{
         notifications::{NotificationDefinition, NotificationKind},
         sessions::{SessionDetails, SessionListItem, SessionSeriesUpdate},
     },
-    logic::notifications::show_notification,
+    logic::{app::SETTINGS_INST, notifications::show_notification},
     mtp::MTP_CLIENT_INST,
     parser::load_from_file,
+    utils::translations::{translate, translate_and_replace},
 };
 use chrono::{Datelike, Local, TimeZone, Timelike, offset::LocalResult};
 use curl::easy::Easy;
-use garmin_tracker_rs_macros::{traced_command, translate};
+use garmin_tracker_rs_macros::traced_command;
 use indexmap::IndexMap;
 use rayon::prelude::*;
 use rusqlite_orm::{
@@ -59,7 +60,7 @@ pub fn get_sessions() -> Result<Vec<SessionListItem>, String> {
         Err(DatabaseError::RunningOnConnection(e)) => {
             error!("Error getting sessions list: {}", e);
             show_notification(NotificationDefinition {
-                title: translate!("error_session_list"),
+                title: translate("error_session_list"),
                 body: e.deref().to_string(),
                 kind: NotificationKind::Persistant,
             });
@@ -135,7 +136,7 @@ pub fn get_session_details(timestamp: i32) -> Result<SessionDetails, String> {
         Err(DatabaseError::RunningOnConnection(e)) => {
             error!("Error getting session details: {}", e);
             show_notification(NotificationDefinition {
-                title: translate!("error_session_details"),
+                title: translate("error_session_details"),
                 body: e.deref().to_string(),
                 kind: NotificationKind::Persistant,
             });
@@ -182,7 +183,7 @@ pub fn save_session_changes(details: SessionSeriesUpdate) -> Result<(), String> 
         Ok(l) => {
             info!("Session updated succesfully");
             show_notification(NotificationDefinition {
-                title: translate!("ok_update_session"),
+                title: translate("ok_update_session"),
                 body: "".to_string(),
                 kind: NotificationKind::Temporal,
             });
@@ -192,7 +193,7 @@ pub fn save_session_changes(details: SessionSeriesUpdate) -> Result<(), String> 
         Err(DatabaseError::Transaction(e)) => {
             error!("Error updating session: {}", e);
             show_notification(NotificationDefinition {
-                title: translate!("error_update_session"),
+                title: translate("error_update_session"),
                 body: e.deref().to_string(),
                 kind: NotificationKind::Persistant,
             });
@@ -275,19 +276,26 @@ where
     let t0 = Instant::now();
     let mut success = 0_u16;
     let mut handled_exercises = HashSet::new();
+    let lang = SETTINGS_INST
+        .get()
+        .unwrap()
+        .read()
+        .unwrap()
+        .language
+        .to_string();
 
     let mut sessions = files
         .par_iter()
         .filter_map(|file| {
             info!("Parsing file {}", file.as_ref().display());
-            match load_from_file(file.as_ref()) {
+            match load_from_file(file.as_ref(), &lang) {
                 Ok(session) => Some(session),
                 Err(e) => {
                     error!("Error parsing session: {}", e);
 
                     show_notification(NotificationDefinition {
                         title: format!("{}", file.as_ref().file_name().unwrap().display()),
-                        body: translate!("error_parsing_session", e),
+                        body: translate_and_replace("error_parsing_session", &[&e.to_string()]),
                         kind: NotificationKind::Persistant,
                     });
 
@@ -368,7 +376,7 @@ where
                         "{} | {} | {}",
                         session.sport, session.workout, formatted_time
                     ),
-                    body: translate!("imported_session"),
+                    body: translate("imported_session"),
                     kind: NotificationKind::Temporal,
                 });
             }
@@ -468,11 +476,11 @@ fn get(url: &str) -> Result<String, curl::Error> {
     Ok(String::from_utf8_lossy(&data).to_string())
 }
 
-pub fn get_location_from_coordinates(lat: f64, long: f64) -> String {
+pub fn get_location_from_coordinates(lat: f64, long: f64, lang: &str) -> String {
     let mut location = "".to_string();
     let url = format!(
-        "https://api.bigdatacloud.net/data/reverse-geocode-client?latitude={}&longitude={}&localityLanguage=es",
-        lat, long
+        "https://api.bigdatacloud.net/data/reverse-geocode-client?latitude={}&longitude={}&localityLanguage={}",
+        lat, long, lang
     );
 
     match get(&url) {
