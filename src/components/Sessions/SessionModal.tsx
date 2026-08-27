@@ -1,9 +1,9 @@
 import { AppContext } from "@/context/AppContext";
 import { BackendClient } from "@/utils/backend/client";
 import { TimeUtils } from "@/utils/TimeUtils";
-import { SessionDetails, SessionSeriesUpdate } from "@/utils/backend/models";
+import { SessionSeriesUpdate } from "@/utils/backend/models";
 import L from "leaflet";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import {
   Button,
   Dialog,
@@ -25,9 +25,10 @@ import {
   Legend,
 } from "recharts";
 import { UnitUtils } from "@/utils/UnitUtils";
+import { SessionFrontDetails } from "@/utils/SessionUtils";
 
 type Props = {
-  session: SessionDetails;
+  session: SessionFrontDetails;
   onClose: () => void;
   onUpdate: () => void;
 };
@@ -53,96 +54,6 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
   const [originalSession] = useState(session);
   const [localSession, setLocalSession] = useState({ ...session });
   const [changed, setChanged] = useState(false);
-  const [minHr, setMinHr] = useState(0);
-  const [maxHr, setMaxHr] = useState(0);
-  const [avgHr, setAvgHr] = useState(0);
-  const [distance, setDistance] = useState(0);
-  const [volume, setVolume] = useState(0);
-  const [hrData, setHrData] = useState<
-    {
-      idx: number;
-      hr: number;
-      avg: number;
-      color: string;
-    }[]
-  >([]);
-
-  useEffect(() => {
-    const hrData: {
-      idx: number;
-      hr: number;
-      avg: number;
-      color: string;
-    }[] = [];
-
-    if (Object.entries(session.series).length > 0) {
-      let vol = 0;
-      Object.entries(session.series).map(([, series]) => {
-        series.forEach((serie) => {
-          vol += serie.reps * serie.weight!;
-        });
-      });
-      setVolume(vol);
-    }
-
-    const maxHr = Math.max(189, Math.max(...session.heart_rates));
-    setMaxHr(Math.max(...session.heart_rates));
-    const avgHr = Math.round(
-      session.heart_rates.reduce((acc, valor) => acc + valor, 0) /
-        session.heart_rates.length,
-    );
-    setAvgHr(avgHr);
-    setMinHr(Math.min(...session.heart_rates));
-
-    if (session.heart_rates.length > 0) {
-      session.heart_rates.forEach((hr, idx) => {
-        let color = "red";
-
-        const rateVal = (hr * 1.0) / (maxHr * 1.0);
-        if (rateVal <= 0.6) {
-          color = "gray";
-        } else if (rateVal <= 0.7) {
-          color = "turquoise";
-        } else if (rateVal <= 0.8) {
-          color = "green";
-        } else if (rateVal <= 0.9) {
-          color = "orange";
-        }
-        hrData.push({
-          idx: idx * 2,
-          hr,
-          avg: avgHr,
-          color,
-        });
-      });
-    }
-    setHrData(hrData);
-
-    if (session.gps_coordinates.length > 0) {
-      function toRadians(grados: number): number {
-        return (grados * Math.PI) / 180;
-      }
-
-      let dist = 0.0;
-      for (let i = 0; i < session.gps_coordinates.length - 1; i++) {
-        const p1 = session.gps_coordinates[i];
-        const p2 = session.gps_coordinates[i + 1];
-
-        const lat1 = toRadians(p1[0]);
-        const lat2 = toRadians(p2[0]);
-        const dLat = toRadians(p2[0] - p1[0]);
-        const dLon = toRadians(p2[1] - p1[1]);
-
-        const a =
-          Math.sin(dLat / 2) ** 2 +
-          Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) ** 2;
-        const c = 2 * Math.asin(Math.sqrt(a));
-
-        dist += 6371 * c;
-      }
-      setDistance(dist);
-    }
-  }, []);
 
   const updateSerieReps = (exercise: string, idx: number, newVal: string) => {
     let reps = parseInt(newVal);
@@ -242,11 +153,14 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                 attribution={""}
               />
 
-              <Polyline
-                positions={localSession.gps_coordinates}
-                color="blue"
-                weight={4}
-              />
+              {localSession.gps_segments.map((val, idx) => (
+                <Polyline
+                  key={"segment-" + idx}
+                  positions={val.coordinates}
+                  color={val.color}
+                  weight={4}
+                />
+              ))}
 
               <Marker
                 position={localSession.gps_coordinates[0]}
@@ -303,14 +217,15 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
               <td>{translate("workout_load")}:</td>
               <td>{localSession.training_load}</td>
             </tr>
-            {distance > 0 && (
+            {localSession.distance > 0 && (
               <>
                 <tr>
                   <td>{translate("distance")}:</td>
                   <td>
-                    {UnitUtils.fromKm(distance, settings.distance_unit).toFixed(
-                      2,
-                    )}{" "}
+                    {UnitUtils.fromKm(
+                      localSession.distance,
+                      settings.distance_unit,
+                    ).toFixed(2)}{" "}
                     {UnitUtils.getUnit(settings.distance_unit)}
                   </td>
                 </tr>
@@ -318,7 +233,7 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                   <td>{translate("speed")}:</td>
                   <td>
                     {UnitUtils.fromKm(
-                      distance / (localSession.total_elapsed_time / 3600),
+                      localSession.speed,
                       settings.distance_unit,
                     ).toFixed(2)}{" "}
                     {UnitUtils.getUnit(settings.distance_unit)}/h
@@ -328,7 +243,7 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                   <td>{translate("pace")}:</td>
                   <td>
                     {UnitUtils.fromKm(
-                      localSession.total_elapsed_time / 60 / distance,
+                      localSession.pace,
                       settings.distance_unit,
                     ).toFixed(2)}{" "}
                     min/{UnitUtils.getUnit(settings.distance_unit)}
@@ -336,11 +251,14 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                 </tr>
               </>
             )}
-            {volume > 0 && (
+            {localSession.volume > 0 && (
               <tr>
                 <td>{translate("volume")}:</td>
                 <td>
-                  {UnitUtils.fromKg(volume, settings.weight_unit).toFixed(1)}{" "}
+                  {UnitUtils.fromKg(
+                    localSession.volume,
+                    settings.weight_unit,
+                  ).toFixed(1)}{" "}
                   {UnitUtils.getUnit(settings.weight_unit)}
                 </td>
               </tr>
@@ -353,20 +271,21 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
             )}
           </tbody>
         </table>
-        {hrData.length > 0 && (
+        {localSession.hrData.length > 0 && (
           <>
             <hr />
             <div style={{ width: "100%", height: 200 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart
-                  data={hrData}
+                  data={localSession.hrData}
                   margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
                 >
                   <defs>
                     <linearGradient id="hrColor" x1="0" y1="0" x2="1" y2="0">
-                      {hrData.flatMap((point, i) => {
-                        const start = (i / hrData.length) * 100;
-                        const end = ((i + 1) / hrData.length) * 100;
+                      {localSession.hrData.flatMap((point, i) => {
+                        const start = (i / localSession.hrData.length) * 100;
+                        const end =
+                          ((i + 1) / localSession.hrData.length) * 100;
                         return [
                           <stop
                             key={`${i}-start`}
@@ -394,24 +313,22 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                   <XAxis dataKey="idx" tick={false} />
                   <YAxis
                     width="auto"
-                    domain={[(4 * minHr) / 5, maxHr]}
-                    ticks={[minHr, avgHr, maxHr]}
+                    domain={[
+                      (4 * localSession.hrRanges[0]) / 5,
+                      localSession.hrRanges[2],
+                    ]}
+                    ticks={localSession.hrRanges}
                   />
-                  <ReferenceLine
-                    y={avgHr}
-                    stroke="white"
-                    strokeDasharray="3 3"
-                  />
-                  <ReferenceLine
-                    y={minHr}
-                    stroke="white"
-                    strokeDasharray="3 3"
-                  />
-                  <ReferenceLine
-                    y={maxHr}
-                    stroke="white"
-                    strokeDasharray="3 3"
-                  />
+                  {localSession.hrRanges.map((val, idx) => {
+                    return (
+                      <ReferenceLine
+                        key={"range-" + idx}
+                        y={val}
+                        stroke="white"
+                        strokeDasharray="3 3"
+                      />
+                    );
+                  })}
                   <Area
                     dataKey="hr"
                     type="monotone"

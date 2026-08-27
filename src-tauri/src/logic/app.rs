@@ -93,7 +93,7 @@ pub fn export_database() -> Result<(), String> {
     let path = constants::HOME_DIR.join(format!(
         "{}-{}.json",
         *constants::APP_NAME,
-        Local::now().format("%Y-%m-%d-%H-%M-%S").to_string()
+        Local::now().format("%Y-%m-%d-%H-%M-%S")
     ));
     info!("Exporting database to {}...", path.display());
 

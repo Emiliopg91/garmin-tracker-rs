@@ -11,13 +11,11 @@ export class TimeUtils {
     let res: string;
     if (h > 0) {
       res = `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
-    } else if (m > 0) {
-      res = `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
     } else {
-      res = `${s}`;
+      res = `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
     }
 
-    while (res.startsWith("0")) {
+    while (res.startsWith("0") && !res.startsWith("0:")) {
       res = res.slice(1);
     }
 

@@ -1,6 +1,6 @@
 import { AppContext } from "@/context/AppContext";
 import { BackendClient } from "@/utils/backend/client";
-import { SessionDetails, SessionListItem } from "@/utils/backend/models";
+import { SessionListItem } from "@/utils/backend/models";
 import { useContext, useEffect, useState } from "react";
 import { Button, Menu, MenuItem } from "@mui/material";
 import { SessionModal } from "./SessionModal";
@@ -16,15 +16,11 @@ import {
 } from "recharts";
 import { BackendListener } from "@/utils/backend/listener";
 import { TimeUtils } from "@/utils/TimeUtils";
-import { UnitUtils } from "@/utils/UnitUtils";
-
-type WorkoutLoad = {
-  date: number;
-  upper: number;
-  current: number;
-  reference: number;
-  lower: number;
-};
+import {
+  SessionFrontDetails,
+  SessionUtils,
+  WorkoutLoad,
+} from "@/utils/SessionUtils";
 
 export function SessionsList() {
   const { startLoading, finishLoading, availableDevices, translate, settings } =
@@ -34,7 +30,7 @@ export function SessionsList() {
   const [workload, setWorkload] = useState<WorkoutLoad[]>([]);
   const [sessions, setSessions] = useState<SessionListItem[]>([]);
   const [sessionDetails, setSessionDetails] = useState<
-    SessionDetails | undefined
+    SessionFrontDetails | undefined
   >(undefined);
   const [importMenuAnchor, setImportMenuAnchor] = useState<HTMLElement | null>(
     null,
@@ -45,116 +41,10 @@ export function SessionsList() {
     BackendClient.getSessions()
       .then((data) => {
         setSessions(data);
-
-        if (data.length === 0) {
-          setWorkload([]);
-        } else {
-          const startOfDay = (d: Date) =>
-            new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
-
-          const addDays = (ts: number, n: number) => {
-            const d = new Date(ts);
-            d.setDate(d.getDate() + n);
-            return d.getTime();
-          };
-
-          const CHRONIC_DAYS = 28;
-          const ACUTE_DAYS = 7;
-          const ACWR_UPPER_RATIO = 1.4;
-          const ACWR_LOWER_RATIO = 0.9;
-          const TODAY = startOfDay(new Date());
-
-          const LAMBDA_ACUTE = 2 / (ACUTE_DAYS + 1); // ~0.25
-          const LAMBDA_CHRONIC = 2 / (CHRONIC_DAYS + 1); // ~0.069
-
-          let working_data = Array.from(
-            data
-              .map((s) => {
-                const [dd, mm, yyyy] = TimeUtils.formatDate(s.timestamp)
-                  .split("/")
-                  .map(Number);
-                const date = new Date(yyyy, mm - 1, dd).getTime();
-
-                return { date, load: s.training_load };
-              })
-              .filter(
-                (s) => TODAY - 2 * CHRONIC_DAYS * 24 * 60 * 60 * 1000 <= s.date,
-              )
-              .reduce((map, s) => {
-                map.set(s.date, (map.get(s.date) ?? 0) + s.load);
-                return map;
-              }, new Map<number, number>()),
-            ([date, load]) => ({ date, load }),
-          );
-
-          for (
-            let dat = addDays(TODAY, -2 * CHRONIC_DAYS + 1);
-            dat <= TODAY;
-            dat = addDays(dat, 1)
-          ) {
-            if (!working_data.find(({ date }) => date === dat)) {
-              working_data.push({ date: dat, load: 0 });
-            }
-          }
-
-          working_data = working_data.sort((a, b) => a.date - b.date);
-
-          if (working_data.length === 0) {
-            setWorkload([]);
-          } else {
-            let ewmaAcute = working_data[0].load;
-            let ewmaChronic = working_data[0].load;
-
-            const ewmaSeries: {
-              date: number;
-              acute: number;
-              chronic: number;
-            }[] = [
-              {
-                date: working_data[0].date,
-                acute: ewmaAcute,
-                chronic: ewmaChronic,
-              },
-            ];
-
-            for (let i = 1; i < working_data.length; i++) {
-              const v = working_data[i].load;
-              ewmaAcute = v * LAMBDA_ACUTE + ewmaAcute * (1 - LAMBDA_ACUTE);
-              ewmaChronic =
-                v * LAMBDA_CHRONIC + ewmaChronic * (1 - LAMBDA_CHRONIC);
-
-              ewmaSeries.push({
-                date: working_data[i].date,
-                acute: ewmaAcute,
-                chronic: ewmaChronic,
-              });
-            }
-
-            let load_data = ewmaSeries
-              .filter((_, idx) => idx >= CHRONIC_DAYS)
-              .map((e) => ({
-                date: e.date,
-                upper: e.chronic * (ACWR_UPPER_RATIO - ACWR_LOWER_RATIO),
-                lower: e.chronic * ACWR_LOWER_RATIO,
-                current: e.acute,
-                reference: e.chronic,
-              }));
-
-            if (load_data.length === 0) {
-              setWorkload([]);
-            } else {
-              load_data = load_data.map((e) => ({
-                ...e,
-                current: e.current,
-                upper: e.upper,
-                lower: e.lower,
-                reference: e.reference,
-              }));
-
-              setMinDate(load_data[0].date);
-              setWorkload(load_data);
-            }
-          }
+        const workout_data = SessionUtils.calculateWorkoutLoad(data);
+        setWorkload(workout_data);
+        if (workout_data.length > 0) {
+          setMinDate(workout_data[0].date);
         }
       })
       .finally(() => {
@@ -190,22 +80,9 @@ export function SessionsList() {
     startLoading();
     BackendClient.getSessionDetails(timestamp)
       .then((details) => {
-        Object.keys(details.series).forEach((key) => {
-          details.series[key].forEach((_, idx) => {
-            const copy = { ...details.series[key][idx] };
-            copy.weight = Number(
-              UnitUtils.fromKg(copy.weight, settings.weight_unit).toFixed(1),
-            );
-            details.series[key][idx] = copy;
-          });
-        });
-        for (let i = 0; i < details.gps_coordinates.length; i++) {
-          details.gps_coordinates[i][0] =
-            details.gps_coordinates[i][0] * UnitUtils.SEMICIRCLE_TO_DEGREES;
-          details.gps_coordinates[i][1] =
-            details.gps_coordinates[i][1] * UnitUtils.SEMICIRCLE_TO_DEGREES;
-        }
-        setSessionDetails(details);
+        setSessionDetails(
+          SessionUtils.detailsFromBackend(details, settings.weight_unit),
+        );
       })
       .finally(() => {
         finishLoading();

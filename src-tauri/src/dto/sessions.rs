@@ -66,7 +66,6 @@ pub struct SessionDetails {
 
     pub total_elapsed_time: i32,
     pub active_time: i32,
-    pub zones_times: Vec<i32>,
 
     pub total_calories: u16,
     pub metabolic_calories: u16,
@@ -104,11 +103,9 @@ impl From<(&Session, &IndexMap<Exercise, Vec<Serie>>)> for SessionDetails {
             .map(|dev| format!("Garmin {}", dev.model));
 
         let mut heart_rates = Vec::new();
-        let mut zones_times = Vec::new();
         if let Some(hr_dao) = value.0.heart_rates.clone()
             && !hr_dao.records.is_empty()
         {
-            zones_times = hr_dao.get_time_in_zones(value.0.total_elapsed_time);
             heart_rates = hr_dao.records.into_iter().collect();
         }
 
@@ -122,7 +119,6 @@ impl From<(&Session, &IndexMap<Exercise, Vec<Serie>>)> for SessionDetails {
             timestamp: value.0.date as i32,
             total_elapsed_time: value.0.total_elapsed_time.round() as i32,
             active_time: value.0.active_time.round() as i32,
-            zones_times,
             metabolic_calories: value.0.metabolic_calories,
             total_calories: value.0.total_calories,
             training_load: value.0.training_load.round() as u16,

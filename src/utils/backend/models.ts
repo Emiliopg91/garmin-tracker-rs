@@ -67,7 +67,6 @@ export interface SessionDetails {
   total_calories: number;
   total_elapsed_time: number;
   training_load: number;
-  zones_times: number[];
 }
 
 // From src-tauri/src/dto/sessions.rs:9
@@ -88,7 +87,7 @@ export interface SessionSerie {
   weight: number;
 }
 
-// From src-tauri/src/dto/sessions.rs:140
+// From src-tauri/src/dto/sessions.rs:136
 export interface SessionSeriesUpdate {
   series: SessionSerie[];
   timestamp: number;
