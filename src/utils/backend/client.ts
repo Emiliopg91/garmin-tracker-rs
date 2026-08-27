@@ -20,13 +20,19 @@ export class BackendClient {
 	}
 	
 
+	// From src-tauri/src/logic/app.rs:92
+	public static exportDatabase(): Promise<void> {
+	  return BackendClient.inner_invoke("export_database"); 
+	}
+	
+
 	// From src-tauri/src/logic/body_metrics.rs:21
 	public static getBodyMeasures(): Promise<BodyMetricListItem[]> {
 	  return BackendClient.inner_invoke("get_body_measures"); 
 	}
 	
 
-	// From src-tauri/src/logic/app.rs:41
+	// From src-tauri/src/logic/app.rs:46
 	public static getEnvironment(): Promise<AppEnvironment> {
 	  return BackendClient.inner_invoke("get_environment"); 
 	}
@@ -56,7 +62,7 @@ export class BackendClient {
 	}
 	
 
-	// From src-tauri/src/logic/app.rs:19
+	// From src-tauri/src/logic/app.rs:24
 	public static getSettings(): Promise<Settings> {
 	  return BackendClient.inner_invoke("get_settings"); 
 	}
@@ -80,7 +86,7 @@ export class BackendClient {
 	}
 	
 
-	// From src-tauri/src/logic/app.rs:25
+	// From src-tauri/src/logic/app.rs:30
 	public static notifyFrontendReady(): Promise<void> {
 	  return BackendClient.inner_invoke("notify_frontend_ready"); 
 	}
@@ -92,7 +98,7 @@ export class BackendClient {
 	}
 	
 
-	// From src-tauri/src/logic/app.rs:51
+	// From src-tauri/src/logic/app.rs:56
 	public static updateSettingsValue(name: string, value: string): Promise<void> {
 	  return BackendClient.inner_invoke("update_settings_value", { name, value }); 
 	}

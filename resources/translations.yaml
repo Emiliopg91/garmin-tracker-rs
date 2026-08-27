@@ -322,3 +322,18 @@ start_on_boot_true:
 start_on_boot_false:
   en: Manually
   es: Manualmente
+select_output_folder:
+  en: Select output folder
+  es: Selecciona directorio de salida
+select_file_import:
+  en: Select file to import
+  en: Selecciona archivo a importar
+database_operations:
+  en: Database management
+  es: Gestión de base de datos
+backup_database:
+  en: Backup
+  es: Exportar
+restore_database:
+  en: Restore
+  es: Restaurar

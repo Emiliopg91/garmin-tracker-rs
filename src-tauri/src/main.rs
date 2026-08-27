@@ -3,6 +3,7 @@
 
 fn main() {
     let args = std::env::args().collect::<Vec<String>>();
+    println!("{:?}", args);
     #[cfg(debug_assertions)]
     if args.len() >= 3 && args.get(1).unwrap() == "--unwrap" {
         unsafe {

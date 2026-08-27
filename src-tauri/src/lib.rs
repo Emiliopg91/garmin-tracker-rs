@@ -189,7 +189,7 @@ pub fn run() {
             delete_body_metric,
             get_settings,
             update_settings_value,
-            export_database
+            export_database,
         ])
         .run(tauri::generate_context!());
 

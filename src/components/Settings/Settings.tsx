@@ -6,10 +6,11 @@ import {
   WeightUnit,
 } from "@/utils/backend/models";
 import { useContext, useState } from "react";
-import { MenuItem, Select } from "@mui/material";
+import { Button, MenuItem, Select } from "@mui/material";
 
 export function Settings() {
-  const { environment, settings, translate } = useContext(AppContext);
+  const { environment, settings, translate, startLoading, finishLoading } =
+    useContext(AppContext);
   console.log(environment);
 
   const [weightUnit, setWeightUnit] = useState(settings.weight_unit);
@@ -18,36 +19,57 @@ export function Settings() {
   const [startOnBoot, setStartOnBoot] = useState(settings.start_boot);
 
   const updateWeightUnit = (value: WeightUnit) => {
-    BackendClient.updateSettingsValue("weight_unit", value).then(() => {
-      setWeightUnit(value);
-      settings.weight_unit = value;
-    });
+    startLoading();
+    BackendClient.updateSettingsValue("weight_unit", value)
+      .then(() => {
+        setWeightUnit(value);
+        settings.weight_unit = value;
+      })
+      .finally(() => {
+        finishLoading();
+      });
   };
 
   const updateDistanceUnit = (value: DistanceUnit) => {
-    BackendClient.updateSettingsValue("distance_unit", value).then(() => {
-      setDistanceUnit(value);
-      settings.distance_unit = value;
-    });
+    startLoading();
+    BackendClient.updateSettingsValue("distance_unit", value)
+      .then(() => {
+        setDistanceUnit(value);
+        settings.distance_unit = value;
+      })
+      .finally(() => {
+        finishLoading();
+      });
   };
 
   const updateAutoSync = (value: boolean) => {
-    BackendClient.updateSettingsValue(
-      "auto_sync",
-      value ? "true" : "false",
-    ).then(() => {
-      setAutoSync(value);
-      settings.auto_sync = value;
-    });
+    startLoading();
+    BackendClient.updateSettingsValue("auto_sync", value ? "true" : "false")
+      .then(() => {
+        setAutoSync(value);
+        settings.auto_sync = value;
+      })
+      .finally(() => {
+        finishLoading();
+      });
   };
 
   const updateStartOnBoot = (value: boolean) => {
-    BackendClient.updateSettingsValue(
-      "start_boot",
-      value ? "true" : "false",
-    ).then(() => {
-      setStartOnBoot(value);
-      settings.auto_sync = value;
+    startLoading();
+    BackendClient.updateSettingsValue("start_boot", value ? "true" : "false")
+      .then(() => {
+        setStartOnBoot(value);
+        settings.auto_sync = value;
+      })
+      .finally(() => {
+        finishLoading();
+      });
+  };
+
+  const exportDatabase = () => {
+    startLoading();
+    BackendClient.exportDatabase().finally(() => {
+      finishLoading();
     });
   };
 
@@ -123,6 +145,19 @@ export function Settings() {
                 {translate("start_on_boot_true")}
               </MenuItem>
             </Select>
+          </td>
+        </tr>
+        <tr>
+          <td>{translate("database_operations")}</td>
+          <td>
+            <Button
+              id="add-measure-button"
+              variant="contained"
+              style={{ width: "100%" }}
+              onClick={exportDatabase}
+            >
+              {translate("backup_database")}
+            </Button>
           </td>
         </tr>
       </table>

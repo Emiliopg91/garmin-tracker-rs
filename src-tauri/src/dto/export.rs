@@ -1,15 +1,16 @@
-use std::{fs, path::Path};
-
-use rusqlite_orm::{dao::Repository, database::Database};
+use rusqlite_orm::{
+    dao::Repository,
+    database::{Database, errors::DatabaseError},
+};
 use serde::{Deserialize, Serialize};
 
 use crate::dao::{
     body_metrics::{BodyMetrics, BodyMetricsRepository},
-    device::{Device, DeviceRepository},
+    device::{self, Device, DeviceRepository},
     exercise::{Exercise, ExerciseRepository},
-    gps_coordinates::GpsCoordinates,
-    heart_rate::HeartRate,
-    serie::Serie,
+    gps_coordinates::{GpsCoordinates, GpsCoordinatesRepository},
+    heart_rate::{HeartRate, HeartRateRepository},
+    serie::{Serie, SerieRepository},
     session::{Session, SessionRepository},
     settings::{Settings, SettingsRepository},
 };
@@ -53,17 +54,7 @@ impl Export {
     }
 
     pub fn to_json(&self) -> Result<String, serde_json::Error> {
-        serde_json::to_string(&self)
-    }
-
-    pub fn from_file<P>(path: P) -> Result<Self, Box<dyn std::error::Error>>
-    where
-        P: AsRef<Path>,
-    {
-        let content = fs::read_to_string(path.as_ref())?;
-        let obj = serde_json::from_str(&content)?;
-
-        Ok(obj)
+        serde_json::to_string_pretty(&self)
     }
 }
 
@@ -121,7 +112,7 @@ impl From<SessionExport> for Session {
         }
         let mut gps_coordinates = None;
         if let Some(gps) = session.gps_coordinates {
-            let mut obj= GpsCoordinates::from(gps.as_slice());
+            let mut obj = GpsCoordinates::from(gps.as_slice());
             obj.session = session.date;
             gps_coordinates = Some(obj);
         }

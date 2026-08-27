@@ -39,6 +39,7 @@ libc = "^0"
 mtp-rs = "^0"
 nusb = "^0"
 rayon = "^1"
+rfd = "^0"
 #rusqlite_orm = { path = "../rusqlite_orm/orm" }
 rusqlite_orm = "^0"
 #rusqlite_orm_macros = { path = "../rusqlite_orm/macros" }

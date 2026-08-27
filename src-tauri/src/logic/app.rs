@@ -1,6 +1,8 @@
-use std::{fs, sync::OnceLock};
+use std::{env, fs, os::unix::process::CommandExt, process::Command, sync::OnceLock};
 
-use garmin_tracker_rs_macros::traced_command;
+use chrono::Local;
+use garmin_tracker_rs_macros::{traced_command, translate};
+use rfd::FileDialog;
 use tauri::{AppHandle, WebviewWindow};
 use tauri_plugin_autostart::ManagerExt;
 use tokio::sync::RwLock;
@@ -13,7 +15,7 @@ use crate::{
     },
     logic::devices::start_device_watcher,
 };
-use tauri_plugin_log::log::info;
+use tauri_plugin_log::log::{error, info};
 
 pub static SETTINGS_INST: OnceLock<RwLock<Settings>> = OnceLock::new();
 
@@ -88,9 +90,19 @@ pub async fn update_settings_value(app: AppHandle, name: &str, value: &str) -> R
 #[traced_command]
 #[tauri::command]
 pub fn export_database() -> Result<(), String> {
-    let export = Export::from_database().map_err(|e| e.to_string())?;
-    let json = export.to_json().map_err(|e| e.to_string())?;
-    fs::write(constants::HOME_DIR.join(format!("{}.json",*constants::APP_NAME)), json).map_err(|e| e.to_string())?;
-
+    if let Some(path) = FileDialog::new()
+        .set_title(translate!("select_output_folder"))
+        .pick_folder()
+    {
+        let path = path.join(format!(
+            "{} {}.gtrs",
+            *constants::APP_NAME,
+            Local::now().format("%Y-%m-%d-%H-%M-%S").to_string()
+        ));
+        info!("Exporting database to {}...", path.display());
+        let export = Export::from_database().map_err(|e| e.to_string())?;
+        let json = export.to_json().map_err(|e| e.to_string())?;
+        fs::write(path, json).map_err(|e| e.to_string())?;
+    }
     Ok(())
 }
