@@ -61,7 +61,7 @@ impl Settings {
         SettingsRepository::select_by_id(settings_keys::LANGUAGE)
             .ok()
             .flatten()
-            .and_then(|r| Some(Languages::from(r.value.as_str())))
+            .map(|r| Languages::from(r.value.as_str()))
             .unwrap_or((*constants::SYSTEM_LANGUAGE).clone())
     }
     pub fn set_language(value: &Languages) -> rusqlite_orm::database::errors::Result<()> {

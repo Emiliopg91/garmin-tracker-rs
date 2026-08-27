@@ -79,7 +79,7 @@ pub fn translate_and_replace(key: &str, replacements: &[&str]) -> String {
     let mut literal = translate(key);
 
     for replacement in replacements {
-        literal = literal.replace("{}", &format!("{}", replacement))
+        literal = literal.replace("{}", replacement)
     }
 
     literal
