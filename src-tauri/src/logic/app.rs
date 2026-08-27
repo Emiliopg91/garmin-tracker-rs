@@ -2,7 +2,6 @@ use std::{fs, sync::OnceLock};
 
 use chrono::Local;
 use garmin_tracker_rs_macros::{traced_command, translate};
-use rfd::FileDialog;
 use tauri::{AppHandle, WebviewWindow};
 use tauri_plugin_autostart::ManagerExt;
 use tokio::sync::RwLock;
@@ -12,10 +11,11 @@ use crate::{
     dto::{
         app::{AppEnvironment, Settings},
         export::Export,
+        notifications::{NotificationDefinition, NotificationKind},
     },
-    logic::devices::start_device_watcher,
+    logic::{devices::start_device_watcher, notifications::show_notification},
 };
-use tauri_plugin_log::log::info;
+use tauri_plugin_log::log::{error, info};
 
 pub static SETTINGS_INST: OnceLock<RwLock<Settings>> = OnceLock::new();
 
@@ -90,19 +90,41 @@ pub async fn update_settings_value(app: AppHandle, name: &str, value: &str) -> R
 #[traced_command]
 #[tauri::command]
 pub fn export_database() -> Result<(), String> {
-    if let Some(path) = FileDialog::new()
-        .set_title(translate!("select_output_folder"))
-        .pick_folder()
-    {
-        let path = path.join(format!(
-            "{} {}.gtrs",
-            *constants::APP_NAME,
-            Local::now().format("%Y-%m-%d-%H-%M-%S").to_string()
-        ));
-        info!("Exporting database to {}...", path.display());
-        let export = Export::from_database().map_err(|e| e.to_string())?;
-        let json = export.to_json().map_err(|e| e.to_string())?;
-        fs::write(path, json).map_err(|e| e.to_string())?;
+    let path = constants::HOME_DIR.join(format!(
+        "{}-{}.json",
+        *constants::APP_NAME,
+        Local::now().format("%Y-%m-%d-%H-%M-%S").to_string()
+    ));
+    info!("Exporting database to {}...", path.display());
+
+    let res = Export::from_database()
+        .map_err(|e| Box::new(e) as Box<dyn std::error::Error>)
+        .and_then(|export| {
+            export
+                .to_json()
+                .map_err(|e| Box::new(e) as Box<dyn std::error::Error>)
+        })
+        .and_then(|json| {
+            fs::write(&path, json).map_err(|e| Box::new(e) as Box<dyn std::error::Error>)
+        });
+
+    match res {
+        Ok(()) => {
+            show_notification(NotificationDefinition {
+                title: translate!("ok_on_export"),
+                body: translate!("export_file_path", path.display()),
+                kind: NotificationKind::Temporal,
+            });
+            Ok(())
+        }
+        Err(e) => {
+            error!("Error exporting database: {}", e);
+            show_notification(NotificationDefinition {
+                title: translate!("error_on_export"),
+                body: e.to_string(),
+                kind: NotificationKind::Persistant,
+            });
+            Err(e.to_string())
+        }
     }
-    Ok(())
 }

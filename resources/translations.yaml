@@ -337,3 +337,15 @@ backup_database:
 restore_database:
   en: Restore
   es: Restaurar
+ok_on_export:
+  en: Database exported succesfully
+  es: Base de datos exportada correctamente
+ok_on_export:
+  en: Database exported succesfully
+  es: Base de datos exportada correctamente
+error_on_export:
+  en: Error exporting database
+  es: Error exportando base de datos
+export_file_path:
+  en: File exported to {}
+  es: Archivo exportado en {}
