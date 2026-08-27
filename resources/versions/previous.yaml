@@ -1,5 +1,10 @@
 node:
+  '@emotion/react': 11.14.0
+  '@emotion/styled': 11.14.1
   '@eslint/js': 9.39.5
+  '@mui/icons-material': 9.3.1
+  '@mui/material': 9.3.1
+  '@mui/x-date-pickers': 9.12.0
   '@tauri-apps/api': 2.11.1
   '@tauri-apps/cli': 2.11.4
   '@tauri-apps/plugin-autostart': 2.5.1
@@ -7,41 +12,38 @@ node:
   '@tauri-apps/plugin-opener': 2.5.4
   '@types/leaflet': 1.9.22
   '@types/react': 19.2.18
-  '@types/react-dom': 19.2.4
+  '@types/react-dom': 19.2.5
   '@vitejs/plugin-react': 4.7.0
-  bootstrap: 5.3.8
+  date-fns: 4.4.0
   eslint: 9.39.5
   eslint-plugin-react: 7.37.5
   leaflet: 1.9.4
   prettier: 3.9.6
   react: 19.2.8
-  react-bootstrap: 2.10.10
-  react-datepicker: 9.1.0
   react-dom: 19.2.8
   react-leaflet: 5.0.0
   recharts: 3.10.1
   typescript: 5.8.3
-  typescript-eslint: 8.67.0
+  typescript-eslint: 8.68.0
   vite: 7.3.6
   vite-plugin-checker: 0.14.5
 rust:
   chrono: 0.4.45
+  curl: 0.4.50
   fitparser: 0.11.0
   garmin-tracker-rs-macros: 0.1.0
   indexmap: 2.14.0
   libc: 0.2.189
-  mtp-rs: 0.30.0
+  mtp-rs: 0.31.0
   nusb: 0.2.7
-  rusqlite_orm: 0.4.7
+  phf: 0.13.1
+  phf_codegen: 0.13.1
+  rayon: 1.12.0
+  rusqlite_orm: 0.4.8
   rusqlite_orm_macros: 0.4.5
   serde: 1.0.229
   serde_json: 1.0.151
   serde_yaml: 0.9.34+deprecated
-  swc_common: 24.0.0
-  swc_ecma_ast: 26.0.0
-  swc_ecma_parser: 42.0.0
-  swc_ecma_visit: 26.0.0
-  syn: 3.0.4
   tauri: 2.11.5
   tauri-build: 2.6.3
   tauri-plugin-autostart: 2.5.1
@@ -51,5 +53,3 @@ rust:
   thiserror: 2.0.20
   tokio: 1.53.1
   tokio-stream: 0.1.19
-  ureq: 2.12.1
-  walkdir: 2.5.0
