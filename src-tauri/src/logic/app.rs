@@ -1,4 +1,4 @@
-use std::{env, fs, os::unix::process::CommandExt, process::Command, sync::OnceLock};
+use std::{fs, sync::OnceLock};
 
 use chrono::Local;
 use garmin_tracker_rs_macros::{traced_command, translate};
@@ -15,7 +15,7 @@ use crate::{
     },
     logic::devices::start_device_watcher,
 };
-use tauri_plugin_log::log::{error, info};
+use tauri_plugin_log::log::info;
 
 pub static SETTINGS_INST: OnceLock<RwLock<Settings>> = OnceLock::new();
 

@@ -1,16 +1,13 @@
-use rusqlite_orm::{
-    dao::Repository,
-    database::{Database, errors::DatabaseError},
-};
+use rusqlite_orm::{dao::Repository, database::Database};
 use serde::{Deserialize, Serialize};
 
 use crate::dao::{
     body_metrics::{BodyMetrics, BodyMetricsRepository},
-    device::{self, Device, DeviceRepository},
+    device::{Device, DeviceRepository},
     exercise::{Exercise, ExerciseRepository},
-    gps_coordinates::{GpsCoordinates, GpsCoordinatesRepository},
-    heart_rate::{HeartRate, HeartRateRepository},
-    serie::{Serie, SerieRepository},
+    gps_coordinates::GpsCoordinates,
+    heart_rate::HeartRate,
+    serie::Serie,
     session::{Session, SessionRepository},
     settings::{Settings, SettingsRepository},
 };
