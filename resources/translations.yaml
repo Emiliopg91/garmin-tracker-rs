@@ -349,3 +349,9 @@ error_on_export:
 export_file_path:
   en: File exported to {}
   es: Archivo exportado en {}
+satellite_map:
+  en: Satellite
+  es: Satélite
+street_map:
+  en: Streets
+  es: Callejero

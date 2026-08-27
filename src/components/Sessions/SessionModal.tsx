@@ -9,7 +9,12 @@ import {
   Dialog,
   DialogContent,
   DialogTitle,
+  FormControl,
+  FormControlLabel,
+  FormLabel,
   IconButton,
+  Radio,
+  RadioGroup,
   TextField,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
@@ -47,6 +52,10 @@ const makeMarkerIcon = (color: string) =>
 
 const startIcon = makeMarkerIcon("#2ecc71");
 const endIcon = makeMarkerIcon("#e74c3c");
+const urls = [
+  "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+  "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+];
 
 export function SessionModal({ session, onClose, onUpdate }: Props) {
   const { startLoading, finishLoading, translate, settings } =
@@ -54,6 +63,11 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
   const [originalSession] = useState(session);
   const [localSession, setLocalSession] = useState({ ...session });
   const [changed, setChanged] = useState(false);
+  const [url, setUrl] = useState(0);
+
+  const handleMapTypeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setUrl(event.target.value === "street" ? 0 : 1);
+  };
 
   const updateSerieReps = (exercise: string, idx: number, newVal: string) => {
     let reps = parseInt(newVal);
@@ -148,10 +162,7 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
               attributionControl={false}
               style={{ height: "200px", width: "100%" }}
             >
-              <TileLayer
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                attribution={""}
-              />
+              <TileLayer url={urls[url]} attribution={""} />
 
               {localSession.gps_segments.map((val, idx) => (
                 <Polyline
@@ -176,6 +187,27 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                 icon={endIcon}
               ></Marker>
             </MapContainer>
+            <FormControl
+              style={{ width: "100%", display: "flex", alignItems: "center" }}
+            >
+              <RadioGroup
+                row
+                name="row-radio-buttons-group"
+                value={url === 0 ? "street" : "satellite"}
+                onChange={handleMapTypeChange}
+              >
+                <FormControlLabel
+                  value="street"
+                  control={<Radio />}
+                  label={translate("street_map")}
+                />
+                <FormControlLabel
+                  value="satellite"
+                  control={<Radio />}
+                  label={translate("satellite_map")}
+                />
+              </RadioGroup>
+            </FormControl>
             <hr />
           </>
         )}

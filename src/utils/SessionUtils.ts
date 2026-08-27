@@ -80,7 +80,7 @@ export class SessionUtils {
           details.gps_coordinates[i][1] * UnitUtils.SEMICIRCLE_TO_DEGREES;
       }
 
-      const diffs = [];
+      const diffs: number[] = [];
       for (let i = 0; i < details.gps_coordinates.length - 1; i++) {
         const diff = SessionUtils.haversine(
           details.gps_coordinates[i],
@@ -91,13 +91,30 @@ export class SessionUtils {
       }
       details.speed = details.distance / (details.total_elapsed_time / 3600);
       details.pace = details.total_elapsed_time / 60 / details.distance;
-      const minDiff = Math.min(...diffs);
-      const maxDiff = Math.max(...diffs) - minDiff;
 
-      diffs.forEach((val, idx) => {
+      const SMOOTH_WINDOW = 8;
+      const smoothed = diffs.map((_, idx) => {
+        const lo = Math.max(0, idx - Math.floor(SMOOTH_WINDOW / 2));
+        const hi = Math.min(
+          diffs.length,
+          idx + Math.floor(SMOOTH_WINDOW / 2) + 1,
+        );
+        const slice = diffs.slice(lo, hi);
+        return slice.reduce((acc, v) => acc + v, 0) / slice.length;
+      });
+
+      const sorted = [...smoothed].sort((a, b) => a - b);
+      const percentile = (p: number) =>
+        sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * p))];
+      const lowClamp = percentile(0.05);
+      const highClamp = percentile(0.95);
+      const clampSpan = highClamp - lowClamp;
+
+      smoothed.forEach((val, idx) => {
+        const clamped = Math.min(Math.max(val, lowClamp), highClamp);
         let hue = 240;
-        if (maxDiff > 0) {
-          hue = 240 - 240 * ((val - minDiff) / maxDiff);
+        if (clampSpan > 0) {
+          hue = 240 - 240 * ((clamped - lowClamp) / clampSpan);
         }
         details.gps_segments.push({
           coordinates: [
@@ -107,7 +124,6 @@ export class SessionUtils {
           color: `hsl(${Math.round(hue)}, 100%, 50%)`,
         });
       });
-      console.table(details.gps_segments);
     }
   }
 
