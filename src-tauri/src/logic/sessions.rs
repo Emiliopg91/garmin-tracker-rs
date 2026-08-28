@@ -12,7 +12,7 @@ use crate::{
         exercise::{self, Exercise, ExerciseRepository},
         heart_rate::HeartRateRepository,
         serie::{self, Serie, SerieRepository, entity},
-        session::{self, SessionRepository},
+        session::{self, Session, SessionRepository},
         speeds::SpeedsRepository,
     },
     dto::{
@@ -177,7 +177,7 @@ pub fn save_session_changes(details: SessionSeriesUpdate) -> Result<(), String> 
         session.fetch_series_relationship_in_conn(tx)?;
         session.update_by_id_in(tx)?;
 
-        update_prs(tx, exercises)?;
+        update_prs(tx, exercises, &[details.timestamp as i64])?;
         Ok(())
     });
 
@@ -207,11 +207,11 @@ pub fn save_session_changes(details: SessionSeriesUpdate) -> Result<(), String> 
 
 #[traced_command]
 #[tauri::command]
-pub async fn import_from_device(serial: &str) -> Result<u16, String> {
+pub async fn import_from_device(serial: &str) -> Result<usize, String> {
     _import_from_device(serial).await
 }
 
-pub async fn _import_from_device(serial: &str) -> Result<u16, String> {
+pub async fn _import_from_device(serial: &str) -> Result<usize, String> {
     info!("Starting import from device with S/N {}", serial);
     let mut latest_date = "2026-06-08-00-00-00".to_string();
     let mut device = DeviceRepository::select_by_id(serial)
@@ -248,7 +248,7 @@ pub async fn _import_from_device(serial: &str) -> Result<u16, String> {
                 info!("Fetched {} activity files", activities.len());
                 import_file_list(tx, &activities, &device)
             } else {
-                Ok(0_u16)
+                Ok(Vec::new())
             }?;
 
             device.last_sync = Some(Local::now().timestamp());
@@ -261,7 +261,7 @@ pub async fn _import_from_device(serial: &str) -> Result<u16, String> {
     .expect("blocking DB task panicked");
 
     match res {
-        Ok(res) => Ok(res),
+        Ok(res) => Ok(res.len()),
         Err(DatabaseError::Transaction(e)) => Err(e.deref().to_string()),
         _ => unreachable!(),
     }
@@ -271,12 +271,11 @@ fn import_file_list<F>(
     tx: &mut rusqlite_orm::rusqlite::Transaction,
     files: &[F],
     device: &Device,
-) -> Result<u16, DatabaseError>
+) -> Result<Vec<i64>, DatabaseError>
 where
     F: AsRef<Path> + Sync,
 {
-    let t0 = Instant::now();
-    let mut success = 0_u16;
+    let mut success = Vec::new();
     let mut handled_exercises = HashSet::new();
     let lang = SETTINGS_INST
         .get()
@@ -368,7 +367,7 @@ where
                         .execute_in(tx)?;
                 }
 
-                success += 1;
+                success.push(session.date);
 
                 true
             };
@@ -376,44 +375,28 @@ where
             Ok(added)
         };
 
-        match res {
-            Ok(added) if added => {
-                info!("Session imported succesfully");
+        if let Err(e) = res {
+            error!("  {}", e);
 
-                show_notification(NotificationDefinition {
-                    title: format!(
-                        "{} | {} | {}",
-                        session.sport, session.workout, formatted_time
-                    ),
-                    body: translate("imported_session"),
-                    kind: NotificationKind::Temporal,
-                });
-            }
-            Err(e) if !e.is_empty() => {
-                error!("  {}", e);
-
-                show_notification(NotificationDefinition {
-                    title: format!(
-                        "{} | {} | {}",
-                        session.sport, session.workout, formatted_time
-                    ),
-                    body: e,
-                    kind: NotificationKind::Persistant,
-                });
-            }
-            _ => {}
+            show_notification(NotificationDefinition {
+                title: format!(
+                    "{} | {} | {}",
+                    session.sport, session.workout, formatted_time
+                ),
+                body: e,
+                kind: NotificationKind::Persistant,
+            });
         }
     }
 
-    if success > 0 {
-        update_prs(tx, handled_exercises)?;
+    if !success.is_empty() {
+        show_notification(NotificationDefinition {
+            title: translate("ok_import_sessions"),
+            body: translate_and_replace("imported_n_sessions", &[&success.len().to_string()]),
+            kind: NotificationKind::Temporal,
+        });
+        update_prs(tx, handled_exercises, &success)?;
     }
-
-    info!(
-        "Imported {} sessions in {:.3}s",
-        success,
-        t0.elapsed().as_secs_f64()
-    );
 
     Ok(success)
 }
@@ -421,7 +404,12 @@ where
 fn update_prs(
     tx: &rusqlite_orm::rusqlite::Transaction,
     exercises: HashSet<(String, u16)>,
+    sessions: &[i64],
 ) -> rusqlite_orm::database::errors::Result<()> {
+    let mut new_prs = false;
+
+    let sessions = sessions.to_vec();
+
     let mut update_false_conditions = vec![];
     let mut update_true_conditions = vec![];
     for exer in &exercises {
@@ -439,6 +427,7 @@ fn update_prs(
             .fetch_one_in(tx)?
         {
             update_true_conditions.push(vec![pr.session.into(), pr.idx.into()]);
+            new_prs = new_prs || sessions.contains(&pr.session);
         }
     }
 
@@ -463,6 +452,14 @@ fn update_prs(
                 update_true_conditions,
             ))
             .execute_in(tx)?;
+    }
+
+    if new_prs {
+        show_notification(NotificationDefinition {
+            title: translate("new_record"),
+            body: translate("contratulations_pr"),
+            kind: NotificationKind::Temporal,
+        });
     }
 
     Ok(())

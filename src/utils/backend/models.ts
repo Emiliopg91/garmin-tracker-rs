@@ -1,6 +1,6 @@
 //Auto generated file, do not edit manually
 
-// From src-tauri/src/dto/app.rs:6
+// From src-tauri/src/dto/app.rs:4
 export enum AppEnvironment {
 	Debug = "Debug",
 	Release = "Release",
@@ -100,7 +100,7 @@ export interface SessionSeriesUpdate {
   timestamp: number;
 }
 
-// From src-tauri/src/dto/app.rs:17
+// From src-tauri/src/dto/app.rs:15
 export interface Settings {
   auto_sync: boolean;
   distance_unit: DistanceUnit;

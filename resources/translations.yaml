@@ -326,3 +326,15 @@ application:
 interface:
   en: Interface
   es: Interfaz
+ok_import_sessions:
+  en: Sessions imported succesfully
+  es: Sesiones importadas con éxito
+imported_n_sessions:
+  en: "{} new sessions added"
+  es: "{} nuevas sesiones añadidas"
+new_record:
+  en: New personal record!
+  es: ¡Nuevo record personal!
+contratulations_pr:
+  en: Congratulations and keep it up!
+  es: ¡Felicidades y continua así!
