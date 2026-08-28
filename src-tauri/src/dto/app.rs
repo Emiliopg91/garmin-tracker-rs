@@ -21,9 +21,3 @@ pub struct Settings {
     pub start_boot: bool,
     pub language: Languages,
 }
-
-#[derive(Serialize)]
-pub struct LanguagesOptions {
-    pub translations: HashMap<String, HashMap<String, String>>,
-    pub default_language: Languages,
-}

@@ -12,7 +12,7 @@ use tauri_plugin_autostart::ManagerExt;
 use crate::{
     constants,
     dto::{
-        app::{AppEnvironment, LanguagesOptions, Settings},
+        app::{AppEnvironment, Settings},
         export::Export,
         notifications::{NotificationDefinition, NotificationKind},
     },
