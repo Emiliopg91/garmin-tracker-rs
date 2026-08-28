@@ -65,7 +65,8 @@ pub struct SessionExport {
     pub training_load: f64,
     pub sport: String,
     pub device: Option<String>,
-    pub gps_coordinates: Option<Vec<(f64, f64)>>,
+    pub coordinates: Option<Vec<(f64, f64)>>,
+    pub speeds: Option<Vec<f64>>,
     pub heart_rates: Option<Vec<u8>>,
     pub series: Vec<Serie>,
 }
@@ -76,9 +77,13 @@ impl From<Session> for SessionExport {
         if let Some(hr) = session.heart_rates {
             heart_rates = Some(hr.records);
         }
-        let mut gps_coordinates: Option<Vec<(f64, f64)>> = None;
+        let mut coordinates: Option<Vec<(f64, f64)>> = None;
         if let Some(gps) = session.coordinates {
-            gps_coordinates = Some((&gps).into());
+            coordinates = Some((&gps).into());
+        }
+        let mut speeds: Option<Vec<f64>> = None;
+        if let Some(spds) = session.speeds {
+            speeds = Some((&spds).into());
         }
         Self {
             date: session.date,
@@ -92,7 +97,8 @@ impl From<Session> for SessionExport {
             device: session.device,
             series: session.series,
             heart_rates,
-            gps_coordinates,
+            coordinates,
+            speeds,
         }
     }
 }
