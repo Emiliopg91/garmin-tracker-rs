@@ -58,12 +58,6 @@ export enum Languages {
 	English = "English",
 }
 
-// From src-tauri/src/dto/app.rs:26
-export interface LanguagesOptions {
-  default_language: Languages;
-  translations: Record<string, Record<string, string>>;
-}
-
 // From src-tauri/src/dto/sessions.rs:62
 export interface SessionDetails {
   active_time: number;

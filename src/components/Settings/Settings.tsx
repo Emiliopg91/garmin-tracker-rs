@@ -23,8 +23,14 @@ type Props = {
 };
 
 export function Settings({ onClose }: Props) {
-  const { environment, settings, translate, startLoading, finishLoading } =
-    useContext(AppContext);
+  const {
+    environment,
+    settings,
+    translate,
+    startLoading,
+    finishLoading,
+    refreshTranslations,
+  } = useContext(AppContext);
   console.log(environment);
 
   const [weightUnit, setWeightUnit] = useState(settings.weight_unit);
@@ -87,6 +93,7 @@ export function Settings({ onClose }: Props) {
       .then(() => {
         setLanguage(value);
         settings.language = value;
+        refreshTranslations();
       })
       .finally(() => {
         finishLoading();

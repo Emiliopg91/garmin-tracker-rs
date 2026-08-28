@@ -34,10 +34,7 @@ export function AppProvider({
     start_boot: false,
     language: Languages.English,
   });
-  const [defaultLanguage, setDefaultLanguage] = useState(Languages.English);
-  const [translations, setTranslations] = useState<
-    Record<string, Record<string, string>>
-  >({});
+  const [translations, setTranslations] = useState<Record<string, string>>({});
 
   const startLoading = () => {
     setLoadingCount((previous) => previous + 1);
@@ -63,30 +60,21 @@ export function AppProvider({
       return key;
     }
 
-    const lang_map = translations[key];
-    let translation = lang_map[defaultLanguage];
-
-    if (!lang_map[settings.language]) {
-      console.warn(
-        "Missing translation for " +
-          settings.language +
-          ", fallback to " +
-          defaultLanguage,
-      );
-    } else {
-      translation = lang_map[settings.language];
-    }
-
-    if (!translation) {
-      translation = key;
-    }
+    let translation = translations[key];
 
     if (replacements) {
       replacements.forEach((r) => {
         translation = translation.replace("{}", r);
       });
     }
+
     return translation;
+  };
+
+  const refreshTranslations = () => {
+    BackendClient.getTranslations().then((translations) => {
+      setTranslations(translations);
+    });
   };
 
   useEffect(() => {
@@ -134,10 +122,9 @@ export function AppProvider({
             setSettings(settings);
           })
           .finally(() => {
-            BackendClient.getLanguagesConfig()
-              .then((config) => {
-                setDefaultLanguage(config.default_language);
-                setTranslations(config.translations);
+            BackendClient.getTranslations()
+              .then((translations) => {
+                setTranslations(translations);
               })
               .finally(() => {
                 BackendClient.notifyFrontendReady().then(() => {
@@ -168,10 +155,10 @@ export function AppProvider({
         environment,
         translate,
         settings,
-        defaultLanguage,
         settingsOpened,
         closeSettings,
         showSettings,
+        refreshTranslations,
       }}
     >
       {children}

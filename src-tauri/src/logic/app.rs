@@ -140,20 +140,9 @@ pub fn export_database() -> Result<(), String> {
 
 #[traced_command]
 #[tauri::command]
-pub fn get_languages_config() -> Result<LanguagesOptions, String> {
-    let translations: HashMap<String, HashMap<String, String>> = TRANSLATIONS
-        .entries()
-        .map(|(&k, v)| {
-            let inner: HashMap<String, String> = v
-                .entries()
-                .map(|(&k1, &v1)| (Languages::from(k1).name(), v1.to_string()))
-                .collect();
-            (k.to_string(), inner)
-        })
-        .collect();
-
-    Ok(LanguagesOptions {
-        translations,
-        default_language: (constants::DEFAULT_LANGUAGE).clone(),
-    })
+pub fn get_translations() -> Result<HashMap<String, String>, String> {
+    Ok(TRANSLATIONS
+        .keys()
+        .map(|k| (k.to_string(), translate(k)))
+        .collect())
 }

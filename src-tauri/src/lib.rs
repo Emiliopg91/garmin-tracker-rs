@@ -28,7 +28,7 @@ use crate::{
     },
     logic::{
         app::{
-            SETTINGS_INST, export_database, get_environment, get_languages_config, get_settings,
+            SETTINGS_INST, export_database, get_environment, get_settings, get_translations,
             notify_frontend_ready, update_settings_value,
         },
         body_metrics::{add_body_measures, delete_body_metric, get_body_measures},
@@ -196,7 +196,7 @@ pub fn run() {
             get_settings,
             update_settings_value,
             export_database,
-            get_languages_config
+            get_translations
         ])
         .run(tauri::generate_context!());
 

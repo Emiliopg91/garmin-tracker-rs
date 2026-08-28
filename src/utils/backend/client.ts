@@ -2,7 +2,7 @@
 
 import { invoke, InvokeArgs } from "@tauri-apps/api/core";
 
-import { AppEnvironment, BodyMetricListItem, ExerciseDetails, ExerciseListItem, LanguagesOptions, SessionDetails, SessionListItem, SessionSeriesUpdate, Settings, WorkoutDetails, WorkoutListItem } from "./models";
+import { AppEnvironment, BodyMetricListItem, ExerciseDetails, ExerciseListItem, SessionDetails, SessionListItem, SessionSeriesUpdate, Settings, WorkoutDetails, WorkoutListItem } from "./models";
 
 export class BackendClient {
 
@@ -50,12 +50,6 @@ export class BackendClient {
 	}
 	
 
-	// From src-tauri/src/logic/app.rs:143
-	public static getLanguagesConfig(): Promise<LanguagesOptions> {
-	  return BackendClient.inner_invoke("get_languages_config"); 
-	}
-	
-
 	// From src-tauri/src/logic/sessions.rs:76
 	public static getSessionDetails(timestamp: number): Promise<SessionDetails> {
 	  return BackendClient.inner_invoke("get_session_details", { timestamp }); 
@@ -71,6 +65,12 @@ export class BackendClient {
 	// From src-tauri/src/logic/app.rs:28
 	public static getSettings(): Promise<Settings> {
 	  return BackendClient.inner_invoke("get_settings"); 
+	}
+	
+
+	// From src-tauri/src/logic/app.rs:143
+	public static getTranslations(): Promise<Record<string, string>> {
+	  return BackendClient.inner_invoke("get_translations"); 
 	}
 	
 

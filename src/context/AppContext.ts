@@ -20,7 +20,7 @@ interface AppContexType {
   environment: AppEnvironment;
   settings: Settings;
   translate: (key: string, replacements?: string[]) => string;
-  defaultLanguage: Languages;
+  refreshTranslations: () => void;
   showSettings: () => void;
   closeSettings: () => void;
   settingsOpened: boolean;
@@ -44,6 +44,9 @@ const defaultValue: AppContexType = {
   translate: () => {
     return "";
   },
+  refreshTranslations: () => {
+    /* */
+  },
   settings: {
     distance_unit: DistanceUnit.Kilometers,
     weight_unit: WeightUnit.Kilograms,
@@ -51,7 +54,6 @@ const defaultValue: AppContexType = {
     start_boot: false,
     language: Languages.English,
   },
-  defaultLanguage: Languages.English,
   settingsOpened: false,
   closeSettings: () => {
     /* */
