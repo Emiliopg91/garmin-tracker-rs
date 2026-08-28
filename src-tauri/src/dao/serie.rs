@@ -23,6 +23,7 @@ pub struct Serie {
     pub weight: f64,
     pub pr: bool,
 
+    #[serde(skip)]
     #[relationship((ex_cat, exercise::entity::columns::CATEGORY),(ex_id, exercise::entity::columns::ID))]
     pub exercise: Option<Exercise>,
 }

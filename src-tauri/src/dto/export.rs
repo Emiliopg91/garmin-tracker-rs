@@ -64,11 +64,16 @@ pub struct SessionExport {
     pub metabolic_calories: u16,
     pub training_load: f64,
     pub sport: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub device: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub coordinates: Option<Vec<(f64, f64)>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub speeds: Option<Vec<f64>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub heart_rates: Option<Vec<u8>>,
-    pub series: Vec<Serie>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub series: Option<Vec<Serie>>,
 }
 
 impl From<Session> for SessionExport {
@@ -85,6 +90,11 @@ impl From<Session> for SessionExport {
         if let Some(spds) = session.speeds {
             speeds = Some((&spds).into());
         }
+        let mut series = None;
+        if !session.series.is_empty() {
+            series = Some(session.series);
+        }
+
         Self {
             date: session.date,
             workout: session.workout,
@@ -95,7 +105,7 @@ impl From<Session> for SessionExport {
             training_load: session.training_load,
             sport: session.sport,
             device: session.device,
-            series: session.series,
+            series,
             heart_rates,
             coordinates,
             speeds,
