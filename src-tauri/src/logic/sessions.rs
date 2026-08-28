@@ -7,12 +7,13 @@ use std::{
 
 use crate::{
     dao::{
+        coordinates::CoordinatesRepository,
         device::{Device, DeviceRepository},
         exercise::{self, Exercise, ExerciseRepository},
-        gps_coordinates::GpsCoordinatesRepository,
         heart_rate::HeartRateRepository,
         serie::{self, Serie, SerieRepository, entity},
         session::{self, SessionRepository},
+        speeds::SpeedsRepository,
     },
     dto::{
         notifications::{NotificationDefinition, NotificationKind},
@@ -87,7 +88,8 @@ pub fn get_session_details(timestamp: i32) -> Result<SessionDetails, String> {
             session.fetch_device_obj_relationship_in_conn(conn)?;
         }
         session.fetch_heart_rates_relationship_in_conn(conn)?;
-        session.fetch_gps_coordinates_relationship_in_conn(conn)?;
+        session.fetch_coordinates_relationship_in_conn(conn)?;
+        session.fetch_speeds_relationship_in_conn(conn)?;
 
         let condition_set: HashSet<(_, _)> = session
             .series
@@ -354,11 +356,18 @@ where
                         .execute_in(tx)?;
                 }
 
-                if let Some(coordinates) = session.gps_coordinates {
-                    GpsCoordinatesRepository::insert()
+                if let Some(coordinates) = session.coordinates {
+                    CoordinatesRepository::insert()
                         .item(coordinates.clone())
                         .execute_in(tx)?;
                 }
+
+                if let Some(speeds) = session.speeds {
+                    SpeedsRepository::insert()
+                        .item(speeds.clone())
+                        .execute_in(tx)?;
+                }
+
                 success += 1;
 
                 true

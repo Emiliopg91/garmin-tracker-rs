@@ -19,7 +19,7 @@ use tauri_plugin_log::{
 
 use crate::{
     dao::{
-        gps_coordinates::{self, GpsCoordinatesRepository},
+        coordinates::{self, CoordinatesRepository},
         session::{self, SessionRepository},
     },
     dto::{
@@ -118,9 +118,9 @@ pub fn run() {
                     .fetch_in(tx)?;
 
                 if !sessions.is_empty() {
-                    let gps_coordinates = GpsCoordinatesRepository::select()
+                    let gps_coordinates = CoordinatesRepository::select()
                         .where_(Where::In(
-                            gps_coordinates::entity::columns::SESSION,
+                            coordinates::entity::columns::SESSION,
                             sessions.iter().map(|s| s.date.into()).collect::<Vec<_>>(),
                         ))
                         .fetch_in(tx)?;

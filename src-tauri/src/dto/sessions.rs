@@ -76,7 +76,8 @@ pub struct SessionDetails {
     pub exercises: Vec<String>,
     pub series: HashMap<String, Vec<SessionSerie>>,
     pub heart_rates: Vec<u8>,
-    pub gps_coordinates: Vec<(i32, i32)>,
+    pub coordinates: Vec<(i32, i32)>,
+    pub speeds: Vec<f64>,
 
     pub device: Option<String>,
 }
@@ -110,8 +111,13 @@ impl From<(&Session, &IndexMap<Exercise, Vec<Serie>>)> for SessionDetails {
         }
 
         let mut gps_coordinates: Vec<(i32, i32)> = Vec::new();
-        if let Some(coords) = value.0.gps_coordinates.clone() {
+        if let Some(coords) = value.0.coordinates.clone() {
             gps_coordinates = (&coords).into()
+        }
+
+        let mut speeds: Vec<f64> = Vec::new();
+        if let Some(spds) = value.0.speeds.clone() {
+            speeds = (&spds).into()
         }
 
         Self {
@@ -127,7 +133,8 @@ impl From<(&Session, &IndexMap<Exercise, Vec<Serie>>)> for SessionDetails {
             series: series_d,
             heart_rates,
             device,
-            gps_coordinates,
+            coordinates: gps_coordinates,
+            speeds,
         }
     }
 }

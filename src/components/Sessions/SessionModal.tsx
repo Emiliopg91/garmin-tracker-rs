@@ -153,10 +153,10 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
       </DialogTitle>
 
       <DialogContent dividers>
-        {localSession.gps_coordinates.length > 0 && (
+        {localSession.coordinates.length > 0 && (
           <>
             <MapContainer
-              bounds={localSession.gps_coordinates}
+              bounds={localSession.coordinates}
               boundsOptions={{ padding: [20, 20] }}
               attributionControl={false}
               style={{ height: "200px", width: "100%" }}
@@ -173,15 +173,13 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
               ))}
 
               <Marker
-                position={localSession.gps_coordinates[0]}
+                position={localSession.coordinates[0]}
                 icon={startIcon}
               ></Marker>
 
               <Marker
                 position={
-                  localSession.gps_coordinates[
-                    localSession.gps_coordinates.length - 1
-                  ]
+                  localSession.coordinates[localSession.coordinates.length - 1]
                 }
                 icon={endIcon}
               ></Marker>

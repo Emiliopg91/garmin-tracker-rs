@@ -9,8 +9,8 @@ use fitparser::{FitDataField, FitDataRecord, Value, de::DecodeOption, profile};
 
 use crate::{
     dao::{
-        exercise::Exercise, gps_coordinates::GpsCoordinates, heart_rate::HeartRate, serie::Serie,
-        session::Session,
+        coordinates::Coordinates, exercise::Exercise, heart_rate::HeartRate, serie::Serie,
+        session::Session, speeds::Speeds,
     },
     logic::sessions::get_location_from_coordinates,
     utils::{constants, translations::translate_and_replace},
@@ -91,9 +91,10 @@ where
     let metabolic_calories = get_u16("metabolic_calories", session_entry.fields())?;
     let series = get_sets(&grouped, &timestamp).unwrap_or_default();
     let heart_rates = get_heart_rate(&timestamp, &grouped.records)?;
-    let gps_coordinates = get_gps_coordinates(&timestamp, &grouped.records)?;
+    let coordinates = get_coordinates(&timestamp, &grouped.records)?;
+    let speeds = get_speeds(&timestamp, &grouped.records)?;
     if workout.is_empty()
-        && let Some(coords) = gps_coordinates.clone()
+        && let Some(coords) = coordinates.clone()
     {
         let coords: Vec<(i32, i32)> = (&coords).into();
         if let Some(start_point) = coords.first() {
@@ -118,7 +119,8 @@ where
         device: None,
         device_obj: None,
         heart_rates,
-        gps_coordinates,
+        coordinates,
+        speeds,
     })
 }
 
@@ -209,10 +211,10 @@ fn get_heart_rate(
     })
 }
 
-fn get_gps_coordinates(
+fn get_coordinates(
     timestamp: &DateTime<Local>,
     records: &[&FitDataRecord],
-) -> errors::Result<Option<GpsCoordinates>> {
+) -> errors::Result<Option<Coordinates>> {
     let mut coords = Vec::with_capacity(records.len());
     let mut start_point = None;
 
@@ -232,9 +234,31 @@ fn get_gps_coordinates(
     Ok(if coords.is_empty() {
         None
     } else {
-        Some(GpsCoordinates {
+        Some(Coordinates {
             session: timestamp.timestamp(),
             records: coords,
+        })
+    })
+}
+
+fn get_speeds(
+    timestamp: &DateTime<Local>,
+    records: &[&FitDataRecord],
+) -> errors::Result<Option<Speeds>> {
+    let mut speeds = Vec::with_capacity(records.len());
+
+    records.iter().for_each(|entry| {
+        if let Ok(speed) = get_f64("enhanced_speed", entry.fields()) {
+            speeds.extend_from_slice(&speed.to_be_bytes());
+        }
+    });
+
+    Ok(if speeds.is_empty() {
+        None
+    } else {
+        Some(Speeds {
+            session: timestamp.timestamp(),
+            records: speeds,
         })
     })
 }

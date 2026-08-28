@@ -72,19 +72,19 @@ export class SessionUtils {
   }
 
   private static handleGpsCoordiates(details: SessionFrontDetails) {
-    if (details.gps_coordinates) {
-      for (let i = 0; i < details.gps_coordinates.length; i++) {
-        details.gps_coordinates[i][0] =
-          details.gps_coordinates[i][0] * UnitUtils.SEMICIRCLE_TO_DEGREES;
-        details.gps_coordinates[i][1] =
-          details.gps_coordinates[i][1] * UnitUtils.SEMICIRCLE_TO_DEGREES;
+    if (details.coordinates) {
+      for (let i = 0; i < details.coordinates.length; i++) {
+        details.coordinates[i][0] =
+          details.coordinates[i][0] * UnitUtils.SEMICIRCLE_TO_DEGREES;
+        details.coordinates[i][1] =
+          details.coordinates[i][1] * UnitUtils.SEMICIRCLE_TO_DEGREES;
       }
 
       const diffs: number[] = [];
-      for (let i = 0; i < details.gps_coordinates.length - 1; i++) {
+      for (let i = 0; i < details.coordinates.length - 1; i++) {
         const diff = SessionUtils.haversine(
-          details.gps_coordinates[i],
-          details.gps_coordinates[i + 1],
+          details.coordinates[i],
+          details.coordinates[i + 1],
         );
         diffs.push(diff);
         details.distance += diff;
@@ -92,38 +92,29 @@ export class SessionUtils {
       details.speed = details.distance / (details.total_elapsed_time / 3600);
       details.pace = details.total_elapsed_time / 60 / details.distance;
 
-      const SMOOTH_WINDOW = 8;
-      const smoothed = diffs.map((_, idx) => {
-        const lo = Math.max(0, idx - Math.floor(SMOOTH_WINDOW / 2));
-        const hi = Math.min(
-          diffs.length,
-          idx + Math.floor(SMOOTH_WINDOW / 2) + 1,
-        );
-        const slice = diffs.slice(lo, hi);
-        return slice.reduce((acc, v) => acc + v, 0) / slice.length;
-      });
-
-      const sorted = [...smoothed].sort((a, b) => a - b);
-      const percentile = (p: number) =>
-        sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * p))];
-      const lowClamp = percentile(0.05);
-      const highClamp = percentile(0.95);
-      const clampSpan = highClamp - lowClamp;
-
-      smoothed.forEach((val, idx) => {
-        const clamped = Math.min(Math.max(val, lowClamp), highClamp);
-        let hue = 240;
-        if (clampSpan > 0) {
-          hue = 240 - 240 * ((clamped - lowClamp) / clampSpan);
+      const colors = [];
+      for (let i = 0; i < details.coordinates.length - 1; i++) {
+        colors.push(240);
+      }
+      if (details.speeds && details.speeds.length > 0) {
+        const speeds = [...details.speeds];
+        const minSpeed = Math.min(...speeds);
+        for (let i = 0; i < speeds.length; i++) {
+          speeds[i] = speeds[i] - minSpeed;
         }
+        const maxSpeed = Math.max(...speeds);
+        for (let i = 0; i < speeds.length && i < colors.length; i++) {
+          colors[i] = 240 - Math.round(240 * (speeds[i] / maxSpeed));
+          console.log(colors[i]);
+        }
+      }
+
+      for (let i = 0; i < details.coordinates.length - 1; i++) {
         details.gps_segments.push({
-          coordinates: [
-            details.gps_coordinates[idx],
-            details.gps_coordinates[idx + 1],
-          ],
-          color: `hsl(${Math.round(hue)}, 100%, 50%)`,
+          coordinates: [details.coordinates[i], details.coordinates[i + 1]],
+          color: `hsl(${colors[i]}, 100%, 50%)`,
         });
-      });
+      }
     }
   }
 
