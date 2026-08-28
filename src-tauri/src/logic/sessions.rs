@@ -2,7 +2,6 @@ use std::{
     collections::{HashMap, HashSet},
     ops::Deref,
     path::Path,
-    time::Instant,
 };
 
 use crate::{
@@ -12,7 +11,7 @@ use crate::{
         exercise::{self, Exercise, ExerciseRepository},
         heart_rate::HeartRateRepository,
         serie::{self, Serie, SerieRepository, entity},
-        session::{self, Session, SessionRepository},
+        session::{self, SessionRepository},
         speeds::SpeedsRepository,
     },
     dto::{
