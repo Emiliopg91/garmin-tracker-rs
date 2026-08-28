@@ -1,6 +1,6 @@
 import { AppContext } from "@/context/AppContext";
 import { JSX, useContext } from "react";
-import { NavBar } from "../NavBar/NavBar";
+import { NavBar, NavBarItem } from "../NavBar/NavBar";
 import "@/styles/app.css";
 import { Tabs } from "@/models/tabs";
 import { SessionsList } from "../Sessions/SessionList";
@@ -9,34 +9,44 @@ import { BodyMetricList } from "../BodyMetrics/BodyMetricList";
 import { Loading } from "../Loading/Loading";
 import { WorkoutsList } from "../Workouts/WorkoutList";
 import { Settings } from "../Settings/Settings";
+import SettingsIcon from "@mui/icons-material/Settings";
 
 export function App(): JSX.Element {
-  const { tab, setTab, loading, appReady, translate } = useContext(AppContext);
+  const {
+    tab,
+    setTab,
+    loading,
+    appReady,
+    translate,
+    showSettings,
+    settingsOpened,
+    closeSettings,
+  } = useContext(AppContext);
 
-  const leftNavBarItems = [
+  const leftNavBarItems: NavBarItem[] = [
     {
-      label: translate("sessions"),
+      label: <span>{translate("sessions")}</span>,
       onSelected: () => {
         setTab(Tabs.SESSIONS);
       },
       selected: tab == Tabs.SESSIONS,
     },
     {
-      label: translate("workouts"),
+      label: <span>{translate("workouts")}</span>,
       onSelected: () => {
         setTab(Tabs.WORKOUTS);
       },
       selected: tab == Tabs.WORKOUTS,
     },
     {
-      label: translate("exercises"),
+      label: <span>{translate("exercises")}</span>,
       onSelected: () => {
         setTab(Tabs.EXERCISES);
       },
       selected: tab == Tabs.EXERCISES,
     },
     {
-      label: translate("body_metrics"),
+      label: <span>{translate("body_metrics")}</span>,
       onSelected: () => {
         setTab(Tabs.BODY_METRICS);
       },
@@ -44,13 +54,17 @@ export function App(): JSX.Element {
     },
   ];
 
-  const rightNavBarItems = [
+  const rightNavBarItems: NavBarItem[] = [
     {
-      label: translate("settings"),
+      label: (
+        <span>
+          <SettingsIcon />
+        </span>
+      ),
       onSelected: () => {
-        setTab(Tabs.SETTINGS);
+        showSettings();
       },
-      selected: tab == Tabs.SETTINGS,
+      selected: false,
     },
   ];
 
@@ -68,7 +82,7 @@ export function App(): JSX.Element {
               {tab == Tabs.EXERCISES && <ExercisesList />}
               {tab == Tabs.WORKOUTS && <WorkoutsList />}
               {tab == Tabs.BODY_METRICS && <BodyMetricList />}
-              {tab == Tabs.SETTINGS && <Settings />}
+              {settingsOpened && <Settings onClose={closeSettings} />}
             </div>
           </>
         )}

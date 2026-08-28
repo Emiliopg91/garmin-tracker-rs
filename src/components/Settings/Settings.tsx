@@ -7,9 +7,22 @@ import {
   WeightUnit,
 } from "@/utils/backend/models";
 import { useContext, useState } from "react";
-import { Button, MenuItem, Select } from "@mui/material";
+import {
+  Button,
+  MenuItem,
+  Select,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+} from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 
-export function Settings() {
+type Props = {
+  onClose: () => void;
+};
+
+export function Settings({ onClose }: Props) {
   const { environment, settings, translate, startLoading, finishLoading } =
     useContext(AppContext);
   console.log(environment);
@@ -89,110 +102,140 @@ export function Settings() {
 
   return (
     <>
-      <table>
-        <tr>
-          <td>{translate("language")}</td>
-          <td>
-            <Select
-              size="small"
-              fullWidth
-              value={language}
-              onChange={(e) => updateLanguage(e.target.value as Languages)}
-            >
-              <MenuItem value={Languages.English}>
-                {translate("lang_en")}
-              </MenuItem>
-              <MenuItem value={Languages.Spanish}>
-                {translate("lang_es")}
-              </MenuItem>
-            </Select>
-          </td>
-        </tr>
-        <tr>
-          <td>{translate("weight_unit")}</td>
-          <td>
-            <Select
-              size="small"
-              fullWidth
-              value={weightUnit}
-              onChange={(e) => updateWeightUnit(e.target.value as WeightUnit)}
-            >
-              <MenuItem value={WeightUnit.Kilograms}>
-                {translate("weight_unit_kilograms")}
-              </MenuItem>
-              <MenuItem value={WeightUnit.Pounds}>
-                {translate("weight_unit_pounds")}
-              </MenuItem>
-            </Select>
-          </td>
-        </tr>
-        <tr>
-          <td>{translate("distance_unit")}</td>
-          <td>
-            <Select
-              size="small"
-              fullWidth
-              value={distanceUnit}
-              onChange={(e) =>
-                updateDistanceUnit(e.target.value as DistanceUnit)
-              }
-            >
-              <MenuItem value={DistanceUnit.Kilometers}>
-                {translate("distance_unit_kilometers")}
-              </MenuItem>
-              <MenuItem value={DistanceUnit.Miles}>
-                {translate("distance_unit_miles")}
-              </MenuItem>
-            </Select>
-          </td>
-        </tr>
-        <tr>
-          <td>{translate("auto_sync")}</td>
-          <td>
-            <Select
-              size="small"
-              fullWidth
-              value={autoSync ? "true" : "false"}
-              onChange={(e) => updateAutoSync(e.target.value === "true")}
-            >
-              <MenuItem value="true">{translate("auto_sync_true")}</MenuItem>
-              <MenuItem value="false">{translate("auto_sync_false")}</MenuItem>
-            </Select>
-          </td>
-        </tr>
-        <tr>
-          <td>{translate("start_on_boot")}</td>
-          <td>
-            <Select
-              size="small"
-              fullWidth
-              value={startOnBoot ? "true" : "false"}
-              onChange={(e) => updateStartOnBoot(e.target.value === "true")}
-              disabled={environment == AppEnvironment.Debug}
-            >
-              <MenuItem value="false">
-                {translate("start_on_boot_false")}
-              </MenuItem>
-              <MenuItem value="true">
-                {translate("start_on_boot_true")}
-              </MenuItem>
-            </Select>
-          </td>
-        </tr>
-        <tr>
-          <td>{translate("database_operations")}</td>
-          <td>
-            <Button
-              id="add-measure-button"
-              variant="contained"
-              style={{ width: "100%" }}
-              onClick={exportDatabase}
-            >
-              {translate("backup_database")}
-            </Button>
-          </td>
-        </tr>
-      </table>
+      <Dialog open={true} onClose={onClose}>
+        <DialogTitle>
+          {translate("settings")}
+          <IconButton
+            onClick={onClose}
+            sx={{ position: "absolute", right: 8, top: 8 }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+
+        <DialogContent dividers>
+          <table>
+            <tr>
+              <td>{translate("language")}</td>
+              <td>
+                <Select
+                  size="small"
+                  fullWidth
+                  value={language}
+                  onChange={(e) => updateLanguage(e.target.value as Languages)}
+                >
+                  <MenuItem value={Languages.English}>
+                    {translate("lang_en")}
+                  </MenuItem>
+                  <MenuItem value={Languages.Spanish}>
+                    {translate("lang_es")}
+                  </MenuItem>
+                </Select>
+              </td>
+            </tr>
+            <tr>
+              <td>{translate("weight_unit")}</td>
+              <td>
+                <Select
+                  size="small"
+                  fullWidth
+                  value={weightUnit}
+                  onChange={(e) =>
+                    updateWeightUnit(e.target.value as WeightUnit)
+                  }
+                >
+                  <MenuItem value={WeightUnit.Kilograms}>
+                    {translate("weight_unit_kilograms")}
+                  </MenuItem>
+                  <MenuItem value={WeightUnit.Pounds}>
+                    {translate("weight_unit_pounds")}
+                  </MenuItem>
+                </Select>
+              </td>
+            </tr>
+            <tr>
+              <td>{translate("distance_unit")}</td>
+              <td>
+                <Select
+                  size="small"
+                  fullWidth
+                  value={distanceUnit}
+                  onChange={(e) =>
+                    updateDistanceUnit(e.target.value as DistanceUnit)
+                  }
+                >
+                  <MenuItem value={DistanceUnit.Kilometers}>
+                    {translate("distance_unit_kilometers")}
+                  </MenuItem>
+                  <MenuItem value={DistanceUnit.Miles}>
+                    {translate("distance_unit_miles")}
+                  </MenuItem>
+                </Select>
+              </td>
+            </tr>
+            <tr>
+              <td colSpan={2}>
+                <hr />
+              </td>
+            </tr>
+            <tr>
+              <td>{translate("auto_sync")}</td>
+              <td>
+                <Select
+                  size="small"
+                  fullWidth
+                  value={autoSync ? "true" : "false"}
+                  onChange={(e) => updateAutoSync(e.target.value === "true")}
+                >
+                  <MenuItem value="true">
+                    {translate("auto_sync_true")}
+                  </MenuItem>
+                  <MenuItem value="false">
+                    {translate("auto_sync_false")}
+                  </MenuItem>
+                </Select>
+              </td>
+            </tr>
+            <tr>
+              <td>{translate("start_on_boot")}</td>
+              <td>
+                <Select
+                  size="small"
+                  fullWidth
+                  value={startOnBoot ? "true" : "false"}
+                  onChange={(e) => updateStartOnBoot(e.target.value === "true")}
+                  disabled={environment == AppEnvironment.Debug}
+                >
+                  <MenuItem value="false">
+                    {translate("start_on_boot_false")}
+                  </MenuItem>
+                  <MenuItem value="true">
+                    {translate("start_on_boot_true")}
+                  </MenuItem>
+                </Select>
+              </td>
+            </tr>
+            <tr>
+              <td colSpan={2}>
+                <hr />
+              </td>
+            </tr>
+            <tr>
+              <td>{translate("database_operations")}</td>
+              <td>
+                <Button
+                  id="add-measure-button"
+                  variant="contained"
+                  style={{ width: "100%" }}
+                  onClick={exportDatabase}
+                >
+                  {translate("backup_database")}
+                </Button>
+              </td>
+            </tr>
+          </table>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

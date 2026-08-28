@@ -20,6 +20,7 @@ export function AppProvider({
 }): JSX.Element {
   const [environment, setEnvironment] = useState(AppEnvironment.Release);
   const [appReady, setAppReady] = useState(false);
+  const [settingsOpened, setSettingsOpened] = useState(false);
   const [tab, setTab] = useState(Tabs.SESSIONS);
   const [availableDevices, setAvailableDevices] = useState<DeviceListItem[]>(
     [],
@@ -44,6 +45,14 @@ export function AppProvider({
 
   const finishLoading = () => {
     setLoadingCount((previous) => Math.max(0, previous - 1));
+  };
+
+  const showSettings = () => {
+    setSettingsOpened(true);
+  };
+
+  const closeSettings = () => {
+    setSettingsOpened(false);
   };
 
   const loading = loadingCount > 0;
@@ -160,6 +169,9 @@ export function AppProvider({
         translate,
         settings,
         defaultLanguage,
+        settingsOpened,
+        closeSettings,
+        showSettings,
       }}
     >
       {children}

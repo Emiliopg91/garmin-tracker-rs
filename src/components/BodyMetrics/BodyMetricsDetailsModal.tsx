@@ -40,7 +40,7 @@ export function BodyMetricsDetailsModal({
   };
 
   return (
-    <Dialog open={true} onClose={onClose} fullWidth maxWidth="sm">
+    <Dialog open={true} onClose={onClose}>
       <DialogTitle>
         {TimeUtils.formatDate(measures.date)}
         <IconButton

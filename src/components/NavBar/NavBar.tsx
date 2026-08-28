@@ -1,8 +1,8 @@
 import { JSX } from "react";
 import { Box } from "@mui/material";
 
-type NavBarItem = {
-  label: string;
+export type NavBarItem = {
+  label: JSX.Element;
   selected: boolean;
   onSelected: () => void;
 };
@@ -14,9 +14,9 @@ export function NavBar({
   leftItems: NavBarItem[];
   rightItems: NavBarItem[];
 }): JSX.Element {
-  const renderItem = (item: NavBarItem) => (
+  const renderItem = (item: NavBarItem, idx: number) => (
     <Box
-      key={item.label}
+      key={"navbar-" + idx}
       onClick={item.onSelected}
       sx={{
         padding: "10px",

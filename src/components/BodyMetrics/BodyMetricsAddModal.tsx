@@ -87,7 +87,7 @@ export function BodyMetricsAddModal({ latest, onClose }: Props) {
   };
 
   return (
-    <Dialog open={true} onClose={onClose} fullWidth maxWidth="sm">
+    <Dialog open={true} onClose={onClose}>
       <DialogTitle>
         {translate("add_entry")}
         <IconButton

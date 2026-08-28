@@ -21,6 +21,9 @@ interface AppContexType {
   settings: Settings;
   translate: (key: string, replacements?: string[]) => string;
   defaultLanguage: Languages;
+  showSettings: () => void;
+  closeSettings: () => void;
+  settingsOpened: boolean;
 }
 
 const defaultValue: AppContexType = {
@@ -49,6 +52,13 @@ const defaultValue: AppContexType = {
     language: Languages.English,
   },
   defaultLanguage: Languages.English,
+  settingsOpened: false,
+  closeSettings: () => {
+    /* */
+  },
+  showSettings: () => {
+    /* */
+  },
 };
 
 export const AppContext = createContext(defaultValue);

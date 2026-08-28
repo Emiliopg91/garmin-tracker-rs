@@ -3,5 +3,4 @@ export enum Tabs {
   WORKOUTS,
   EXERCISES,
   BODY_METRICS,
-  SETTINGS,
 }
