@@ -25,11 +25,11 @@ pub struct Session {
     pub sport: String,
     pub device: Option<String>,
 
-    #[relationship((date, serie::entity::columns::SESSION))]
-    pub series: Vec<Serie>,
-
     #[relationship((device, device::entity::columns::SERIAL))]
     pub device_obj: Option<Device>,
+
+    #[relationship((date, serie::entity::columns::SESSION))]
+    pub series: Vec<Serie>,
 
     #[relationship((date, heart_rate::entity::columns::SESSION))]
     pub heart_rates: Option<HeartRate>,

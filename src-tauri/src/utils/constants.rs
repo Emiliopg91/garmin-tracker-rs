@@ -58,7 +58,7 @@ pub static LOG_LEVEL: LazyLock<LevelFilter> = LazyLock::new(|| {
         .unwrap_or(LevelFilter::Info)
 });
 
-pub const LOG_FILE_MAX_SIZE: u128 = 1_024 * 1_024;
+pub const LOG_FILE_MAX_SIZE: u128 = 50 * 1_024 * 1_024;
 pub const LOG_FILE_ROTATION_STRATEGY: RotationStrategy = RotationStrategy::KeepSome(3);
 
 #[repr(i32)]
