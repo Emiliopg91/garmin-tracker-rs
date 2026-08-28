@@ -19,12 +19,15 @@ Garmin Tracker is a cross-platform desktop application built with [Tauri](https:
 - **Manual import** — Import activity files from disk if you prefer not to connect a device.
 - **`.FIT` file parsing** — Parses Garmin `.FIT` activity files into structured session, series, heart rate, and GPS data.
 - **Strength training tracking** — Review/edit recorded sessions and their series (sets, reps, weight, etc.).
-- **GPS route tracking** — Displays the recorded route on an interactive map (start/end markers, route line) for outdoor activities. Unnamed GPS sessions are automatically labeled with the start location, resolved via reverse geocoding.
+- **GPS route tracking** — Displays the recorded route on an interactive map, with the track colored by speed and a toggle between satellite and street map layers, for outdoor activities (start/end markers, route line). Unnamed GPS sessions are automatically labeled with the start location, resolved via reverse geocoding.
+- **Speed tracking** — Parses speed data from the `.FIT` file and surfaces it alongside distance/pace in session details and JSON exports.
 - **Heart-rate zones** — Visualizes heart rate over a session as a color-coded chart and breaks down time spent in each HR zone.
+- **Personal record notifications** — Detects when a strength session beats a previous best for an exercise and shows a congratulatory desktop notification.
 - **Body measurements** — Log, review, and delete body measures over time.
-- **Configurable app settings** — Choose weight/distance units, toggle launch on system boot, and enable/disable automatic sync on device connect.
+- **Database export to JSON** — Export the full database (sessions, series, heart rate, GPS coordinates, speed, body metrics, devices, and settings) to a JSON file from Settings, for backup or external analysis.
+- **Configurable app settings** — Choose the interface language, weight/distance units, toggle launch on system boot, and enable/disable automatic sync on device connect — changes apply immediately, no restart required.
 - **Local database** — All data is persisted in a local SQLite database (schema managed via versioned DDL migrations, applied automatically at startup).
-- **Desktop notifications** — Native, localized (English/Spanish) notifications for background events (e.g. device connected/disconnected, sync completed, update available).
+- **Desktop notifications** — Native, localized notifications for background events (e.g. device connected/disconnected, sync completed, new personal record, update available).
 - **Single instance** — Prevents multiple copies of the app from running at once, avoiding database corruption.
 - **Rotating file logs** — Structured, leveled logging to disk with automatic rotation.
 
