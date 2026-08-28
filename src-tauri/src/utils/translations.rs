@@ -23,12 +23,6 @@ impl Languages {
             Languages::English => Language("en"),
         }
     }
-    pub fn name(&self) -> String {
-        match self {
-            Languages::Spanish => "Spanish".to_string(),
-            Languages::English => "English".to_string(),
-        }
-    }
     pub fn from_name(literal: &str) -> Self {
         match literal.trim() {
             "Spanish" => Languages::Spanish,
