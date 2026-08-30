@@ -7,6 +7,7 @@ use crate::{
     dto::notifications::NotificationDefinition,
 };
 
+/// Fires a native desktop notification via `notify-send`, on a background thread.
 pub fn show_notification(notification: NotificationDefinition) {
     thread::spawn(move || {
         let icon_param = format!("--icon={}", *ICON_PATH);

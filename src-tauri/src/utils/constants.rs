@@ -94,6 +94,7 @@ pub static ICON_PATH: LazyLock<String> = LazyLock::new(|| {
     }
 });
 
+/// Creates `dir` (and parents) if it doesn't exist yet, then returns it.
 fn ensure_dir(dir: PathBuf) -> PathBuf {
     if !dir.exists() {
         fs::create_dir_all(&dir)

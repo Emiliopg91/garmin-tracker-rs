@@ -23,6 +23,7 @@ use crate::{
     utils::translations::translate,
 };
 
+/// Returns sessions grouped/aggregated by workout name (count, average time, latest date), sorted by name.
 #[traced_command]
 #[tauri::command]
 pub fn get_workout_list() -> Result<Vec<WorkoutListItem>, String> {
@@ -74,6 +75,7 @@ pub fn get_workout_list() -> Result<Vec<WorkoutListItem>, String> {
     }
 }
 
+/// Returns every session for one workout name with per-session volume and session-over-session volume diff.
 #[traced_command]
 #[tauri::command]
 pub fn get_workout_details(name: &str) -> Result<WorkoutDetails, String> {

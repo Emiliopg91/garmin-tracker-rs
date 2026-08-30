@@ -48,6 +48,7 @@ use crate::parser::{debug_dump, read_from_file};
 
 dlls!("../resources/ddl");
 
+/// Boots the Tauri app: acquires the single-instance lock, opens/migrates the DB, loads settings, and registers commands.
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     SingleInstance::acquire();

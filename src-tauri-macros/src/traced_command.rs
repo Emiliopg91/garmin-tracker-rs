@@ -2,6 +2,7 @@ use proc_macro::TokenStream;
 use quote::quote;
 use syn::{FnArg, ItemFn, Pat, ReturnType, Type, parse_macro_input};
 
+/// Generates the traced wrapper body for the annotated command function.
 pub fn traced_command(_attrs: TokenStream, item: TokenStream) -> TokenStream {
     let input_fn = parse_macro_input!(item as ItemFn);
 
@@ -103,6 +104,7 @@ pub fn traced_command(_attrs: TokenStream, item: TokenStream) -> TokenStream {
     expanded.into()
 }
 
+/// Checks whether a type's last path segment matches `name` (e.g. `Result`, `Option`, `WebviewWindow`).
 fn last_segment_is(ty: &Type, name: &str) -> bool {
     if let Type::Path(type_path) = ty
         && let Some(segment) = type_path.path.segments.last()
@@ -112,6 +114,7 @@ fn last_segment_is(ty: &Type, name: &str) -> bool {
     false
 }
 
+/// Same as `last_segment_is`, but applied to a function's return type.
 fn last_segment_is_return(output: &ReturnType, name: &str) -> bool {
     if let ReturnType::Type(_, ty) = output {
         last_segment_is(ty, name)

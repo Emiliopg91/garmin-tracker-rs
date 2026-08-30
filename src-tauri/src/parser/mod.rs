@@ -34,6 +34,7 @@ struct GroupedEntries<'a> {
 }
 
 impl<'a> GroupedEntries<'a> {
+    /// Buckets FIT records by message kind in a single pass.
     fn from_entries(entries: &'a [FitDataRecord]) -> Self {
         let mut grouped = GroupedEntries::default();
 
@@ -53,6 +54,7 @@ impl<'a> GroupedEntries<'a> {
     }
 }
 
+/// Parses a `.FIT` activity file into a `Session` (with nested series, heart rate, GPS, and speed data). Falls back to reverse-geocoding the start GPS point for the workout name if the file has none.
 pub(crate) fn load_from_file<P>(path: P, lang: &str) -> errors::Result<Session>
 where
     P: AsRef<Path>,
@@ -124,6 +126,7 @@ where
     })
 }
 
+/// Reads and decodes a `.FIT` file into its raw records, dropping unknown fields/messages.
 pub fn read_from_file<P>(path: P) -> errors::Result<Vec<FitDataRecord>>
 where
     P: AsRef<Path>,
@@ -140,6 +143,7 @@ where
         .map_err(|e| ParseFitFileError::FileReading(path_ref.display().to_string(), e))
 }
 
+/// Debug-only helper: writes the raw parsed records to `<file>.txt` for inspection.
 #[cfg(debug_assertions)]
 pub fn debug_dump<P>(path: P, entries: &[FitDataRecord])
 where
@@ -151,6 +155,7 @@ where
     }
 }
 
+/// Extracts the workout name from the `workout` FIT record, if present.
 fn get_workout_name(wkt_entry: Option<&FitDataRecord>) -> errors::Result<String> {
     let wkt_entry =
         wkt_entry.ok_or_else(|| ParseFitFileError::MissingField("workout".to_string()))?;
@@ -159,6 +164,7 @@ fn get_workout_name(wkt_entry: Option<&FitDataRecord>) -> errors::Result<String>
         .map_err(|_| ParseFitFileError::InvalidFieldValue("name".to_string(), "string".to_string()))
 }
 
+/// Builds the list of strength-training sets (`Serie`s) for a session, resolving each set to its exercise via the workout steps.
 fn get_sets(grouped: &GroupedEntries, timestamp: &DateTime<Local>) -> errors::Result<Vec<Serie>> {
     let exercises = get_exercises(&grouped.exercise_titles)?;
     let steps = get_steps(&grouped.workout_steps, &exercises)?;
@@ -189,6 +195,7 @@ fn get_sets(grouped: &GroupedEntries, timestamp: &DateTime<Local>) -> errors::Re
     Ok(sets)
 }
 
+/// Extracts heart-rate samples from the session's `record` messages, packing them into a `HeartRate` entity.
 fn get_heart_rate(
     timestamp: &DateTime<Local>,
     records: &[&FitDataRecord],
@@ -211,6 +218,7 @@ fn get_heart_rate(
     })
 }
 
+/// Extracts GPS samples from the session's `record` messages, packing them into a `Coordinates` entity.
 fn get_coordinates(
     timestamp: &DateTime<Local>,
     records: &[&FitDataRecord],
@@ -241,6 +249,7 @@ fn get_coordinates(
     })
 }
 
+/// Extracts speed samples from the session's `record` messages, packing them into a `Speeds` entity.
 fn get_speeds(
     timestamp: &DateTime<Local>,
     records: &[&FitDataRecord],
@@ -263,6 +272,7 @@ fn get_speeds(
     })
 }
 
+/// Resolves each workout step to its `Exercise`, by looking it up in the exercise titles parsed from the same file.
 fn get_steps(
     workout_steps: &[&FitDataRecord],
     exercises: &[Exercise],
@@ -294,6 +304,7 @@ fn get_steps(
         .collect()
 }
 
+/// Parses the file's `exercise_title` messages into `Exercise` entities.
 pub fn get_exercises(exercise_titles: &[&FitDataRecord]) -> errors::Result<Vec<Exercise>> {
     exercise_titles
         .iter()
@@ -329,6 +340,7 @@ typed_getter!(get_string, String, String, "string");
 typed_getter!(get_i64, SInt64, i64, "i64");
 typed_getter!(get_i32, SInt32, i32, "i32");
 
+/// Finds the raw field value named `name` among a record's fields.
 fn get_field<'a>(name: &str, entries: &'a [FitDataField]) -> errors::Result<&'a Value> {
     entries
         .iter()

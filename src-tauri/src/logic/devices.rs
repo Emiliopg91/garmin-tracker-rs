@@ -16,6 +16,7 @@ use crate::{
     utils::translations::{translate, translate_and_replace},
 };
 
+/// Spawns a background task that watches USB hotplug events and keeps the device list/DB/frontend in sync.
 pub fn start_device_watcher(app: AppHandle) {
     info!("Starting device monitor...");
     tauri::async_runtime::spawn(async move {
@@ -40,6 +41,7 @@ pub fn start_device_watcher(app: AppHandle) {
     });
 }
 
+/// Diffs the currently connected Garmin devices against `devices`, enrolling new ones in the DB, emitting connect/disconnect events, and triggering auto-sync for newly connected devices.
 async fn mtp_dev_check_and_sync(app: AppHandle, devices: &mut Vec<DeviceListItem>) {
     let mut devs_to_sync = Vec::new();
     if let Ok(cur_dev) = MTP_CLIENT_INST

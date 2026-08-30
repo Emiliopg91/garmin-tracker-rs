@@ -9,6 +9,7 @@ pub static TRANSLATIONS: LazyLock<BTreeMap<String, String>> = LazyLock::new(|| {
     serde_yaml::from_str(&content).unwrap()
 });
 
+/// Entry point for the `translate!` macro: converts a `translate_impl` error into a compile error.
 pub fn translate(input: TokenStream) -> TokenStream {
     match translate_impl(input) {
         Ok(tokens) => tokens.into(),
@@ -16,6 +17,7 @@ pub fn translate(input: TokenStream) -> TokenStream {
     }
 }
 
+/// Parses `translate!("key", args...)`, looks up `"key"` in `TRANSLATIONS`, and expands to a `String`/`format!` call.
 fn translate_impl(input: TokenStream) -> syn::Result<proc_macro2::TokenStream> {
     let mut args = Punctuated::<Expr, Token![,]>::parse_terminated
         .parse(input)?
