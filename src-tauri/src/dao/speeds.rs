@@ -8,6 +8,7 @@ pub struct Speeds {
     pub records: Vec<u8>,
 }
 
+/// Unpacks the raw byte blob into individual speed samples.
 impl From<&Speeds> for Vec<f64> {
     fn from(value: &Speeds) -> Self {
         value
@@ -20,6 +21,7 @@ impl From<&Speeds> for Vec<f64> {
     }
 }
 
+/// Packs speed samples into the raw byte blob format (session id left unset, to be filled in by the caller).
 impl From<&[f64]> for Speeds {
     fn from(value: &[f64]) -> Self {
         let mut records = Vec::new();

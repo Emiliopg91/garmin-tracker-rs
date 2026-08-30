@@ -28,6 +28,7 @@ use crate::{
     utils::translations::translate,
 };
 
+/// Returns every exercise in the catalog, each annotated with its current personal record.
 #[traced_command]
 #[tauri::command]
 pub fn get_exercises() -> Result<Vec<ExerciseListItem>, String> {
@@ -81,6 +82,7 @@ pub fn get_exercises() -> Result<Vec<ExerciseListItem>, String> {
     }
 }
 
+/// Returns the personal record and full per-session set history for one exercise.
 #[traced_command]
 #[tauri::command]
 pub fn get_exercise_details(category: &str, id: u16) -> Result<ExerciseDetails, String> {
@@ -162,6 +164,7 @@ pub fn get_exercise_details(category: &str, id: u16) -> Result<ExerciseDetails, 
     }
 }
 
+/// Estimates a 1-rep max from a weight/reps pair.
 pub fn get_1rm_estimation(weight: f64, reps: f64) -> f64 {
     weight * reps.powf(0.1)
 }

@@ -13,6 +13,7 @@ fn main() {
     generate_translations_file();
 }
 
+/// Reads `resources/translations.yaml` and generates a static `phf::Map` of translations at `$OUT_DIR/translations_map.rs`.
 fn generate_translations_file() {
     let translations_file = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap())
         .parent()

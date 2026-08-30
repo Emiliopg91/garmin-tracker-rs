@@ -17,12 +17,14 @@ impl std::fmt::Display for Languages {
     }
 }
 impl Languages {
+    /// Returns the ISO language code used as the key into `TRANSLATIONS` (e.g. `"es"`, `"en"`).
     pub fn code(&self) -> Language {
         match self {
             Languages::Spanish => Language("es"),
             Languages::English => Language("en"),
         }
     }
+    /// Parses a language from its display name (e.g. `"Spanish"`), as stored in the settings UI/DB.
     pub fn from_name(literal: &str) -> Self {
         match literal.trim() {
             "Spanish" => Languages::Spanish,
@@ -30,6 +32,7 @@ impl Languages {
             _ => unreachable!(),
         }
     }
+    /// Parses a language from its ISO code (e.g. `"es"`), falling back to English on an unrecognized value.
     pub fn from(literal: &str) -> Self {
         match literal.trim() {
             "es" => Languages::Spanish,
@@ -46,6 +49,7 @@ impl Languages {
     }
 }
 
+/// Resolves `key` to a string in the current UI language, falling back to English then to the raw key.
 pub fn translate(key: &str) -> String {
     match TRANSLATIONS.get(key) {
         Some(langs) => match langs.get(
@@ -69,6 +73,7 @@ pub fn translate(key: &str) -> String {
     .to_string()
 }
 
+/// Like `translate`, but substitutes each `{}` placeholder in order with the given `replacements`.
 pub fn translate_and_replace(key: &str, replacements: &[&str]) -> String {
     let mut literal = translate(key);
 

@@ -25,6 +25,7 @@ pub struct Export {
 }
 
 impl Export {
+    /// Loads every table from the database and assembles a full export snapshot.
     pub fn from_database() -> rusqlite_orm::database::errors::Result<Self> {
         Database::run_in_connection(|conn| {
             let body_metrics = BodyMetricsRepository::select().fetch_in(conn)?;
@@ -88,6 +89,7 @@ impl Export {
         })
     }
 
+    /// Serializes the export snapshot to pretty-printed JSON.
     pub fn to_json(&self) -> Result<String, serde_json::Error> {
         serde_json::to_string_pretty(&self)
     }

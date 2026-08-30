@@ -17,6 +17,7 @@ use crate::{
     utils::translations::translate,
 };
 
+/// Returns all logged body measurements, newest first.
 #[traced_command]
 #[tauri::command]
 pub fn get_body_measures() -> Result<Vec<BodyMetricListItem>, String> {
@@ -53,6 +54,7 @@ pub fn get_body_measures() -> Result<Vec<BodyMetricListItem>, String> {
     }
 }
 
+/// Inserts a new body measurement entry.
 #[traced_command]
 #[tauri::command]
 pub fn add_body_measures(measures: BodyMetricListItem) -> Result<(), String> {
@@ -84,6 +86,7 @@ pub fn add_body_measures(measures: BodyMetricListItem) -> Result<(), String> {
     }
 }
 
+/// Deletes the body measurement logged on `date`, if any.
 #[traced_command]
 #[tauri::command]
 pub fn delete_body_metric(date: i32) -> Result<(), String> {

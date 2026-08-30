@@ -10,6 +10,7 @@ pub struct Coordinates {
     pub records: Vec<u8>,
 }
 
+/// Unpacks the raw byte blob into (lat, lon) pairs in semicircles.
 impl From<&Coordinates> for Vec<(i32, i32)> {
     fn from(value: &Coordinates) -> Self {
         value
@@ -26,6 +27,7 @@ impl From<&Coordinates> for Vec<(i32, i32)> {
     }
 }
 
+/// Unpacks the raw byte blob into (lat, lon) pairs converted to degrees.
 impl From<&Coordinates> for Vec<(f64, f64)> {
     fn from(value: &Coordinates) -> Self {
         let semicircles: Vec<(i32, i32)> = value.into();

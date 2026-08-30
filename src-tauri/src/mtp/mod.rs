@@ -19,6 +19,7 @@ pub static MTP_CLIENT_INST: LazyLock<Mutex<MtpClient>> = LazyLock::new(|| Mutex:
 pub struct MtpClient {}
 
 impl MtpClient {
+    /// Lists MTP devices currently connected over USB, filtered to Garmin ones.
     pub async fn get_connected_devices(&self) -> Result<Vec<DeviceListItem>> {
         let mut res = Vec::new();
 
@@ -40,6 +41,7 @@ impl MtpClient {
         Ok(res)
     }
 
+    /// Downloads `.FIT` activity files newer than `date` from the device's `GARMIN/Activity` folder into a temp directory, returning their local paths.
     pub async fn download_activities_since(
         &self,
         serial: &str,

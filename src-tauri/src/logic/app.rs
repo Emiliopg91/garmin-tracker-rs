@@ -23,12 +23,14 @@ use tauri_plugin_log::log::{error, info};
 
 pub static SETTINGS_INST: OnceLock<RwLock<Settings>> = OnceLock::new();
 
+/// Returns the current in-memory app settings.
 #[traced_command]
 #[tauri::command]
 pub async fn get_settings() -> Settings {
     SETTINGS_INST.get().unwrap().read().unwrap().clone()
 }
 
+/// Called once the frontend has mounted: starts the USB device watcher and reveals the main window.
 #[traced_command]
 #[tauri::command]
 pub async fn notify_frontend_ready(app: AppHandle, webview_window: WebviewWindow) {
@@ -45,6 +47,7 @@ pub async fn notify_frontend_ready(app: AppHandle, webview_window: WebviewWindow
     let _ = webview_window.show();
 }
 
+/// Reports whether this is a debug or release build.
 #[traced_command]
 #[tauri::command]
 pub async fn get_environment() -> AppEnvironment {
@@ -55,6 +58,7 @@ pub async fn get_environment() -> AppEnvironment {
     }
 }
 
+/// Updates a single named setting: persists it to the DB, applies any side effect (e.g. autostart toggle), and refreshes `SETTINGS_INST`.
 #[traced_command]
 #[tauri::command]
 pub async fn update_settings_value(app: AppHandle, name: &str, value: &str) -> Result<(), String> {
@@ -96,6 +100,7 @@ pub async fn update_settings_value(app: AppHandle, name: &str, value: &str) -> R
     Ok(())
 }
 
+/// Exports the whole database to a timestamped JSON file in the user's home directory and notifies on success/failure.
 #[traced_command]
 #[tauri::command]
 pub fn export_database() -> Result<(), String> {
@@ -138,6 +143,7 @@ pub fn export_database() -> Result<(), String> {
     }
 }
 
+/// Returns every translation key resolved to the current UI language, for the frontend's i18n bootstrap.
 #[traced_command]
 #[tauri::command]
 pub fn get_translations() -> Result<HashMap<String, String>, String> {

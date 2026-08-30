@@ -21,6 +21,7 @@ pub struct Settings {
 }
 
 impl Settings {
+    /// Reads the persisted weight unit, defaulting to kilograms if unset/invalid.
     pub fn get_weight_unit() -> WeightUnit {
         SettingsRepository::select_by_id(settings_keys::WEIGHT_UNIT)
             .ok()
@@ -28,6 +29,7 @@ impl Settings {
             .and_then(|r| WeightUnit::try_from(r.value.as_str()).ok())
             .unwrap_or(WeightUnit::Kilograms)
     }
+    /// Persists the weight unit setting.
     pub fn set_weight_unit(value: &WeightUnit) -> rusqlite_orm::database::errors::Result<()> {
         SettingsRepository::insert()
             .or_replace()
@@ -39,6 +41,7 @@ impl Settings {
             .map(|_| ())
     }
 
+    /// Reads the persisted distance unit, defaulting to kilometers if unset/invalid.
     pub fn get_distance_unit() -> DistanceUnit {
         SettingsRepository::select_by_id(settings_keys::DISTANCE_UNIT)
             .ok()
@@ -46,6 +49,7 @@ impl Settings {
             .and_then(|r| DistanceUnit::try_from(r.value.as_str()).ok())
             .unwrap_or(DistanceUnit::Kilometers)
     }
+    /// Persists the distance unit setting.
     pub fn set_distance_unit(value: &DistanceUnit) -> rusqlite_orm::database::errors::Result<()> {
         SettingsRepository::insert()
             .or_replace()
@@ -57,6 +61,7 @@ impl Settings {
             .map(|_| ())
     }
 
+    /// Reads the persisted UI language, defaulting to the system language if unset.
     pub fn get_language() -> Languages {
         SettingsRepository::select_by_id(settings_keys::LANGUAGE)
             .ok()
@@ -64,6 +69,7 @@ impl Settings {
             .map(|r| Languages::from(r.value.as_str()))
             .unwrap_or((*constants::SYSTEM_LANGUAGE).clone())
     }
+    /// Persists the UI language setting.
     pub fn set_language(value: &Languages) -> rusqlite_orm::database::errors::Result<()> {
         SettingsRepository::insert()
             .or_replace()
@@ -75,6 +81,7 @@ impl Settings {
             .map(|_| ())
     }
 
+    /// Reads whether auto-sync on device connect is enabled, defaulting to `true` if unset.
     pub fn get_auto_sync() -> bool {
         SettingsRepository::select_by_id(settings_keys::AUTO_SYNC)
             .ok()
@@ -82,6 +89,7 @@ impl Settings {
             .and_then(|r| r.value.parse().ok())
             .unwrap_or(true)
     }
+    /// Persists the auto-sync setting.
     pub fn set_auto_sync(value: bool) -> rusqlite_orm::database::errors::Result<()> {
         SettingsRepository::insert()
             .or_replace()
@@ -93,6 +101,7 @@ impl Settings {
             .map(|_| ())
     }
 
+    /// Reads whether launch-on-boot is enabled, defaulting to `false` if unset.
     pub fn get_start_on_boot() -> bool {
         SettingsRepository::select_by_id(settings_keys::START_ON_BOOT)
             .ok()
@@ -100,6 +109,7 @@ impl Settings {
             .and_then(|r| r.value.parse().ok())
             .unwrap_or(false)
     }
+    /// Persists the launch-on-boot setting.
     pub fn set_start_on_boot(value: bool) -> rusqlite_orm::database::errors::Result<()> {
         SettingsRepository::insert()
             .or_replace()

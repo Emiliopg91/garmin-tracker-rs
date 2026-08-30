@@ -37,6 +37,7 @@ use rusqlite_orm::{
 };
 use tauri_plugin_log::log::{error, info, warn};
 
+/// Returns every recorded session, newest first.
 #[traced_command]
 #[tauri::command]
 pub fn get_sessions() -> Result<Vec<SessionListItem>, String> {
@@ -70,6 +71,7 @@ pub fn get_sessions() -> Result<Vec<SessionListItem>, String> {
     }
 }
 
+/// Returns full details for one session (series grouped by exercise, heart rate, GPS, speeds, device).
 #[traced_command]
 #[tauri::command]
 pub fn get_session_details(timestamp: i32) -> Result<SessionDetails, String> {
@@ -147,6 +149,7 @@ pub fn get_session_details(timestamp: i32) -> Result<SessionDetails, String> {
     }
 }
 
+/// Applies user edits (reps/weight) to a session's series and recomputes personal records.
 #[traced_command]
 #[tauri::command]
 pub fn save_session_changes(details: SessionSeriesUpdate) -> Result<(), String> {
@@ -204,12 +207,14 @@ pub fn save_session_changes(details: SessionSeriesUpdate) -> Result<(), String> 
     }
 }
 
+/// Tauri command wrapper around `_import_from_device`; returns the number of sessions imported.
 #[traced_command]
 #[tauri::command]
 pub async fn import_from_device(serial: &str) -> Result<usize, String> {
     _import_from_device(serial).await
 }
 
+/// Downloads new activity files from the given device since its last sync and imports them.
 pub async fn _import_from_device(serial: &str) -> Result<usize, String> {
     info!("Starting import from device with S/N {}", serial);
     let mut latest_date = "2026-06-08-00-00-00".to_string();
@@ -266,6 +271,7 @@ pub async fn _import_from_device(serial: &str) -> Result<usize, String> {
     }
 }
 
+/// Parses a batch of `.FIT` files in parallel and inserts each new session (plus its exercises/series/heart rate/GPS/speeds) in the given transaction, then refreshes personal records.
 fn import_file_list<F>(
     tx: &mut rusqlite_orm::rusqlite::Transaction,
     files: &[F],
@@ -400,6 +406,7 @@ where
     Ok(success)
 }
 
+/// Recomputes the `pr` flag for each affected exercise and notifies if any of the just-imported/edited sessions set a new record.
 fn update_prs(
     tx: &rusqlite_orm::rusqlite::Transaction,
     exercises: HashSet<(String, u16)>,
@@ -464,6 +471,7 @@ fn update_prs(
     Ok(())
 }
 
+/// Performs a blocking HTTP GET and returns the response body as a string.
 fn get(url: &str) -> Result<String, curl::Error> {
     let mut easy = Easy::new();
     easy.url(url)?;
@@ -481,6 +489,7 @@ fn get(url: &str) -> Result<String, curl::Error> {
     Ok(String::from_utf8_lossy(&data).to_string())
 }
 
+/// Reverse-geocodes a lat/lon point to a city/locality name via the BigDataCloud API; returns an empty string on failure.
 pub fn get_location_from_coordinates(lat: f64, long: f64, lang: &str) -> String {
     let mut location = "".to_string();
     let url = format!(
