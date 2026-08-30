@@ -9,8 +9,8 @@ use fitparser::{FitDataField, FitDataRecord, Value, de::DecodeOption, profile};
 
 use crate::{
     dao::{
-        coordinates::Coordinates, exercise::Exercise, heart_rate::HeartRate, serie::Serie,
-        session::Session, speeds::Speeds,
+        additional_data::AdditionalData, coordinates::Coordinates, exercise::Exercise,
+        heart_rate::HeartRate, serie::Serie, session::Session, speeds::Speeds,
     },
     logic::sessions::get_location_from_coordinates,
     utils::{constants, translations::translate_and_replace},
@@ -222,8 +222,7 @@ fn get_coordinates(
         if let Ok(latitude) = get_i32("position_lat", entry.fields())
             && let Ok(longitude) = get_i32("position_long", entry.fields())
         {
-            coords.extend_from_slice(&latitude.to_be_bytes());
-            coords.extend_from_slice(&longitude.to_be_bytes());
+            coords.push((latitude, longitude));
 
             if start_point.is_none() {
                 start_point = Some((latitude, longitude));
@@ -236,7 +235,7 @@ fn get_coordinates(
     } else {
         Some(Coordinates {
             session: timestamp.timestamp(),
-            records: coords,
+            records: AdditionalData::build_coordinates_blob(&coords),
         })
     })
 }
@@ -249,7 +248,7 @@ fn get_speeds(
 
     records.iter().for_each(|entry| {
         if let Ok(speed) = get_f64("enhanced_speed", entry.fields()) {
-            speeds.extend_from_slice(&speed.to_be_bytes());
+            speeds.push(speed);
         }
     });
 
@@ -258,7 +257,7 @@ fn get_speeds(
     } else {
         Some(Speeds {
             session: timestamp.timestamp(),
-            records: speeds,
+            records: AdditionalData::build_speeds_blob(&speeds),
         })
     })
 }

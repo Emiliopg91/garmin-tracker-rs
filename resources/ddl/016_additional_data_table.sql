@@ -1,0 +1,42 @@
+--- Table for session additional data
+
+CREATE TABLE IF NOT EXISTS ADDITIONAL_DATA (
+	session INTEGER NOT NULL,
+	heart_rates BLOB DEFAULT NULL,
+	coordinates BLOB DEFAULT NULL,
+	speeds BLOB DEFAULT NULL,
+	
+	PRIMARY KEY(session),
+	FOREIGN KEY(session) REFERENCES SESSION(date) ON DELETE CASCADE
+);
+
+INSERT OR IGNORE INTO ADDITIONAL_DATA (session)
+SELECT session FROM HEART_RATE
+UNION
+SELECT session FROM COORDINATES
+UNION
+SELECT session FROM SPEEDS;
+
+UPDATE ADDITIONAL_DATA
+SET heart_rates = (
+    SELECT records
+    FROM HEART_RATE
+    WHERE HEART_RATE.session = ADDITIONAL_DATA.session
+)
+WHERE session IN (SELECT session FROM HEART_RATE);
+
+UPDATE ADDITIONAL_DATA
+SET coordinates = (
+    SELECT records
+    FROM COORDINATES
+    WHERE COORDINATES.session = ADDITIONAL_DATA.session
+)
+WHERE session IN (SELECT session FROM COORDINATES);
+
+UPDATE ADDITIONAL_DATA
+SET speeds = (
+    SELECT records
+    FROM SPEEDS
+    WHERE SPEEDS.session = SPEEDS.session
+)
+WHERE session IN (SELECT session FROM SPEEDS);

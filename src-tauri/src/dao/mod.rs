@@ -1,3 +1,4 @@
+pub mod additional_data;
 pub mod body_metrics;
 pub mod coordinates;
 pub mod device;
