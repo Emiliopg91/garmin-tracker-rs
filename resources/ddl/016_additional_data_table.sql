@@ -24,6 +24,7 @@ SET heart_rates = (
     WHERE HEART_RATE.session = ADDITIONAL_DATA.session
 )
 WHERE session IN (SELECT session FROM HEART_RATE);
+DROP TABLE HEART_RATE;
 
 UPDATE ADDITIONAL_DATA
 SET coordinates = (
@@ -32,6 +33,7 @@ SET coordinates = (
     WHERE COORDINATES.session = ADDITIONAL_DATA.session
 )
 WHERE session IN (SELECT session FROM COORDINATES);
+DROP TABLE COORDINATES;
 
 UPDATE ADDITIONAL_DATA
 SET speeds = (
@@ -40,3 +42,5 @@ SET speeds = (
     WHERE SPEEDS.session = SPEEDS.session
 )
 WHERE session IN (SELECT session FROM SPEEDS);
+
+DROP TABLE SPEEDS;
