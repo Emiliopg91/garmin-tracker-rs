@@ -1,19 +1,19 @@
 node:
-  "@emotion/react": 11.14.0
-  "@emotion/styled": 11.14.1
-  "@eslint/js": 9.39.5
-  "@mui/icons-material": 9.4.0
-  "@mui/material": 9.4.0
-  "@mui/x-date-pickers": 9.12.0
-  "@tauri-apps/api": 2.11.1
-  "@tauri-apps/cli": 2.11.4
-  "@tauri-apps/plugin-autostart": 2.5.1
-  "@tauri-apps/plugin-log": 2.9.0
-  "@tauri-apps/plugin-opener": 2.5.4
-  "@types/leaflet": 1.9.22
-  "@types/react": 19.2.18
-  "@types/react-dom": 19.2.5
-  "@vitejs/plugin-react": 4.7.0
+  '@emotion/react': 11.14.0
+  '@emotion/styled': 11.14.1
+  '@eslint/js': 9.39.5
+  '@mui/icons-material': 9.4.0
+  '@mui/material': 9.4.0
+  '@mui/x-date-pickers': 9.12.0
+  '@tauri-apps/api': 2.11.1
+  '@tauri-apps/cli': 2.11.4
+  '@tauri-apps/plugin-autostart': 2.5.1
+  '@tauri-apps/plugin-log': 2.9.0
+  '@tauri-apps/plugin-opener': 2.5.4
+  '@types/leaflet': 1.9.22
+  '@types/react': 19.2.18
+  '@types/react-dom': 19.2.5
+  '@vitejs/plugin-react': 4.7.0
   date-fns: 4.4.0
   eslint: 9.39.5
   eslint-plugin-react: 7.37.5
@@ -32,7 +32,7 @@ rust:
   curl: 0.4.50
   fitparser: 0.11.0
   garmin-tracker-rs-macros: 0.1.0
-  indexmap: 2.14.0
+  indexmap: 2.14.1
   libc: 0.2.189
   mtp-rs: 0.32.0
   nusb: 0.2.7
@@ -49,7 +49,7 @@ rust:
   tauri-plugin-autostart: 2.5.1
   tauri-plugin-log: 2.9.0
   tauri-plugin-opener: 2.5.4
-  tauri-rs-ts-ipc: 0.1.19
+  tauri-rs-ts-ipc: 0.1.20
   thiserror: 2.0.20
   tokio: 1.53.1
   tokio-stream: 0.1.19

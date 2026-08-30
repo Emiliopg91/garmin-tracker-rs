@@ -19,7 +19,7 @@ use tauri_plugin_log::{
 
 use crate::{
     dao::{
-        additional_data::{self, AdditionalData, AdditionalDataRepository},
+        additional_data::{self, AdditionalDataRepository},
         session::{self, SessionRepository},
     },
     dto::{
