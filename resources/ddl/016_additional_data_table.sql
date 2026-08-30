@@ -42,5 +42,4 @@ SET speeds = (
     WHERE SPEEDS.session = SPEEDS.session
 )
 WHERE session IN (SELECT session FROM SPEEDS);
-
 DROP TABLE SPEEDS;
