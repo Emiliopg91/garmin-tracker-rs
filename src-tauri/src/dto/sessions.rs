@@ -76,7 +76,7 @@ pub struct SessionDetails {
     pub exercises: Vec<String>,
     pub series: HashMap<String, Vec<SessionSerie>>,
     pub heart_rates: Vec<u8>,
-    pub coordinates: Vec<(i32, i32)>,
+    pub coordinates: Vec<Option<(i32, i32)>>,
     pub speeds: Vec<f64>,
 
     pub device: Option<String>,
@@ -104,20 +104,19 @@ impl From<(&Session, &IndexMap<Exercise, Vec<Serie>>)> for SessionDetails {
             .map(|dev| format!("Garmin {}", dev.model));
 
         let mut heart_rates = Vec::new();
-        if let Some(hr_dao) = value.0.heart_rates.clone()
-            && !hr_dao.records.is_empty()
-        {
-            heart_rates = hr_dao.records.into_iter().collect();
-        }
-
-        let mut gps_coordinates: Vec<(i32, i32)> = Vec::new();
-        if let Some(coords) = value.0.coordinates.clone() {
-            gps_coordinates = (&coords).into()
-        }
-
+        let mut gps_coordinates: Vec<Option<(i32, i32)>> = Vec::new();
         let mut speeds: Vec<f64> = Vec::new();
-        if let Some(spds) = value.0.speeds.clone() {
-            speeds = (&spds).into()
+
+        if let Some(add_data) = &value.0.additional_data {
+            if let Some(hr_data) = add_data.heart_rates.clone() {
+                heart_rates = hr_data;
+            }
+            if let Some(coords) = add_data.get_coordinates_semicircle() {
+                gps_coordinates = coords;
+            }
+            if let Some(spds) = add_data.get_speeds() {
+                speeds = spds;
+            }
         }
 
         Self {

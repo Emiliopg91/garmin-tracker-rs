@@ -9,8 +9,10 @@ use fitparser::{FitDataField, FitDataRecord, Value, de::DecodeOption, profile};
 
 use crate::{
     dao::{
-        additional_data::AdditionalData, coordinates::Coordinates, exercise::Exercise,
-        heart_rate::HeartRate, serie::Serie, session::Session, speeds::Speeds,
+        additional_data::{self, AdditionalData},
+        exercise::Exercise,
+        serie::Serie,
+        session::Session,
     },
     logic::sessions::get_location_from_coordinates,
     utils::{constants, translations::translate_and_replace},
@@ -92,14 +94,13 @@ where
     let total_calories = get_u16("total_calories", session_entry.fields())?;
     let metabolic_calories = get_u16("metabolic_calories", session_entry.fields())?;
     let series = get_sets(&grouped, &timestamp).unwrap_or_default();
-    let heart_rates = get_heart_rate(&timestamp, &grouped.records)?;
-    let coordinates = get_coordinates(&timestamp, &grouped.records)?;
-    let speeds = get_speeds(&timestamp, &grouped.records)?;
+    let additional_data = get_additional_data(&timestamp, &grouped.records)?;
     if workout.is_empty()
-        && let Some(coords) = coordinates.clone()
+        && let Some(add_data) = additional_data.clone()
+        && let Some(coords) = add_data.get_coordinates_semicircle()
     {
-        let coords: Vec<(i32, i32)> = (&coords).into();
-        if let Some(start_point) = coords.first() {
+        if let Some(start_point) = coords.iter().find(|p| p.is_some()) {
+            let start_point = start_point.unwrap();
             workout = get_location_from_coordinates(
                 start_point.0 as f64 * constants::SEMICIRCLE_TO_DEGREES,
                 start_point.1 as f64 * constants::SEMICIRCLE_TO_DEGREES,
@@ -120,9 +121,7 @@ where
         sport,
         device: None,
         device_obj: None,
-        heart_rates,
-        coordinates,
-        speeds,
+        additional_data,
     })
 }
 
@@ -195,80 +194,113 @@ fn get_sets(grouped: &GroupedEntries, timestamp: &DateTime<Local>) -> errors::Re
     Ok(sets)
 }
 
-/// Extracts heart-rate samples from the session's `record` messages, packing them into a `HeartRate` entity.
-fn get_heart_rate(
+/// Extracts additional data from the session's `record` messages, packing them into a `HeartRate` entity.
+fn get_additional_data(
     timestamp: &DateTime<Local>,
     records: &[&FitDataRecord],
-) -> errors::Result<Option<HeartRate>> {
-    let mut hrs = Vec::with_capacity(records.len());
-
-    records.iter().for_each(|entry| {
-        if let Ok(val) = get_u8("heart_rate", entry.fields()) {
-            hrs.push(val);
-        }
-    });
-
-    Ok(if hrs.is_empty() {
-        None
-    } else {
-        Some(HeartRate {
-            session: timestamp.timestamp(),
-            records: hrs,
-        })
-    })
-}
-
-/// Extracts GPS samples from the session's `record` messages, packing them into a `Coordinates` entity.
-fn get_coordinates(
-    timestamp: &DateTime<Local>,
-    records: &[&FitDataRecord],
-) -> errors::Result<Option<Coordinates>> {
-    let mut coords = Vec::with_capacity(records.len());
-    let mut start_point = None;
-
-    records.iter().for_each(|entry| {
-        if let Ok(latitude) = get_i32("position_lat", entry.fields())
-            && let Ok(longitude) = get_i32("position_long", entry.fields())
-        {
-            coords.push((latitude, longitude));
-
-            if start_point.is_none() {
-                start_point = Some((latitude, longitude));
-            }
-        }
-    });
-
-    Ok(if coords.is_empty() {
-        None
-    } else {
-        Some(Coordinates {
-            session: timestamp.timestamp(),
-            records: AdditionalData::build_coordinates_blob(&coords),
-        })
-    })
-}
-
-/// Extracts speed samples from the session's `record` messages, packing them into a `Speeds` entity.
-fn get_speeds(
-    timestamp: &DateTime<Local>,
-    records: &[&FitDataRecord],
-) -> errors::Result<Option<Speeds>> {
+) -> errors::Result<Option<AdditionalData>> {
+    let mut hrs = Vec::new();
+    let mut coords = Vec::new();
     let mut speeds = Vec::with_capacity(records.len());
 
     records.iter().for_each(|entry| {
-        if let Ok(speed) = get_f64("enhanced_speed", entry.fields()) {
-            speeds.push(speed);
-        }
+        hrs.push(if let Ok(val) = get_u8("heart_rate", entry.fields()) {
+            Some(val)
+        } else {
+            None
+        });
+        coords.push(
+            if let Ok(latitude) = get_i32("position_lat", entry.fields())
+                && let Ok(longitude) = get_i32("position_long", entry.fields())
+            {
+                Some((latitude, longitude))
+            } else {
+                None
+            },
+        );
+        speeds.push(
+            if let Ok(speed) = get_f64("enhanced_speed", entry.fields()) {
+                Some(speed)
+            } else {
+                None
+            },
+        );
     });
 
-    Ok(if speeds.is_empty() {
-        None
+    let hrs = if !hrs.is_empty() && hrs.iter().find(|e| e.is_some()).is_some() {
+        Some(
+            hrs.iter()
+                .map(|e| match e {
+                    Some(v) => *v,
+                    None => 0_u8,
+                })
+                .collect::<Vec<_>>(),
+        )
     } else {
-        Some(Speeds {
+        None
+    };
+
+    let coords = if !coords.is_empty() && coords.iter().find(|e| e.is_some()).is_some() {
+        fn get_coord_for_idx(coords: &[Option<(i32, i32)>], idx: usize) -> (i32, i32) {
+            let elem = coords[idx];
+            match elem {
+                Some((lat, long)) => {
+                    return (lat, long);
+                }
+                None => {
+                    if idx > 0 {
+                        get_coord_for_idx(coords, idx - 1)
+                    } else {
+                        return (
+                            additional_data::POSITION_INVALID,
+                            additional_data::POSITION_INVALID,
+                        );
+                    }
+                }
+            }
+        }
+
+        let mut new_coords = Vec::new();
+        for i in 0..coords.len() {
+            new_coords.push(get_coord_for_idx(&coords, i));
+        }
+        Some(new_coords)
+    } else {
+        None
+    };
+
+    let speeds = if !speeds.is_empty() && speeds.iter().find(|e| e.is_some()).is_some() {
+        Some(
+            speeds
+                .iter()
+                .map(|e| match e {
+                    Some(v) => *v,
+                    None => 0_f64,
+                })
+                .collect::<Vec<_>>(),
+        )
+    } else {
+        None
+    };
+
+    if hrs.is_some() || coords.is_some() || speeds.is_some() {
+        Ok(Some(AdditionalData {
             session: timestamp.timestamp(),
-            records: AdditionalData::build_speeds_blob(&speeds),
-        })
-    })
+            heart_rates: hrs,
+            coordinates: if coords.is_some() {
+                Some(AdditionalData::build_coordinates_blob(&coords.unwrap()))
+            } else {
+                None
+            },
+            speeds: if speeds.is_some() {
+                Some(AdditionalData::build_speeds_blob(&speeds.unwrap()))
+            } else {
+                None
+            },
+        }))
+    } else {
+        Ok(None)
+    }
 }
 
 /// Resolves each workout step to its `Exercise`, by looking it up in the exercise titles parsed from the same file.

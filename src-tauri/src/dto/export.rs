@@ -4,15 +4,13 @@ use rusqlite_orm::{dao::Repository, database::Database};
 use serde::{Deserialize, Serialize};
 
 use crate::dao::{
+    additional_data::{AdditionalData, AdditionalDataRepository},
     body_metrics::{BodyMetrics, BodyMetricsRepository},
-    coordinates::{Coordinates, CoordinatesRepository},
     device::{Device, DeviceRepository},
     exercise::{Exercise, ExerciseRepository},
-    heart_rate::{HeartRate, HeartRateRepository},
     serie::{Serie, SerieRepository},
     session::{Session, SessionRepository},
     settings::{Settings, SettingsRepository},
-    speeds::{Speeds, SpeedsRepository},
 };
 
 #[derive(Serialize, Deserialize)]
@@ -34,28 +32,12 @@ impl Export {
             let settings = SettingsRepository::select().fetch_in(conn)?;
             let sessions = SessionRepository::select().fetch_in(conn)?;
 
-            let mut heart_rates: HashMap<i64, HeartRate> = HashMap::new();
-            HeartRateRepository::select()
+            let mut additional_datas: HashMap<i64, AdditionalData> = HashMap::new();
+            AdditionalDataRepository::select()
                 .fetch_in(conn)?
                 .into_iter()
-                .for_each(|hr| {
-                    heart_rates.insert(hr.session, hr);
-                });
-
-            let mut coordinates: HashMap<i64, Coordinates> = HashMap::new();
-            CoordinatesRepository::select()
-                .fetch_in(conn)?
-                .into_iter()
-                .for_each(|c| {
-                    coordinates.insert(c.session, c);
-                });
-
-            let mut speeds: HashMap<i64, Speeds> = HashMap::new();
-            SpeedsRepository::select()
-                .fetch_in(conn)?
-                .into_iter()
-                .for_each(|s| {
-                    speeds.insert(s.session, s);
+                .for_each(|ad| {
+                    additional_datas.insert(ad.session, ad);
                 });
 
             let mut series: HashMap<i64, Vec<Serie>> = HashMap::new();
@@ -70,12 +52,10 @@ impl Export {
             let sessions = sessions
                 .into_iter()
                 .map(|session| {
-                    let heart_rate = heart_rates.get(&session.date);
-                    let coordinate = coordinates.get(&session.date);
-                    let speed = speeds.get(&session.date);
                     let serie = series.get(&session.date);
+                    let add_data = additional_datas.get(&session.date);
 
-                    SessionExport::from((&session, heart_rate, coordinate, speed, serie))
+                    SessionExport::from((&session, add_data, serie))
                 })
                 .collect::<Vec<_>>();
 
@@ -108,7 +88,7 @@ pub struct SessionExport {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub device: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub coordinates: Option<Vec<(f64, f64)>>,
+    pub coordinates: Option<Vec<Option<(f64, f64)>>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub speeds: Option<Vec<f64>>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -117,38 +97,20 @@ pub struct SessionExport {
     pub series: Option<Vec<Serie>>,
 }
 
-impl
-    From<(
-        &Session,
-        Option<&HeartRate>,
-        Option<&Coordinates>,
-        Option<&Speeds>,
-        Option<&Vec<Serie>>,
-    )> for SessionExport
-{
-    fn from(
-        values: (
-            &Session,
-            Option<&HeartRate>,
-            Option<&Coordinates>,
-            Option<&Speeds>,
-            Option<&Vec<Serie>>,
-        ),
-    ) -> Self {
+impl From<(&Session, Option<&AdditionalData>, Option<&Vec<Serie>>)> for SessionExport {
+    fn from(values: (&Session, Option<&AdditionalData>, Option<&Vec<Serie>>)) -> Self {
         let mut heart_rates = None;
-        if let Some(hr) = values.1 {
-            heart_rates = Some(hr.records.clone());
-        }
-        let mut coordinates: Option<Vec<(f64, f64)>> = None;
-        if let Some(gps) = values.2 {
-            coordinates = Some(gps.into());
-        }
+        let mut coordinates: Option<Vec<Option<(f64, f64)>>> = None;
         let mut speeds: Option<Vec<f64>> = None;
-        if let Some(spds) = values.3 {
-            speeds = Some(spds.into());
-        }
         let mut series = None;
-        if let Some(srs) = values.4
+
+        if let Some(add_data) = values.1 {
+            heart_rates = add_data.heart_rates.clone();
+            coordinates = add_data.get_coordinates_degrees();
+            speeds = add_data.get_speeds();
+        }
+
+        if let Some(srs) = values.2
             && !srs.is_empty()
         {
             series = Some(srs.clone());

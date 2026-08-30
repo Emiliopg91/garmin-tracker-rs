@@ -6,13 +6,11 @@ use std::{
 
 use crate::{
     dao::{
-        coordinates::CoordinatesRepository,
+        additional_data::AdditionalDataRepository,
         device::{Device, DeviceRepository},
         exercise::{self, Exercise, ExerciseRepository},
-        heart_rate::HeartRateRepository,
         serie::{self, Serie, SerieRepository, entity},
         session::{self, SessionRepository},
-        speeds::SpeedsRepository,
     },
     dto::{
         notifications::{NotificationDefinition, NotificationKind},
@@ -88,9 +86,7 @@ pub fn get_session_details(timestamp: i32) -> Result<SessionDetails, String> {
         if session.device.is_some() {
             session.fetch_device_obj_relationship_in_conn(conn)?;
         }
-        session.fetch_heart_rates_relationship_in_conn(conn)?;
-        session.fetch_coordinates_relationship_in_conn(conn)?;
-        session.fetch_speeds_relationship_in_conn(conn)?;
+        session.fetch_additional_data_relationship_in_conn(conn)?;
 
         let condition_set: HashSet<(_, _)> = session
             .series
@@ -354,21 +350,9 @@ where
                     insert.execute_in(tx)?;
                 }
 
-                if let Some(heart_rates) = session.heart_rates {
-                    HeartRateRepository::insert()
-                        .item(heart_rates.clone())
-                        .execute_in(tx)?;
-                }
-
-                if let Some(coordinates) = session.coordinates {
-                    CoordinatesRepository::insert()
-                        .item(coordinates.clone())
-                        .execute_in(tx)?;
-                }
-
-                if let Some(speeds) = session.speeds {
-                    SpeedsRepository::insert()
-                        .item(speeds.clone())
+                if let Some(additional_data) = session.additional_data {
+                    AdditionalDataRepository::insert()
+                        .item(additional_data.clone())
                         .execute_in(tx)?;
                 }
 

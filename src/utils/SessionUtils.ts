@@ -16,6 +16,9 @@ export interface SessionFrontDetails extends SessionDetails {
     coordinates: [[number, number], [number, number]];
     color: string;
   }[];
+  valid_points: [number, number][];
+  start_point: [number, number];
+  finish_point: [number, number];
   distance: number;
   speed: number;
   pace: number;
@@ -38,6 +41,9 @@ export class SessionUtils {
       ...backDetails,
       zones_times: [0, 0, 0, 0, 0],
       gps_segments: [],
+      valid_points: [],
+      start_point: [0, 0],
+      finish_point: [0, 0],
       distance: 0,
       speed: 0,
       pace: 0,
@@ -74,23 +80,42 @@ export class SessionUtils {
   private static handleGpsCoordiates(details: SessionFrontDetails) {
     if (details.coordinates) {
       for (let i = 0; i < details.coordinates.length; i++) {
-        details.coordinates[i][0] =
-          details.coordinates[i][0] * UnitUtils.SEMICIRCLE_TO_DEGREES;
-        details.coordinates[i][1] =
-          details.coordinates[i][1] * UnitUtils.SEMICIRCLE_TO_DEGREES;
+        if (details.coordinates[i]) {
+          details.coordinates[i]![0] =
+            details.coordinates[i]![0] * UnitUtils.SEMICIRCLE_TO_DEGREES;
+          details.coordinates[i]![1] =
+            details.coordinates[i]![1] * UnitUtils.SEMICIRCLE_TO_DEGREES;
+          details.valid_points.push(details.coordinates[i]!);
+        }
       }
 
       const diffs: number[] = [];
       for (let i = 0; i < details.coordinates.length - 1; i++) {
-        const diff = SessionUtils.haversine(
-          details.coordinates[i],
-          details.coordinates[i + 1],
-        );
-        diffs.push(diff);
-        details.distance += diff;
+        if (details.coordinates[i]) {
+          const diff = SessionUtils.haversine(
+            details.coordinates[i]!,
+            details.coordinates[i + 1]!,
+          );
+          diffs.push(diff);
+          details.distance += diff;
+        }
       }
       details.speed = details.distance / (details.total_elapsed_time / 3600);
       details.pace = details.total_elapsed_time / 60 / details.distance;
+
+      for (let i = 0; i < details.coordinates.length; i++) {
+        if (details.coordinates[i]) {
+          details.start_point = details.coordinates[i]!;
+          break;
+        }
+      }
+
+      for (let i = details.coordinates.length - 1; i >= 0; i--) {
+        if (details.coordinates[i]) {
+          details.finish_point = details.coordinates[i]!;
+          break;
+        }
+      }
 
       const colors = [];
       for (let i = 0; i < details.coordinates.length - 1; i++) {
@@ -105,15 +130,16 @@ export class SessionUtils {
         const maxSpeed = Math.max(...speeds);
         for (let i = 0; i < speeds.length && i < colors.length; i++) {
           colors[i] = 240 - Math.round(240 * (speeds[i] / maxSpeed));
-          console.log(colors[i]);
         }
       }
 
       for (let i = 0; i < details.coordinates.length - 1; i++) {
-        details.gps_segments.push({
-          coordinates: [details.coordinates[i], details.coordinates[i + 1]],
-          color: `hsl(${colors[i]}, 100%, 50%)`,
-        });
+        if (details.coordinates[i]) {
+          details.gps_segments.push({
+            coordinates: [details.coordinates[i]!, details.coordinates[i + 1]!],
+            color: `hsl(${colors[i]}, 100%, 50%)`,
+          });
+        }
       }
     }
   }

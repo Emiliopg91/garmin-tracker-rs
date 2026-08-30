@@ -2,11 +2,9 @@ use rusqlite_orm_macros::Entity;
 use serde::{Deserialize, Serialize};
 
 use crate::dao::{
-    coordinates::{self, Coordinates},
+    additional_data::{self, AdditionalData},
     device::{self, Device},
-    heart_rate::{self, HeartRate},
     serie,
-    speeds::{self, Speeds},
 };
 
 use super::serie::Serie;
@@ -25,18 +23,12 @@ pub struct Session {
     pub sport: String,
     pub device: Option<String>,
 
-    #[relationship((device, device::entity::columns::SERIAL))]
-    pub device_obj: Option<Device>,
-
     #[relationship((date, serie::entity::columns::SESSION))]
     pub series: Vec<Serie>,
 
-    #[relationship((date, heart_rate::entity::columns::SESSION))]
-    pub heart_rates: Option<HeartRate>,
+    #[relationship((device, device::entity::columns::SERIAL))]
+    pub device_obj: Option<Device>,
 
-    #[relationship((date, coordinates::entity::columns::SESSION))]
-    pub coordinates: Option<Coordinates>,
-
-    #[relationship((date, speeds::entity::columns::SESSION))]
-    pub speeds: Option<Speeds>,
+    #[relationship((date, additional_data::entity::columns::SESSION))]
+    pub additional_data: Option<AdditionalData>,
 }

@@ -1,8 +1,11 @@
 use rusqlite_orm_macros::Entity;
+use serde::{Deserialize, Serialize};
 
 use crate::utils::constants::SEMICIRCLE_TO_DEGREES;
 
-#[derive(Entity)]
+pub const POSITION_INVALID: i32 = 0x7FFFFFFF; // 2147483647
+
+#[derive(Entity, Clone, Deserialize, Serialize)]
 #[entity("additional_data")]
 #[primary_key(session)]
 pub struct AdditionalData {
@@ -13,7 +16,8 @@ pub struct AdditionalData {
 }
 
 impl AdditionalData {
-    pub fn get_coordinates_semicircle(&self) -> Option<Vec<(i32, i32)>> {
+    /// Unpacks the raw byte blob into (lat, lon) pairs in semicircles.
+    pub fn get_coordinates_semicircle(&self) -> Option<Vec<Option<(i32, i32)>>> {
         if let Some(records) = &self.coordinates {
             Some(
                 records
@@ -23,7 +27,11 @@ impl AdditionalData {
                     .map(|chunk| {
                         let lat = i32::from_be_bytes(chunk[0..4].try_into().unwrap());
                         let lon = i32::from_be_bytes(chunk[4..8].try_into().unwrap());
-                        (lat, lon)
+                        if lat != POSITION_INVALID && lon != POSITION_INVALID {
+                            Some((lat, lon))
+                        } else {
+                            None
+                        }
                     })
                     .collect(),
             )
@@ -31,16 +39,21 @@ impl AdditionalData {
             None
         }
     }
-    pub fn get_coordinates(&self) -> Option<Vec<(f64, f64)>> {
+    /// Unpacks the raw byte blob into (lat, lon) pairs converted to degrees.
+    pub fn get_coordinates_degrees(&self) -> Option<Vec<Option<(f64, f64)>>> {
         if let Some(semicircles) = self.get_coordinates_semicircle() {
             Some(
                 semicircles
                     .into_iter()
-                    .map(|(lat, long)| {
-                        (
-                            lat as f64 * SEMICIRCLE_TO_DEGREES,
-                            long as f64 * SEMICIRCLE_TO_DEGREES,
-                        )
+                    .map(|p| {
+                        if let Some(p) = p {
+                            Some((
+                                p.0 as f64 * SEMICIRCLE_TO_DEGREES,
+                                p.1 as f64 * SEMICIRCLE_TO_DEGREES,
+                            ))
+                        } else {
+                            None
+                        }
                     })
                     .collect(),
             )
@@ -48,6 +61,7 @@ impl AdditionalData {
             None
         }
     }
+    /// Build blob from semicircles coordinates Vec
     pub fn build_coordinates_blob(values: &[(i32, i32)]) -> Vec<u8> {
         let mut coords = Vec::new();
 
@@ -59,7 +73,8 @@ impl AdditionalData {
         coords
     }
 
-    pub fn get_speeds(self) -> Option<Vec<f64>> {
+    /// Unpacks the speeds Blob into Vec
+    pub fn get_speeds(&self) -> Option<Vec<f64>> {
         if let Some(records) = &self.speeds {
             Some(
                 records
@@ -73,7 +88,7 @@ impl AdditionalData {
             None
         }
     }
-
+    /// Build blob from speeds Vec
     pub fn build_speeds_blob(value: &[f64]) -> Vec<u8> {
         let mut records = Vec::new();
 

@@ -19,7 +19,7 @@ use tauri_plugin_log::{
 
 use crate::{
     dao::{
-        coordinates::{self, CoordinatesRepository},
+        additional_data::{self, AdditionalData, AdditionalDataRepository},
         session::{self, SessionRepository},
     },
     dto::{
@@ -119,14 +119,14 @@ pub fn run() {
                     .fetch_in(tx)?;
 
                 if !sessions.is_empty() {
-                    let gps_coordinates = CoordinatesRepository::select()
+                    let additional_datas = AdditionalDataRepository::select()
                         .where_(Where::In(
-                            coordinates::entity::columns::SESSION,
+                            additional_data::entity::columns::SESSION,
                             sessions.iter().map(|s| s.date.into()).collect::<Vec<_>>(),
                         ))
                         .fetch_in(tx)?;
 
-                    if !gps_coordinates.is_empty() {
+                    if !additional_datas.is_empty() {
                         show_notification(NotificationDefinition {
                             title: translate("aligning_database"),
                             body: translate("operation_may_last"),
@@ -140,21 +140,23 @@ pub fn run() {
                             .language
                             .to_string();
 
-                        for gps_coords in gps_coordinates {
-                            let coords: Vec<(i32, i32)> = (&gps_coords).into();
-                            if let Some(start_point) = coords.first() {
-                                let location = get_location_from_coordinates(
-                                    start_point.0 as f64 * constants::SEMICIRCLE_TO_DEGREES,
-                                    start_point.1 as f64 * constants::SEMICIRCLE_TO_DEGREES,
-                                    &lang,
-                                );
-                                SessionRepository::update()
-                                    .set(session::entity::columns::WORKOUT, location.into())
-                                    .where_(Where::Eq(
-                                        session::entity::columns::DATE,
-                                        gps_coords.session.into(),
-                                    ))
-                                    .execute_in(tx)?;
+                        for additional_data in additional_datas {
+                            if let Some(coords) = additional_data.get_coordinates_semicircle() {
+                                if let Some(start_point) = coords.iter().find(|p| p.is_some()) {
+                                    let start_point = start_point.unwrap();
+                                    let location = get_location_from_coordinates(
+                                        start_point.0 as f64 * constants::SEMICIRCLE_TO_DEGREES,
+                                        start_point.1 as f64 * constants::SEMICIRCLE_TO_DEGREES,
+                                        &lang,
+                                    );
+                                    SessionRepository::update()
+                                        .set(session::entity::columns::WORKOUT, location.into())
+                                        .where_(Where::Eq(
+                                            session::entity::columns::DATE,
+                                            additional_data.session.into(),
+                                        ))
+                                        .execute_in(tx)?;
+                                }
                             }
                         }
                     }
