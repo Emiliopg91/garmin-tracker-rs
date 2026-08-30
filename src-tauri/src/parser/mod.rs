@@ -98,15 +98,14 @@ where
     if workout.is_empty()
         && let Some(add_data) = additional_data.clone()
         && let Some(coords) = add_data.get_coordinates_semicircle()
+        && let Some(start_point) = coords.iter().find(|p| p.is_some())
     {
-        if let Some(start_point) = coords.iter().find(|p| p.is_some()) {
-            let start_point = start_point.unwrap();
-            workout = get_location_from_coordinates(
-                start_point.0 as f64 * constants::SEMICIRCLE_TO_DEGREES,
-                start_point.1 as f64 * constants::SEMICIRCLE_TO_DEGREES,
-                lang,
-            )
-        }
+        let start_point = start_point.unwrap();
+        workout = get_location_from_coordinates(
+            start_point.0 as f64 * constants::SEMICIRCLE_TO_DEGREES,
+            start_point.1 as f64 * constants::SEMICIRCLE_TO_DEGREES,
+            lang,
+        )
     }
 
     Ok(Session {
@@ -204,11 +203,7 @@ fn get_additional_data(
     let mut speeds = Vec::with_capacity(records.len());
 
     records.iter().for_each(|entry| {
-        hrs.push(if let Ok(val) = get_u8("heart_rate", entry.fields()) {
-            Some(val)
-        } else {
-            None
-        });
+        hrs.push(get_u8("heart_rate", entry.fields()).ok());
         coords.push(
             if let Ok(latitude) = get_i32("position_lat", entry.fields())
                 && let Ok(longitude) = get_i32("position_long", entry.fields())
@@ -218,13 +213,7 @@ fn get_additional_data(
                 None
             },
         );
-        speeds.push(
-            if let Ok(speed) = get_f64("enhanced_speed", entry.fields()) {
-                Some(speed)
-            } else {
-                None
-            },
-        );
+        speeds.push(get_f64("enhanced_speed", entry.fields()).ok());
     });
 
     let hrs = if !hrs.is_empty() && hrs.iter().find(|e| e.is_some()).is_some() {
@@ -244,17 +233,15 @@ fn get_additional_data(
         fn get_coord_for_idx(coords: &[Option<(i32, i32)>], idx: usize) -> (i32, i32) {
             let elem = coords[idx];
             match elem {
-                Some((lat, long)) => {
-                    return (lat, long);
-                }
+                Some((lat, long)) => (lat, long),
                 None => {
                     if idx > 0 {
                         get_coord_for_idx(coords, idx - 1)
                     } else {
-                        return (
+                        (
                             additional_data::POSITION_INVALID,
                             additional_data::POSITION_INVALID,
-                        );
+                        )
                     }
                 }
             }
@@ -287,16 +274,8 @@ fn get_additional_data(
         Ok(Some(AdditionalData {
             session: timestamp.timestamp(),
             heart_rates: hrs,
-            coordinates: if coords.is_some() {
-                Some(AdditionalData::build_coordinates_blob(&coords.unwrap()))
-            } else {
-                None
-            },
-            speeds: if speeds.is_some() {
-                Some(AdditionalData::build_speeds_blob(&speeds.unwrap()))
-            } else {
-                None
-            },
+            coordinates: coords.map(|coords| AdditionalData::build_coordinates_blob(&coords)),
+            speeds: speeds.map(|speeds| AdditionalData::build_speeds_blob(&speeds)),
         }))
     } else {
         Ok(None)

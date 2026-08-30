@@ -18,48 +18,38 @@ pub struct AdditionalData {
 impl AdditionalData {
     /// Unpacks the raw byte blob into (lat, lon) pairs in semicircles.
     pub fn get_coordinates_semicircle(&self) -> Option<Vec<Option<(i32, i32)>>> {
-        if let Some(records) = &self.coordinates {
-            Some(
-                records
-                    .as_chunks::<8>()
-                    .0
-                    .iter()
-                    .map(|chunk| {
-                        let lat = i32::from_be_bytes(chunk[0..4].try_into().unwrap());
-                        let lon = i32::from_be_bytes(chunk[4..8].try_into().unwrap());
-                        if lat != POSITION_INVALID && lon != POSITION_INVALID {
-                            Some((lat, lon))
-                        } else {
-                            None
-                        }
-                    })
-                    .collect(),
-            )
-        } else {
-            None
-        }
+        self.coordinates.as_ref().map(|records| {
+            records
+                .as_chunks::<8>()
+                .0
+                .iter()
+                .map(|chunk| {
+                    let lat = i32::from_be_bytes(chunk[0..4].try_into().unwrap());
+                    let lon = i32::from_be_bytes(chunk[4..8].try_into().unwrap());
+                    if lat != POSITION_INVALID && lon != POSITION_INVALID {
+                        Some((lat, lon))
+                    } else {
+                        None
+                    }
+                })
+                .collect()
+        })
     }
     /// Unpacks the raw byte blob into (lat, lon) pairs converted to degrees.
     pub fn get_coordinates_degrees(&self) -> Option<Vec<Option<(f64, f64)>>> {
-        if let Some(semicircles) = self.get_coordinates_semicircle() {
-            Some(
-                semicircles
-                    .into_iter()
-                    .map(|p| {
-                        if let Some(p) = p {
-                            Some((
-                                p.0 as f64 * SEMICIRCLE_TO_DEGREES,
-                                p.1 as f64 * SEMICIRCLE_TO_DEGREES,
-                            ))
-                        } else {
-                            None
-                        }
+        self.get_coordinates_semicircle().map(|semicircles| {
+            semicircles
+                .into_iter()
+                .map(|p| {
+                    p.map(|p| {
+                        (
+                            p.0 as f64 * SEMICIRCLE_TO_DEGREES,
+                            p.1 as f64 * SEMICIRCLE_TO_DEGREES,
+                        )
                     })
-                    .collect(),
-            )
-        } else {
-            None
-        }
+                })
+                .collect()
+        })
     }
     /// Build blob from semicircles coordinates Vec
     pub fn build_coordinates_blob(values: &[(i32, i32)]) -> Vec<u8> {
@@ -75,18 +65,14 @@ impl AdditionalData {
 
     /// Unpacks the speeds Blob into Vec
     pub fn get_speeds(&self) -> Option<Vec<f64>> {
-        if let Some(records) = &self.speeds {
-            Some(
-                records
-                    .as_chunks::<8>()
-                    .0
-                    .iter()
-                    .map(|chunk| f64::from_be_bytes(*chunk))
-                    .collect(),
-            )
-        } else {
-            None
-        }
+        self.speeds.as_ref().map(|records| {
+            records
+                .as_chunks::<8>()
+                .0
+                .iter()
+                .map(|chunk| f64::from_be_bytes(*chunk))
+                .collect()
+        })
     }
     /// Build blob from speeds Vec
     pub fn build_speeds_blob(value: &[f64]) -> Vec<u8> {

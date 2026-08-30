@@ -141,22 +141,22 @@ pub fn run() {
                             .to_string();
 
                         for additional_data in additional_datas {
-                            if let Some(coords) = additional_data.get_coordinates_semicircle() {
-                                if let Some(start_point) = coords.iter().find(|p| p.is_some()) {
-                                    let start_point = start_point.unwrap();
-                                    let location = get_location_from_coordinates(
-                                        start_point.0 as f64 * constants::SEMICIRCLE_TO_DEGREES,
-                                        start_point.1 as f64 * constants::SEMICIRCLE_TO_DEGREES,
-                                        &lang,
-                                    );
-                                    SessionRepository::update()
-                                        .set(session::entity::columns::WORKOUT, location.into())
-                                        .where_(Where::Eq(
-                                            session::entity::columns::DATE,
-                                            additional_data.session.into(),
-                                        ))
-                                        .execute_in(tx)?;
-                                }
+                            if let Some(coords) = additional_data.get_coordinates_semicircle()
+                                && let Some(start_point) = coords.iter().find(|p| p.is_some())
+                            {
+                                let start_point = start_point.unwrap();
+                                let location = get_location_from_coordinates(
+                                    start_point.0 as f64 * constants::SEMICIRCLE_TO_DEGREES,
+                                    start_point.1 as f64 * constants::SEMICIRCLE_TO_DEGREES,
+                                    &lang,
+                                );
+                                SessionRepository::update()
+                                    .set(session::entity::columns::WORKOUT, location.into())
+                                    .where_(Where::Eq(
+                                        session::entity::columns::DATE,
+                                        additional_data.session.into(),
+                                    ))
+                                    .execute_in(tx)?;
                             }
                         }
                     }
