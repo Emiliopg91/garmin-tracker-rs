@@ -8,14 +8,8 @@ use chrono::{DateTime, Local};
 use fitparser::{FitDataField, FitDataRecord, Value, de::DecodeOption, profile};
 
 use crate::{
-    dao::{
-        additional_data::{self, AdditionalData},
-        exercise::Exercise,
-        serie::Serie,
-        session::Session,
-    },
-    logic::sessions::get_location_from_coordinates,
-    utils::{constants, translations::translate_and_replace},
+    dao::{additional_data::AdditionalData, exercise::Exercise, serie::Serie, session::Session},
+    utils::translations::translate_and_replace,
 };
 
 use self::errors::ParseFitFileError;
@@ -57,7 +51,7 @@ impl<'a> GroupedEntries<'a> {
 }
 
 /// Parses a `.FIT` activity file into a `Session` (with nested series, heart rate, GPS, and speed data). Falls back to reverse-geocoding the start GPS point for the workout name if the file has none.
-pub(crate) fn load_from_file<P>(path: P, lang: &str) -> errors::Result<Session>
+pub(crate) fn load_from_file<P>(path: P) -> errors::Result<Session>
 where
     P: AsRef<Path>,
 {
@@ -87,7 +81,7 @@ where
 
     let timestamp = get_timestamp("timestamp", session_entry.fields())?;
     let sport = get_string("sport_profile_name", session_entry.fields())?;
-    let mut workout = get_workout_name(grouped.workout).unwrap_or_default();
+    let workout = get_workout_name(grouped.workout).unwrap_or_default();
     let total_elapsed_time = get_f64("total_elapsed_time", session_entry.fields())?;
     let active_time = get_f64("active_time", session_entry.fields()).unwrap_or(0.0);
     let training_load = get_f64("training_load_peak", session_entry.fields())?;
@@ -95,18 +89,6 @@ where
     let metabolic_calories = get_u16("metabolic_calories", session_entry.fields())?;
     let series = get_sets(&grouped, &timestamp).unwrap_or_default();
     let additional_data = get_additional_data(&timestamp, &grouped.records)?;
-    if workout.is_empty()
-        && let Some(add_data) = additional_data.clone()
-        && let Some(coords) = add_data.get_coordinates_semicircle()
-        && let Some(start_point) = coords.iter().find(|p| p.is_some())
-    {
-        let start_point = start_point.unwrap();
-        workout = get_location_from_coordinates(
-            start_point.0 as f64 * constants::SEMICIRCLE_TO_DEGREES,
-            start_point.1 as f64 * constants::SEMICIRCLE_TO_DEGREES,
-            lang,
-        )
-    }
 
     Ok(Session {
         workout,
@@ -239,8 +221,8 @@ fn get_additional_data(
                         get_coord_for_idx(coords, idx - 1)
                     } else {
                         (
-                            additional_data::POSITION_INVALID,
-                            additional_data::POSITION_INVALID,
+                            AdditionalData::INVALID_POSITION,
+                            AdditionalData::INVALID_POSITION,
                         )
                     }
                 }
@@ -262,7 +244,7 @@ fn get_additional_data(
                 .iter()
                 .map(|e| match e {
                     Some(v) => *v,
-                    None => 0_f64,
+                    None => -1_f64,
                 })
                 .collect::<Vec<_>>(),
         )

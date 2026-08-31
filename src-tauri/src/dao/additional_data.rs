@@ -3,8 +3,6 @@ use serde::{Deserialize, Serialize};
 
 use crate::utils::constants::SEMICIRCLE_TO_DEGREES;
 
-pub const POSITION_INVALID: i32 = 0x7FFFFFFF; // 2147483647
-
 #[derive(Entity, Clone, Deserialize, Serialize)]
 #[entity("additional_data")]
 #[primary_key(session)]
@@ -16,6 +14,9 @@ pub struct AdditionalData {
 }
 
 impl AdditionalData {
+    pub const INVALID_POSITION: i32 = 0x7FFFFFFF;
+    pub const INVALID_HEAR_RATE: u8 = 0xFF;
+
     /// Unpacks the raw byte blob into (lat, lon) pairs in semicircles.
     pub fn get_coordinates_semicircle(&self) -> Option<Vec<Option<(i32, i32)>>> {
         self.coordinates.as_ref().map(|records| {
@@ -26,7 +27,7 @@ impl AdditionalData {
                 .map(|chunk| {
                     let lat = i32::from_be_bytes(chunk[0..4].try_into().unwrap());
                     let lon = i32::from_be_bytes(chunk[4..8].try_into().unwrap());
-                    if lat != POSITION_INVALID && lon != POSITION_INVALID {
+                    if lat != Self::INVALID_POSITION && lon != Self::INVALID_POSITION {
                         Some((lat, lon))
                     } else {
                         None
@@ -64,13 +65,16 @@ impl AdditionalData {
     }
 
     /// Unpacks the speeds Blob into Vec
-    pub fn get_speeds(&self) -> Option<Vec<f64>> {
+    pub fn get_speeds(&self) -> Option<Vec<Option<f64>>> {
         self.speeds.as_ref().map(|records| {
             records
                 .as_chunks::<8>()
                 .0
                 .iter()
-                .map(|chunk| f64::from_be_bytes(*chunk))
+                .map(|chunk| {
+                    let val = f64::from_be_bytes(*chunk);
+                    if val >= 0_f64 { Some(val) } else { None }
+                })
                 .collect()
         })
     }
@@ -83,5 +87,22 @@ impl AdditionalData {
         });
 
         records
+    }
+
+    /// Unpacks the heart rate Blob into Vec
+    pub fn get_heart_rates(&self) -> Option<Vec<Option<u8>>> {
+        self.heart_rates.as_ref().map(|records| {
+            records
+                .clone()
+                .into_iter()
+                .map(|val| {
+                    if val < Self::INVALID_HEAR_RATE {
+                        Some(val)
+                    } else {
+                        None
+                    }
+                })
+                .collect()
+        })
     }
 }

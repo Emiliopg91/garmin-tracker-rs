@@ -2,11 +2,13 @@ use std::{
     collections::{HashMap, HashSet},
     ops::Deref,
     path::Path,
+    sync::Mutex,
+    time::Duration,
 };
 
 use crate::{
     dao::{
-        additional_data::AdditionalDataRepository,
+        additional_data::{self, AdditionalDataRepository},
         device::{Device, DeviceRepository},
         exercise::{self, Exercise, ExerciseRepository},
         serie::{self, Serie, SerieRepository, entity},
@@ -14,12 +16,15 @@ use crate::{
     },
     dto::{
         notifications::{NotificationDefinition, NotificationKind},
-        sessions::{SessionDetails, SessionListItem, SessionSeriesUpdate},
+        sessions::{SessionDetails, SessionListItem, SessionLocation, SessionSeriesUpdate},
     },
-    logic::{app::SETTINGS_INST, notifications::show_notification},
+    logic::notifications::show_notification,
     mtp::MTP_CLIENT_INST,
     parser::load_from_file,
-    utils::translations::{translate, translate_and_replace},
+    utils::{
+        constants::SEMICIRCLE_TO_DEGREES,
+        translations::{translate, translate_and_replace},
+    },
 };
 use chrono::{Datelike, Local, TimeZone, Timelike, offset::LocalResult};
 use curl::easy::Easy;
@@ -33,6 +38,7 @@ use rusqlite_orm::{
     },
     database::{Database, errors::DatabaseError},
 };
+use tauri::{AppHandle, Emitter};
 use tauri_plugin_log::log::{error, info, warn};
 
 /// Returns every recorded session, newest first.
@@ -206,12 +212,12 @@ pub fn save_session_changes(details: SessionSeriesUpdate) -> Result<(), String> 
 /// Tauri command wrapper around `_import_from_device`; returns the number of sessions imported.
 #[traced_command]
 #[tauri::command]
-pub async fn import_from_device(serial: &str) -> Result<usize, String> {
-    _import_from_device(serial).await
+pub async fn import_from_device(app: AppHandle, serial: &str) -> Result<usize, String> {
+    _import_from_device(&app, serial).await
 }
 
 /// Downloads new activity files from the given device since its last sync and imports them.
-pub async fn _import_from_device(serial: &str) -> Result<usize, String> {
+pub async fn _import_from_device(app: &AppHandle, serial: &str) -> Result<usize, String> {
     info!("Starting import from device with S/N {}", serial);
     let mut latest_date = "2026-06-08-00-00-00".to_string();
     let mut device = DeviceRepository::select_by_id(serial)
@@ -261,7 +267,15 @@ pub async fn _import_from_device(serial: &str) -> Result<usize, String> {
     .expect("blocking DB task panicked");
 
     match res {
-        Ok(res) => Ok(res.len()),
+        Ok(res) => {
+            if !res.is_empty() {
+                let app = app.clone();
+                std::thread::spawn(move || {
+                    update_pending_geolocation(&app);
+                });
+            }
+            Ok(res.len())
+        }
         Err(DatabaseError::Transaction(e)) => Err(e.deref().to_string()),
         _ => unreachable!(),
     }
@@ -278,19 +292,12 @@ where
 {
     let mut success = Vec::new();
     let mut handled_exercises = HashSet::new();
-    let lang = SETTINGS_INST
-        .get()
-        .unwrap()
-        .read()
-        .unwrap()
-        .language
-        .to_string();
 
     let mut sessions = files
         .par_iter()
         .filter_map(|file| {
             info!("Parsing file {}", file.as_ref().display());
-            match load_from_file(file.as_ref(), &lang) {
+            match load_from_file(file.as_ref()) {
                 Ok(session) => Some(session),
                 Err(e) => {
                     error!("Error parsing session: {}", e);
@@ -455,10 +462,120 @@ fn update_prs(
     Ok(())
 }
 
+static GELOCATION_MUTEX: Mutex<bool> = Mutex::new(false);
+
+/// Recover all pending workouts pending on geolocation
+pub fn update_pending_geolocation(app: &AppHandle) {
+    let _lock = GELOCATION_MUTEX.lock().unwrap();
+    info!("Looking for pending geocode workouts...");
+    match Database::run_in_connection(|conn| {
+        let unnamed_sessions = SessionRepository::select()
+            .where_(Where::Eq(session::entity::columns::WORKOUT, "".into()))
+            .fetch_in(conn)?;
+
+        let sessions_ids = unnamed_sessions
+            .iter()
+            .map(|s| s.date.into())
+            .collect::<Vec<_>>();
+
+        let pending = AdditionalDataRepository::select()
+            .where_(Where::And(vec![
+                Where::In(additional_data::entity::columns::SESSION, sessions_ids),
+                Where::NotNull(additional_data::entity::columns::COORDINATES),
+            ]))
+            .order_by(OrderBy::Desc(additional_data::entity::columns::SESSION))
+            .fetch_in(conn)?;
+
+        Ok(pending)
+    }) {
+        Ok(pendings) => {
+            info!("Found {} pending sessions", pendings.len());
+            for pending in pendings {
+                let first = pending
+                    .get_coordinates_semicircle()
+                    .unwrap()
+                    .iter()
+                    .find(|e| e.is_some())
+                    .unwrap()
+                    .unwrap();
+
+                match get(
+                    first.0 as f64 * SEMICIRCLE_TO_DEGREES,
+                    first.1 as f64 * SEMICIRCLE_TO_DEGREES,
+                ) {
+                    Ok(response) => match serde_json::from_str::<serde_json::Value>(&response) {
+                        Ok(e) => {
+                            if let Some(address) = e.get("address") {
+                                for key in ["village", "town", "city", "state", "country"] {
+                                    if let Some(value) = address.get(key) {
+                                        let location = value.to_string().replace("\"", "");
+
+                                        match SessionRepository::update()
+                                            .set(
+                                                session::entity::columns::WORKOUT,
+                                                location.clone().into(),
+                                            )
+                                            .where_(Where::Eq(
+                                                session::entity::columns::DATE,
+                                                pending.session.into(),
+                                            ))
+                                            .execute()
+                                        {
+                                            Ok(1) => {
+                                                info!(
+                                                    "Updated location for session @ {}",
+                                                    pending.session
+                                                );
+                                                let payload: SessionLocation = SessionLocation {
+                                                    session: pending.session as i32,
+                                                    location,
+                                                };
+                                                let _ =
+                                                    app.emit("session_location_update", payload);
+                                            }
+                                            Ok(_) => {
+                                                info!("Missing session @ {}", pending.session)
+                                            }
+                                            Err(e) => {
+                                                error!(
+                                                    "Error while updating session {}: {}",
+                                                    pending.session, e
+                                                )
+                                            }
+                                        }
+
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        Err(e) => {
+                            error!("Error parsing response: {}", e)
+                        }
+                    },
+                    Err(e) => {
+                        error!("Error on geocode query: {}", e)
+                    }
+                }
+
+                std::thread::sleep(Duration::from_secs(1));
+            }
+        }
+        Err(e) => {
+            error!("Error while looking for pending sessions: {}", e);
+        }
+    }
+}
+
 /// Performs a blocking HTTP GET and returns the response body as a string.
-fn get(url: &str) -> Result<String, curl::Error> {
+fn get(lat: f64, lon: f64) -> Result<String, curl::Error> {
+    let url = format!(
+        "https://nominatim.openstreetmap.org/reverse?format=json&lat={}&lon={}",
+        lat, lon
+    );
     let mut easy = Easy::new();
-    easy.url(url)?;
+    easy.url(&url)?;
+    easy.useragent("garmin-tracker-rs")?;
 
     let mut data = Vec::new();
     {
@@ -471,36 +588,4 @@ fn get(url: &str) -> Result<String, curl::Error> {
     }
 
     Ok(String::from_utf8_lossy(&data).to_string())
-}
-
-/// Reverse-geocodes a lat/lon point to a city/locality name via the BigDataCloud API; returns an empty string on failure.
-pub fn get_location_from_coordinates(lat: f64, long: f64, lang: &str) -> String {
-    let mut location = "".to_string();
-    let url = format!(
-        "https://api.bigdatacloud.net/data/reverse-geocode-client?latitude={}&longitude={}&localityLanguage={}",
-        lat, long, lang
-    );
-
-    match get(&url) {
-        Ok(response) => match serde_json::from_str::<serde_json::Value>(&response) {
-            Ok(json) => {
-                let city = json
-                    .get("city")
-                    .and_then(|v| v.as_str())
-                    .filter(|s| !s.is_empty());
-
-                let locality = json.get("locality").and_then(|v| v.as_str());
-
-                location = city.or(locality).unwrap_or_default().to_string();
-            }
-            Err(e) => {
-                error!("Error parsing response body: {}", e);
-            }
-        },
-        Err(e) => {
-            error!("Error getting location: {}", e)
-        }
-    }
-
-    location
 }

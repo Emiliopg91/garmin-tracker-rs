@@ -7,10 +7,7 @@ mod utils;
 
 use std::{process::exit, sync::RwLock};
 
-use rusqlite_orm::{
-    dao::{Repository, helpers::types::where_clause::Where},
-    database::Database,
-};
+use rusqlite_orm::database::Database;
 use rusqlite_orm_macros::dlls;
 use tauri_plugin_log::{
     Target, TargetKind,
@@ -18,14 +15,7 @@ use tauri_plugin_log::{
 };
 
 use crate::{
-    dao::{
-        additional_data::{self, AdditionalDataRepository},
-        session::{self, SessionRepository},
-    },
-    dto::{
-        app::Settings,
-        notifications::{NotificationDefinition, NotificationKind},
-    },
+    dto::app::Settings,
     logic::{
         app::{
             SETTINGS_INST, export_database, get_environment, get_settings, get_translations,
@@ -33,14 +23,10 @@ use crate::{
         },
         body_metrics::{add_body_measures, delete_body_metric, get_body_measures},
         exercises::{get_exercise_details, get_exercises},
-        notifications::show_notification,
-        sessions::{
-            get_location_from_coordinates, get_session_details, get_sessions, import_from_device,
-            save_session_changes,
-        },
+        sessions::{get_session_details, get_sessions, import_from_device, save_session_changes},
         workouts::{get_workout_details, get_workout_list},
     },
-    utils::{constants, single_instance::SingleInstance, translations::translate},
+    utils::{constants, single_instance::SingleInstance},
 };
 
 #[cfg(debug_assertions)]
@@ -111,60 +97,6 @@ pub fn run() {
             };
             if let Err(e) = Database::create_schema(&DDLS) {
                 error!("Could not initialize database: {}", e);
-                exit(constants::ExitCodes::DbError.into())
-            }
-            if let Err(e) = Database::run_in_transaction(|tx| {
-                let sessions = SessionRepository::select()
-                    .where_(Where::Eq(session::entity::columns::WORKOUT, "".into()))
-                    .fetch_in(tx)?;
-
-                if !sessions.is_empty() {
-                    let additional_datas = AdditionalDataRepository::select()
-                        .where_(Where::In(
-                            additional_data::entity::columns::SESSION,
-                            sessions.iter().map(|s| s.date.into()).collect::<Vec<_>>(),
-                        ))
-                        .fetch_in(tx)?;
-
-                    if !additional_datas.is_empty() {
-                        show_notification(NotificationDefinition {
-                            title: translate("aligning_database"),
-                            body: translate("operation_may_last"),
-                            kind: NotificationKind::Temporal,
-                        });
-                        let lang = SETTINGS_INST
-                            .get()
-                            .unwrap()
-                            .read()
-                            .unwrap()
-                            .language
-                            .to_string();
-
-                        for additional_data in additional_datas {
-                            if let Some(coords) = additional_data.get_coordinates_semicircle()
-                                && let Some(start_point) = coords.iter().find(|p| p.is_some())
-                            {
-                                let start_point = start_point.unwrap();
-                                let location = get_location_from_coordinates(
-                                    start_point.0 as f64 * constants::SEMICIRCLE_TO_DEGREES,
-                                    start_point.1 as f64 * constants::SEMICIRCLE_TO_DEGREES,
-                                    &lang,
-                                );
-                                SessionRepository::update()
-                                    .set(session::entity::columns::WORKOUT, location.into())
-                                    .where_(Where::Eq(
-                                        session::entity::columns::DATE,
-                                        additional_data.session.into(),
-                                    ))
-                                    .execute_in(tx)?;
-                            }
-                        }
-                    }
-                }
-
-                Ok(())
-            }) {
-                error!("Error aligning database: {}", e);
                 exit(constants::ExitCodes::DbError.into())
             }
 

@@ -75,9 +75,9 @@ pub struct SessionDetails {
 
     pub exercises: Vec<String>,
     pub series: HashMap<String, Vec<SessionSerie>>,
-    pub heart_rates: Vec<u8>,
+    pub heart_rates: Vec<Option<u8>>,
     pub coordinates: Vec<Option<(i32, i32)>>,
-    pub speeds: Vec<f64>,
+    pub speeds: Vec<Option<f64>>,
 
     pub device: Option<String>,
 }
@@ -105,10 +105,10 @@ impl From<(&Session, &IndexMap<Exercise, Vec<Serie>>)> for SessionDetails {
 
         let mut heart_rates = Vec::new();
         let mut gps_coordinates: Vec<Option<(i32, i32)>> = Vec::new();
-        let mut speeds: Vec<f64> = Vec::new();
+        let mut speeds: Vec<Option<f64>> = Vec::new();
 
         if let Some(add_data) = &value.0.additional_data {
-            if let Some(hr_data) = add_data.heart_rates.clone() {
+            if let Some(hr_data) = add_data.get_heart_rates() {
                 heart_rates = hr_data;
             }
             if let Some(coords) = add_data.get_coordinates_semicircle() {
@@ -142,4 +142,10 @@ impl From<(&Session, &IndexMap<Exercise, Vec<Serie>>)> for SessionDetails {
 pub struct SessionSeriesUpdate {
     pub timestamp: i32,
     pub series: Vec<SessionSerie>,
+}
+
+#[derive(Serialize, Clone)]
+pub struct SessionLocation {
+    pub session: i32,
+    pub location: String,
 }

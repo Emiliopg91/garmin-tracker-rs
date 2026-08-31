@@ -122,7 +122,12 @@ export class SessionUtils {
         colors.push(240);
       }
       if (details.speeds && details.speeds.length > 0) {
-        const speeds = [...details.speeds];
+        const speeds: number[] = [];
+        for (let i = 0; i < details.speeds.length; i++) {
+          if (details.speeds[i]) {
+            speeds.push(details.speeds[i]!);
+          }
+        }
         const minSpeed = Math.min(...speeds);
         for (let i = 0; i < speeds.length; i++) {
           speeds[i] = speeds[i] - minSpeed;
@@ -146,10 +151,16 @@ export class SessionUtils {
 
   private static handleHeartRate(details: SessionFrontDetails) {
     if (details.heart_rates) {
-      const maxHr = Math.max(189, ...details.heart_rates);
+      const validHrs = [];
+      for (let i = 0; i < details.heart_rates.length; i++) {
+        if (details.heart_rates[i]) {
+          validHrs.push(details.heart_rates[i]!);
+        }
+      }
+      const maxHr = Math.max(189, ...validHrs);
 
       details.zones_times = [0, 0, 0, 0, 0];
-      details.heart_rates.forEach((hr) => {
+      validHrs.forEach((hr) => {
         const rate = hr / maxHr;
         if (rate < 0.6) {
           details.zones_times[0]++;
@@ -175,18 +186,17 @@ export class SessionUtils {
 
       details.zones_times[0] += Math.round(details.total_elapsed_time) - accum;
 
-      if (details.heart_rates.length > 0) {
+      if (validHrs.length > 0) {
         details.hrRanges = [
-          Math.min(...details.heart_rates),
+          Math.min(...validHrs),
           Math.round(
-            details.heart_rates.reduce((acc, valor) => acc + valor, 0) /
-              details.heart_rates.length,
+            validHrs.reduce((acc, valor) => acc + valor, 0) / validHrs.length,
           ),
-          Math.max(...details.heart_rates),
+          Math.max(...validHrs),
         ];
-        const maxHr = Math.max(189, Math.max(...details.heart_rates));
+        const maxHr = Math.max(189, Math.max(...validHrs));
 
-        details.heart_rates.forEach((hr, idx) => {
+        validHrs.forEach((hr, idx) => {
           let color = "red";
 
           const rateVal = (hr * 1.0) / (maxHr * 1.0);
@@ -201,7 +211,7 @@ export class SessionUtils {
           }
 
           details.hrData.push({
-            idx: idx * 2,
+            idx: idx,
             hr,
             avg: details.hrRanges[1],
             color,

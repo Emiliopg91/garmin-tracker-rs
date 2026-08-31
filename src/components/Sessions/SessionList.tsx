@@ -58,8 +58,20 @@ export function SessionsList() {
       refreshList();
     });
 
+    const unregisterSessionLocation = BackendListener.onSessionLocationUpdate(
+      (data) => {
+        setSessions((prev) => {
+          return prev.map((item) => {
+            if (item.timestamp !== data.session) return item;
+            return { ...item, name: data.location };
+          });
+        });
+      },
+    );
+
     return () => {
       unregisterSessionAdded();
+      unregisterSessionLocation();
     };
   }, []);
 

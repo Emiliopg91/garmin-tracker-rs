@@ -16,7 +16,10 @@ use crate::{
         export::Export,
         notifications::{NotificationDefinition, NotificationKind},
     },
-    logic::{devices::start_device_watcher, notifications::show_notification},
+    logic::{
+        devices::start_device_watcher, notifications::show_notification,
+        sessions::update_pending_geolocation,
+    },
     utils::translations::{Languages, TRANSLATIONS, translate, translate_and_replace},
 };
 use tauri_plugin_log::log::{error, info};
@@ -45,6 +48,11 @@ pub async fn notify_frontend_ready(app: AppHandle, webview_window: WebviewWindow
         *constants::APP_VERSION
     ));
     let _ = webview_window.show();
+
+    let app = app.clone();
+    std::thread::spawn(move || {
+        update_pending_geolocation(&app);
+    });
 }
 
 /// Reports whether this is a debug or release build.
