@@ -315,7 +315,7 @@ fn get_additional_data(
             cadences,
             powers: powers.map(|powers| AdditionalData::build_powers_blob(&powers)),
             respirations: respirations
-                .map(|respirations| AdditionalData::build_speeds_blob(&respirations)),
+                .map(|respirations| AdditionalData::build_respirations_blob(&respirations)),
         }))
     } else {
         Ok(None)
