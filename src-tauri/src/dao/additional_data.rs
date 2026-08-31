@@ -1,8 +1,6 @@
 use rusqlite_orm_macros::Entity;
 use serde::{Deserialize, Serialize};
 
-use crate::utils::constants::SEMICIRCLE_TO_DEGREES;
-
 #[derive(Entity, Clone, Deserialize, Serialize)]
 #[entity("additional_data")]
 #[primary_key(session)]
@@ -23,6 +21,7 @@ impl AdditionalData {
     pub const INVALID_CADENCE: u8 = u8::MAX;
     pub const INVALID_POWER: u16 = u16::MAX;
     pub const INVALID_RESPIRATIONS: f64 = -1_f64;
+    pub const SEMICIRCLE_TO_DEGREES: f64 = 180.0 / (2_i64.pow(31) as f64);
 
     /// Unpacks the raw byte blob into (lat, lon) pairs in semicircles.
     pub fn get_coordinates_semicircle(&self) -> Option<Vec<Option<(i32, i32)>>> {
@@ -51,8 +50,8 @@ impl AdditionalData {
                 .map(|p| {
                     p.map(|p| {
                         (
-                            p.0 as f64 * SEMICIRCLE_TO_DEGREES,
-                            p.1 as f64 * SEMICIRCLE_TO_DEGREES,
+                            p.0 as f64 * Self::SEMICIRCLE_TO_DEGREES,
+                            p.1 as f64 * Self::SEMICIRCLE_TO_DEGREES,
                         )
                     })
                 })

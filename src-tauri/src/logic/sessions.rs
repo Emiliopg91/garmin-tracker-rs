@@ -21,10 +21,7 @@ use crate::{
     logic::notifications::show_notification,
     mtp::MTP_CLIENT_INST,
     parser::load_from_file,
-    utils::{
-        constants::SEMICIRCLE_TO_DEGREES,
-        translations::{translate, translate_and_replace},
-    },
+    utils::translations::{translate, translate_and_replace},
 };
 use chrono::{Datelike, Local, TimeZone, Timelike, offset::LocalResult};
 use curl::easy::Easy;
@@ -492,17 +489,14 @@ pub fn update_pending_geolocation(app: &AppHandle) {
             info!("Found {} pending sessions", pendings.len());
             for pending in pendings {
                 let first = pending
-                    .get_coordinates_semicircle()
+                    .get_coordinates_degrees()
                     .unwrap()
                     .iter()
                     .find(|e| e.is_some())
                     .unwrap()
                     .unwrap();
 
-                match get(
-                    first.0 as f64 * SEMICIRCLE_TO_DEGREES,
-                    first.1 as f64 * SEMICIRCLE_TO_DEGREES,
-                ) {
+                match get(first.0, first.1) {
                     Ok(response) => match serde_json::from_str::<serde_json::Value>(&response) {
                         Ok(e) => {
                             if let Some(address) = e.get("address") {

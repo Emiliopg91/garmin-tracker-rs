@@ -102,5 +102,3 @@ fn ensure_dir(dir: PathBuf) -> PathBuf {
     }
     dir
 }
-
-pub const SEMICIRCLE_TO_DEGREES: f64 = 180.0 / (2_i64.pow(31) as f64);

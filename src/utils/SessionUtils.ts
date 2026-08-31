@@ -23,7 +23,7 @@ export interface SessionFrontDetails extends SessionDetails {
   speed: number;
   pace: number;
   hrRanges: [number, number, number];
-  hrData: {
+  hrBreathData: {
     idx: number;
     hr: number;
     avg: number;
@@ -47,7 +47,7 @@ export class SessionUtils {
       distance: 0,
       speed: 0,
       pace: 0,
-      hrData: [],
+      hrBreathData: [],
       hrRanges: [0, 0, 0],
       volume: 0,
     };
@@ -155,6 +155,8 @@ export class SessionUtils {
       for (let i = 0; i < details.heart_rates.length; i++) {
         if (details.heart_rates[i]) {
           validHrs.push(details.heart_rates[i]!);
+        } else {
+          validHrs.push(0);
         }
       }
       const maxHr = Math.max(189, ...validHrs);
@@ -187,12 +189,15 @@ export class SessionUtils {
       details.zones_times[0] += Math.round(details.total_elapsed_time) - accum;
 
       if (validHrs.length > 0) {
+        const nonZeroHrs = validHrs.filter((valor) => valor !== 0);
+
         details.hrRanges = [
-          Math.min(...validHrs),
+          Math.min(...nonZeroHrs),
           Math.round(
-            validHrs.reduce((acc, valor) => acc + valor, 0) / validHrs.length,
+            nonZeroHrs.reduce((acc, valor) => acc + valor, 0) /
+              nonZeroHrs.length,
           ),
-          Math.max(...validHrs),
+          Math.max(...nonZeroHrs),
         ];
         const maxHr = Math.max(189, Math.max(...validHrs));
 
@@ -210,7 +215,7 @@ export class SessionUtils {
             color = "orange";
           }
 
-          details.hrData.push({
+          details.hrBreathData.push({
             idx: idx,
             hr,
             avg: details.hrRanges[1],

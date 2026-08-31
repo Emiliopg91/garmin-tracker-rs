@@ -298,21 +298,22 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
             )}
           </tbody>
         </table>
-        {localSession.hrData.length > 0 && (
+        {localSession.hrBreathData.length > 0 && (
           <>
             <hr />
             <div style={{ width: "100%", height: 200 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart
-                  data={localSession.hrData}
+                  data={localSession.hrBreathData}
                   margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
                 >
                   <defs>
                     <linearGradient id="hrColor" x1="0" y1="0" x2="1" y2="0">
-                      {localSession.hrData.flatMap((point, i) => {
-                        const start = (i / localSession.hrData.length) * 100;
+                      {localSession.hrBreathData.flatMap((point, i) => {
+                        const start =
+                          (i / localSession.hrBreathData.length) * 100;
                         const end =
-                          ((i + 1) / localSession.hrData.length) * 100;
+                          ((i + 1) / localSession.hrBreathData.length) * 100;
                         return [
                           <stop
                             key={`${i}-start`}
