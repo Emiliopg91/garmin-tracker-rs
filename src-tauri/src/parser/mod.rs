@@ -310,9 +310,9 @@ fn get_additional_data(
         Ok(Some(AdditionalData {
             session: timestamp.timestamp(),
             heart_rates: hrs,
+            cadences,
             coordinates: coords.map(|coords| AdditionalData::build_coordinates_blob(&coords)),
             speeds: speeds.map(|speeds| AdditionalData::build_speeds_blob(&speeds)),
-            cadences,
             powers: powers.map(|powers| AdditionalData::build_powers_blob(&powers)),
             respirations: respirations
                 .map(|respirations| AdditionalData::build_respirations_blob(&respirations)),
