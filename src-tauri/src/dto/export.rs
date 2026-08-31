@@ -99,6 +99,8 @@ pub struct SessionExport {
     pub cadences: Option<Vec<Option<u8>>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub powers: Option<Vec<Option<u16>>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub respirations: Option<Vec<Option<f64>>>,
 }
 
 impl From<(&Session, Option<&AdditionalData>, Option<&Vec<Serie>>)> for SessionExport {
@@ -109,13 +111,15 @@ impl From<(&Session, Option<&AdditionalData>, Option<&Vec<Serie>>)> for SessionE
         let mut series = None;
         let mut cadences = None;
         let mut powers = None;
+        let mut respirations = None;
 
         if let Some(add_data) = values.1 {
             heart_rates = add_data.get_heart_rates();
             coordinates = add_data.get_coordinates_degrees();
             speeds = add_data.get_speeds();
             cadences = add_data.get_cadences();
-            powers = add_data.get_powers()
+            powers = add_data.get_powers();
+            respirations = add_data.get_respirations();
         }
 
         if let Some(srs) = values.2
@@ -140,6 +144,7 @@ impl From<(&Session, Option<&AdditionalData>, Option<&Vec<Serie>>)> for SessionE
             speeds,
             cadences,
             powers,
+            respirations,
         }
     }
 }

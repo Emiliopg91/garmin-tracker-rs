@@ -185,9 +185,14 @@ fn get_additional_data(
     let mut coords = Vec::with_capacity(records.len());
     let mut speeds = Vec::with_capacity(records.len());
     let mut powers = Vec::with_capacity(records.len());
+    let mut respirations = Vec::with_capacity(records.len());
 
     records.iter().for_each(|entry| {
         hrs.push(get_u8("heart_rate", entry.fields()).ok());
+        speeds.push(get_f64("enhanced_speed", entry.fields()).ok());
+        cadences.push(get_u8("cadence", entry.fields()).ok());
+        powers.push(get_u16("power", entry.fields()).ok());
+        respirations.push(get_f64("enhanced_respiration_rate", entry.fields()).ok());
         coords.push(
             if let Ok(latitude) = get_i32("position_lat", entry.fields())
                 && let Ok(longitude) = get_i32("position_long", entry.fields())
@@ -197,9 +202,6 @@ fn get_additional_data(
                 None
             },
         );
-        speeds.push(get_f64("enhanced_speed", entry.fields()).ok());
-        cadences.push(get_u8("cadence", entry.fields()).ok());
-        powers.push(get_u16("power", entry.fields()).ok());
     });
 
     let hrs = if !hrs.is_empty() && hrs.iter().find(|e| e.is_some()).is_some() {
@@ -284,7 +286,27 @@ fn get_additional_data(
         None
     };
 
-    if hrs.is_some() || coords.is_some() || speeds.is_some() {
+    let respirations =
+        if !respirations.is_empty() && respirations.iter().find(|e| e.is_some()).is_some() {
+            Some(
+                respirations
+                    .iter()
+                    .map(|e| match e {
+                        Some(v) => *v,
+                        None => AdditionalData::INVALID_RESPIRATIONS,
+                    })
+                    .collect::<Vec<_>>(),
+            )
+        } else {
+            None
+        };
+
+    if hrs.is_some()
+        || coords.is_some()
+        || speeds.is_some()
+        || cadences.is_some()
+        || powers.is_some()
+    {
         Ok(Some(AdditionalData {
             session: timestamp.timestamp(),
             heart_rates: hrs,
@@ -292,6 +314,8 @@ fn get_additional_data(
             speeds: speeds.map(|speeds| AdditionalData::build_speeds_blob(&speeds)),
             cadences,
             powers: powers.map(|powers| AdditionalData::build_powers_blob(&powers)),
+            respirations: respirations
+                .map(|respirations| AdditionalData::build_speeds_blob(&respirations)),
         }))
     } else {
         Ok(None)

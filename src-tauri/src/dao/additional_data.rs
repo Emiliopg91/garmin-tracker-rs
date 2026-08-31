@@ -13,6 +13,7 @@ pub struct AdditionalData {
     pub speeds: Option<Vec<u8>>,
     pub cadences: Option<Vec<u8>>,
     pub powers: Option<Vec<u8>>,
+    pub respirations: Option<Vec<u8>>,
 }
 
 impl AdditionalData {
@@ -21,6 +22,7 @@ impl AdditionalData {
     pub const INVALID_SPEED: f64 = -1_f64;
     pub const INVALID_CADENCE: u8 = u8::MAX;
     pub const INVALID_POWER: u16 = u16::MAX;
+    pub const INVALID_RESPIRATIONS: f64 = -1_f64;
 
     /// Unpacks the raw byte blob into (lat, lon) pairs in semicircles.
     pub fn get_coordinates_semicircle(&self) -> Option<Vec<Option<(i32, i32)>>> {
@@ -89,6 +91,35 @@ impl AdditionalData {
     }
     /// Build blob from speeds Vec
     pub fn build_speeds_blob(value: &[f64]) -> Vec<u8> {
+        let mut records = Vec::new();
+
+        value.to_vec().iter().for_each(|speed| {
+            records.extend_from_slice(&(*speed).to_be_bytes());
+        });
+
+        records
+    }
+
+    /// Unpacks the respirations Blob into Vec
+    pub fn get_respirations(&self) -> Option<Vec<Option<f64>>> {
+        self.respirations.as_ref().map(|records| {
+            records
+                .as_chunks::<8>()
+                .0
+                .iter()
+                .map(|chunk| {
+                    let val = f64::from_be_bytes(*chunk);
+                    if val != Self::INVALID_RESPIRATIONS {
+                        Some(val)
+                    } else {
+                        None
+                    }
+                })
+                .collect()
+        })
+    }
+    /// Build blob from speeds Vec
+    pub fn build_respirations_blob(value: &[f64]) -> Vec<u8> {
         let mut records = Vec::new();
 
         value.to_vec().iter().for_each(|speed| {
