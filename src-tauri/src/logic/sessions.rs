@@ -1,5 +1,6 @@
 use std::{
     collections::{HashMap, HashSet},
+    fs,
     ops::Deref,
     path::Path,
     sync::Mutex,
@@ -238,33 +239,58 @@ pub async fn _import_from_device(app: &AppHandle, serial: &str) -> Result<usize,
         "Fetching from device activity files after {}...",
         latest_date
     );
-    let activities = MTP_CLIENT_INST
+    let mut res = Ok(Vec::new());
+    let mut activities = Vec::new();
+    let mut src_dir = None;
+
+    if let Ok(Some(dst_dir)) = MTP_CLIENT_INST
         .lock()
         .await
         .download_activities_since(serial, latest_date)
         .await
-        .map_err(|e| e.to_string())?;
+        .map_err(|e| e.to_string())
+    {
+        src_dir = Some(dst_dir.clone());
+        activities = Vec::new();
 
-    let res = tokio::task::spawn_blocking(move || {
-        Database::run_in_transaction(|tx| {
-            let res = if !activities.is_empty() {
-                info!("Fetched {} activity files", activities.len());
-                import_file_list(tx, &activities, &device)
-            } else {
-                Ok(Vec::new())
-            }?;
+        if let Ok(read_dir) = fs::read_dir(dst_dir) {
+            for entry in read_dir {
+                if let Ok(entry) = entry {
+                    if entry.file_type().unwrap().is_file() {
+                        activities.push(entry.path());
+                    }
+                }
+            }
+        };
 
-            device.last_sync = Some(Local::now().timestamp());
-            device.update_by_id_in(tx)?;
+        let activities_cpy = activities.clone();
+        res = tokio::task::spawn_blocking(move || {
+            Database::run_in_transaction(|tx| {
+                let res = if !activities_cpy.is_empty() {
+                    info!("Fetched {} activity files", activities_cpy.len());
+                    import_file_list(tx, &activities_cpy, &device)
+                } else {
+                    Ok(Vec::new())
+                }?;
 
-            Ok(res)
+                device.last_sync = Some(Local::now().timestamp());
+                device.update_by_id_in(tx)?;
+
+                Ok(res)
+            })
         })
-    })
-    .await
-    .expect("blocking DB task panicked");
+        .await
+        .expect("blocking DB task panicked");
+    }
 
     match res {
         Ok(res) => {
+            if res.len() == activities.len()
+                && let Some(src_dir) = src_dir
+            {
+                let _ = fs::remove_dir_all(src_dir);
+            }
+
             if !res.is_empty() {
                 let app = app.clone();
                 std::thread::spawn(move || {
@@ -295,7 +321,7 @@ where
         .filter_map(|file| {
             info!("Parsing file {}", file.as_ref().display());
             match load_from_file(file.as_ref()) {
-                Ok(session) => Some(session),
+                Ok(session) => Some((session, file)),
                 Err(e) => {
                     error!("Error parsing session: {}", e);
 
@@ -311,9 +337,9 @@ where
         })
         .collect::<Vec<_>>();
 
-    sessions.sort_by_key(|s| s.date);
+    sessions.sort_by_key(|s| s.0.date);
 
-    for mut session in sessions {
+    for (mut session, file) in sessions {
         let formatted_time = match Local.timestamp_opt(session.date, 0) {
             LocalResult::Single(fecha) => fecha.format("%H:%M:%S %d/%m/%Y").to_string(),
             _ => "".to_string(),
@@ -361,6 +387,15 @@ where
                 }
 
                 success.push(session.date);
+
+                let _ = fs::remove_file(file);
+                #[cfg(debug_assertions)]
+                {
+                    use std::path::PathBuf;
+
+                    let file = PathBuf::from(format!("{}.txt", file.as_ref().display()));
+                    let _ = fs::remove_file(file);
+                }
 
                 true
             };

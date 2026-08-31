@@ -46,7 +46,7 @@ impl MtpClient {
         &self,
         serial: &str,
         date: String,
-    ) -> Result<Vec<PathBuf>> {
+    ) -> Result<Option<PathBuf>> {
         let mut result = Vec::new();
 
         let devices_info = MtpDevice::list_devices().map_err(MtpError::ListDevices)?;
@@ -93,7 +93,7 @@ impl MtpClient {
 
                     if objs.is_empty() {
                         info!("No pending files to import");
-                        Ok(result)
+                        Ok(None)
                     } else {
                         info!("Pending {} files", objs.len());
                         let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
@@ -135,7 +135,7 @@ impl MtpClient {
                                 elapsed_secs,
                                 (size / (1024 * 1024) as f64) / elapsed_secs
                             );
-                            Ok(result)
+                            Ok(Some(tmp_dir))
                         }
                     }
                 } else {
