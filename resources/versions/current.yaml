@@ -47,8 +47,8 @@ rust:
   tauri: 2.11.5
   tauri-build: 2.6.3
   tauri-plugin-autostart: 2.5.1
-  tauri-plugin-log: 2.9.0
-  tauri-plugin-opener: 2.5.4
+  tauri-plugin-log: 2.9.1
+  tauri-plugin-opener: 2.5.5
   tauri-rs-ts-ipc: 0.1.20
   thiserror: 2.0.20
   tokio: 1.53.1
