@@ -255,10 +255,10 @@ pub async fn _import_from_device(app: &AppHandle, serial: &str) -> Result<usize,
 
         if let Ok(read_dir) = fs::read_dir(dst_dir) {
             for entry in read_dir {
-                if let Ok(entry) = entry {
-                    if entry.file_type().unwrap().is_file() {
-                        activities.push(entry.path());
-                    }
+                if let Ok(entry) = entry
+                    && entry.file_type().unwrap().is_file()
+                {
+                    activities.push(entry.path());
                 }
             }
         };
