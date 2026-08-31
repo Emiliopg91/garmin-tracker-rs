@@ -5,6 +5,8 @@ mod mtp;
 mod parser;
 mod utils;
 
+#[cfg(debug_assertions)]
+use std::path::Path;
 use std::{process::exit, sync::RwLock};
 
 use rusqlite_orm::database::Database;
@@ -34,20 +36,21 @@ use crate::parser::{debug_dump, read_from_file};
 
 dlls!("../resources/ddl");
 
+#[cfg(debug_assertions)]
+pub fn unwrap_path<P>(paths: &[P])
+where
+    P: AsRef<Path>,
+{
+    for path in paths {
+        let entries = read_from_file(&path).unwrap();
+        debug_dump(&path, &entries);
+    }
+}
+
 /// Boots the Tauri app: acquires the single-instance lock, opens/migrates the DB, loads settings, and registers commands.
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     SingleInstance::acquire();
-
-    #[cfg(debug_assertions)]
-    if let Ok(paths) = std::env::var("GTRS-UNWRAP-PATH") {
-        let paths = serde_json::from_str::<Vec<String>>(&paths).unwrap();
-        for path in paths {
-            let entries = read_from_file(&path).unwrap();
-            debug_dump(&path, &entries);
-        }
-        exit(0);
-    }
 
     let res = tauri::Builder::default()
         .plugin(tauri_plugin_autostart::Builder::new().build())

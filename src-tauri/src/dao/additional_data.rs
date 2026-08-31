@@ -11,11 +11,16 @@ pub struct AdditionalData {
     pub heart_rates: Option<Vec<u8>>,
     pub coordinates: Option<Vec<u8>>,
     pub speeds: Option<Vec<u8>>,
+    pub cadences: Option<Vec<u8>>,
+    pub powers: Option<Vec<u8>>,
 }
 
 impl AdditionalData {
-    pub const INVALID_POSITION: i32 = 0x7FFFFFFF;
-    pub const INVALID_HEAR_RATE: u8 = 0xFF;
+    pub const INVALID_POSITION: i32 = i32::MAX;
+    pub const INVALID_HEAR_RATE: u8 = u8::MAX;
+    pub const INVALID_SPEED: f64 = -1_f64;
+    pub const INVALID_CADENCE: u8 = u8::MAX;
+    pub const INVALID_POWER: u16 = u16::MAX;
 
     /// Unpacks the raw byte blob into (lat, lon) pairs in semicircles.
     pub fn get_coordinates_semicircle(&self) -> Option<Vec<Option<(i32, i32)>>> {
@@ -73,13 +78,46 @@ impl AdditionalData {
                 .iter()
                 .map(|chunk| {
                     let val = f64::from_be_bytes(*chunk);
-                    if val >= 0_f64 { Some(val) } else { None }
+                    if val != Self::INVALID_SPEED {
+                        Some(val)
+                    } else {
+                        None
+                    }
                 })
                 .collect()
         })
     }
     /// Build blob from speeds Vec
     pub fn build_speeds_blob(value: &[f64]) -> Vec<u8> {
+        let mut records = Vec::new();
+
+        value.to_vec().iter().for_each(|speed| {
+            records.extend_from_slice(&(*speed).to_be_bytes());
+        });
+
+        records
+    }
+
+    /// Unpacks the powers Blob into Vec
+    pub fn get_powers(&self) -> Option<Vec<Option<u16>>> {
+        self.speeds.as_ref().map(|records| {
+            records
+                .as_chunks::<2>()
+                .0
+                .iter()
+                .map(|chunk| {
+                    let val = u16::from_be_bytes(*chunk);
+                    if val != Self::INVALID_POWER {
+                        Some(val)
+                    } else {
+                        None
+                    }
+                })
+                .collect()
+        })
+    }
+    /// Build blob from powers Vec
+    pub fn build_powers_blob(value: &[u16]) -> Vec<u8> {
         let mut records = Vec::new();
 
         value.to_vec().iter().for_each(|speed| {
@@ -97,6 +135,23 @@ impl AdditionalData {
                 .into_iter()
                 .map(|val| {
                     if val < Self::INVALID_HEAR_RATE {
+                        Some(val)
+                    } else {
+                        None
+                    }
+                })
+                .collect()
+        })
+    }
+
+    /// Unpacks the cadences Blob into Vec
+    pub fn get_cadences(&self) -> Option<Vec<Option<u8>>> {
+        self.cadences.as_ref().map(|records| {
+            records
+                .clone()
+                .into_iter()
+                .map(|val| {
+                    if val < Self::INVALID_CADENCE {
                         Some(val)
                     } else {
                         None

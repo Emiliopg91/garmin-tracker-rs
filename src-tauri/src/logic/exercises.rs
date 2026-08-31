@@ -98,7 +98,10 @@ pub fn get_exercise_details(category: &str, id: u16) -> Result<ExerciseDetails, 
             conn,
             category,
             id,
-            Some(&[OrderBy::Desc(serie::entity::columns::SESSION)]),
+            Some(&[
+                OrderBy::Desc(serie::entity::columns::SESSION),
+                OrderBy::Asc(serie::entity::columns::IDX),
+            ]),
         )?;
 
         let pr = series.iter().find(|s| s.pr).unwrap();

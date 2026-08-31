@@ -6,12 +6,11 @@ fn main() {
     let args = std::env::args().collect::<Vec<String>>();
     #[cfg(debug_assertions)]
     if args.len() >= 3 && args.get(1).unwrap() == "--unwrap" {
-        unsafe {
-            std::env::set_var(
-                "GTRS-UNWRAP-PATH",
-                serde_json::to_string(&args[2..]).unwrap(),
-            );
-        }
+        use std::process::exit;
+
+        let paths = &args[2..];
+        garmin_tracker_rs_lib::unwrap_path(paths);
+        exit(0);
     } else {
         if std::env::var("IN_DEBUG").is_err() {
             tauri_rs_ts_ipc::build();

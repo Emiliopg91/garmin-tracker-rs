@@ -180,9 +180,11 @@ fn get_additional_data(
     timestamp: &DateTime<Local>,
     records: &[&FitDataRecord],
 ) -> errors::Result<Option<AdditionalData>> {
-    let mut hrs = Vec::new();
-    let mut coords = Vec::new();
+    let mut hrs = Vec::with_capacity(records.len());
+    let mut cadences = Vec::with_capacity(records.len());
+    let mut coords = Vec::with_capacity(records.len());
     let mut speeds = Vec::with_capacity(records.len());
+    let mut powers = Vec::with_capacity(records.len());
 
     records.iter().for_each(|entry| {
         hrs.push(get_u8("heart_rate", entry.fields()).ok());
@@ -196,6 +198,8 @@ fn get_additional_data(
             },
         );
         speeds.push(get_f64("enhanced_speed", entry.fields()).ok());
+        cadences.push(get_u8("cadence", entry.fields()).ok());
+        powers.push(get_u16("power", entry.fields()).ok());
     });
 
     let hrs = if !hrs.is_empty() && hrs.iter().find(|e| e.is_some()).is_some() {
@@ -203,7 +207,35 @@ fn get_additional_data(
             hrs.iter()
                 .map(|e| match e {
                     Some(v) => *v,
-                    None => 0_u8,
+                    None => AdditionalData::INVALID_HEAR_RATE,
+                })
+                .collect::<Vec<_>>(),
+        )
+    } else {
+        None
+    };
+
+    let cadences = if !cadences.is_empty() && cadences.iter().find(|e| e.is_some()).is_some() {
+        Some(
+            cadences
+                .iter()
+                .map(|e| match e {
+                    Some(v) => *v,
+                    None => AdditionalData::INVALID_CADENCE,
+                })
+                .collect::<Vec<_>>(),
+        )
+    } else {
+        None
+    };
+
+    let powers = if !powers.is_empty() && powers.iter().find(|e| e.is_some()).is_some() {
+        Some(
+            powers
+                .iter()
+                .map(|e| match e {
+                    Some(v) => *v,
+                    None => AdditionalData::INVALID_POWER,
                 })
                 .collect::<Vec<_>>(),
         )
@@ -244,7 +276,7 @@ fn get_additional_data(
                 .iter()
                 .map(|e| match e {
                     Some(v) => *v,
-                    None => -1_f64,
+                    None => AdditionalData::INVALID_SPEED,
                 })
                 .collect::<Vec<_>>(),
         )
@@ -258,6 +290,8 @@ fn get_additional_data(
             heart_rates: hrs,
             coordinates: coords.map(|coords| AdditionalData::build_coordinates_blob(&coords)),
             speeds: speeds.map(|speeds| AdditionalData::build_speeds_blob(&speeds)),
+            cadences,
+            powers: powers.map(|powers| AdditionalData::build_powers_blob(&powers)),
         }))
     } else {
         Ok(None)
