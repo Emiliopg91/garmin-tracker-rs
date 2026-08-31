@@ -42,8 +42,8 @@ where
     P: AsRef<Path>,
 {
     for path in paths {
-        let entries = read_from_file(&path).unwrap();
-        debug_dump(&path, &entries);
+        let entries = read_from_file(path).unwrap();
+        debug_dump(path, &entries);
     }
 }
 
