@@ -229,15 +229,8 @@ fn get_additional_data(
             },
         );
         powers.push((entry.power != AdditionalData::INVALID_POWER).then_some(entry.power));
-
-        speeds.push(
-            (entry.enhanced_speed != AdditionalData::INVALID_SPEED_FIT)
-                .then_some(entry.enhanced_speed as f64 / 1000.0),
-        );
-        respirations.push(
-            (entry.enhanced_respiration_rate != AdditionalData::INVALID_RESPIRATIONS_FIT)
-                .then_some(entry.enhanced_respiration_rate as f64 / 100.0),
-        );
+        speeds.push(entry.enhanced_speed_scaled());
+        respirations.push(entry.enhanced_respiration_rate_scaled());
     });
 
     let hrs = if !hrs.is_empty() && hrs.iter().find(|e| e.is_some()).is_some() {
@@ -449,31 +442,19 @@ fn get_sport_profile_name(session: &mesgdef::Session) -> errors::Result<String> 
 }
 
 fn get_total_elapsed_time(session: &mesgdef::Session) -> errors::Result<f64> {
-    if session.total_elapsed_time == u32::MAX {
-        Err(ParseFitFileError::MissingField(
-            "total_elapsed_time".to_string(),
-        ))
-    } else {
-        Ok(session.total_elapsed_time as f64 / 1000.0)
-    }
+    session
+        .total_elapsed_time_scaled()
+        .ok_or_else(|| ParseFitFileError::MissingField("total_elapsed_time".to_string()))
 }
 
 fn get_active_time(session: &mesgdef::Session) -> f64 {
-    if session.active_time == u32::MAX {
-        0.0
-    } else {
-        session.active_time as f64 / 1000.0
-    }
+    session.active_time_scaled().unwrap_or(0_f64)
 }
 
 fn get_training_load_peak(session: &mesgdef::Session) -> errors::Result<f64> {
-    if session.training_load_peak == i32::MAX {
-        Err(ParseFitFileError::MissingField(
-            "training_load_peak".to_string(),
-        ))
-    } else {
-        Ok(session.training_load_peak as f64 / 65536.0)
-    }
+    session
+        .training_load_peak_scaled()
+        .ok_or_else(|| ParseFitFileError::MissingField("training_load_peak".to_string()))
 }
 
 fn get_total_calories(session: &mesgdef::Session) -> errors::Result<u16> {
