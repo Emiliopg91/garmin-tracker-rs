@@ -8,8 +8,8 @@ node:
   '@tauri-apps/api': 2.11.1
   '@tauri-apps/cli': 2.11.4
   '@tauri-apps/plugin-autostart': 2.5.1
-  '@tauri-apps/plugin-log': 2.9.0
-  '@tauri-apps/plugin-opener': 2.5.4
+  '@tauri-apps/plugin-log': 2.9.1
+  '@tauri-apps/plugin-opener': 2.5.5
   '@types/leaflet': 1.9.22
   '@types/react': 19.2.18
   '@types/react-dom': 19.2.5
@@ -39,8 +39,8 @@ rust:
   phf: 0.13.1
   phf_codegen: 0.13.1
   rayon: 1.12.0
-  rusqlite_orm: 0.4.8
-  rusqlite_orm_macros: 0.4.5
+  rusqlite_orm: 0.4.11
+  rusqlite_orm_macros: 0.4.11
   serde: 1.0.229
   serde_json: 1.0.151
   serde_yaml: 0.9.34+deprecated
