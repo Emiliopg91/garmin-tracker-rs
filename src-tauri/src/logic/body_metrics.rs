@@ -2,7 +2,7 @@ use std::{ops::Deref, sync::RwLock};
 
 use garmin_tracker_rs_macros::traced_command;
 use rusqlite_orm::{
-    dao::Repository, database::DatabaseConnection, errors::DatabaseError, types::order_by::OrderBy,
+    dao::Repository, database::DatabasePool, errors::DatabaseError, types::order_by::OrderBy,
 };
 use tauri::State;
 use tauri_plugin_log::log::{error, info};
@@ -22,7 +22,7 @@ use crate::{
 #[traced_command]
 #[tauri::command]
 pub fn get_body_measures(
-    database: State<'_, DatabaseConnection>,
+    database: State<'_, DatabasePool>,
     settings: State<'_, RwLock<Settings>>,
 ) -> Result<Vec<BodyMetricListItem>, String> {
     info!("Getting body measures list...");
@@ -65,7 +65,7 @@ pub fn get_body_measures(
 #[traced_command]
 #[tauri::command]
 pub fn add_body_measures(
-    database: State<'_, DatabaseConnection>,
+    database: State<'_, DatabasePool>,
     settings: State<'_, RwLock<Settings>>,
     measures: BodyMetricListItem,
 ) -> Result<(), String> {
@@ -104,7 +104,7 @@ pub fn add_body_measures(
 #[traced_command]
 #[tauri::command]
 pub fn delete_body_metric(
-    database: State<'_, DatabaseConnection>,
+    database: State<'_, DatabasePool>,
     settings: State<'_, RwLock<Settings>>,
     date: i32,
 ) -> Result<(), String> {

@@ -3,7 +3,7 @@ use std::{collections::HashMap, ops::Deref, sync::RwLock};
 use garmin_tracker_rs_macros::traced_command;
 use rusqlite_orm::{
     dao::Repository,
-    database::DatabaseConnection,
+    database::DatabasePool,
     errors::DatabaseError,
     types::{order_by::OrderBy, value::Value, where_clause::Where},
 };
@@ -28,7 +28,7 @@ use crate::{
 #[traced_command]
 #[tauri::command]
 pub fn get_workout_list(
-    database: State<'_, DatabaseConnection>,
+    database: State<'_, DatabasePool>,
     settings: State<'_, RwLock<Settings>>,
 ) -> Result<Vec<WorkoutListItem>, String> {
     info!("Getting workouts list...");
@@ -83,7 +83,7 @@ pub fn get_workout_list(
 #[traced_command]
 #[tauri::command]
 pub fn get_workout_details(
-    database: State<'_, DatabaseConnection>,
+    database: State<'_, DatabasePool>,
     settings: State<'_, RwLock<Settings>>,
     name: &str,
 ) -> Result<WorkoutDetails, String> {

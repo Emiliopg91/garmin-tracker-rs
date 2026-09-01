@@ -7,9 +7,9 @@ mod utils;
 
 #[cfg(debug_assertions)]
 use std::path::Path;
-use std::{process::exit, sync::RwLock};
+use std::{process::exit, sync::RwLock, time::Duration};
 
-use rusqlite_orm::database::{DatabaseConnectionBuilder, JournalMode};
+use rusqlite_orm::database::builder::{DatabaseConnectionBuilder, JournalMode};
 use rusqlite_orm_macros::dlls;
 use tauri::Manager;
 use tauri_plugin_log::{
@@ -97,9 +97,13 @@ pub fn run() {
             debug!("Initializing database...");
             let builder = DatabaseConnectionBuilder::default()
                 .location(constants::DB_FILE.clone())
+                .busy_timeout(Duration::from_secs(8))
+                .connection_timeout(Duration::from_secs(5))
+                .pool_size(10)
+                .min_idle(1)
                 .enable_foreign_keys()
                 .journal_mode(JournalMode::Delete);
-            match builder.build() {
+            match builder.build("gtrs") {
                 Ok(database) => {
                     if let Err(e) = database.create_schema(&DDLS) {
                         error!("Could not initialize database: {}", e);

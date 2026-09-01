@@ -32,7 +32,7 @@ use indexmap::IndexMap;
 use rayon::prelude::*;
 use rusqlite_orm::{
     dao::Repository,
-    database::DatabaseConnection,
+    database::DatabasePool,
     errors::DatabaseError,
     types::{order_by::OrderBy, value::Value, where_clause::Where},
 };
@@ -43,7 +43,7 @@ use tauri_plugin_log::log::{error, info, warn};
 #[traced_command]
 #[tauri::command]
 pub fn get_sessions(
-    database: State<'_, DatabaseConnection>,
+    database: State<'_, DatabasePool>,
     settings: State<'_, RwLock<Settings>>,
 ) -> Result<Vec<SessionListItem>, String> {
     info!("Getting sessions list...");
@@ -80,7 +80,7 @@ pub fn get_sessions(
 #[traced_command]
 #[tauri::command]
 pub fn get_session_details(
-    database: State<'_, DatabaseConnection>,
+    database: State<'_, DatabasePool>,
     settings: State<'_, RwLock<Settings>>,
     timestamp: i32,
 ) -> Result<SessionDetails, String> {
@@ -160,7 +160,7 @@ pub fn get_session_details(
 #[traced_command]
 #[tauri::command]
 pub fn save_session_changes(
-    database: State<'_, DatabaseConnection>,
+    database: State<'_, DatabasePool>,
     settings: State<'_, RwLock<Settings>>,
     details: SessionSeriesUpdate,
 ) -> Result<(), String> {
@@ -231,7 +231,7 @@ pub async fn _import_from_device(app: &AppHandle, serial: &str) -> Result<usize,
     info!("Starting import from device with S/N {}", serial);
     let mut latest_date = "2026-06-08-00-00-00".to_string();
     let lang = app.state::<RwLock<Settings>>().read().unwrap().language;
-    let db = app.state::<DatabaseConnection>();
+    let db = app.state::<DatabasePool>();
     let mut device = DeviceRepository::select_by_id(&db, serial)
         .map_err(|e| e.to_string())?
         .unwrap();
@@ -280,7 +280,7 @@ pub async fn _import_from_device(app: &AppHandle, serial: &str) -> Result<usize,
         let activities_cpy = activities.clone();
         let app_cpy = app.clone();
         res = tokio::task::spawn_blocking(move || {
-            let db = app_cpy.state::<DatabaseConnection>();
+            let db = app_cpy.state::<DatabasePool>();
             db.run_in_transaction(|tx| {
                 let res = if !activities_cpy.is_empty() {
                     info!("Fetched {} activity files", activities_cpy.len());
@@ -310,7 +310,7 @@ pub async fn _import_from_device(app: &AppHandle, serial: &str) -> Result<usize,
             if !res.is_empty() {
                 let app = app.clone();
                 std::thread::spawn(move || {
-                    let db = app.state::<DatabaseConnection>();
+                    let db = app.state::<DatabasePool>();
                     update_pending_geolocation(&app, &db);
                 });
             }
@@ -520,7 +520,7 @@ fn update_prs(
 static GELOCATION_MUTEX: Mutex<bool> = Mutex::new(false);
 
 /// Recover all pending workouts pending on geolocation
-pub fn update_pending_geolocation(app: &AppHandle, db: &DatabaseConnection) {
+pub fn update_pending_geolocation(app: &AppHandle, db: &DatabasePool) {
     let _lock = GELOCATION_MUTEX.lock().unwrap();
     info!("Looking for pending geocode workouts...");
     match db.run_in_connection(|conn| {

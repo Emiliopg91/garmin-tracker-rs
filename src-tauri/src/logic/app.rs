@@ -2,7 +2,7 @@ use std::{collections::HashMap, fs, sync::RwLock};
 
 use chrono::Local;
 use garmin_tracker_rs_macros::traced_command;
-use rusqlite_orm::database::DatabaseConnection;
+use rusqlite_orm::database::DatabasePool;
 use tauri::{AppHandle, Manager, State, WebviewWindow};
 use tauri_plugin_autostart::ManagerExt;
 
@@ -46,7 +46,7 @@ pub async fn notify_frontend_ready(app: AppHandle, webview_window: WebviewWindow
 
     let app = app.clone();
     std::thread::spawn(move || {
-        let db = app.state::<DatabaseConnection>();
+        let db = app.state::<DatabasePool>();
         update_pending_geolocation(&app, &db);
     });
 }
@@ -67,7 +67,7 @@ pub async fn get_environment() -> AppEnvironment {
 #[tauri::command]
 pub async fn update_settings_value(
     app: AppHandle,
-    database: State<'_, DatabaseConnection>,
+    database: State<'_, DatabasePool>,
     settings: State<'_, RwLock<Settings>>,
     name: &str,
     value: &str,
@@ -75,7 +75,8 @@ pub async fn update_settings_value(
     match name {
         crate::dao::settings::settings_keys::AUTO_SYNC => {
             let value = value == "true";
-            crate::dao::settings::Settings::set_auto_sync(&database, value).map_err(|e| e.to_string())?;
+            crate::dao::settings::Settings::set_auto_sync(&database, value)
+                .map_err(|e| e.to_string())?;
             settings.write().unwrap().auto_sync = value;
         }
         crate::dao::settings::settings_keys::DISTANCE_UNIT => {
@@ -104,7 +105,8 @@ pub async fn update_settings_value(
         }
         crate::dao::settings::settings_keys::LANGUAGE => {
             let value = Languages::from_name(value);
-            crate::dao::settings::Settings::set_language(&database, &value).map_err(|e| e.to_string())?;
+            crate::dao::settings::Settings::set_language(&database, &value)
+                .map_err(|e| e.to_string())?;
             settings.write().unwrap().language = value;
         }
         _ => unreachable!(),
@@ -117,7 +119,7 @@ pub async fn update_settings_value(
 #[traced_command]
 #[tauri::command]
 pub fn export_database(
-    database: State<'_, DatabaseConnection>,
+    database: State<'_, DatabasePool>,
     settings: State<'_, RwLock<Settings>>,
 ) -> Result<(), String> {
     let path = constants::HOME_DIR.join(format!(

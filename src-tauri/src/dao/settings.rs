@@ -1,4 +1,4 @@
-use rusqlite_orm::dao::Repository;
+use rusqlite_orm::{dao::Repository, database::DatabasePool};
 use rusqlite_orm_macros::Entity;
 use serde::{Deserialize, Serialize};
 use std::fmt;
@@ -22,7 +22,7 @@ pub struct Settings {
 
 impl Settings {
     /// Reads the persisted weight unit, defaulting to kilograms if unset/invalid.
-    pub fn get_weight_unit(db: &rusqlite_orm::database::DatabaseConnection) -> WeightUnit {
+    pub fn get_weight_unit(db: &DatabasePool) -> WeightUnit {
         SettingsRepository::select_by_id(db, settings_keys::WEIGHT_UNIT)
             .ok()
             .flatten()
@@ -31,7 +31,7 @@ impl Settings {
     }
     /// Persists the weight unit setting.
     pub fn set_weight_unit(
-        db: &rusqlite_orm::database::DatabaseConnection,
+        db: &DatabasePool,
         value: &WeightUnit,
     ) -> rusqlite_orm::errors::Result<()> {
         SettingsRepository::insert()
@@ -45,7 +45,7 @@ impl Settings {
     }
 
     /// Reads the persisted distance unit, defaulting to kilometers if unset/invalid.
-    pub fn get_distance_unit(db: &rusqlite_orm::database::DatabaseConnection) -> DistanceUnit {
+    pub fn get_distance_unit(db: &DatabasePool) -> DistanceUnit {
         SettingsRepository::select_by_id(db, settings_keys::DISTANCE_UNIT)
             .ok()
             .flatten()
@@ -54,7 +54,7 @@ impl Settings {
     }
     /// Persists the distance unit setting.
     pub fn set_distance_unit(
-        db: &rusqlite_orm::database::DatabaseConnection,
+        db: &DatabasePool,
         value: &DistanceUnit,
     ) -> rusqlite_orm::errors::Result<()> {
         SettingsRepository::insert()
@@ -68,7 +68,7 @@ impl Settings {
     }
 
     /// Reads the persisted UI language, defaulting to the system language if unset.
-    pub fn get_language(db: &rusqlite_orm::database::DatabaseConnection) -> Languages {
+    pub fn get_language(db: &DatabasePool) -> Languages {
         SettingsRepository::select_by_id(db, settings_keys::LANGUAGE)
             .ok()
             .flatten()
@@ -77,7 +77,7 @@ impl Settings {
     }
     /// Persists the UI language setting.
     pub fn set_language(
-        db: &rusqlite_orm::database::DatabaseConnection,
+        db: &DatabasePool,
         value: &Languages,
     ) -> rusqlite_orm::errors::Result<()> {
         SettingsRepository::insert()
@@ -91,7 +91,7 @@ impl Settings {
     }
 
     /// Reads whether auto-sync on device connect is enabled, defaulting to `true` if unset.
-    pub fn get_auto_sync(db: &rusqlite_orm::database::DatabaseConnection) -> bool {
+    pub fn get_auto_sync(db: &DatabasePool) -> bool {
         SettingsRepository::select_by_id(db, settings_keys::AUTO_SYNC)
             .ok()
             .flatten()
@@ -100,7 +100,7 @@ impl Settings {
     }
     /// Persists the auto-sync setting.
     pub fn set_auto_sync(
-        db: &rusqlite_orm::database::DatabaseConnection,
+        db: &DatabasePool,
         value: bool,
     ) -> rusqlite_orm::errors::Result<()> {
         SettingsRepository::insert()
@@ -114,7 +114,7 @@ impl Settings {
     }
 
     /// Reads whether launch-on-boot is enabled, defaulting to `false` if unset.
-    pub fn get_start_on_boot(db: &rusqlite_orm::database::DatabaseConnection) -> bool {
+    pub fn get_start_on_boot(db: &DatabasePool) -> bool {
         SettingsRepository::select_by_id(db, settings_keys::START_ON_BOOT)
             .ok()
             .flatten()
@@ -123,7 +123,7 @@ impl Settings {
     }
     /// Persists the launch-on-boot setting.
     pub fn set_start_on_boot(
-        db: &rusqlite_orm::database::DatabaseConnection,
+        db: &DatabasePool,
         value: bool,
     ) -> rusqlite_orm::errors::Result<()> {
         SettingsRepository::insert()

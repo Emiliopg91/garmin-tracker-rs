@@ -8,7 +8,8 @@ use chrono::{DateTime, Local};
 use fitparser::{FitDataField, FitDataRecord, Value, de::DecodeOption, profile};
 
 use crate::{
-    dao::{additional_data::AdditionalData, exercise::Exercise, serie::Serie, session::Session}, utils::translations::{Languages, translate_and_replace},
+    dao::{additional_data::AdditionalData, exercise::Exercise, serie::Serie, session::Session},
+    utils::translations::{Languages, translate_and_replace},
 };
 
 use self::errors::ParseFitFileError;
@@ -144,7 +145,11 @@ fn get_workout_name(wkt_entry: Option<&FitDataRecord>) -> errors::Result<String>
 }
 
 /// Builds the list of strength-training sets (`Serie`s) for a session, resolving each set to its exercise via the workout steps.
-fn get_sets(grouped: &GroupedEntries, timestamp: &DateTime<Local>, lang: Languages) -> errors::Result<Vec<Serie>> {
+fn get_sets(
+    grouped: &GroupedEntries,
+    timestamp: &DateTime<Local>,
+    lang: Languages,
+) -> errors::Result<Vec<Serie>> {
     let exercises = get_exercises(&grouped.exercise_titles)?;
     let steps = get_steps(&grouped.workout_steps, &exercises, lang)?;
 
@@ -325,7 +330,7 @@ fn get_additional_data(
 fn get_steps(
     workout_steps: &[&FitDataRecord],
     exercises: &[Exercise],
-    lang: Languages
+    lang: Languages,
 ) -> errors::Result<Vec<Option<Exercise>>> {
     let lookup: HashMap<(u16, &str), &Exercise> = exercises
         .iter()
@@ -348,7 +353,7 @@ fn get_steps(
                     ParseFitFileError::GenericError(translate_and_replace(
                         "error_parser_unknown_exercise",
                         &[&ex_cat, &ex_id.to_string()],
-                        lang
+                        lang,
                     ))
                 })
         })

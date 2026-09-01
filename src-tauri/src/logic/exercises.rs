@@ -7,7 +7,7 @@ use std::{
 use garmin_tracker_rs_macros::traced_command;
 use rusqlite_orm::{
     dao::Repository,
-    database::DatabaseConnection,
+    database::DatabasePool,
     errors::DatabaseError,
     types::{order_by::OrderBy, value::Value, where_clause::Where},
 };
@@ -34,7 +34,7 @@ use crate::{
 #[traced_command]
 #[tauri::command]
 pub fn get_exercises(
-    database: State<'_, DatabaseConnection>,
+    database: State<'_, DatabasePool>,
     settings: State<'_, RwLock<Settings>>,
 ) -> Result<Vec<ExerciseListItem>, String> {
     info!("Getting exercises list...");
@@ -91,7 +91,7 @@ pub fn get_exercises(
 #[traced_command]
 #[tauri::command]
 pub fn get_exercise_details(
-    database: State<'_, DatabaseConnection>,
+    database: State<'_, DatabasePool>,
     settings: State<'_, RwLock<Settings>>,
     category: &str,
     id: u16,

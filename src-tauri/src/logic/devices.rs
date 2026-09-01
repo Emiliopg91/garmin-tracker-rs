@@ -1,7 +1,7 @@
 use std::sync::RwLock;
 
 use nusb::hotplug::HotplugEvent;
-use rusqlite_orm::{dao::Repository, database::DatabaseConnection};
+use rusqlite_orm::{dao::Repository, database::DatabasePool};
 use tokio_stream::StreamExt;
 
 use tauri::{AppHandle, Emitter, Manager};
@@ -63,7 +63,7 @@ async fn mtp_dev_check_and_sync(app: AppHandle, devices: &mut Vec<DeviceListItem
                 let mut enrolled = Vec::new();
                 let mut errors = Vec::new();
 
-                let db = app_cloned.state::<DatabaseConnection>();
+                let db = app_cloned.state::<DatabasePool>();
                 let _ =
                     db.run_in_transaction(|tx: &mut rusqlite_orm::rusqlite::Transaction<'_>| {
                         for device in &cur_dev_owned {
