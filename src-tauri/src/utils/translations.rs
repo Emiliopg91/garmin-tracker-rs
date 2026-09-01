@@ -1,12 +1,12 @@
 use serde::{Deserialize, Serialize};
 use tauri_plugin_log::log::error;
 
-use crate::{logic::app::SETTINGS_INST, utils::constants};
+use crate::utils::constants;
 
 include!(concat!(env!("OUT_DIR"), "/translations_map.rs"));
 
 pub struct Language(pub &'static str);
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy)]
 pub enum Languages {
     Spanish,
     English,
@@ -50,18 +50,9 @@ impl Languages {
 }
 
 /// Resolves `key` to a string in the current UI language, falling back to English then to the raw key.
-pub fn translate(key: &str) -> String {
+pub fn translate(key: &str, lang: Languages) -> String {
     match TRANSLATIONS.get(key) {
-        Some(langs) => match langs.get(
-            SETTINGS_INST
-                .get()
-                .unwrap()
-                .read()
-                .unwrap()
-                .language
-                .code()
-                .0,
-        ) {
+        Some(langs) => match langs.get(&lang.to_string()) {
             Some(translation) => translation,
             None => match langs.get(constants::DEFAULT_LANGUAGE.code().0) {
                 Some(translation) => translation,
@@ -74,8 +65,8 @@ pub fn translate(key: &str) -> String {
 }
 
 /// Like `translate`, but substitutes each `{}` placeholder in order with the given `replacements`.
-pub fn translate_and_replace(key: &str, replacements: &[&str]) -> String {
-    let mut literal = translate(key);
+pub fn translate_and_replace(key: &str, replacements: &[&str], lang: Languages) -> String {
+    let mut literal = translate(key, lang);
 
     for replacement in replacements {
         literal = literal.replace("{}", replacement)

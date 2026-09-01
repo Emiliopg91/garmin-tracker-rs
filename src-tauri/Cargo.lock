@@ -1325,7 +1325,7 @@ dependencies = [
 
 [[package]]
 name = "garmin-tracker-rs"
-version = "1.13.1"
+version = "1.13.2"
 dependencies = [
  "chrono",
  "curl",
@@ -3347,9 +3347,9 @@ dependencies = [
 
 [[package]]
 name = "rusqlite_orm"
-version = "0.4.8"
+version = "0.4.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "104fef0e6cff383556c468c3c11a2ce15cec45dc2f49792e3377b060bb3ff0ac"
+checksum = "57db4da2bda83b78c2da959ca54a67bb7cca3ba895ff4194773da3f0a42e8ca9"
 dependencies = [
  "log",
  "r2d2",
@@ -3359,9 +3359,9 @@ dependencies = [
 
 [[package]]
 name = "rusqlite_orm_macros"
-version = "0.4.5"
+version = "0.4.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "07b02c12a17f83faf0242dc485752fbdba89ed0012c1c25f267e83cba192a8cf"
+checksum = "bed2e2720c768cea79cb3a2d25f95a186367308e72b22fa4beaecfbd44782d68"
 dependencies = [
  "proc-macro2",
  "quote",

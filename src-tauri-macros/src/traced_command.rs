@@ -23,6 +23,7 @@ pub fn traced_command(_attrs: TokenStream, item: TokenStream) -> TokenStream {
                 Pat::Ident(pat_ident) => {
                     if last_segment_is(&pat_type.ty, "WebviewWindow")
                         || last_segment_is(&pat_type.ty, "AppHandle")
+                        || last_segment_is(&pat_type.ty, "State")
                     {
                         return None;
                     }

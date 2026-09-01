@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use rusqlite_orm::{dao::Repository, database::Database};
+use rusqlite_orm::dao::Repository;
 use serde::{Deserialize, Serialize};
 
 use crate::dao::{
@@ -24,8 +24,10 @@ pub struct Export {
 
 impl Export {
     /// Loads every table from the database and assembles a full export snapshot.
-    pub fn from_database() -> rusqlite_orm::database::errors::Result<Self> {
-        Database::run_in_connection(|conn| {
+    pub fn from_database(
+        db: &rusqlite_orm::database::DatabaseConnection,
+    ) -> rusqlite_orm::errors::Result<Self> {
+        db.run_in_connection(|conn| {
             let body_metrics = BodyMetricsRepository::select().fetch_in(conn)?;
             let exercises = ExerciseRepository::select().fetch_in(conn)?;
             let devices = DeviceRepository::select().fetch_in(conn)?;

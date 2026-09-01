@@ -1,17 +1,20 @@
+use std::sync::RwLock;
+
 use nusb::hotplug::HotplugEvent;
-use rusqlite_orm::{dao::Repository, database::Database};
+use rusqlite_orm::{dao::Repository, database::DatabaseConnection};
 use tokio_stream::StreamExt;
 
-use tauri::{AppHandle, Emitter};
+use tauri::{AppHandle, Emitter, Manager};
 use tauri_plugin_log::log::{error, info};
 
 use crate::{
     dao::device::{Device, DeviceRepository},
     dto::{
+        app::Settings,
         devices::DeviceListItem,
         notifications::{NotificationDefinition, NotificationKind},
     },
-    logic::{app::SETTINGS_INST, notifications::show_notification, sessions::_import_from_device},
+    logic::{notifications::show_notification, sessions::_import_from_device},
     mtp::MTP_CLIENT_INST,
     utils::translations::{translate, translate_and_replace},
 };
@@ -54,13 +57,15 @@ async fn mtp_dev_check_and_sync(app: AppHandle, devices: &mut Vec<DeviceListItem
         let already_known: Vec<String> = devices.iter().map(|d| d.serial_number.clone()).collect();
         let cur_dev_owned = cur_dev.clone();
 
+        let app_cloned = app.clone();
         let (newly_enrolled, enroll_errors): (Vec<DeviceListItem>, Vec<(DeviceListItem, String)>) =
             tokio::task::spawn_blocking(move || {
                 let mut enrolled = Vec::new();
                 let mut errors = Vec::new();
 
-                let _ = Database::run_in_transaction(
-                    |tx: &mut rusqlite_orm::rusqlite::Transaction<'_>| {
+                let db = app_cloned.state::<DatabaseConnection>();
+                let _ =
+                    db.run_in_transaction(|tx: &mut rusqlite_orm::rusqlite::Transaction<'_>| {
                         for device in &cur_dev_owned {
                             if !already_known.contains(&device.serial_number) {
                                 let enrol_err = match DeviceRepository::select_by_id_in(
@@ -83,8 +88,7 @@ async fn mtp_dev_check_and_sync(app: AppHandle, devices: &mut Vec<DeviceListItem
                         }
 
                         Ok(())
-                    },
-                );
+                    });
 
                 (enrolled, errors)
             })
@@ -98,6 +102,9 @@ async fn mtp_dev_check_and_sync(app: AppHandle, devices: &mut Vec<DeviceListItem
             );
         }
 
+        let settings_state = app.state::<RwLock<Settings>>();
+        let settings = settings_state.read().unwrap();
+        let lang = settings.language;
         for device in &newly_enrolled {
             info!(
                 "Connected {} {} ({})",
@@ -108,19 +115,20 @@ async fn mtp_dev_check_and_sync(app: AppHandle, devices: &mut Vec<DeviceListItem
             let payload: DeviceListItem = device.clone();
             let _ = app.emit("device_connected", payload);
 
-            if SETTINGS_INST.get().unwrap().read().unwrap().auto_sync {
+            if settings.auto_sync {
                 devs_to_sync.push(device.serial_number.clone());
                 show_notification(NotificationDefinition {
-                    title: translate("device_connected"),
+                    title: translate("device_connected", lang),
                     body: translate_and_replace(
                         "syncing_device",
                         &[&device.manufacturer, &device.model],
+                        lang,
                     ),
                     kind: NotificationKind::Temporal,
                 });
             } else {
                 show_notification(NotificationDefinition {
-                    title: translate("device_connected"),
+                    title: translate("device_connected", lang),
                     body: format!("{} {}", device.manufacturer, device.model),
                     kind: NotificationKind::Temporal,
                 });
@@ -140,7 +148,7 @@ async fn mtp_dev_check_and_sync(app: AppHandle, devices: &mut Vec<DeviceListItem
                     device.manufacturer, device.model, device.serial_number
                 );
                 show_notification(NotificationDefinition {
-                    title: translate("device_disconnected"),
+                    title: translate("device_disconnected", lang),
                     body: format!("{} {}", device.manufacturer, device.model),
                     kind: NotificationKind::Temporal,
                 });

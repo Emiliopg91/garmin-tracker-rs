@@ -1,13 +1,13 @@
-use std::{collections::HashMap, ops::Deref};
+use std::{collections::HashMap, ops::Deref, sync::RwLock};
 
 use garmin_tracker_rs_macros::traced_command;
 use rusqlite_orm::{
-    dao::{
-        Repository,
-        helpers::types::{order_by::OrderBy, value::Value, where_clause::Where},
-    },
-    database::{Database, errors::DatabaseError},
+    dao::Repository,
+    database::DatabaseConnection,
+    errors::DatabaseError,
+    types::{order_by::OrderBy, value::Value, where_clause::Where},
 };
+use tauri::State;
 use tauri_plugin_log::log::{error, info};
 
 use crate::{
@@ -16,6 +16,7 @@ use crate::{
         session::{SessionRepository, entity},
     },
     dto::{
+        app::Settings,
         notifications::{NotificationDefinition, NotificationKind},
         workouts::{WorkoutDetails, WorkoutListItem, WorkoutSession},
     },
@@ -26,9 +27,12 @@ use crate::{
 /// Returns sessions grouped/aggregated by workout name (count, average time, latest date), sorted by name.
 #[traced_command]
 #[tauri::command]
-pub fn get_workout_list() -> Result<Vec<WorkoutListItem>, String> {
+pub fn get_workout_list(
+    database: State<'_, DatabaseConnection>,
+    settings: State<'_, RwLock<Settings>>,
+) -> Result<Vec<WorkoutListItem>, String> {
     info!("Getting workouts list...");
-    let res = Database::run_in_connection(|conn| {
+    let res = database.run_in_connection(|conn| {
         let sessions = SessionRepository::select()
             .order_by(OrderBy::Desc(entity::columns::DATE))
             .fetch_in(conn)?;
@@ -65,7 +69,7 @@ pub fn get_workout_list() -> Result<Vec<WorkoutListItem>, String> {
         Err(DatabaseError::RunningOnConnection(e)) => {
             error!("Error getting workouts list: {}", e);
             show_notification(NotificationDefinition {
-                title: translate("error_workout_list"),
+                title: translate("error_workout_list", settings.read().unwrap().language),
                 body: e.deref().to_string(),
                 kind: NotificationKind::Persistant,
             });
@@ -78,8 +82,12 @@ pub fn get_workout_list() -> Result<Vec<WorkoutListItem>, String> {
 /// Returns every session for one workout name with per-session volume and session-over-session volume diff.
 #[traced_command]
 #[tauri::command]
-pub fn get_workout_details(name: &str) -> Result<WorkoutDetails, String> {
-    let res = Database::run_in_connection(|conn| {
+pub fn get_workout_details(
+    database: State<'_, DatabaseConnection>,
+    settings: State<'_, RwLock<Settings>>,
+    name: &str,
+) -> Result<WorkoutDetails, String> {
+    let res = database.run_in_connection(|conn| {
         info!("Getting details for workout {}", name);
 
         let sessions = SessionRepository::select_by_workout_in_conn(
@@ -153,7 +161,7 @@ pub fn get_workout_details(name: &str) -> Result<WorkoutDetails, String> {
         Err(DatabaseError::RunningOnConnection(e)) => {
             error!("Error getting workout details: {}", e);
             show_notification(NotificationDefinition {
-                title: translate("error_workout_details"),
+                title: translate("error_workout_details", settings.read().unwrap().language),
                 body: e.deref().to_string(),
                 kind: NotificationKind::Persistant,
             });

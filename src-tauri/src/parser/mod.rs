@@ -8,8 +8,7 @@ use chrono::{DateTime, Local};
 use fitparser::{FitDataField, FitDataRecord, Value, de::DecodeOption, profile};
 
 use crate::{
-    dao::{additional_data::AdditionalData, exercise::Exercise, serie::Serie, session::Session},
-    utils::translations::translate_and_replace,
+    dao::{additional_data::AdditionalData, exercise::Exercise, serie::Serie, session::Session}, utils::translations::{Languages, translate_and_replace},
 };
 
 use self::errors::ParseFitFileError;
@@ -51,7 +50,7 @@ impl<'a> GroupedEntries<'a> {
 }
 
 /// Parses a `.FIT` activity file into a `Session` (with nested series, heart rate, GPS, and speed data). Falls back to reverse-geocoding the start GPS point for the workout name if the file has none.
-pub(crate) fn load_from_file<P>(path: P) -> errors::Result<Session>
+pub(crate) fn load_from_file<P>(path: P, lang: Languages) -> errors::Result<Session>
 where
     P: AsRef<Path>,
 {
@@ -87,7 +86,7 @@ where
     let training_load = get_f64("training_load_peak", session_entry.fields())?;
     let total_calories = get_u16("total_calories", session_entry.fields())?;
     let metabolic_calories = get_u16("metabolic_calories", session_entry.fields())?;
-    let series = get_sets(&grouped, &timestamp).unwrap_or_default();
+    let series = get_sets(&grouped, &timestamp, lang).unwrap_or_default();
     let additional_data = get_additional_data(&timestamp, &grouped.records)?;
 
     Ok(Session {
@@ -145,9 +144,9 @@ fn get_workout_name(wkt_entry: Option<&FitDataRecord>) -> errors::Result<String>
 }
 
 /// Builds the list of strength-training sets (`Serie`s) for a session, resolving each set to its exercise via the workout steps.
-fn get_sets(grouped: &GroupedEntries, timestamp: &DateTime<Local>) -> errors::Result<Vec<Serie>> {
+fn get_sets(grouped: &GroupedEntries, timestamp: &DateTime<Local>, lang: Languages) -> errors::Result<Vec<Serie>> {
     let exercises = get_exercises(&grouped.exercise_titles)?;
-    let steps = get_steps(&grouped.workout_steps, &exercises)?;
+    let steps = get_steps(&grouped.workout_steps, &exercises, lang)?;
 
     let mut sets = Vec::new();
 
@@ -326,6 +325,7 @@ fn get_additional_data(
 fn get_steps(
     workout_steps: &[&FitDataRecord],
     exercises: &[Exercise],
+    lang: Languages
 ) -> errors::Result<Vec<Option<Exercise>>> {
     let lookup: HashMap<(u16, &str), &Exercise> = exercises
         .iter()
@@ -348,6 +348,7 @@ fn get_steps(
                     ParseFitFileError::GenericError(translate_and_replace(
                         "error_parser_unknown_exercise",
                         &[&ex_cat, &ex_id.to_string()],
+                        lang
                     ))
                 })
         })

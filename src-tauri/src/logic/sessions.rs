@@ -3,7 +3,7 @@ use std::{
     fs,
     ops::Deref,
     path::Path,
-    sync::Mutex,
+    sync::{Mutex, RwLock},
     time::Duration,
 };
 
@@ -16,13 +16,14 @@ use crate::{
         session::{self, SessionRepository},
     },
     dto::{
+        app::Settings,
         notifications::{NotificationDefinition, NotificationKind},
         sessions::{SessionDetails, SessionListItem, SessionLocation, SessionSeriesUpdate},
     },
     logic::notifications::show_notification,
     mtp::MTP_CLIENT_INST,
     parser::load_from_file,
-    utils::translations::{translate, translate_and_replace},
+    utils::translations::{Languages, translate, translate_and_replace},
 };
 use chrono::{Datelike, Local, TimeZone, Timelike, offset::LocalResult};
 use curl::easy::Easy;
@@ -30,21 +31,23 @@ use garmin_tracker_rs_macros::traced_command;
 use indexmap::IndexMap;
 use rayon::prelude::*;
 use rusqlite_orm::{
-    dao::{
-        Repository,
-        helpers::types::{order_by::OrderBy, value::Value, where_clause::Where},
-    },
-    database::{Database, errors::DatabaseError},
+    dao::Repository,
+    database::DatabaseConnection,
+    errors::DatabaseError,
+    types::{order_by::OrderBy, value::Value, where_clause::Where},
 };
-use tauri::{AppHandle, Emitter};
+use tauri::{AppHandle, Emitter, Manager, State};
 use tauri_plugin_log::log::{error, info, warn};
 
 /// Returns every recorded session, newest first.
 #[traced_command]
 #[tauri::command]
-pub fn get_sessions() -> Result<Vec<SessionListItem>, String> {
+pub fn get_sessions(
+    database: State<'_, DatabaseConnection>,
+    settings: State<'_, RwLock<Settings>>,
+) -> Result<Vec<SessionListItem>, String> {
     info!("Getting sessions list...");
-    let res = Database::run_in_connection(|conn| {
+    let res = database.run_in_connection(|conn| {
         let sessions = SessionRepository::select()
             .order_by(OrderBy::Desc(session::entity::columns::DATE))
             .fetch_in(conn)?;
@@ -63,7 +66,7 @@ pub fn get_sessions() -> Result<Vec<SessionListItem>, String> {
         Err(DatabaseError::RunningOnConnection(e)) => {
             error!("Error getting sessions list: {}", e);
             show_notification(NotificationDefinition {
-                title: translate("error_session_list"),
+                title: translate("error_session_list", settings.read().unwrap().language),
                 body: e.deref().to_string(),
                 kind: NotificationKind::Persistant,
             });
@@ -76,14 +79,18 @@ pub fn get_sessions() -> Result<Vec<SessionListItem>, String> {
 /// Returns full details for one session (series grouped by exercise, heart rate, GPS, speeds, device).
 #[traced_command]
 #[tauri::command]
-pub fn get_session_details(timestamp: i32) -> Result<SessionDetails, String> {
+pub fn get_session_details(
+    database: State<'_, DatabaseConnection>,
+    settings: State<'_, RwLock<Settings>>,
+    timestamp: i32,
+) -> Result<SessionDetails, String> {
     let timestamp = timestamp as i64;
     info!(
         "Getting details for session {}",
         Local.timestamp_opt(timestamp, 0).unwrap().to_rfc3339()
     );
 
-    let res = Database::run_in_connection(|conn| {
+    let res = database.run_in_connection(|conn| {
         let mut session = SessionRepository::select_by_id_in(conn, timestamp)?.unwrap();
 
         session.fetch_series_relationship_in_conn(conn)?;
@@ -139,7 +146,7 @@ pub fn get_session_details(timestamp: i32) -> Result<SessionDetails, String> {
         Err(DatabaseError::RunningOnConnection(e)) => {
             error!("Error getting session details: {}", e);
             show_notification(NotificationDefinition {
-                title: translate("error_session_details"),
+                title: translate("error_session_details", settings.read().unwrap().language),
                 body: e.deref().to_string(),
                 kind: NotificationKind::Persistant,
             });
@@ -152,7 +159,11 @@ pub fn get_session_details(timestamp: i32) -> Result<SessionDetails, String> {
 /// Applies user edits (reps/weight) to a session's series and recomputes personal records.
 #[traced_command]
 #[tauri::command]
-pub fn save_session_changes(details: SessionSeriesUpdate) -> Result<(), String> {
+pub fn save_session_changes(
+    database: State<'_, DatabaseConnection>,
+    settings: State<'_, RwLock<Settings>>,
+    details: SessionSeriesUpdate,
+) -> Result<(), String> {
     info!(
         "Saving changes on session {}...",
         Local
@@ -160,7 +171,8 @@ pub fn save_session_changes(details: SessionSeriesUpdate) -> Result<(), String> 
             .unwrap()
             .to_rfc3339()
     );
-    let res = Database::run_in_transaction(|tx| {
+    let lang = settings.read().unwrap().language;
+    let res = database.run_in_transaction(|tx| {
         let mut exercises = HashSet::new();
         for serie in &details.series {
             SerieRepository::update()
@@ -179,7 +191,7 @@ pub fn save_session_changes(details: SessionSeriesUpdate) -> Result<(), String> 
         session.fetch_series_relationship_in_conn(tx)?;
         session.update_by_id_in(tx)?;
 
-        update_prs(tx, exercises, &[details.timestamp as i64])?;
+        update_prs(tx, exercises, &[details.timestamp as i64], lang)?;
         Ok(())
     });
 
@@ -187,7 +199,7 @@ pub fn save_session_changes(details: SessionSeriesUpdate) -> Result<(), String> 
         Ok(l) => {
             info!("Session updated succesfully");
             show_notification(NotificationDefinition {
-                title: translate("ok_update_session"),
+                title: translate("ok_update_session", lang),
                 body: "".to_string(),
                 kind: NotificationKind::Temporal,
             });
@@ -197,7 +209,7 @@ pub fn save_session_changes(details: SessionSeriesUpdate) -> Result<(), String> 
         Err(DatabaseError::Transaction(e)) => {
             error!("Error updating session: {}", e);
             show_notification(NotificationDefinition {
-                title: translate("error_update_session"),
+                title: translate("error_update_session", lang),
                 body: e.deref().to_string(),
                 kind: NotificationKind::Persistant,
             });
@@ -218,7 +230,9 @@ pub async fn import_from_device(app: AppHandle, serial: &str) -> Result<usize, S
 pub async fn _import_from_device(app: &AppHandle, serial: &str) -> Result<usize, String> {
     info!("Starting import from device with S/N {}", serial);
     let mut latest_date = "2026-06-08-00-00-00".to_string();
-    let mut device = DeviceRepository::select_by_id(serial)
+    let lang = app.state::<RwLock<Settings>>().read().unwrap().language;
+    let db = app.state::<DatabaseConnection>();
+    let mut device = DeviceRepository::select_by_id(&db, serial)
         .map_err(|e| e.to_string())?
         .unwrap();
 
@@ -264,11 +278,13 @@ pub async fn _import_from_device(app: &AppHandle, serial: &str) -> Result<usize,
         };
 
         let activities_cpy = activities.clone();
+        let app_cpy = app.clone();
         res = tokio::task::spawn_blocking(move || {
-            Database::run_in_transaction(|tx| {
+            let db = app_cpy.state::<DatabaseConnection>();
+            db.run_in_transaction(|tx| {
                 let res = if !activities_cpy.is_empty() {
                     info!("Fetched {} activity files", activities_cpy.len());
-                    import_file_list(tx, &activities_cpy, &device)
+                    import_file_list(tx, &activities_cpy, &device, lang)
                 } else {
                     Ok(Vec::new())
                 }?;
@@ -294,7 +310,8 @@ pub async fn _import_from_device(app: &AppHandle, serial: &str) -> Result<usize,
             if !res.is_empty() {
                 let app = app.clone();
                 std::thread::spawn(move || {
-                    update_pending_geolocation(&app);
+                    let db = app.state::<DatabaseConnection>();
+                    update_pending_geolocation(&app, &db);
                 });
             }
             Ok(res.len())
@@ -309,6 +326,7 @@ fn import_file_list<F>(
     tx: &mut rusqlite_orm::rusqlite::Transaction,
     files: &[F],
     device: &Device,
+    lang: Languages,
 ) -> Result<Vec<i64>, DatabaseError>
 where
     F: AsRef<Path> + Sync,
@@ -320,14 +338,18 @@ where
         .par_iter()
         .filter_map(|file| {
             info!("Parsing file {}", file.as_ref().display());
-            match load_from_file(file.as_ref()) {
+            match load_from_file(file.as_ref(), lang) {
                 Ok(session) => Some((session, file)),
                 Err(e) => {
                     error!("Error parsing session: {}", e);
 
                     show_notification(NotificationDefinition {
                         title: format!("{}", file.as_ref().file_name().unwrap().display()),
-                        body: translate_and_replace("error_parsing_session", &[&e.to_string()]),
+                        body: translate_and_replace(
+                            "error_parsing_session",
+                            &[&e.to_string()],
+                            lang,
+                        ),
                         kind: NotificationKind::Persistant,
                     });
 
@@ -419,11 +441,11 @@ where
 
     if !success.is_empty() {
         show_notification(NotificationDefinition {
-            title: translate("ok_import_sessions"),
-            body: translate_and_replace("imported_n_sessions", &[&success.len().to_string()]),
+            title: translate("ok_import_sessions", lang),
+            body: translate_and_replace("imported_n_sessions", &[&success.len().to_string()], lang),
             kind: NotificationKind::Temporal,
         });
-        update_prs(tx, handled_exercises, &success)?;
+        update_prs(tx, handled_exercises, &success, lang)?;
     }
 
     Ok(success)
@@ -434,7 +456,8 @@ fn update_prs(
     tx: &rusqlite_orm::rusqlite::Transaction,
     exercises: HashSet<(String, u16)>,
     sessions: &[i64],
-) -> rusqlite_orm::database::errors::Result<()> {
+    lang: Languages,
+) -> rusqlite_orm::errors::Result<()> {
     let mut new_prs = false;
 
     let sessions = sessions.to_vec();
@@ -485,8 +508,8 @@ fn update_prs(
 
     if new_prs {
         show_notification(NotificationDefinition {
-            title: translate("new_record"),
-            body: translate("contratulations_pr"),
+            title: translate("new_record", lang),
+            body: translate("contratulations_pr", lang),
             kind: NotificationKind::Temporal,
         });
     }
@@ -497,10 +520,10 @@ fn update_prs(
 static GELOCATION_MUTEX: Mutex<bool> = Mutex::new(false);
 
 /// Recover all pending workouts pending on geolocation
-pub fn update_pending_geolocation(app: &AppHandle) {
+pub fn update_pending_geolocation(app: &AppHandle, db: &DatabaseConnection) {
     let _lock = GELOCATION_MUTEX.lock().unwrap();
     info!("Looking for pending geocode workouts...");
-    match Database::run_in_connection(|conn| {
+    match db.run_in_connection(|conn| {
         let unnamed_sessions = SessionRepository::select()
             .where_(Where::Eq(session::entity::columns::WORKOUT, "".into()))
             .fetch_in(conn)?;
@@ -548,7 +571,7 @@ pub fn update_pending_geolocation(app: &AppHandle) {
                                                 session::entity::columns::DATE,
                                                 pending.session.into(),
                                             ))
-                                            .execute()
+                                            .execute(db)
                                         {
                                             Ok(1) => {
                                                 info!(

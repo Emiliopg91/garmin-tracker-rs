@@ -9,8 +9,9 @@ mod utils;
 use std::path::Path;
 use std::{process::exit, sync::RwLock};
 
-use rusqlite_orm::database::Database;
+use rusqlite_orm::database::{DatabaseConnectionBuilder, JournalMode};
 use rusqlite_orm_macros::dlls;
+use tauri::Manager;
 use tauri_plugin_log::{
     Target, TargetKind,
     log::{LevelFilter, debug, error, info},
@@ -20,7 +21,7 @@ use crate::{
     dto::app::Settings,
     logic::{
         app::{
-            SETTINGS_INST, export_database, get_environment, get_settings, get_translations,
+            export_database, get_environment, get_settings, get_translations,
             notify_frontend_ready, update_settings_value,
         },
         body_metrics::{add_body_measures, delete_body_metric, get_body_measures},
@@ -85,7 +86,7 @@ pub fn run() {
                 .build(),
         )
         .plugin(tauri_plugin_opener::init())
-        .setup(move |_| {
+        .setup(move |app| {
             info!(
                 "Starting {} v{} with PID {}",
                 *constants::APP_NAME,
@@ -94,25 +95,33 @@ pub fn run() {
             );
 
             debug!("Initializing database...");
-            if let Err(e) = Database::initialize(constants::DB_FILE.clone()) {
-                error!("Could not open database: {}", e);
-                exit(constants::ExitCodes::DbError.into())
-            };
-            if let Err(e) = Database::create_schema(&DDLS) {
-                error!("Could not initialize database: {}", e);
-                exit(constants::ExitCodes::DbError.into())
-            }
+            let builder = DatabaseConnectionBuilder::default()
+                .location(constants::DB_FILE.clone())
+                .enable_foreign_keys()
+                .journal_mode(JournalMode::Delete);
+            match builder.build() {
+                Ok(database) => {
+                    if let Err(e) = database.create_schema(&DDLS) {
+                        error!("Could not initialize database: {}", e);
+                        exit(constants::ExitCodes::DbError.into())
+                    }
+                    debug!("Loading settings...");
+                    let settings = Settings {
+                        auto_sync: crate::dao::settings::Settings::get_auto_sync(&database),
+                        distance_unit: crate::dao::settings::Settings::get_distance_unit(&database),
+                        language: crate::dao::settings::Settings::get_language(&database),
+                        start_boot: crate::dao::settings::Settings::get_start_on_boot(&database),
+                        weight_unit: crate::dao::settings::Settings::get_weight_unit(&database),
+                    };
 
-            debug!("Loading settings...");
-            SETTINGS_INST
-                .set(RwLock::new(Settings {
-                    auto_sync: crate::dao::settings::Settings::get_auto_sync(),
-                    distance_unit: crate::dao::settings::Settings::get_distance_unit(),
-                    language: crate::dao::settings::Settings::get_language(),
-                    start_boot: crate::dao::settings::Settings::get_start_on_boot(),
-                    weight_unit: crate::dao::settings::Settings::get_weight_unit(),
-                }))
-                .unwrap();
+                    app.manage(database);
+                    app.manage(RwLock::new(settings));
+                }
+                Err(e) => {
+                    error!("Could not open database: {}", e);
+                    exit(constants::ExitCodes::DbError.into())
+                }
+            }
 
             debug!("Setup finished");
             Ok(())

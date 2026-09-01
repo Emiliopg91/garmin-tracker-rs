@@ -1,16 +1,17 @@
 use std::{
     collections::{HashMap, HashSet},
     ops::Deref,
+    sync::RwLock,
 };
 
 use garmin_tracker_rs_macros::traced_command;
 use rusqlite_orm::{
-    dao::{
-        Repository,
-        helpers::types::{order_by::OrderBy, value::Value, where_clause::Where},
-    },
-    database::{Database, errors::DatabaseError},
+    dao::Repository,
+    database::DatabaseConnection,
+    errors::DatabaseError,
+    types::{order_by::OrderBy, value::Value, where_clause::Where},
 };
+use tauri::State;
 use tauri_plugin_log::log::{error, info};
 
 use crate::{
@@ -20,6 +21,7 @@ use crate::{
         session::{self, SessionRepository},
     },
     dto::{
+        app::Settings,
         exercises::{ExerciseDetails, ExerciseListItem},
         notifications::{NotificationDefinition, NotificationKind},
         sessions::SessionSerie,
@@ -31,9 +33,12 @@ use crate::{
 /// Returns every exercise in the catalog, each annotated with its current personal record.
 #[traced_command]
 #[tauri::command]
-pub fn get_exercises() -> Result<Vec<ExerciseListItem>, String> {
+pub fn get_exercises(
+    database: State<'_, DatabaseConnection>,
+    settings: State<'_, RwLock<Settings>>,
+) -> Result<Vec<ExerciseListItem>, String> {
     info!("Getting exercises list...");
-    let res = Database::run_in_connection(|conn| {
+    let res = database.run_in_connection(|conn| {
         let mut result = Vec::new();
 
         let exercises = ExerciseRepository::select()
@@ -72,7 +77,7 @@ pub fn get_exercises() -> Result<Vec<ExerciseListItem>, String> {
         Err(DatabaseError::RunningOnConnection(e)) => {
             error!("Error getting exercises list: {}", e);
             show_notification(NotificationDefinition {
-                title: translate("error_exercise_list"),
+                title: translate("error_exercise_list", settings.read().unwrap().language),
                 body: e.deref().to_string(),
                 kind: NotificationKind::Persistant,
             });
@@ -85,12 +90,17 @@ pub fn get_exercises() -> Result<Vec<ExerciseListItem>, String> {
 /// Returns the personal record and full per-session set history for one exercise.
 #[traced_command]
 #[tauri::command]
-pub fn get_exercise_details(category: &str, id: u16) -> Result<ExerciseDetails, String> {
+pub fn get_exercise_details(
+    database: State<'_, DatabaseConnection>,
+    settings: State<'_, RwLock<Settings>>,
+    category: &str,
+    id: u16,
+) -> Result<ExerciseDetails, String> {
     info!(
         "Getting details for exercise with category {} and id {}...",
         category, id
     );
-    let res = Database::run_in_connection(|conn| {
+    let res = database.run_in_connection(|conn| {
         let exercise = ExerciseRepository::select_by_id_in(conn, category, id)?.unwrap();
         let mut res = ExerciseDetails::from(&exercise);
 
@@ -157,7 +167,7 @@ pub fn get_exercise_details(category: &str, id: u16) -> Result<ExerciseDetails, 
         Err(DatabaseError::RunningOnConnection(e)) => {
             error!("Error getting exercise details: {}", e);
             show_notification(NotificationDefinition {
-                title: translate("error_exercise_details"),
+                title: translate("error_exercise_details", settings.read().unwrap().language),
                 body: e.deref().to_string(),
                 kind: NotificationKind::Persistant,
             });
