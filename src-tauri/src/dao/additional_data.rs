@@ -15,13 +15,15 @@ pub struct AdditionalData {
 }
 
 impl AdditionalData {
-    pub const INVALID_POSITION: i32 = i32::MAX;
     pub const INVALID_HEAR_RATE: u8 = u8::MAX;
-    pub const INVALID_SPEED: f64 = -1_f64;
+    pub const INVALID_POSITION: i32 = i32::MAX;
     pub const INVALID_CADENCE: u8 = u8::MAX;
     pub const INVALID_POWER: u16 = u16::MAX;
     pub const INVALID_RESPIRATIONS: f64 = -1_f64;
+    pub const INVALID_RESPIRATIONS_FIT: u16 = u16::MAX;
     pub const SEMICIRCLE_TO_DEGREES: f64 = 180.0 / (2_i64.pow(31) as f64);
+    pub const INVALID_SPEED: f64 = -1_f64;
+    pub const INVALID_SPEED_FIT: u32 = u32::MAX;
 
     /// Unpacks the raw byte blob into (lat, lon) pairs in semicircles.
     pub fn get_coordinates_semicircle(&self) -> Option<Vec<Option<(i32, i32)>>> {

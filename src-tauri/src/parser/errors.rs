@@ -5,7 +5,7 @@ pub enum ParseFitFileError {
     #[error("Error while opening file {0}: {1}")]
     FileOpening(String, #[source] std::io::Error),
     #[error("Error while reading file {0}: {1}")]
-    FileReading(String, #[source] fitparser::Error),
+    FileReading(String, #[source] Box<dyn std::error::Error + Send + Sync>),
     #[error("Missing {0} field")]
     MissingField(String),
     #[error("Invalid {0} field format: expected {1}")]
