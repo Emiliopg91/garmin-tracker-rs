@@ -44,9 +44,13 @@ impl GroupedEntries {
             } else if entry.num == MesgNum::WORKOUT {
                 grouped.workout = Some(mesgdef::Workout::from(entry));
             } else if entry.num == MesgNum::EXERCISE_TITLE {
-                grouped.exercise_titles.push(mesgdef::ExerciseTitle::from(entry));
+                grouped
+                    .exercise_titles
+                    .push(mesgdef::ExerciseTitle::from(entry));
             } else if entry.num == MesgNum::WORKOUT_STEP {
-                grouped.workout_steps.push(mesgdef::WorkoutStep::from(entry));
+                grouped
+                    .workout_steps
+                    .push(mesgdef::WorkoutStep::from(entry));
             } else if entry.num == MesgNum::SET {
                 grouped.sets.push(mesgdef::Set::from(entry));
             } else if entry.num == MesgNum::RECORD {
@@ -211,10 +215,14 @@ fn get_additional_data(
     let mut respirations = Vec::with_capacity(records.len());
 
     records.iter().for_each(|entry| {
-        hrs.push((entry.heart_rate != AdditionalData::INVALID_HEAR_RATE).then_some(entry.heart_rate));
+        hrs.push(
+            (entry.heart_rate != AdditionalData::INVALID_HEAR_RATE).then_some(entry.heart_rate),
+        );
         cadences.push((entry.cadence != AdditionalData::INVALID_CADENCE).then_some(entry.cadence));
         coords.push(
-            if entry.position_lat != AdditionalData::INVALID_POSITION && entry.position_long != AdditionalData::INVALID_POSITION {
+            if entry.position_lat != AdditionalData::INVALID_POSITION
+                && entry.position_long != AdditionalData::INVALID_POSITION
+            {
                 Some((entry.position_lat, entry.position_long))
             } else {
                 None
@@ -223,7 +231,8 @@ fn get_additional_data(
         powers.push((entry.power != AdditionalData::INVALID_POWER).then_some(entry.power));
 
         speeds.push(
-            (entry.enhanced_speed != AdditionalData::INVALID_SPEED_FIT).then_some(entry.enhanced_speed as f64 / 1000.0),
+            (entry.enhanced_speed != AdditionalData::INVALID_SPEED_FIT)
+                .then_some(entry.enhanced_speed as f64 / 1000.0),
         );
         respirations.push(
             (entry.enhanced_respiration_rate != AdditionalData::INVALID_RESPIRATIONS_FIT)

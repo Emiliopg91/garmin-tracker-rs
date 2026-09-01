@@ -76,10 +76,7 @@ impl Settings {
             .unwrap_or(*constants::SYSTEM_LANGUAGE)
     }
     /// Persists the UI language setting.
-    pub fn set_language(
-        db: &DatabasePool,
-        value: &Languages,
-    ) -> rusqlite_orm::errors::Result<()> {
+    pub fn set_language(db: &DatabasePool, value: &Languages) -> rusqlite_orm::errors::Result<()> {
         SettingsRepository::insert()
             .or_replace()
             .item(Settings {
@@ -99,10 +96,7 @@ impl Settings {
             .unwrap_or(true)
     }
     /// Persists the auto-sync setting.
-    pub fn set_auto_sync(
-        db: &DatabasePool,
-        value: bool,
-    ) -> rusqlite_orm::errors::Result<()> {
+    pub fn set_auto_sync(db: &DatabasePool, value: bool) -> rusqlite_orm::errors::Result<()> {
         SettingsRepository::insert()
             .or_replace()
             .item(Settings {
@@ -122,10 +116,7 @@ impl Settings {
             .unwrap_or(false)
     }
     /// Persists the launch-on-boot setting.
-    pub fn set_start_on_boot(
-        db: &DatabasePool,
-        value: bool,
-    ) -> rusqlite_orm::errors::Result<()> {
+    pub fn set_start_on_boot(db: &DatabasePool, value: bool) -> rusqlite_orm::errors::Result<()> {
         SettingsRepository::insert()
             .or_replace()
             .item(Settings {
