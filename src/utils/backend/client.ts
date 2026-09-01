@@ -20,7 +20,7 @@ export class BackendClient {
 	}
 	
 
-	// From src-tauri/src/logic/app.rs:119
+	// From src-tauri/src/logic/app.rs:121
 	public static exportDatabase(): Promise<void> {
 	  return BackendClient.inner_invoke("export_database"); 
 	}
@@ -68,7 +68,7 @@ export class BackendClient {
 	}
 	
 
-	// From src-tauri/src/logic/app.rs:170
+	// From src-tauri/src/logic/app.rs:172
 	public static getTranslations(): Promise<Record<string, string>> {
 	  return BackendClient.inner_invoke("get_translations"); 
 	}
