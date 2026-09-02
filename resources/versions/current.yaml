@@ -24,7 +24,7 @@ node:
   react-leaflet: 5.0.0
   recharts: 3.10.1
   typescript: 5.8.3
-  typescript-eslint: 8.68.0
+  typescript-eslint: 8.69.0
   vite: 7.3.6
   vite-plugin-checker: 0.14.5
 rust:
@@ -39,7 +39,7 @@ rust:
   phf: 0.13.1
   phf_codegen: 0.13.1
   rayon: 1.12.0
-  rusqlite_orm: 0.4.11
+  rusqlite_orm: 0.4.12
   rusqlite_orm_macros: 0.4.11
   rustyfit: 0.10.2
   serde: 1.0.229
