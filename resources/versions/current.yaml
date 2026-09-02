@@ -39,7 +39,7 @@ rust:
   phf: 0.13.1
   phf_codegen: 0.13.1
   rayon: 1.12.0
-  rusqlite_orm: 0.4.12
+  rusqlite_orm: 0.4.13
   rusqlite_orm_macros: 0.4.11
   rustyfit: 0.10.2
   serde: 1.0.229
