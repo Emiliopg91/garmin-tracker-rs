@@ -13,7 +13,7 @@ use tauri_plugin_log::log::{error, info};
 use crate::{
     dao::{
         serie::{self, SerieRepository},
-        session::{SessionRepository, entity},
+        session::{self, SessionRepository, entity},
     },
     dto::{
         app::Settings,
@@ -33,7 +33,13 @@ pub fn get_workout_list(
 ) -> Result<Vec<WorkoutListItem>, String> {
     info!("Getting workouts list...");
     let res = database.run_in_connection(|conn| {
+        let subquery = SerieRepository::select().distinct(&vec![serie::entity::columns::SESSION]);
+
         let sessions = SessionRepository::select()
+            .where_(Where::InSub(
+                session::entity::columns::DATE,
+                subquery.to_subquery(),
+            ))
             .order_by(OrderBy::Desc(entity::columns::DATE))
             .fetch_in(conn)?;
 

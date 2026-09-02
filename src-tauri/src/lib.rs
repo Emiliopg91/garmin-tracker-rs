@@ -53,7 +53,7 @@ where
 pub fn run() {
     SingleInstance::acquire();
 
-    let res = tauri::Builder::default()
+    if let Err(e) = tauri::Builder::default()
         .plugin(tauri_plugin_autostart::Builder::new().build())
         .plugin(
             tauri_plugin_log::Builder::new()
@@ -100,7 +100,7 @@ pub fn run() {
                 .busy_timeout(Duration::from_secs(8))
                 .connection_timeout(Duration::from_secs(5))
                 .pool_size(10)
-                .min_idle(1)
+                .min_idle(10)
                 .enable_foreign_keys()
                 .journal_mode(JournalMode::Delete);
             match builder.build("gtrs") {
@@ -149,9 +149,8 @@ pub fn run() {
             export_database,
             get_translations
         ])
-        .run(tauri::generate_context!());
-
-    if let Err(e) = res {
+        .run(tauri::generate_context!())
+    {
         eprintln!("Error while running tauri application {}", e);
         exit(constants::ExitCodes::TauriError.into())
     }
