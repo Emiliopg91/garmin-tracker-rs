@@ -3405,6 +3405,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f100a37f0672f038671fdd8d983a03d6e5223ee5850dcea7477413798cc69bfc"
 dependencies = [
  "embedded-io",
+ "serde",
 ]
 
 [[package]]

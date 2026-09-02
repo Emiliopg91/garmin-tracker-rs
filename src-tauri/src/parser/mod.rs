@@ -1,6 +1,5 @@
 use std::{collections::HashMap, fs::File, io::BufReader, path::Path};
 
-use chrono::{DateTime, Local, TimeZone};
 use embedded_io_adapters::std::FromStd;
 use rustyfit::{
     Decoder,
@@ -97,12 +96,12 @@ where
     let training_load = get_training_load_peak(session_entry)?;
     let total_calories = get_total_calories(session_entry)?;
     let metabolic_calories = get_metabolic_calories(session_entry)?;
-    let series = get_sets(&grouped, &timestamp, lang).unwrap_or_default();
-    let additional_data = get_additional_data(&timestamp, &grouped.records)?;
+    let series = get_sets(&grouped, timestamp, lang).unwrap_or_default();
+    let additional_data = get_additional_data(timestamp, &grouped.records)?;
 
     Ok(Session {
         workout,
-        date: timestamp.timestamp(),
+        date: timestamp,
         total_elapsed_time,
         active_time,
         total_calories,
@@ -141,9 +140,16 @@ pub fn debug_dump<P>(path: P, entries: &[Message])
 where
     P: AsRef<Path>,
 {
-    let dump_path = format!("{}.txt", path.as_ref().display());
-    if let Err(e) = std::fs::write(&dump_path, format!("{:#?}", entries)) {
-        eprintln!("failed to write debug dump to {:?}: {e}", dump_path);
+    let dump_path = format!("{}.json", path.as_ref().display());
+    match serde_json::to_string_pretty(&entries.to_vec()) {
+        Ok(json) => {
+            if let Err(e) = std::fs::write(&dump_path, json) {
+                eprintln!("failed to write debug dump to {:?}: {e}", dump_path);
+            }
+        }
+        Err(e) => {
+            eprintln!("failed to serialize data: {e}");
+        }
     }
 }
 
@@ -165,7 +171,7 @@ fn get_workout_name(wkt_entry: Option<&mesgdef::Workout>) -> errors::Result<Stri
 /// Builds the list of strength-training sets (`Serie`s) for a session, resolving each set to its exercise via the workout steps.
 fn get_sets(
     grouped: &GroupedEntries,
-    timestamp: &DateTime<Local>,
+    timestamp: i64,
     lang: Languages,
 ) -> errors::Result<Vec<Serie>> {
     let exercises = get_exercises(&grouped.exercise_titles)?;
@@ -180,7 +186,7 @@ fn get_sets(
         }
 
         let reps = reg.repetitions;
-        let weight = reg.weight as f64 / 16.0;
+        let weight = reg.weight_scaled().unwrap();
         let ex_idx = reg.wkt_step_index.0 as usize;
         let exercise = steps.get(ex_idx)?.as_ref()?;
         Some((exercise.clone(), reps, weight))
@@ -188,7 +194,7 @@ fn get_sets(
 
     for (idx, (exercise, reps, weight)) in valid_sets.enumerate() {
         sets.push(Serie {
-            session: timestamp.timestamp(),
+            session: timestamp,
             idx: idx as u8,
             ex_cat: exercise.category.clone(),
             ex_id: exercise.id,
@@ -202,9 +208,9 @@ fn get_sets(
     Ok(sets)
 }
 
-/// Extracts additional data from the session's `record` messages, packing them into a `HeartRate` entity.
+/// Extracts additional data from the session's `record` messages, packing them into a `AdditionalData` entity.
 fn get_additional_data(
-    timestamp: &DateTime<Local>,
+    timestamp: i64,
     records: &[mesgdef::Record],
 ) -> errors::Result<Option<AdditionalData>> {
     let mut hrs = Vec::with_capacity(records.len());
@@ -233,48 +239,7 @@ fn get_additional_data(
         respirations.push(entry.enhanced_respiration_rate_scaled());
     });
 
-    let hrs = if !hrs.is_empty() && hrs.iter().find(|e| e.is_some()).is_some() {
-        Some(
-            hrs.iter()
-                .map(|e| match e {
-                    Some(v) => *v,
-                    None => AdditionalData::INVALID_HEAR_RATE,
-                })
-                .collect::<Vec<_>>(),
-        )
-    } else {
-        None
-    };
-
-    let cadences = if !cadences.is_empty() && cadences.iter().find(|e| e.is_some()).is_some() {
-        Some(
-            cadences
-                .iter()
-                .map(|e| match e {
-                    Some(v) => *v,
-                    None => AdditionalData::INVALID_CADENCE,
-                })
-                .collect::<Vec<_>>(),
-        )
-    } else {
-        None
-    };
-
-    let powers = if !powers.is_empty() && powers.iter().find(|e| e.is_some()).is_some() {
-        Some(
-            powers
-                .iter()
-                .map(|e| match e {
-                    Some(v) => *v,
-                    None => AdditionalData::INVALID_POWER,
-                })
-                .collect::<Vec<_>>(),
-        )
-    } else {
-        None
-    };
-
-    let coords = if !coords.is_empty() && coords.iter().find(|e| e.is_some()).is_some() {
+    let coords = if !coords.is_empty() && coords.iter().any(|e| e.is_some()) {
         fn get_coord_for_idx(coords: &[Option<(i32, i32)>], idx: usize) -> (i32, i32) {
             let elem = coords[idx];
             match elem {
@@ -301,34 +266,11 @@ fn get_additional_data(
         None
     };
 
-    let speeds = if !speeds.is_empty() && speeds.iter().find(|e| e.is_some()).is_some() {
-        Some(
-            speeds
-                .iter()
-                .map(|e| match e {
-                    Some(v) => *v,
-                    None => AdditionalData::INVALID_SPEED,
-                })
-                .collect::<Vec<_>>(),
-        )
-    } else {
-        None
-    };
-
-    let respirations =
-        if !respirations.is_empty() && respirations.iter().find(|e| e.is_some()).is_some() {
-            Some(
-                respirations
-                    .iter()
-                    .map(|e| match e {
-                        Some(v) => *v,
-                        None => AdditionalData::INVALID_RESPIRATIONS,
-                    })
-                    .collect::<Vec<_>>(),
-            )
-        } else {
-            None
-        };
+    let hrs = fill_invalid(&hrs, AdditionalData::INVALID_HEAR_RATE);
+    let cadences = fill_invalid(&cadences, AdditionalData::INVALID_CADENCE);
+    let powers = fill_invalid(&powers, AdditionalData::INVALID_POWER);
+    let speeds = fill_invalid(&speeds, AdditionalData::INVALID_SPEED);
+    let respirations = fill_invalid(&respirations, AdditionalData::INVALID_RESPIRATIONS);
 
     if hrs.is_some()
         || coords.is_some()
@@ -338,7 +280,7 @@ fn get_additional_data(
         || respirations.is_some()
     {
         Ok(Some(AdditionalData {
-            session: timestamp.timestamp(),
+            session: timestamp,
             heart_rates: hrs,
             cadences,
             coordinates: coords.map(|coords| AdditionalData::build_coordinates_blob(&coords)),
@@ -349,6 +291,14 @@ fn get_additional_data(
         }))
     } else {
         Ok(None)
+    }
+}
+
+fn fill_invalid<T: Copy>(vals: &[Option<T>], invalid: T) -> Option<Vec<T>> {
+    if vals.iter().any(|v| v.is_some()) {
+        Some(vals.iter().map(|v| v.unwrap_or(invalid)).collect())
+    } else {
+        None
     }
 }
 
@@ -423,11 +373,10 @@ fn get_exercise_category(v: ExerciseCategory) -> errors::Result<String> {
     }
 }
 
-fn get_timestamp(session: &mesgdef::Session) -> errors::Result<DateTime<Local>> {
+fn get_timestamp(session: &mesgdef::Session) -> errors::Result<i64> {
     session
         .timestamp
         .unix_timestamp()
-        .and_then(|secs| Local.timestamp_opt(secs, 0).single())
         .ok_or_else(|| ParseFitFileError::MissingField("timestamp".to_string()))
 }
 
