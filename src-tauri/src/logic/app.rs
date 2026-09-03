@@ -1,8 +1,10 @@
-use std::{collections::HashMap, fs, sync::RwLock};
+use std::{collections::HashMap, fs, sync::RwLock, thread, time::Duration};
 
 use chrono::Local;
 use garmin_tracker_rs_macros::traced_command;
 use rusqlite_orm::database::DatabasePool;
+use semver::Version;
+use serde_json::Value;
 use tauri::{AppHandle, Manager, State, WebviewWindow};
 use tauri_plugin_autostart::ManagerExt;
 
@@ -19,7 +21,7 @@ use crate::{
     },
     utils::translations::{Languages, TRANSLATIONS, translate, translate_and_replace},
 };
-use tauri_plugin_log::log::{error, info};
+use tauri_plugin_log::log::{debug, error, info};
 
 /// Returns the current in-memory app settings.
 #[traced_command]
@@ -44,11 +46,14 @@ pub async fn notify_frontend_ready(app: AppHandle, webview_window: WebviewWindow
     ));
     let _ = webview_window.show();
 
-    let app = app.clone();
+    let app_cl = app.clone();
     std::thread::spawn(move || {
-        let db = app.state::<DatabasePool>();
-        update_pending_geolocation(&app, &db);
+        let db = app_cl.state::<DatabasePool>();
+        update_pending_geolocation(&app_cl, &db);
     });
+
+    let app_cl = app.clone();
+    std::thread::spawn(|| check_for_update(app_cl));
 }
 
 /// Reports whether this is a debug or release build.
@@ -181,4 +186,69 @@ pub fn get_translations(
             )
         })
         .collect())
+}
+
+fn check_for_update(app: AppHandle) {
+    thread::sleep(Duration::from_secs(5));
+
+    loop {
+        info!("Looking for updates...");
+
+        let result = curl_rest::Client::with_user_agent("garmin-tracker-rs")
+            .get()
+            .header(curl_rest::Header::Accept(
+                "application/vnd.github+json".into(),
+            ))
+            .send(constants::URL);
+
+        match result {
+            Ok(response) => {
+                if response.status == curl_rest::StatusCode::Ok {
+                    match serde_json::from_slice::<Value>(&response.body) {
+                        Ok(response_json) => match response_json.get("tag_name") {
+                            Some(tag_name) => match Version::parse(&tag_name.as_str().unwrap()) {
+                                Ok(version) => {
+                                    if version > *constants::APP_SEM_VERSION {
+                                        info!("Update {} found!", version);
+                                        let lang = app
+                                            .state::<RwLock<Settings>>()
+                                            .read()
+                                            .unwrap()
+                                            .language;
+                                        show_notification(NotificationDefinition {
+                                            title: translate("new_update_title", lang),
+                                            body: translate_and_replace(
+                                                "new_update_body",
+                                                &[&version.to_string()],
+                                                lang,
+                                            ),
+                                            kind: NotificationKind::Persistant,
+                                        });
+                                        break;
+                                    } else {
+                                        info!("No update found");
+                                    }
+                                }
+                                Err(e) => {
+                                    debug!("Error parsing version: {}", e)
+                                }
+                            },
+                            None => {
+                                debug!("No tag name found")
+                            }
+                        },
+                        Err(e) => {
+                            debug!("Invalid parsing response: {}", e)
+                        }
+                    }
+                } else {
+                    debug!("Invalid response status: {}", response.status,)
+                }
+            }
+            Err(e) => {
+                debug!("Error sending request to GitHub: {}", e)
+            }
+        }
+        thread::sleep(Duration::from_hours(1));
+    }
 }

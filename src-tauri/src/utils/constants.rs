@@ -1,5 +1,6 @@
 use std::{fs, path::PathBuf, str::FromStr, sync::LazyLock};
 
+use semver::Version;
 use tauri_plugin_log::{RotationStrategy, log::LevelFilter};
 
 use crate::utils::translations::Languages;
@@ -8,6 +9,8 @@ use crate::utils::translations::Languages;
 pub static APP_TITLE: &str = "Garmin Tracker";
 pub static APP_NAME: LazyLock<String> = LazyLock::new(|| env!("CARGO_PKG_NAME").to_string());
 pub static APP_VERSION: LazyLock<String> = LazyLock::new(|| env!("CARGO_PKG_VERSION").to_string());
+pub static APP_SEM_VERSION: LazyLock<Version> =
+    LazyLock::new(|| Version::parse(&APP_VERSION).unwrap());
 pub static LIB_NAME: LazyLock<String> =
     LazyLock::new(|| format!("{}_lib", APP_NAME.replace('-', "_")));
 pub static PID: LazyLock<u32> = LazyLock::new(std::process::id);
@@ -15,7 +18,10 @@ pub static LOCK_FILE: LazyLock<PathBuf> = LazyLock::new(|| {
     let run_dir = std::env::var("XDG_RUNTIME_DIR").expect("Could not get runtime dir");
     PathBuf::from(run_dir).join(format!("{}.lock", *APP_NAME))
 });
+pub static URL: &'static str =
+    "https://api.github.com/repos/Emiliopg91/garmin-tracker-rs/releases/latest";
 
+// Languages block
 pub static DEFAULT_LANGUAGE: Languages = Languages::English;
 pub static SYSTEM_LANGUAGE: LazyLock<Languages> = LazyLock::new(|| {
     let mut lang_var = std::env::var("LANG").unwrap_or("C".to_string());

@@ -701,6 +701,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "curl-rest"
+version = "0.5.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5d0cc7f16cc830d9963666dbf073110e7afa6cd2f95bb49f079c5b4515a64851"
+dependencies = [
+ "brotli-decompressor",
+ "curl",
+ "percent-encoding",
+ "thiserror 2.0.20",
+ "url",
+]
+
+[[package]]
 name = "curl-sys"
 version = "0.4.90+curl-8.21.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1332,7 +1345,7 @@ name = "garmin-tracker-rs"
 version = "1.14.0"
 dependencies = [
  "chrono",
- "curl",
+ "curl-rest",
  "embedded-io-adapters",
  "garmin-tracker-rs-macros",
  "indexmap 2.14.1",
@@ -1345,6 +1358,7 @@ dependencies = [
  "rusqlite_orm",
  "rusqlite_orm_macros",
  "rustyfit",
+ "semver",
  "serde",
  "serde_json",
  "serde_yaml",

@@ -20,7 +20,7 @@ export class BackendClient {
 	}
 	
 
-	// From src-tauri/src/logic/app.rs:121
+	// From src-tauri/src/logic/app.rs:126
 	public static exportDatabase(): Promise<void> {
 	  return BackendClient.inner_invoke("export_database"); 
 	}
@@ -32,7 +32,7 @@ export class BackendClient {
 	}
 	
 
-	// From src-tauri/src/logic/app.rs:57
+	// From src-tauri/src/logic/app.rs:62
 	public static getEnvironment(): Promise<AppEnvironment> {
 	  return BackendClient.inner_invoke("get_environment"); 
 	}
@@ -62,13 +62,13 @@ export class BackendClient {
 	}
 	
 
-	// From src-tauri/src/logic/app.rs:27
+	// From src-tauri/src/logic/app.rs:29
 	public static getSettings(): Promise<Settings> {
 	  return BackendClient.inner_invoke("get_settings"); 
 	}
 	
 
-	// From src-tauri/src/logic/app.rs:172
+	// From src-tauri/src/logic/app.rs:177
 	public static getTranslations(): Promise<Record<string, string>> {
 	  return BackendClient.inner_invoke("get_translations"); 
 	}
@@ -92,7 +92,7 @@ export class BackendClient {
 	}
 	
 
-	// From src-tauri/src/logic/app.rs:34
+	// From src-tauri/src/logic/app.rs:36
 	public static notifyFrontendReady(): Promise<void> {
 	  return BackendClient.inner_invoke("notify_frontend_ready"); 
 	}
@@ -104,7 +104,7 @@ export class BackendClient {
 	}
 	
 
-	// From src-tauri/src/logic/app.rs:68
+	// From src-tauri/src/logic/app.rs:73
 	public static updateSettingsValue(name: string, value: string): Promise<void> {
 	  return BackendClient.inner_invoke("update_settings_value", { name, value }); 
 	}

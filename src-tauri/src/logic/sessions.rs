@@ -26,7 +26,7 @@ use crate::{
     utils::translations::{Languages, translate, translate_and_replace},
 };
 use chrono::{Datelike, Local, TimeZone, Timelike, offset::LocalResult};
-use curl::easy::Easy;
+use curl_rest::StatusCode;
 use garmin_tracker_rs_macros::traced_command;
 use indexmap::IndexMap;
 use rayon::prelude::*;
@@ -557,57 +557,81 @@ pub fn update_pending_geolocation(app: &AppHandle, db: &DatabasePool) {
                     .unwrap()
                     .unwrap();
 
-                match get(first.0, first.1) {
-                    Ok(response) => match serde_json::from_str::<serde_json::Value>(&response) {
-                        Ok(e) => {
-                            if let Some(address) = e.get("address") {
-                                for key in ["village", "town", "city", "state", "country"] {
-                                    if let Some(value) = address.get(key) {
-                                        let location = value.to_string().replace("\"", "");
+                let url = format!(
+                    "https://nominatim.openstreetmap.org/reverse?format=json&lat={}&lon={}",
+                    first.0, first.1
+                );
+                //
+                let resp = curl_rest::Client::with_user_agent("garmin-tracker-rs")
+                    .get()
+                    .header(curl_rest::Header::Accept(
+                        "application/vnd.github+json".into(),
+                    ))
+                    .send(&url);
 
-                                        match SessionRepository::update()
-                                            .set(
-                                                session::entity::columns::WORKOUT,
-                                                location.clone().into(),
-                                            )
-                                            .where_(Where::Eq(
-                                                session::entity::columns::DATE,
-                                                pending.session.into(),
-                                            ))
-                                            .execute(db)
-                                        {
-                                            Ok(1) => {
-                                                info!(
-                                                    "Updated location for session @ {}",
-                                                    pending.session
-                                                );
-                                                let payload: SessionLocation = SessionLocation {
-                                                    session: pending.session as i32,
-                                                    location,
-                                                };
-                                                let _ =
-                                                    app.emit("session_location_update", payload);
-                                            }
-                                            Ok(_) => {
-                                                info!("Missing session @ {}", pending.session)
-                                            }
-                                            Err(e) => {
-                                                error!(
-                                                    "Error while updating session {}: {}",
-                                                    pending.session, e
-                                                )
+                match resp {
+                    Ok(response) => {
+                        if response.status == StatusCode::Ok {
+                            match serde_json::from_slice::<serde_json::Value>(&response.body) {
+                                Ok(e) => {
+                                    if let Some(address) = e.get("address") {
+                                        for key in ["village", "town", "city", "state", "country"] {
+                                            if let Some(value) = address.get(key) {
+                                                let location = value.to_string().replace("\"", "");
+
+                                                match SessionRepository::update()
+                                                    .set(
+                                                        session::entity::columns::WORKOUT,
+                                                        location.clone().into(),
+                                                    )
+                                                    .where_(Where::Eq(
+                                                        session::entity::columns::DATE,
+                                                        pending.session.into(),
+                                                    ))
+                                                    .execute(db)
+                                                {
+                                                    Ok(1) => {
+                                                        info!(
+                                                            "Updated location for session @ {}",
+                                                            pending.session
+                                                        );
+                                                        let payload: SessionLocation =
+                                                            SessionLocation {
+                                                                session: pending.session as i32,
+                                                                location,
+                                                            };
+                                                        let _ = app.emit(
+                                                            "session_location_update",
+                                                            payload,
+                                                        );
+                                                    }
+                                                    Ok(_) => {
+                                                        info!(
+                                                            "Missing session @ {}",
+                                                            pending.session
+                                                        )
+                                                    }
+                                                    Err(e) => {
+                                                        error!(
+                                                            "Error while updating session {}: {}",
+                                                            pending.session, e
+                                                        )
+                                                    }
+                                                }
+
+                                                break;
                                             }
                                         }
-
-                                        break;
                                     }
                                 }
+                                Err(e) => {
+                                    error!("Error parsing response: {}", e)
+                                }
                             }
+                        } else {
+                            error!("Invalid status code: {}", response.status)
                         }
-                        Err(e) => {
-                            error!("Error parsing response: {}", e)
-                        }
-                    },
+                    }
                     Err(e) => {
                         error!("Error on geocode query: {}", e)
                     }
@@ -620,27 +644,4 @@ pub fn update_pending_geolocation(app: &AppHandle, db: &DatabasePool) {
             error!("Error while looking for pending sessions: {}", e);
         }
     }
-}
-
-/// Performs a blocking HTTP GET and returns the response body as a string.
-fn get(lat: f64, lon: f64) -> Result<String, curl::Error> {
-    let url = format!(
-        "https://nominatim.openstreetmap.org/reverse?format=json&lat={}&lon={}",
-        lat, lon
-    );
-    let mut easy = Easy::new();
-    easy.url(&url)?;
-    easy.useragent("garmin-tracker-rs")?;
-
-    let mut data = Vec::new();
-    {
-        let mut transfer = easy.transfer();
-        transfer.write_function(|chunk| {
-            data.extend_from_slice(chunk);
-            Ok(chunk.len())
-        })?;
-        transfer.perform()?;
-    }
-
-    Ok(String::from_utf8_lossy(&data).to_string())
 }
