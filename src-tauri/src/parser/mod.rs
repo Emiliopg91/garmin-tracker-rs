@@ -240,27 +240,19 @@ fn get_additional_data(
     });
 
     let coords = if !coords.is_empty() && coords.iter().any(|e| e.is_some()) {
-        fn get_coord_for_idx(coords: &[Option<(i32, i32)>], idx: usize) -> (i32, i32) {
-            let elem = coords[idx];
-            match elem {
-                Some((lat, long)) => (lat, long),
-                None => {
-                    if idx > 0 {
-                        get_coord_for_idx(coords, idx - 1)
-                    } else {
-                        (
-                            AdditionalData::INVALID_POSITION,
-                            AdditionalData::INVALID_POSITION,
-                        )
-                    }
-                }
+        let mut new_coords = Vec::new();
+        let mut last_valid = (
+            AdditionalData::INVALID_POSITION,
+            AdditionalData::INVALID_POSITION,
+        );
+
+        for c in coords {
+            if let Some(pos) = c {
+                last_valid = pos;
             }
+            new_coords.push(last_valid)
         }
 
-        let mut new_coords = Vec::new();
-        for i in 0..coords.len() {
-            new_coords.push(get_coord_for_idx(&coords, i));
-        }
         Some(new_coords)
     } else {
         None

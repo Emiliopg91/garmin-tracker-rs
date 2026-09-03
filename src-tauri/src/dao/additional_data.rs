@@ -93,7 +93,7 @@ impl AdditionalData {
     pub fn build_speeds_blob(value: &[f64]) -> Vec<u8> {
         let mut records = Vec::new();
 
-        value.to_vec().iter().for_each(|speed| {
+        value.iter().for_each(|speed| {
             records.extend_from_slice(&(*speed).to_be_bytes());
         });
 
@@ -122,7 +122,7 @@ impl AdditionalData {
     pub fn build_respirations_blob(value: &[f64]) -> Vec<u8> {
         let mut records = Vec::new();
 
-        value.to_vec().iter().for_each(|speed| {
+        value.iter().for_each(|speed| {
             records.extend_from_slice(&(*speed).to_be_bytes());
         });
 
@@ -151,7 +151,7 @@ impl AdditionalData {
     pub fn build_powers_blob(value: &[u16]) -> Vec<u8> {
         let mut records = Vec::new();
 
-        value.to_vec().iter().for_each(|speed| {
+        value.iter().for_each(|speed| {
             records.extend_from_slice(&(*speed).to_be_bytes());
         });
 
@@ -162,8 +162,8 @@ impl AdditionalData {
     pub fn get_heart_rates(&self) -> Option<Vec<Option<u8>>> {
         self.heart_rates.as_ref().map(|records| {
             records
-                .clone()
-                .into_iter()
+                .iter()
+                .copied()
                 .map(|val| {
                     if val < Self::INVALID_HEAR_RATE {
                         Some(val)
@@ -179,8 +179,8 @@ impl AdditionalData {
     pub fn get_cadences(&self) -> Option<Vec<Option<u8>>> {
         self.cadences.as_ref().map(|records| {
             records
-                .clone()
-                .into_iter()
+                .iter()
+                .copied()
                 .map(|val| {
                     if val < Self::INVALID_CADENCE {
                         Some(val)

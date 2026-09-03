@@ -186,11 +186,6 @@ pub fn save_session_changes(
             exercises.insert((serie.ex_cat.clone(), serie.ex_id));
         }
 
-        let mut session =
-            SessionRepository::select_by_id_in(tx, details.timestamp as i64)?.unwrap();
-        session.fetch_series_relationship_in_conn(tx)?;
-        session.update_by_id_in(tx)?;
-
         update_prs(tx, exercises, &[details.timestamp as i64], lang)?;
         Ok(())
     });
@@ -367,21 +362,31 @@ where
             _ => "".to_string(),
         };
 
+        let err_title = format!(
+            "{} | {} | {}",
+            session.sport, session.workout, formatted_time
+        );
+
         let res: Result<bool, String> = {
-            info!("Importing session {} - {}", session.workout, formatted_time);
+            info!(
+                "Importing session {} - {}...",
+                session.workout, formatted_time
+            );
             let added = if SessionRepository::exists_in(tx, session.date)? {
                 let msg = format!("Session with date {} already exists", session.date);
                 warn!("{}", msg);
                 false
             } else {
+                let date = session.date;
+                let series = std::mem::take(&mut session.series);
+                let add_data = session.additional_data.take();
+
                 session.device = Some(device.serial.to_string());
-                SessionRepository::insert()
-                    .item(session.clone())
-                    .execute_in(tx)?;
+                SessionRepository::insert().item(session).execute_in(tx)?;
 
                 let mut insert = ExerciseRepository::insert().or_ignore();
                 let mut seen = HashSet::new();
-                for serie in &session.series {
+                for serie in &series {
                     let exercise = serie.exercise.clone().unwrap();
                     if seen.insert(exercise.clone()) {
                         insert = insert.item(exercise.clone());
@@ -394,21 +399,21 @@ where
 
                 let mut insert = SerieRepository::insert();
                 let mut count = 0;
-                for serie in &session.series {
-                    insert = insert.item(serie.clone());
+                for serie in series {
+                    insert = insert.item(serie);
                     count += 1;
                 }
                 if count > 0 {
                     insert.execute_in(tx)?;
                 }
 
-                if let Some(additional_data) = session.additional_data {
+                if let Some(additional_data) = add_data {
                     AdditionalDataRepository::insert()
-                        .item(additional_data.clone())
+                        .item(additional_data)
                         .execute_in(tx)?;
                 }
 
-                success.push(session.date);
+                success.push(date);
 
                 let _ = fs::remove_file(file);
                 #[cfg(debug_assertions)]
@@ -429,10 +434,7 @@ where
             error!("  {}", e);
 
             show_notification(NotificationDefinition {
-                title: format!(
-                    "{} | {} | {}",
-                    session.sport, session.workout, formatted_time
-                ),
+                title: err_title,
                 body: e,
                 kind: NotificationKind::Persistant,
             });
@@ -464,6 +466,7 @@ fn update_prs(
 
     let mut update_false_conditions = vec![];
     let mut update_true_conditions = vec![];
+
     for exer in &exercises {
         update_false_conditions.push(vec![exer.0.clone().into(), exer.1.into()]);
         if let Some(pr) = SerieRepository::select()
