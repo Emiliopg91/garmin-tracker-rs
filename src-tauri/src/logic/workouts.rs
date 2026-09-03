@@ -33,7 +33,7 @@ pub fn get_workout_list(
 ) -> Result<Vec<WorkoutListItem>, String> {
     info!("Getting workouts list...");
     let res = database.run_in_connection(|conn| {
-        let subquery = SerieRepository::select().distinct(&vec![serie::entity::columns::SESSION]);
+        let subquery = SerieRepository::select().distinct(&[serie::entity::columns::SESSION]);
 
         let sessions = SessionRepository::select()
             .where_(Where::InSub(

@@ -33,28 +33,38 @@ struct GroupedEntries {
 }
 
 impl GroupedEntries {
-    /// Buckets FIT messages by message kind in a single pass.
+    /// Buckets FIT messages by message kind in a single pass. Branches are ordered by
+    /// expected frequency (`RECORD` can number in the thousands per file, while
+    /// `SESSION`/`WORKOUT` appear once) so the common case needs fewer comparisons.
     fn from_entries(entries: &[Message]) -> Self {
         let mut grouped = GroupedEntries::default();
 
         for entry in entries {
-            if entry.num == MesgNum::SESSION {
-                grouped.session = Some(mesgdef::Session::from(entry));
-            } else if entry.num == MesgNum::WORKOUT {
-                grouped.workout = Some(mesgdef::Workout::from(entry));
-            } else if entry.num == MesgNum::EXERCISE_TITLE {
-                grouped
-                    .exercise_titles
-                    .push(mesgdef::ExerciseTitle::from(entry));
-            } else if entry.num == MesgNum::WORKOUT_STEP {
-                grouped
-                    .workout_steps
-                    .push(mesgdef::WorkoutStep::from(entry));
-            } else if entry.num == MesgNum::SET {
-                grouped.sets.push(mesgdef::Set::from(entry));
-            } else if entry.num == MesgNum::RECORD {
-                grouped.records.push(mesgdef::Record::from(entry));
-            }
+            match entry.num {
+                MesgNum::RECORD => {
+                    grouped.records.push(mesgdef::Record::from(entry));
+                }
+                MesgNum::SET => {
+                    grouped.sets.push(mesgdef::Set::from(entry));
+                }
+                MesgNum::WORKOUT_STEP => {
+                    grouped
+                        .workout_steps
+                        .push(mesgdef::WorkoutStep::from(entry));
+                }
+                MesgNum::EXERCISE_TITLE => {
+                    grouped
+                        .exercise_titles
+                        .push(mesgdef::ExerciseTitle::from(entry));
+                }
+                MesgNum::SESSION => {
+                    grouped.session = Some(mesgdef::Session::from(entry));
+                }
+                MesgNum::WORKOUT => {
+                    grouped.workout = Some(mesgdef::Workout::from(entry));
+                }
+                _ => {}
+            };
         }
 
         grouped
@@ -66,20 +76,24 @@ pub(crate) fn load_from_file<P>(path: P, lang: Languages) -> errors::Result<Sess
 where
     P: AsRef<Path>,
 {
-    let entries = read_from_file(&path)?
-        .into_iter()
-        .filter(|m| {
-            m.num == MesgNum::SESSION
-                || m.num == MesgNum::WORKOUT
-                || m.num == MesgNum::EXERCISE_TITLE
-                || m.num == MesgNum::WORKOUT_STEP
-                || m.num == MesgNum::SET
-                || m.num == MesgNum::RECORD
-        })
-        .collect::<Vec<Message>>();
+    let entries = read_from_file(&path)?;
 
     #[cfg(debug_assertions)]
-    debug_dump(&path, &entries);
+    {
+        let relevant = entries
+            .iter()
+            .filter(|m| {
+                m.num == MesgNum::SESSION
+                    || m.num == MesgNum::WORKOUT
+                    || m.num == MesgNum::EXERCISE_TITLE
+                    || m.num == MesgNum::WORKOUT_STEP
+                    || m.num == MesgNum::SET
+                    || m.num == MesgNum::RECORD
+            })
+            .cloned()
+            .collect::<Vec<Message>>();
+        debug_dump(&path, &relevant);
+    }
 
     let grouped = GroupedEntries::from_entries(&entries);
 
@@ -90,7 +104,7 @@ where
 
     let timestamp = get_timestamp(session_entry)?;
     let sport = get_sport_profile_name(session_entry)?;
-    let workout = get_workout_name(grouped.workout.as_ref()).unwrap_or_default();
+    let workout = get_workout_name(grouped.workout.as_ref());
     let total_elapsed_time = get_total_elapsed_time(session_entry)?;
     let active_time = get_active_time(session_entry);
     let training_load = get_training_load_peak(session_entry)?;
@@ -141,7 +155,7 @@ where
     P: AsRef<Path>,
 {
     let dump_path = format!("{}.json", path.as_ref().display());
-    match serde_json::to_string_pretty(&entries.to_vec()) {
+    match serde_json::to_string_pretty(entries) {
         Ok(json) => {
             if let Err(e) = std::fs::write(&dump_path, json) {
                 eprintln!("failed to write debug dump to {:?}: {e}", dump_path);
@@ -154,17 +168,16 @@ where
 }
 
 /// Extracts the workout name from the `workout` FIT message, if present.
-fn get_workout_name(wkt_entry: Option<&mesgdef::Workout>) -> errors::Result<String> {
-    let wkt_entry =
-        wkt_entry.ok_or_else(|| ParseFitFileError::MissingField("workout".to_string()))?;
-
-    if wkt_entry.wkt_name.is_empty() {
-        Err(ParseFitFileError::InvalidFieldValue(
-            "name".to_string(),
-            "string".to_string(),
-        ))
-    } else {
-        Ok(wkt_entry.wkt_name.clone())
+fn get_workout_name(wkt_entry: Option<&mesgdef::Workout>) -> String {
+    match wkt_entry {
+        None => String::new(),
+        Some(entry) => {
+            if entry.wkt_name.is_empty() {
+                String::new()
+            } else {
+                entry.wkt_name.clone()
+            }
+        }
     }
 }
 

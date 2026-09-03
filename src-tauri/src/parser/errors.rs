@@ -8,8 +8,6 @@ pub enum ParseFitFileError {
     FileReading(String, #[source] Box<dyn std::error::Error + Send + Sync>),
     #[error("Missing {0} field")]
     MissingField(String),
-    #[error("Invalid {0} field format: expected {1}")]
-    InvalidFieldValue(String, String),
     #[error("{0}")]
     GenericError(String),
 }
