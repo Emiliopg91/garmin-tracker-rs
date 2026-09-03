@@ -35,10 +35,10 @@ mtp-rs = "^0"
 nusb = "^0"
 phf = { version = "0.11", features = ["macros"] }
 rayon = "^1"
-rusqlite_orm = { path = "../rusqlite_orm/orm" }
-#rusqlite_orm = "^0"
-rusqlite_orm_macros = { path = "../rusqlite_orm/macros" }
-#rusqlite_orm_macros = "^0"
+#rusqlite_orm = { path = "../rusqlite_orm/orm" }
+rusqlite_orm = "^0"
+#rusqlite_orm_macros = { path = "../rusqlite_orm/macros" }
+rusqlite_orm_macros = "^0"
 rustyfit = { version = "^0", features = ["serde"] }
 serde = { version = "^1", features = ["derive"] }
 serde_json = "^1"
