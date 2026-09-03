@@ -34,6 +34,8 @@ use crate::{
 
 #[cfg(debug_assertions)]
 use crate::parser::{debug_dump, stream_from_file};
+#[cfg(debug_assertions)]
+use rustyfit::{Decoder, DecoderEvent, StreamingIterator};
 
 dlls!("../resources/ddl");
 
@@ -43,7 +45,16 @@ where
     P: AsRef<Path>,
 {
     for path in paths {
-        let entries = stream_from_file(path, false).unwrap();
+        let mut decoder = Decoder::new();
+        let mut stream = stream_from_file(&mut decoder, path).unwrap();
+
+        let mut entries = Vec::new();
+        while let Some(event) = stream.next() {
+            if let DecoderEvent::Message(mesg) = event.unwrap() {
+                entries.push(mesg.clone());
+            }
+        }
+
         debug_dump(path, &entries);
     }
 }

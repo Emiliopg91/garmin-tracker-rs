@@ -2,7 +2,7 @@ use std::{collections::HashMap, fs::File, io::BufReader, path::Path};
 
 use embedded_io_adapters::std::FromStd;
 use rustyfit::{
-    Decoder, DecoderEvent, StreamingIterator,
+    Decoder, DecoderEvent, StreamDecoder, StreamingIterator,
     profile::{
         mesgdef,
         typedef::{ExerciseCategory, MesgNum},
@@ -76,7 +76,29 @@ pub(crate) fn load_from_file<P>(path: P, lang: Languages) -> errors::Result<Sess
 where
     P: AsRef<Path>,
 {
-    let entries = stream_from_file(&path, true)?;
+    let mut decoder = Decoder::new();
+    let mut stream = stream_from_file(&mut decoder, &path)?;
+
+    let mut entries = Vec::new();
+    while let Some(event) = stream.next() {
+        let event = event.map_err(|e| {
+            ParseFitFileError::FileReading(path.as_ref().display().to_string(), Box::new(e))
+        })?;
+
+        if let DecoderEvent::Message(mesg) = event
+            && matches!(
+                mesg.num,
+                MesgNum::SESSION
+                    | MesgNum::WORKOUT
+                    | MesgNum::EXERCISE_TITLE
+                    | MesgNum::WORKOUT_STEP
+                    | MesgNum::SET
+                    | MesgNum::RECORD
+            )
+        {
+            entries.push(mesg.clone());
+        }
+    }
 
     #[cfg(debug_assertions)]
     debug_dump(&path, &entries);
@@ -115,11 +137,13 @@ where
     })
 }
 
-/// Decodes a `.FIT` file into its raw messages, streaming message-by-message from the decoder
-/// instead of buffering the whole decoded file at once. When `filter_relevant` is `true`, only
-/// the message kinds consumed by [`GroupedEntries`] are kept, discarding the rest as they are
-/// streamed rather than after collecting the whole file into memory.
-pub fn stream_from_file<P>(path: P, filter_relevant: bool) -> errors::Result<Vec<Message>>
+/// Opens a `.FIT` file and returns a decoder `Stream` over its raw messages, borrowed from the
+/// caller-owned `decoder`. Iteration is entirely up to the caller (via [`StreamingIterator::next`]):
+/// which messages to keep, convert, or discard, and when to stop reading.
+pub fn stream_from_file<'a, P>(
+    decoder: &'a mut Decoder,
+    path: P,
+) -> errors::Result<StreamDecoder<'a, FromStd<BufReader<File>>>>
 where
     P: AsRef<Path>,
 {
@@ -127,34 +151,9 @@ where
 
     let file = File::open(path_ref)
         .map_err(|e| ParseFitFileError::FileOpening(path_ref.display().to_string(), e))?;
-    let mut reader = FromStd::new(BufReader::new(file));
+    let reader = FromStd::new(BufReader::new(file));
 
-    let mut decoder = Decoder::new();
-    let mut stream = decoder.stream(&mut reader);
-
-    let mut messages = Vec::new();
-    while let Some(event) = stream.next() {
-        let event = event.map_err(|e| {
-            ParseFitFileError::FileReading(path_ref.display().to_string(), Box::new(e))
-        })?;
-
-        if let DecoderEvent::Message(mesg) = event
-            && (!filter_relevant
-                || matches!(
-                    mesg.num,
-                    MesgNum::SESSION
-                        | MesgNum::WORKOUT
-                        | MesgNum::EXERCISE_TITLE
-                        | MesgNum::WORKOUT_STEP
-                        | MesgNum::SET
-                        | MesgNum::RECORD
-                ))
-        {
-            messages.push(mesg.clone());
-        }
-    }
-
-    Ok(messages)
+    Ok(decoder.stream(reader))
 }
 
 /// Debug-only helper: writes the raw parsed messages to `<file>.txt` for inspection.
