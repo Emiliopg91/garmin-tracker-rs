@@ -2,7 +2,7 @@ use std::{collections::HashMap, fs::File, io::BufReader, path::Path};
 
 use embedded_io_adapters::std::FromStd;
 use rustyfit::{
-    Decoder,
+    Decoder, DecoderEvent, StreamingIterator,
     profile::{
         mesgdef,
         typedef::{ExerciseCategory, MesgNum},
@@ -76,24 +76,10 @@ pub(crate) fn load_from_file<P>(path: P, lang: Languages) -> errors::Result<Sess
 where
     P: AsRef<Path>,
 {
-    let entries = read_from_file(&path)?;
+    let entries = stream_from_file(&path, true)?;
 
     #[cfg(debug_assertions)]
-    {
-        let relevant = entries
-            .iter()
-            .filter(|m| {
-                m.num == MesgNum::SESSION
-                    || m.num == MesgNum::WORKOUT
-                    || m.num == MesgNum::EXERCISE_TITLE
-                    || m.num == MesgNum::WORKOUT_STEP
-                    || m.num == MesgNum::SET
-                    || m.num == MesgNum::RECORD
-            })
-            .cloned()
-            .collect::<Vec<Message>>();
-        debug_dump(&path, &relevant);
-    }
+    debug_dump(&path, &entries);
 
     let grouped = GroupedEntries::from_entries(&entries);
 
@@ -129,8 +115,11 @@ where
     })
 }
 
-/// Reads and decodes a `.FIT` file into its raw messages.
-pub fn read_from_file<P>(path: P) -> errors::Result<Vec<Message>>
+/// Decodes a `.FIT` file into its raw messages, streaming message-by-message from the decoder
+/// instead of buffering the whole decoded file at once. When `filter_relevant` is `true`, only
+/// the message kinds consumed by [`GroupedEntries`] are kept, discarding the rest as they are
+/// streamed rather than after collecting the whole file into memory.
+pub fn stream_from_file<P>(path: P, filter_relevant: bool) -> errors::Result<Vec<Message>>
 where
     P: AsRef<Path>,
 {
@@ -140,12 +129,32 @@ where
         .map_err(|e| ParseFitFileError::FileOpening(path_ref.display().to_string(), e))?;
     let mut reader = FromStd::new(BufReader::new(file));
 
-    let fit = Decoder::new()
-        .decode(&mut reader)
-        .map_err(|e| ParseFitFileError::FileReading(path_ref.display().to_string(), Box::new(e)))?
-        .unwrap_or_default();
+    let mut decoder = Decoder::new();
+    let mut stream = decoder.stream(&mut reader);
 
-    Ok(fit.messages)
+    let mut messages = Vec::new();
+    while let Some(event) = stream.next() {
+        let event = event.map_err(|e| {
+            ParseFitFileError::FileReading(path_ref.display().to_string(), Box::new(e))
+        })?;
+
+        if let DecoderEvent::Message(mesg) = event
+            && (!filter_relevant
+                || matches!(
+                    mesg.num,
+                    MesgNum::SESSION
+                        | MesgNum::WORKOUT
+                        | MesgNum::EXERCISE_TITLE
+                        | MesgNum::WORKOUT_STEP
+                        | MesgNum::SET
+                        | MesgNum::RECORD
+                ))
+        {
+            messages.push(mesg.clone());
+        }
+    }
+
+    Ok(messages)
 }
 
 /// Debug-only helper: writes the raw parsed messages to `<file>.txt` for inspection.

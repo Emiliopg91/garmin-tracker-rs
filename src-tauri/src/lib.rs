@@ -33,7 +33,7 @@ use crate::{
 };
 
 #[cfg(debug_assertions)]
-use crate::parser::{debug_dump, read_from_file};
+use crate::parser::{debug_dump, stream_from_file};
 
 dlls!("../resources/ddl");
 
@@ -43,7 +43,7 @@ where
     P: AsRef<Path>,
 {
     for path in paths {
-        let entries = read_from_file(path).unwrap();
+        let entries = stream_from_file(path, false).unwrap();
         debug_dump(path, &entries);
     }
 }
