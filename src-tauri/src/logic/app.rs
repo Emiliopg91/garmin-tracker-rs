@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fs, sync::RwLock, thread, time::Duration};
+use std::{collections::HashMap, fs, thread, time::Duration};
 
 use chrono::Local;
 use garmin_tracker_rs_macros::traced_command;
@@ -9,7 +9,7 @@ use tauri::{AppHandle, Manager, State, WebviewWindow};
 use tauri_plugin_autostart::ManagerExt;
 
 use crate::{
-    constants,
+    SettingsLock, constants,
     dto::{
         app::{AppEnvironment, Settings},
         export::Export,
@@ -26,7 +26,7 @@ use tauri_plugin_log::log::{debug, error, info};
 /// Returns the current in-memory app settings.
 #[traced_command]
 #[tauri::command]
-pub async fn get_settings(settings: State<'_, RwLock<Settings>>) -> Result<Settings, String> {
+pub async fn get_settings(settings: State<'_, SettingsLock>) -> Result<Settings, String> {
     Ok(settings.read().unwrap().clone())
 }
 
@@ -73,7 +73,7 @@ pub async fn get_environment() -> AppEnvironment {
 pub async fn update_settings_value(
     app: AppHandle,
     database: State<'_, DatabasePool>,
-    settings: State<'_, RwLock<Settings>>,
+    settings: State<'_, SettingsLock>,
     name: &str,
     value: &str,
 ) -> Result<(), String> {
@@ -125,7 +125,7 @@ pub async fn update_settings_value(
 #[tauri::command]
 pub fn export_database(
     database: State<'_, DatabasePool>,
-    settings: State<'_, RwLock<Settings>>,
+    settings: State<'_, SettingsLock>,
 ) -> Result<(), String> {
     let path = constants::HOME_DIR.join(format!(
         "{}-{}.json",
@@ -175,7 +175,7 @@ pub fn export_database(
 #[traced_command]
 #[tauri::command]
 pub fn get_translations(
-    settings: State<'_, RwLock<Settings>>,
+    settings: State<'_, SettingsLock>,
 ) -> Result<HashMap<String, String>, String> {
     Ok(TRANSLATIONS
         .keys()
@@ -206,15 +206,12 @@ fn check_for_update(app: AppHandle) {
                 if response.status == curl_rest::StatusCode::Ok {
                     match serde_json::from_slice::<Value>(&response.body) {
                         Ok(response_json) => match response_json.get("tag_name") {
-                            Some(tag_name) => match Version::parse(&tag_name.as_str().unwrap()) {
+                            Some(tag_name) => match Version::parse(tag_name.as_str().unwrap()) {
                                 Ok(version) => {
                                     if version > *constants::APP_SEM_VERSION {
                                         info!("Update {} found!", version);
-                                        let lang = app
-                                            .state::<RwLock<Settings>>()
-                                            .read()
-                                            .unwrap()
-                                            .language;
+                                        let lang =
+                                            app.state::<SettingsLock>().read().unwrap().language;
                                         show_notification(NotificationDefinition {
                                             title: translate("new_update_title", lang),
                                             body: translate_and_replace(

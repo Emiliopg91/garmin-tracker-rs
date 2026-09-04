@@ -1,7 +1,6 @@
 use std::{
     collections::{HashMap, HashSet},
     ops::Deref,
-    sync::RwLock,
 };
 
 use garmin_tracker_rs_macros::traced_command;
@@ -15,13 +14,13 @@ use tauri::State;
 use tauri_plugin_log::log::{error, info};
 
 use crate::{
+    SettingsLock,
     dao::{
         exercise::{self, ExerciseRepository},
         serie::{self, Serie, SerieRepository},
         session::{self, SessionRepository},
     },
     dto::{
-        app::Settings,
         exercises::{ExerciseDetails, ExerciseListItem},
         notifications::{NotificationDefinition, NotificationKind},
         sessions::SessionSerie,
@@ -35,7 +34,7 @@ use crate::{
 #[tauri::command]
 pub fn get_exercises(
     database: State<'_, DatabasePool>,
-    settings: State<'_, RwLock<Settings>>,
+    settings: State<'_, SettingsLock>,
 ) -> Result<Vec<ExerciseListItem>, String> {
     info!("Getting exercises list...");
     let res = database.run_in_connection(|conn| {
@@ -92,7 +91,7 @@ pub fn get_exercises(
 #[tauri::command]
 pub fn get_exercise_details(
     database: State<'_, DatabasePool>,
-    settings: State<'_, RwLock<Settings>>,
+    settings: State<'_, SettingsLock>,
     category: &str,
     id: u16,
 ) -> Result<ExerciseDetails, String> {

@@ -1,4 +1,4 @@
-use std::{collections::HashMap, ops::Deref, sync::RwLock};
+use std::{collections::HashMap, ops::Deref};
 
 use garmin_tracker_rs_macros::traced_command;
 use rusqlite_orm::{
@@ -11,12 +11,12 @@ use tauri::State;
 use tauri_plugin_log::log::{error, info};
 
 use crate::{
+    SettingsLock,
     dao::{
         serie::{self, SerieRepository},
         session::{self, SessionRepository, entity},
     },
     dto::{
-        app::Settings,
         notifications::{NotificationDefinition, NotificationKind},
         workouts::{WorkoutDetails, WorkoutListItem, WorkoutSession},
     },
@@ -29,7 +29,7 @@ use crate::{
 #[tauri::command]
 pub fn get_workout_list(
     database: State<'_, DatabasePool>,
-    settings: State<'_, RwLock<Settings>>,
+    settings: State<'_, SettingsLock>,
 ) -> Result<Vec<WorkoutListItem>, String> {
     info!("Getting workouts list...");
     let res = database.run_in_connection(|conn| {
@@ -90,7 +90,7 @@ pub fn get_workout_list(
 #[tauri::command]
 pub fn get_workout_details(
     database: State<'_, DatabasePool>,
-    settings: State<'_, RwLock<Settings>>,
+    settings: State<'_, SettingsLock>,
     name: &str,
 ) -> Result<WorkoutDetails, String> {
     let res = database.run_in_connection(|conn| {

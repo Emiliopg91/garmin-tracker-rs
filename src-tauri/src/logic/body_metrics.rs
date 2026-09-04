@@ -1,4 +1,4 @@
-use std::{ops::Deref, sync::RwLock};
+use std::ops::Deref;
 
 use garmin_tracker_rs_macros::traced_command;
 use rusqlite_orm::{
@@ -8,9 +8,9 @@ use tauri::State;
 use tauri_plugin_log::log::{error, info};
 
 use crate::{
+    SettingsLock,
     dao::body_metrics::{self, BodyMetrics, BodyMetricsRepository},
     dto::{
-        app::Settings,
         body_metrics::BodyMetricListItem,
         notifications::{NotificationDefinition, NotificationKind},
     },
@@ -23,7 +23,7 @@ use crate::{
 #[tauri::command]
 pub fn get_body_measures(
     database: State<'_, DatabasePool>,
-    settings: State<'_, RwLock<Settings>>,
+    settings: State<'_, SettingsLock>,
 ) -> Result<Vec<BodyMetricListItem>, String> {
     info!("Getting body measures list...");
 
@@ -66,7 +66,7 @@ pub fn get_body_measures(
 #[tauri::command]
 pub fn add_body_measures(
     database: State<'_, DatabasePool>,
-    settings: State<'_, RwLock<Settings>>,
+    settings: State<'_, SettingsLock>,
     measures: BodyMetricListItem,
 ) -> Result<(), String> {
     info!("Adding body measures list...");
@@ -105,7 +105,7 @@ pub fn add_body_measures(
 #[tauri::command]
 pub fn delete_body_metric(
     database: State<'_, DatabasePool>,
-    settings: State<'_, RwLock<Settings>>,
+    settings: State<'_, SettingsLock>,
     date: i32,
 ) -> Result<(), String> {
     let res = database.run_in_transaction(|tx| {

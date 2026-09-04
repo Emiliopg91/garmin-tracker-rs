@@ -33,9 +33,9 @@ use crate::{
 };
 
 #[cfg(debug_assertions)]
-use crate::parser::{debug_dump, stream_from_file};
+use crate::parser::FitParser;
 #[cfg(debug_assertions)]
-use rustyfit::{Decoder, DecoderEvent, StreamingIterator};
+use rustyfit::Decoder;
 
 dlls!("../resources/ddl");
 
@@ -45,19 +45,25 @@ where
     P: AsRef<Path>,
 {
     for path in paths {
-        let mut decoder = Decoder::new();
-        let mut stream = stream_from_file(&mut decoder, path).unwrap();
-
-        let mut entries = Vec::new();
-        while let Some(event) = stream.next() {
-            if let DecoderEvent::Message(mesg) = event.unwrap() {
-                entries.push(mesg.clone());
-            }
+        let res: Result<(), Box<dyn std::error::Error>> =
+            match FitParser::from_file(path, &mut Decoder::new()) {
+                Ok(parser) => match parser.debug_dump() {
+                    Ok(_) => Ok(()),
+                    Err(e) => Err(e),
+                },
+                Err(e) => Err(Box::new(e)),
+            };
+        if let Err(e) = res {
+            eprintln!(
+                "Error handling '{}': \n  {}",
+                path.as_ref().display(),
+                e.as_ref()
+            )
         }
-
-        debug_dump(path, &entries);
     }
 }
+
+pub type SettingsLock = RwLock<Settings>;
 
 /// Boots the Tauri app: acquires the single-instance lock, opens/migrates the DB, loads settings, and registers commands.
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -130,7 +136,7 @@ pub fn run() {
                     };
 
                     app.manage(database);
-                    app.manage(RwLock::new(settings));
+                    app.manage(SettingsLock::new(settings));
                 }
                 Err(e) => {
                     error!("Could not open database: {}", e);

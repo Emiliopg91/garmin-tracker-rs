@@ -18,8 +18,7 @@ pub static LOCK_FILE: LazyLock<PathBuf> = LazyLock::new(|| {
     let run_dir = std::env::var("XDG_RUNTIME_DIR").expect("Could not get runtime dir");
     PathBuf::from(run_dir).join(format!("{}.lock", *APP_NAME))
 });
-pub static URL: &'static str =
-    "https://api.github.com/repos/Emiliopg91/garmin-tracker-rs/releases/latest";
+pub static URL: &str = "https://api.github.com/repos/Emiliopg91/garmin-tracker-rs/releases/latest";
 
 // Languages block
 pub static DEFAULT_LANGUAGE: Languages = Languages::English;

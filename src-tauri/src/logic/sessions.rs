@@ -3,11 +3,12 @@ use std::{
     fs,
     ops::Deref,
     path::Path,
-    sync::{Mutex, RwLock},
+    sync::Mutex,
     time::Duration,
 };
 
 use crate::{
+    SettingsLock,
     dao::{
         additional_data::{self, AdditionalDataRepository},
         device::{Device, DeviceRepository},
@@ -16,13 +17,12 @@ use crate::{
         session::{self, SessionRepository},
     },
     dto::{
-        app::Settings,
         notifications::{NotificationDefinition, NotificationKind},
         sessions::{SessionDetails, SessionListItem, SessionLocation, SessionSeriesUpdate},
     },
     logic::notifications::show_notification,
     mtp::MTP_CLIENT_INST,
-    parser::load_from_file,
+    parser::FitParser,
     utils::translations::{Languages, translate, translate_and_replace},
 };
 use chrono::{Datelike, Local, TimeZone, Timelike, offset::LocalResult};
@@ -36,6 +36,7 @@ use rusqlite_orm::{
     errors::DatabaseError,
     types::{order_by::OrderBy, value::Value, where_clause::Where},
 };
+use rustyfit::Decoder;
 use tauri::{AppHandle, Emitter, Manager, State};
 use tauri_plugin_log::log::{error, info, warn};
 
@@ -44,7 +45,7 @@ use tauri_plugin_log::log::{error, info, warn};
 #[tauri::command]
 pub fn get_sessions(
     database: State<'_, DatabasePool>,
-    settings: State<'_, RwLock<Settings>>,
+    settings: State<'_, SettingsLock>,
 ) -> Result<Vec<SessionListItem>, String> {
     info!("Getting sessions list...");
     let res = database.run_in_connection(|conn| {
@@ -81,7 +82,7 @@ pub fn get_sessions(
 #[tauri::command]
 pub fn get_session_details(
     database: State<'_, DatabasePool>,
-    settings: State<'_, RwLock<Settings>>,
+    settings: State<'_, SettingsLock>,
     timestamp: i32,
 ) -> Result<SessionDetails, String> {
     let timestamp = timestamp as i64;
@@ -161,7 +162,7 @@ pub fn get_session_details(
 #[tauri::command]
 pub fn save_session_changes(
     database: State<'_, DatabasePool>,
-    settings: State<'_, RwLock<Settings>>,
+    settings: State<'_, SettingsLock>,
     details: SessionSeriesUpdate,
 ) -> Result<(), String> {
     info!(
@@ -225,7 +226,7 @@ pub async fn import_from_device(app: AppHandle, serial: &str) -> Result<usize, S
 pub async fn _import_from_device(app: &AppHandle, serial: &str) -> Result<usize, String> {
     info!("Starting import from device with S/N {}", serial);
     let mut latest_date = "2026-06-08-00-00-00".to_string();
-    let lang = app.state::<RwLock<Settings>>().read().unwrap().language;
+    let lang = app.state::<SettingsLock>().read().unwrap().language;
     let db = app.state::<DatabasePool>();
     let mut device = DeviceRepository::select_by_id(&db, serial)
         .map_err(|e| e.to_string())?
@@ -333,8 +334,15 @@ where
         .par_iter()
         .filter_map(|file| {
             info!("Parsing file {}", file.as_ref().display());
-            match load_from_file(file.as_ref(), lang) {
-                Ok(session) => Some((session, file)),
+            let res = match FitParser::from_file(file, &mut Decoder::new()) {
+                Ok(parser) => match parser.parse_session(lang) {
+                    Ok(session) => Ok((session, file)),
+                    Err(e) => Err(e),
+                },
+                Err(e) => Err(e),
+            };
+            match res {
+                Ok(result) => Some(result),
                 Err(e) => {
                     error!("Error parsing session: {}", e);
 

@@ -1,4 +1,3 @@
-use std::sync::RwLock;
 
 use nusb::hotplug::HotplugEvent;
 use rusqlite_orm::{dao::Repository, database::DatabasePool};
@@ -8,9 +7,9 @@ use tauri::{AppHandle, Emitter, Manager};
 use tauri_plugin_log::log::{error, info};
 
 use crate::{
+    SettingsLock,
     dao::device::{Device, DeviceRepository},
     dto::{
-        app::Settings,
         devices::DeviceListItem,
         notifications::{NotificationDefinition, NotificationKind},
     },
@@ -102,7 +101,7 @@ async fn mtp_dev_check_and_sync(app: AppHandle, devices: &mut Vec<DeviceListItem
             );
         }
 
-        let settings_state = app.state::<RwLock<Settings>>();
+        let settings_state = app.state::<SettingsLock>();
         let settings = settings_state.read().unwrap();
         let lang = settings.language;
         for device in &newly_enrolled {
