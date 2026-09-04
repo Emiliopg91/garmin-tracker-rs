@@ -332,3 +332,9 @@ new_record:
 contratulations_pr:
   en: Congratulations and keep it up!
   es: ¡Felicidades y continua así!
+ok_update_settings:
+  en: Settings updated succesfully
+  es: Configuración actualizada
+error_update_settings:
+  en: Error updating settings
+  es: Error actualizando configuración

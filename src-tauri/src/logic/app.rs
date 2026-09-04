@@ -10,6 +10,9 @@ use tauri_plugin_autostart::ManagerExt;
 
 use crate::{
     SettingsLock, constants,
+    dao::settings::settings_keys::{
+        AUTO_SYNC, DISTANCE_UNIT, LANGUAGE, START_ON_BOOT, WEIGHT_UNIT,
+    },
     dto::{
         app::{AppEnvironment, Settings},
         export::Export,
@@ -70,54 +73,80 @@ pub async fn get_environment() -> AppEnvironment {
 /// Updates a single named setting: persists it to the DB, applies any side effect (e.g. autostart toggle), and refreshes `SETTINGS_INST`.
 #[traced_command]
 #[tauri::command]
-pub async fn update_settings_value(
-    app: AppHandle,
-    database: State<'_, DatabasePool>,
-    settings: State<'_, SettingsLock>,
-    name: &str,
-    value: &str,
-) -> Result<(), String> {
-    match name {
-        crate::dao::settings::settings_keys::AUTO_SYNC => {
-            let value = value == "true";
-            crate::dao::settings::Settings::set_auto_sync(&database, value)
-                .map_err(|e| e.to_string())?;
-            settings.write().unwrap().auto_sync = value;
-        }
-        crate::dao::settings::settings_keys::DISTANCE_UNIT => {
-            let value = value.try_into()?;
-            crate::dao::settings::Settings::set_distance_unit(&database, &value)
-                .map_err(|e| e.to_string())?;
-            settings.write().unwrap().distance_unit = value;
-        }
-        crate::dao::settings::settings_keys::START_ON_BOOT => {
-            let value = value == "true";
-            crate::dao::settings::Settings::set_start_on_boot(&database, value)
-                .map_err(|e| e.to_string())?;
-            if value {
-                app.autolaunch().enable()
-            } else {
-                app.autolaunch().disable()
-            }
-            .map_err(|e| e.to_string())?;
-            settings.write().unwrap().start_boot = value;
-        }
-        crate::dao::settings::settings_keys::WEIGHT_UNIT => {
-            let value = value.try_into()?;
-            crate::dao::settings::Settings::set_weight_unit(&database, &value)
-                .map_err(|e| e.to_string())?;
-            settings.write().unwrap().weight_unit = value;
-        }
-        crate::dao::settings::settings_keys::LANGUAGE => {
-            let value = Languages::from_name(value);
-            crate::dao::settings::Settings::set_language(&database, &value)
-                .map_err(|e| e.to_string())?;
-            settings.write().unwrap().language = value;
-        }
-        _ => unreachable!(),
-    }
+pub async fn update_settings_value(app: AppHandle, name: &str, value: &str) -> Result<(), String> {
+    let name = name.to_string();
+    let value = value.to_string();
 
-    Ok(())
+    let lang = app.state::<SettingsLock>().read().unwrap().language;
+
+    let res = tokio::task::spawn_blocking(move || {
+        let database = app.state::<DatabasePool>();
+        let settings = app.state::<SettingsLock>();
+        match name.as_str() {
+            AUTO_SYNC => {
+                let value = value == "true";
+                crate::dao::settings::Settings::set_auto_sync(&database, value)
+                    .map_err(|e| e.to_string())?;
+                settings.write().unwrap().auto_sync = value;
+            }
+            DISTANCE_UNIT => {
+                let value = value.as_str().try_into()?;
+                crate::dao::settings::Settings::set_distance_unit(&database, &value)
+                    .map_err(|e| e.to_string())?;
+                settings.write().unwrap().distance_unit = value;
+            }
+            START_ON_BOOT => {
+                let value = value == "true";
+                crate::dao::settings::Settings::set_start_on_boot(&database, value)
+                    .map_err(|e| e.to_string())?;
+                if value {
+                    app.autolaunch().enable()
+                } else {
+                    app.autolaunch().disable()
+                }
+                .map_err(|e| e.to_string())?;
+                settings.write().unwrap().start_boot = value;
+            }
+            WEIGHT_UNIT => {
+                let value = value.as_str().try_into()?;
+                crate::dao::settings::Settings::set_weight_unit(&database, &value)
+                    .map_err(|e| e.to_string())?;
+                settings.write().unwrap().weight_unit = value;
+            }
+            LANGUAGE => {
+                let value = Languages::from_name(&value);
+                crate::dao::settings::Settings::set_language(&database, &value)
+                    .map_err(|e| e.to_string())?;
+                settings.write().unwrap().language = value;
+            }
+            _ => unreachable!(),
+        }
+
+        Ok(settings.read().unwrap().language)
+    })
+    .await
+    .map_err(|e| e.to_string())
+    .flatten();
+
+    match res {
+        Ok(lang) => {
+            show_notification(NotificationDefinition {
+                title: translate("ok_update_settings", lang),
+                body: String::new(),
+                kind: NotificationKind::Temporal,
+            });
+            Ok(())
+        }
+        Err(e) => {
+            error!("Error exporting database: {}", e);
+            show_notification(NotificationDefinition {
+                title: translate("error_update_settings", lang),
+                body: e.to_string(),
+                kind: NotificationKind::Persistant,
+            });
+            Err(e.to_string())
+        }
+    }
 }
 
 /// Exports the whole database to a timestamped JSON file in the user's home directory and notifies on success/failure.

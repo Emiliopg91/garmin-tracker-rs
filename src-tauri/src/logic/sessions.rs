@@ -1,4 +1,4 @@
-use std::{collections::HashSet, fs, ops::Deref, path::Path, sync::Mutex, time::Duration};
+use std::{collections::HashSet, fs, path::Path, sync::Mutex, time::Duration};
 
 use crate::{
     SettingsLock,
@@ -56,16 +56,15 @@ pub fn get_sessions(
             info!("Retreived {} sessions", l.len());
             Ok(l)
         }
-        Err(DatabaseError::RunningOnConnection(e)) => {
+        Err(e) => {
             error!("Error getting sessions list: {}", e);
             show_notification(NotificationDefinition {
                 title: translate("error_session_list", settings.read().unwrap().language),
-                body: e.deref().to_string(),
+                body: e.to_string(),
                 kind: NotificationKind::Persistant,
             });
-            Err(e.deref().to_string())
+            Err(e.to_string())
         }
-        _ => unreachable!(),
     }
 }
 
@@ -128,16 +127,15 @@ pub fn get_session_details(
             );
             Ok(details)
         }
-        Err(DatabaseError::RunningOnConnection(e)) => {
+        Err(e) => {
             error!("Error getting session details: {}", e);
             show_notification(NotificationDefinition {
                 title: translate("error_session_details", settings.read().unwrap().language),
-                body: e.deref().to_string(),
+                body: e.to_string(),
                 kind: NotificationKind::Persistant,
             });
-            Err(e.deref().to_string())
+            Err(e.to_string())
         }
-        _ => unreachable!(),
     }
 }
 
@@ -186,16 +184,15 @@ pub fn save_session_changes(
 
             Ok(l)
         }
-        Err(DatabaseError::Transaction(e)) => {
+        Err(e) => {
             error!("Error updating session: {}", e);
             show_notification(NotificationDefinition {
                 title: translate("error_update_session", lang),
-                body: e.deref().to_string(),
+                body: e.to_string(),
                 kind: NotificationKind::Persistant,
             });
-            Err(e.deref().to_string())
+            Err(e.to_string())
         }
-        _ => unreachable!(),
     }
 }
 
@@ -296,8 +293,7 @@ pub async fn _import_from_device(app: &AppHandle, serial: &str) -> Result<usize,
             }
             Ok(res.len())
         }
-        Err(DatabaseError::Transaction(e)) => Err(e.deref().to_string()),
-        _ => unreachable!(),
+        Err(e) => Err(e.to_string()),
     }
 }
 
@@ -556,9 +552,7 @@ pub fn update_pending_geolocation(app: &AppHandle, db: &DatabasePool) {
                 //
                 let resp = curl_rest::Client::with_user_agent("garmin-tracker-rs")
                     .get()
-                    .header(curl_rest::Header::Accept(
-                        "application/vnd.github+json".into(),
-                    ))
+                    .header(curl_rest::Header::Accept("application/json".into()))
                     .send(&url);
 
                 match resp {

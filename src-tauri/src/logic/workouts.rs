@@ -1,10 +1,9 @@
-use std::{collections::HashMap, ops::Deref};
+use std::collections::HashMap;
 
 use garmin_tracker_rs_macros::traced_command;
 use rusqlite_orm::{
     dao::Repository,
     database::DatabasePool,
-    errors::DatabaseError,
     types::{order_by::OrderBy, value::Value, where_clause::Where},
 };
 use tauri::State;
@@ -72,16 +71,15 @@ pub fn get_workout_list(
             info!("Retreived {} workouts", l.len());
             Ok(l)
         }
-        Err(DatabaseError::RunningOnConnection(e)) => {
+        Err(e) => {
             error!("Error getting workouts list: {}", e);
             show_notification(NotificationDefinition {
                 title: translate("error_workout_list", settings.read().unwrap().language),
-                body: e.deref().to_string(),
+                body: e.to_string(),
                 kind: NotificationKind::Persistant,
             });
-            Err(e.deref().to_string())
+            Err(e.to_string())
         }
-        _ => unreachable!(),
     }
 }
 
@@ -164,15 +162,14 @@ pub fn get_workout_details(
             info!("Found details for workout {}", l.name);
             Ok(l)
         }
-        Err(DatabaseError::RunningOnConnection(e)) => {
+        Err(e) => {
             error!("Error getting workout details: {}", e);
             show_notification(NotificationDefinition {
                 title: translate("error_workout_details", settings.read().unwrap().language),
-                body: e.deref().to_string(),
+                body: e.to_string(),
                 kind: NotificationKind::Persistant,
             });
-            Err(e.deref().to_string())
+            Err(e.to_string())
         }
-        _ => unreachable!(),
     }
 }

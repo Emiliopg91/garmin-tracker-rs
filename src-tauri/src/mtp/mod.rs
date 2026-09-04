@@ -47,8 +47,6 @@ impl MtpClient {
         serial: &str,
         date: String,
     ) -> Result<Option<PathBuf>> {
-        let mut result = Vec::new();
-
         let devices_info = MtpDevice::list_devices().map_err(MtpError::ListDevices)?;
         if let Some(device_info) = devices_info.iter().find(|d| {
             d.serial_number
@@ -119,7 +117,6 @@ impl MtpClient {
                                         })?;
                                         size += bytes.len() as f64;
                                         counter += 1;
-                                        result.push(path);
                                     }
                                     Err(e) => {
                                         error!("Error downloading file {}: {}", obj.filename, e)

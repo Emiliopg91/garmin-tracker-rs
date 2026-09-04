@@ -1,5 +1,3 @@
-use std::ops::Deref;
-
 use garmin_tracker_rs_macros::traced_command;
 use rusqlite_orm::{
     dao::Repository, database::DatabasePool, errors::DatabaseError, types::order_by::OrderBy,
@@ -45,19 +43,18 @@ pub fn get_body_measures(
             info!("Retrieved {} measures", res.len());
             Ok(res)
         }
-        Err(DatabaseError::RunningOnConnection(e)) => {
+        Err(e) => {
             error!("Error getting measures list: {}", e);
             show_notification(NotificationDefinition {
                 title: translate(
                     "error_body_measures_list",
                     settings.read().unwrap().language,
                 ),
-                body: e.deref().to_string(),
+                body: e.to_string(),
                 kind: NotificationKind::Persistant,
             });
-            Err(e.deref().to_string())
+            Err(e.to_string())
         }
-        _ => unreachable!(),
     }
 }
 
@@ -84,19 +81,18 @@ pub fn add_body_measures(
             info!("Measures added succesfully");
             Ok(())
         }
-        Err(DatabaseError::Transaction(e)) => {
+        Err(e) => {
             error!("Error adding measures: {}", e);
             show_notification(NotificationDefinition {
                 title: translate(
                     "error_adding_body_measures",
                     settings.read().unwrap().language,
                 ),
-                body: e.deref().to_string(),
+                body: e.to_string(),
                 kind: NotificationKind::Persistant,
             });
-            Err(e.deref().to_string())
+            Err(e.to_string())
         }
-        _ => unreachable!(),
     }
 }
 
@@ -127,15 +123,14 @@ pub fn delete_body_metric(
             });
             Ok(())
         }
-        Err(DatabaseError::Transaction(e)) => {
+        Err(e) => {
             error!("Error deleting measures: {}", e);
             show_notification(NotificationDefinition {
                 title: translate("error_deleting_body_measures", lang),
-                body: e.deref().to_string(),
+                body: e.to_string(),
                 kind: NotificationKind::Persistant,
             });
-            Err(e.deref().to_string())
+            Err(e.to_string())
         }
-        _ => unreachable!(),
     }
 }
