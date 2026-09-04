@@ -20,6 +20,12 @@ pub static LOCK_FILE: LazyLock<PathBuf> = LazyLock::new(|| {
 });
 pub static URL: &str = "https://api.github.com/repos/Emiliopg91/garmin-tracker-rs/releases/latest";
 
+// MTP block
+pub static MTP_GARMIN_MANUFACTURER: &str = "GARMIN";
+pub static MTP_GARMIN_ROOT_FOLDER: &str = "GARMIN";
+pub static MTP_GARMIN_ACTIVITY_FOLDER: &str = "Activity";
+pub static MTP_TMP_DIR_PREFIX: &str = "garmin-tracker-rs";
+
 // Languages block
 pub static DEFAULT_LANGUAGE: Languages = Languages::English;
 pub static SYSTEM_LANGUAGE: LazyLock<Languages> = LazyLock::new(|| {

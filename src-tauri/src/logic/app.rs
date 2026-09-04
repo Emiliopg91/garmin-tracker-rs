@@ -19,12 +19,12 @@ use crate::{
         notifications::{NotificationDefinition, NotificationKind},
     },
     logic::{
-        devices::start_device_watcher, notifications::show_notification,
+        devices::start_device_watcher, notifications::show_notification, report_error,
         sessions::update_pending_geolocation,
     },
     utils::translations::{Languages, TRANSLATIONS, translate, translate_and_replace},
 };
-use tauri_plugin_log::log::{debug, error, info};
+use tauri_plugin_log::log::{debug, info};
 
 /// Returns the current in-memory app settings.
 #[traced_command]
@@ -137,15 +137,12 @@ pub async fn update_settings_value(app: AppHandle, name: &str, value: &str) -> R
             });
             Ok(())
         }
-        Err(e) => {
-            error!("Error exporting database: {}", e);
-            show_notification(NotificationDefinition {
-                title: translate("error_update_settings", lang),
-                body: e.to_string(),
-                kind: NotificationKind::Persistant,
-            });
-            Err(e.to_string())
-        }
+        Err(e) => Err(report_error(
+            e,
+            lang,
+            "error_update_settings",
+            "Error updating settings",
+        )),
     }
 }
 
@@ -188,15 +185,12 @@ pub fn export_database(
             });
             Ok(())
         }
-        Err(e) => {
-            error!("Error exporting database: {}", e);
-            show_notification(NotificationDefinition {
-                title: translate("error_on_export", lang),
-                body: e.to_string(),
-                kind: NotificationKind::Persistant,
-            });
-            Err(e.to_string())
-        }
+        Err(e) => Err(report_error(
+            e,
+            lang,
+            "error_on_export",
+            "Error exporting database",
+        )),
     }
 }
 

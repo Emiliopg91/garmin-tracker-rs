@@ -3,7 +3,7 @@ use rusqlite_orm::{
     dao::Repository, database::DatabasePool, errors::DatabaseError, types::order_by::OrderBy,
 };
 use tauri::State;
-use tauri_plugin_log::log::{error, info};
+use tauri_plugin_log::log::info;
 
 use crate::{
     SettingsLock,
@@ -12,7 +12,7 @@ use crate::{
         body_metrics::BodyMetricListItem,
         notifications::{NotificationDefinition, NotificationKind},
     },
-    logic::notifications::show_notification,
+    logic::{notifications::show_notification, report_error},
     utils::translations::translate,
 };
 
@@ -43,18 +43,12 @@ pub fn get_body_measures(
             info!("Retrieved {} measures", res.len());
             Ok(res)
         }
-        Err(e) => {
-            error!("Error getting measures list: {}", e);
-            show_notification(NotificationDefinition {
-                title: translate(
-                    "error_body_measures_list",
-                    settings.read().unwrap().language,
-                ),
-                body: e.to_string(),
-                kind: NotificationKind::Persistant,
-            });
-            Err(e.to_string())
-        }
+        Err(e) => Err(report_error(
+            e,
+            settings.read().unwrap().language,
+            "error_body_measures_list",
+            "Error getting measures list",
+        )),
     }
 }
 
@@ -81,18 +75,12 @@ pub fn add_body_measures(
             info!("Measures added succesfully");
             Ok(())
         }
-        Err(e) => {
-            error!("Error adding measures: {}", e);
-            show_notification(NotificationDefinition {
-                title: translate(
-                    "error_adding_body_measures",
-                    settings.read().unwrap().language,
-                ),
-                body: e.to_string(),
-                kind: NotificationKind::Persistant,
-            });
-            Err(e.to_string())
-        }
+        Err(e) => Err(report_error(
+            e,
+            settings.read().unwrap().language,
+            "error_adding_body_measures",
+            "Error adding measures",
+        )),
     }
 }
 
@@ -123,14 +111,11 @@ pub fn delete_body_metric(
             });
             Ok(())
         }
-        Err(e) => {
-            error!("Error deleting measures: {}", e);
-            show_notification(NotificationDefinition {
-                title: translate("error_deleting_body_measures", lang),
-                body: e.to_string(),
-                kind: NotificationKind::Persistant,
-            });
-            Err(e.to_string())
-        }
+        Err(e) => Err(report_error(
+            e,
+            lang,
+            "error_deleting_body_measures",
+            "Error deleting measures",
+        )),
     }
 }

@@ -10,10 +10,7 @@ use rustyfit::{
     proto::Message,
 };
 
-use crate::{
-    dao::{additional_data::AdditionalData, exercise::Exercise, serie::Serie, session::Session},
-    utils::translations::{Languages, translate_and_replace},
-};
+use crate::dao::{additional_data::AdditionalData, exercise::Exercise, serie::Serie, session::Session};
 
 use self::errors::ParseFitFileError;
 
@@ -94,7 +91,7 @@ impl<'a> FitParser<'a> {
     }
 
     /// Parses a `.FIT` activity file into a `Session` (with nested series, heart rate, GPS, and speed data). Falls back to reverse-geocoding the start GPS point for the workout name if the file has none.
-    pub(crate) fn parse_session(mut self, lang: Languages) -> errors::Result<Session> {
+    pub(crate) fn parse_session(mut self) -> errors::Result<Session> {
         let mut entries = Vec::new();
         while let Some(event) = self.stream.next() {
             let event = event.map_err(|e| {
@@ -131,7 +128,7 @@ impl<'a> FitParser<'a> {
         let training_load = Self::get_training_load_peak(session_entry)?;
         let total_calories = Self::get_total_calories(session_entry)?;
         let metabolic_calories = Self::get_metabolic_calories(session_entry)?;
-        let series = Self::get_sets(&grouped, timestamp, lang).unwrap_or_default();
+        let series = Self::get_sets(&grouped, timestamp).unwrap_or_default();
         let additional_data = Self::get_additional_data(timestamp, &grouped.records)?;
 
         Ok(Session {
@@ -150,7 +147,7 @@ impl<'a> FitParser<'a> {
         })
     }
 
-    /// Debug-only helper: writes the raw parsed messages to `<file>.txt` for inspection.
+    /// Debug-only helper: writes the raw parsed messages to `<file>.json` for inspection.
     #[cfg(debug_assertions)]
     pub fn debug_dump(mut self) -> Result<(), Box<dyn std::error::Error>> {
         let dump_path = format!("{}.json", self.path.display());
@@ -197,26 +194,19 @@ impl<'a> FitParser<'a> {
     }
 
     /// Builds the list of strength-training sets (`Serie`s) for a session, resolving each set to its exercise via the workout steps.
-    fn get_sets(
-        grouped: &GroupedEntries,
-        timestamp: i64,
-        lang: Languages,
-    ) -> errors::Result<Vec<Serie>> {
+    fn get_sets(grouped: &GroupedEntries, timestamp: i64) -> errors::Result<Vec<Serie>> {
         let exercises = Self::get_exercises(&grouped.exercise_titles)?;
-        let steps = Self::get_steps(&grouped.workout_steps, &exercises, lang)?;
+        let steps = Self::get_steps(&grouped.workout_steps, &exercises)?;
 
         let mut sets = Vec::new();
 
         let valid_sets = grouped.sets.iter().filter_map(|reg| {
-            if reg.repetitions == u16::MAX
-                || reg.weight == u16::MAX
-                || reg.wkt_step_index.0 == u16::MAX
-            {
+            if reg.repetitions == u16::MAX || reg.wkt_step_index.0 == u16::MAX {
                 return None;
             }
 
             let reps = reg.repetitions;
-            let weight = reg.weight_scaled().unwrap();
+            let weight = reg.weight_scaled()?;
             let ex_idx = reg.wkt_step_index.0 as usize;
             let exercise = steps.get(ex_idx)?.as_ref()?;
             Some((exercise.clone(), reps, weight))
@@ -329,7 +319,6 @@ impl<'a> FitParser<'a> {
     fn get_steps(
         workout_steps: &[mesgdef::WorkoutStep],
         exercises: &[Exercise],
-        lang: Languages,
     ) -> errors::Result<Vec<Option<Exercise>>> {
         let lookup: HashMap<(u16, &str), &Exercise> = exercises
             .iter()
@@ -349,13 +338,7 @@ impl<'a> FitParser<'a> {
                 lookup
                     .get(&(ex_id, ex_cat.as_str()))
                     .map(|e| Some((*e).clone()))
-                    .ok_or_else(|| {
-                        ParseFitFileError::GenericError(translate_and_replace(
-                            "error_parser_unknown_exercise",
-                            &[&ex_cat, &ex_id.to_string()],
-                            lang,
-                        ))
-                    })
+                    .ok_or_else(|| ParseFitFileError::UnknownExercise(ex_cat.clone(), ex_id))
             })
             .collect()
     }

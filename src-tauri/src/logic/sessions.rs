@@ -13,9 +13,9 @@ use crate::{
         notifications::{NotificationDefinition, NotificationKind},
         sessions::{SessionDetails, SessionListItem, SessionLocation, SessionSeriesUpdate},
     },
-    logic::notifications::show_notification,
+    logic::{notifications::show_notification, report_error},
     mtp::MTP_CLIENT_INST,
-    parser::FitParser,
+    parser::{FitParser, errors::ParseFitFileError},
     utils::translations::{Languages, translate, translate_and_replace},
 };
 use chrono::{Datelike, Local, TimeZone, Timelike, offset::LocalResult};
@@ -56,15 +56,12 @@ pub fn get_sessions(
             info!("Retreived {} sessions", l.len());
             Ok(l)
         }
-        Err(e) => {
-            error!("Error getting sessions list: {}", e);
-            show_notification(NotificationDefinition {
-                title: translate("error_session_list", settings.read().unwrap().language),
-                body: e.to_string(),
-                kind: NotificationKind::Persistant,
-            });
-            Err(e.to_string())
-        }
+        Err(e) => Err(report_error(
+            e,
+            settings.read().unwrap().language,
+            "error_session_list",
+            "Error getting sessions list",
+        )),
     }
 }
 
@@ -127,15 +124,12 @@ pub fn get_session_details(
             );
             Ok(details)
         }
-        Err(e) => {
-            error!("Error getting session details: {}", e);
-            show_notification(NotificationDefinition {
-                title: translate("error_session_details", settings.read().unwrap().language),
-                body: e.to_string(),
-                kind: NotificationKind::Persistant,
-            });
-            Err(e.to_string())
-        }
+        Err(e) => Err(report_error(
+            e,
+            settings.read().unwrap().language,
+            "error_session_details",
+            "Error getting session details",
+        )),
     }
 }
 
@@ -184,15 +178,12 @@ pub fn save_session_changes(
 
             Ok(l)
         }
-        Err(e) => {
-            error!("Error updating session: {}", e);
-            show_notification(NotificationDefinition {
-                title: translate("error_update_session", lang),
-                body: e.to_string(),
-                kind: NotificationKind::Persistant,
-            });
-            Err(e.to_string())
-        }
+        Err(e) => Err(report_error(
+            e,
+            lang,
+            "error_update_session",
+            "Error updating session",
+        )),
     }
 }
 
@@ -315,7 +306,7 @@ where
         .filter_map(|file| {
             info!("Parsing file {}", file.as_ref().display());
             let res = match FitParser::from_file(file, &mut Decoder::new()) {
-                Ok(parser) => match parser.parse_session(lang) {
+                Ok(parser) => match parser.parse_session() {
                     Ok(session) => Ok((session, file)),
                     Err(e) => Err(e),
                 },
@@ -326,13 +317,18 @@ where
                 Err(e) => {
                     error!("Error parsing session: {}", e);
 
-                    show_notification(NotificationDefinition {
-                        title: format!("{}", file.as_ref().file_name().unwrap().display()),
-                        body: translate_and_replace(
-                            "error_parsing_session",
-                            &[&e.to_string()],
+                    let error_msg = match &e {
+                        ParseFitFileError::UnknownExercise(category, id) => translate_and_replace(
+                            "error_parser_unknown_exercise",
+                            &[category, &id.to_string()],
                             lang,
                         ),
+                        other => other.to_string(),
+                    };
+
+                    show_notification(NotificationDefinition {
+                        title: format!("{}", file.as_ref().file_name().unwrap().display()),
+                        body: translate_and_replace("error_parsing_session", &[&error_msg], lang),
                         kind: NotificationKind::Persistant,
                     });
 

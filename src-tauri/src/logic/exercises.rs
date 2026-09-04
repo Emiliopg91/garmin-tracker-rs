@@ -7,7 +7,7 @@ use rusqlite_orm::{
     types::{order_by::OrderBy, value::Value, where_clause::Where},
 };
 use tauri::State;
-use tauri_plugin_log::log::{error, info};
+use tauri_plugin_log::log::info;
 
 use crate::{
     SettingsLock,
@@ -18,11 +18,9 @@ use crate::{
     },
     dto::{
         exercises::{ExerciseDetails, ExerciseListItem},
-        notifications::{NotificationDefinition, NotificationKind},
         sessions::SessionSerie,
     },
-    logic::notifications::show_notification,
-    utils::translations::translate,
+    logic::report_error,
 };
 
 /// Returns every exercise in the catalog, each annotated with its current personal record.
@@ -69,15 +67,12 @@ pub fn get_exercises(
             info!("Retreived {} exercises", l.len());
             Ok(l)
         }
-        Err(e) => {
-            error!("Error getting exercises list: {}", e);
-            show_notification(NotificationDefinition {
-                title: translate("error_exercise_list", settings.read().unwrap().language),
-                body: e.to_string(),
-                kind: NotificationKind::Persistant,
-            });
-            Err(e.to_string())
-        }
+        Err(e) => Err(report_error(
+            e,
+            settings.read().unwrap().language,
+            "error_exercise_list",
+            "Error getting exercises list",
+        )),
     }
 }
 
@@ -158,15 +153,12 @@ pub fn get_exercise_details(
             info!("Found details for exercise {}", l.name);
             Ok(l)
         }
-        Err(e) => {
-            error!("Error getting exercise details: {}", e);
-            show_notification(NotificationDefinition {
-                title: translate("error_exercise_details", settings.read().unwrap().language),
-                body: e.to_string(),
-                kind: NotificationKind::Persistant,
-            });
-            Err(e.to_string())
-        }
+        Err(e) => Err(report_error(
+            e,
+            settings.read().unwrap().language,
+            "error_exercise_details",
+            "Error getting exercise details",
+        )),
     }
 }
 

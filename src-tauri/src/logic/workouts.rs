@@ -7,7 +7,7 @@ use rusqlite_orm::{
     types::{order_by::OrderBy, value::Value, where_clause::Where},
 };
 use tauri::State;
-use tauri_plugin_log::log::{error, info};
+use tauri_plugin_log::log::info;
 
 use crate::{
     SettingsLock,
@@ -15,12 +15,8 @@ use crate::{
         serie::{self, SerieRepository},
         session::{self, SessionRepository, entity},
     },
-    dto::{
-        notifications::{NotificationDefinition, NotificationKind},
-        workouts::{WorkoutDetails, WorkoutListItem, WorkoutSession},
-    },
-    logic::notifications::show_notification,
-    utils::translations::translate,
+    dto::workouts::{WorkoutDetails, WorkoutListItem, WorkoutSession},
+    logic::report_error,
 };
 
 /// Returns sessions grouped/aggregated by workout name (count, average time, latest date), sorted by name.
@@ -71,15 +67,12 @@ pub fn get_workout_list(
             info!("Retreived {} workouts", l.len());
             Ok(l)
         }
-        Err(e) => {
-            error!("Error getting workouts list: {}", e);
-            show_notification(NotificationDefinition {
-                title: translate("error_workout_list", settings.read().unwrap().language),
-                body: e.to_string(),
-                kind: NotificationKind::Persistant,
-            });
-            Err(e.to_string())
-        }
+        Err(e) => Err(report_error(
+            e,
+            settings.read().unwrap().language,
+            "error_workout_list",
+            "Error getting workouts list",
+        )),
     }
 }
 
@@ -162,14 +155,11 @@ pub fn get_workout_details(
             info!("Found details for workout {}", l.name);
             Ok(l)
         }
-        Err(e) => {
-            error!("Error getting workout details: {}", e);
-            show_notification(NotificationDefinition {
-                title: translate("error_workout_details", settings.read().unwrap().language),
-                body: e.to_string(),
-                kind: NotificationKind::Persistant,
-            });
-            Err(e.to_string())
-        }
+        Err(e) => Err(report_error(
+            e,
+            settings.read().unwrap().language,
+            "error_workout_details",
+            "Error getting workout details",
+        )),
     }
 }
