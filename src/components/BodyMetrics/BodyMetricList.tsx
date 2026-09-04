@@ -117,82 +117,82 @@ export function BodyMetricList() {
 
   return (
     <>
-      {bodyMetrics.length > 0 && (
-        <>
-          <div style={{ width: "100%", height: 200 }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart
-                data={chartData}
-                margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
-              >
-                <CartesianGrid stroke="#80808000" strokeDasharray="5 5" />
-                <XAxis
-                  dataKey="date"
-                  type="number"
-                  domain={[minDate, maxDate]}
-                  stroke="#fff"
-                  tick={false}
-                  height={0}
-                />
-                <YAxis
-                  yAxisId="fat"
-                  stroke="#fff"
-                  width={0}
-                  domain={[minFat, maxFat]}
-                  tick={false}
-                />
-                <YAxis
-                  yAxisId="weight"
-                  stroke="#fff"
-                  width={0}
-                  domain={[minWeight, maxWeight]}
-                  tick={false}
-                />
-                <YAxis
-                  yAxisId="lean"
-                  stroke="#fff"
-                  width={0}
-                  domain={[minLean, maxLean]}
-                  tick={false}
-                />
-                <Line
-                  yAxisId="fat"
-                  name={translate("fat_ratio")}
-                  type="monotone"
-                  dataKey="fat"
-                  stroke="#f00"
-                  dot={{ fill: "#f00" }}
-                  activeDot={{ stroke: "#00ff0000" }}
-                  isAnimationActive={false}
-                />
-                <Line
-                  yAxisId="weight"
-                  name={translate("body_weight")}
-                  type="monotone"
-                  dataKey="weight"
-                  stroke="cyan"
-                  dot={{ fill: "cyan" }}
-                  activeDot={{ stroke: "#00ff0000" }}
-                  isAnimationActive={false}
-                />
-                <Line
-                  yAxisId="lean"
-                  name={translate("lean_mass")}
-                  type="monotone"
-                  dataKey="lean"
-                  stroke="green"
-                  dot={{ fill: "green" }}
-                  activeDot={{ stroke: "#00ff0000" }}
-                  isAnimationActive={false}
-                />
-                <Legend />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </>
-      )}
-
       <div id="list-layer">
+        {bodyMetrics.length > 0 && (
+          <>
+            <div style={{ width: "100%", height: 200, marginRight: "20px" }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart
+                  data={chartData}
+                  margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
+                >
+                  <CartesianGrid stroke="#80808000" strokeDasharray="5 5" />
+                  <XAxis
+                    dataKey="date"
+                    type="number"
+                    domain={[minDate, maxDate]}
+                    stroke="#fff"
+                    tick={false}
+                    height={0}
+                  />
+                  <YAxis
+                    yAxisId="fat"
+                    stroke="#fff"
+                    width={0}
+                    domain={[minFat, maxFat]}
+                    tick={false}
+                  />
+                  <YAxis
+                    yAxisId="weight"
+                    stroke="#fff"
+                    width={0}
+                    domain={[minWeight, maxWeight]}
+                    tick={false}
+                  />
+                  <YAxis
+                    yAxisId="lean"
+                    stroke="#fff"
+                    width={0}
+                    domain={[minLean, maxLean]}
+                    tick={false}
+                  />
+                  <Line
+                    yAxisId="fat"
+                    name={translate("fat_ratio")}
+                    type="monotone"
+                    dataKey="fat"
+                    stroke="#f00"
+                    dot={{ fill: "#f00" }}
+                    activeDot={{ stroke: "#00ff0000" }}
+                    isAnimationActive={false}
+                  />
+                  <Line
+                    yAxisId="weight"
+                    name={translate("body_weight")}
+                    type="monotone"
+                    dataKey="weight"
+                    stroke="cyan"
+                    dot={{ fill: "cyan" }}
+                    activeDot={{ stroke: "#00ff0000" }}
+                    isAnimationActive={false}
+                  />
+                  <Line
+                    yAxisId="lean"
+                    name={translate("lean_mass")}
+                    type="monotone"
+                    dataKey="lean"
+                    stroke="green"
+                    dot={{ fill: "green" }}
+                    activeDot={{ stroke: "#00ff0000" }}
+                    isAnimationActive={false}
+                  />
+                  <Legend />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </>
+        )}
+
         <table>
           <thead>
             <tr>
