@@ -1,4 +1,9 @@
-import { SessionDetails, SessionListItem, WeightUnit } from "./backend/models";
+import {
+  SessionDetails,
+  SessionListItem,
+  SessionSerie,
+  WeightUnit,
+} from "./backend/models";
 import { TimeUtils } from "./TimeUtils";
 import { UnitUtils } from "./UnitUtils";
 
@@ -30,6 +35,8 @@ export interface SessionFrontDetails extends SessionDetails {
     color: string;
   }[];
   volume: number;
+  exercises: string[];
+  grouped_series: Record<string, SessionSerie[]>;
 }
 
 export class SessionUtils {
@@ -50,6 +57,8 @@ export class SessionUtils {
       hrBreathData: [],
       hrRanges: [0, 0, 0],
       volume: 0,
+      exercises: [],
+      grouped_series: {},
     };
 
     SessionUtils.handleSeries(details, weightUnit);
@@ -64,15 +73,23 @@ export class SessionUtils {
     weightUnit: WeightUnit,
   ) {
     if (details.series) {
-      Object.keys(details.series).forEach((key) => {
-        details.series[key].forEach((_, idx) => {
-          const copy = { ...details.series[key][idx] };
-          copy.weight = Number(
-            UnitUtils.fromKg(copy.weight, weightUnit).toFixed(1),
-          );
-          details.series[key][idx] = copy;
-          details.volume += copy.reps * copy.weight;
-        });
+      details.series.forEach((_, idx) => {
+        const copy = { ...details.series[idx] };
+        copy.weight = Number(
+          UnitUtils.fromKg(copy.weight, weightUnit).toFixed(1),
+        );
+        details.series[idx] = copy;
+        details.volume += copy.reps * copy.weight;
+
+        if (!details.exercises.includes(details.series[idx].exercise)) {
+          details.exercises.push(details.series[idx].exercise);
+        }
+        if (!details.grouped_series[details.series[idx].exercise]) {
+          details.grouped_series[details.series[idx].exercise] = [];
+        }
+        details.grouped_series[details.series[idx].exercise].push(
+          details.series[idx],
+        );
       });
     }
   }

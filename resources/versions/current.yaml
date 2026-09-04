@@ -29,7 +29,7 @@ node:
   vite-plugin-checker: 0.14.5
 rust:
   chrono: 0.4.45
-  curl: 0.4.50
+  curl-rest: 0.5.4
   embedded-io-adapters: 0.7.0
   garmin-tracker-rs-macros: 0.1.0
   indexmap: 2.14.1
@@ -42,6 +42,7 @@ rust:
   rusqlite_orm: 0.4.14
   rusqlite_orm_macros: 0.4.11
   rustyfit: 0.10.2
+  semver: 1.0.28
   serde: 1.0.229
   serde_json: 1.0.151
   serde_yaml: 0.9.34+deprecated

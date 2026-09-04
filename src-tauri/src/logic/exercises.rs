@@ -139,7 +139,7 @@ pub fn get_exercise_details(
 
         let mut last_session = None;
         for serie in series {
-            let wk = SessionSerie::from(&serie);
+            let wk = SessionSerie::from((&serie, exercise.name.as_str()));
             let ex_str = format!(
                 "{}\n{}",
                 workouts.get(&serie.session).unwrap(),

@@ -73,15 +73,10 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
     if (isNaN(reps)) {
       reps = 0;
     }
-    const newObj = {
-      ...localSession,
-      series: {
-        ...localSession.series,
-        [exercise]: localSession.series[exercise].map((serie, id) =>
-          id === idx ? { ...serie, reps } : serie,
-        ),
-      },
-    };
+    const newObj = structuredClone(localSession);
+    const serieIdx = newObj.grouped_series[exercise][idx].idx;
+    newObj.grouped_series[exercise][idx].reps = reps;
+    newObj.series[serieIdx].reps = reps;
     setLocalSession(newObj);
     setChanged(JSON.stringify(newObj) != JSON.stringify(session));
   };
@@ -91,15 +86,10 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
     if (isNaN(weight)) {
       weight = 0;
     }
-    const newObj = {
-      ...localSession,
-      series: {
-        ...localSession.series,
-        [exercise]: localSession.series[exercise].map((serie, id) =>
-          id === idx ? { ...serie, weight } : serie,
-        ),
-      },
-    };
+    const newObj = structuredClone(localSession);
+    const serieIdx = newObj.grouped_series[exercise][idx].idx;
+    newObj.grouped_series[exercise][idx].weight = weight;
+    newObj.series[serieIdx].weight = weight;
     setLocalSession(newObj);
     setChanged(JSON.stringify(newObj) != JSON.stringify(session));
   };
@@ -110,18 +100,16 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
       timestamp: localSession.timestamp,
       series: [],
     };
-    Object.entries(localSession.series).forEach(([ex, series]) => {
-      series.forEach((serie, serIdx) => {
-        if (
-          originalSession.series[ex][serIdx].reps != serie.reps ||
-          originalSession.series[ex][serIdx].weight != serie.weight
-        ) {
-          update.series.push({
-            ...serie,
-            weight: UnitUtils.toKg(serie.weight, settings.weight_unit),
-          });
-        }
-      });
+    localSession.series.forEach((serie, serIdx) => {
+      if (
+        originalSession.series[serIdx].reps != serie.reps ||
+        originalSession.series[serIdx].weight != serie.weight
+      ) {
+        update.series.push({
+          ...serie,
+          weight: UnitUtils.toKg(serie.weight, settings.weight_unit),
+        });
+      }
     });
     BackendClient.saveSessionChanges(update)
       .then(() => {
@@ -434,7 +422,7 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
               </thead>
               <tbody>
                 {localSession.exercises.map((exercise) =>
-                  localSession.series[exercise].map((serie, idx) => (
+                  localSession.grouped_series[exercise].map((serie, idx) => (
                     <tr key={`${exercise}-${idx}`}>
                       {idx === 0 && (
                         <td
@@ -442,7 +430,7 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                             borderBottom:
                               idx === 0 ? "1px solid #e4e4e430" : "",
                           }}
-                          rowSpan={localSession.series[exercise].length}
+                          rowSpan={localSession.grouped_series[exercise].length}
                         >
                           {exercise}
                         </td>
@@ -451,11 +439,13 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                       <td
                         style={{
                           borderBottom:
-                            idx === localSession.series[exercise].length - 1
+                            idx ===
+                            localSession.grouped_series[exercise].length - 1
                               ? "1px solid #e4e4e430"
                               : "",
                           paddingBottom:
-                            idx === localSession.series[exercise].length - 1
+                            idx ===
+                            localSession.grouped_series[exercise].length - 1
                               ? "5px"
                               : "",
                           paddingTop: idx === 0 ? "5px" : "",

@@ -1,19 +1,12 @@
-use std::{
-    collections::{HashMap, HashSet},
-    fs,
-    ops::Deref,
-    path::Path,
-    sync::Mutex,
-    time::Duration,
-};
+use std::{collections::HashSet, fs, ops::Deref, path::Path, sync::Mutex, time::Duration};
 
 use crate::{
     SettingsLock,
     dao::{
         additional_data::{self, AdditionalDataRepository},
         device::{Device, DeviceRepository},
-        exercise::{self, Exercise, ExerciseRepository},
-        serie::{self, Serie, SerieRepository, entity},
+        exercise::{self, ExerciseRepository},
+        serie::{self, SerieRepository, entity},
         session::{self, SessionRepository},
     },
     dto::{
@@ -28,7 +21,6 @@ use crate::{
 use chrono::{Datelike, Local, TimeZone, Timelike, offset::LocalResult};
 use curl_rest::StatusCode;
 use garmin_tracker_rs_macros::traced_command;
-use indexmap::IndexMap;
 use rayon::prelude::*;
 use rusqlite_orm::{
     dao::Repository,
@@ -121,19 +113,11 @@ pub fn get_session_details(
             ))
             .fetch_in(conn)?;
 
-        let exercise_by_key: HashMap<(_, _), &Exercise> = exercises
-            .iter()
-            .map(|e| ((e.category.clone(), e.id), e))
-            .collect();
-
-        let mut res: IndexMap<Exercise, Vec<Serie>> = IndexMap::with_capacity(exercises.len());
-        for r in &session.series {
-            if let Some(&ex) = exercise_by_key.get(&(r.ex_cat.clone(), r.ex_id)) {
-                res.entry(ex.clone()).or_default().push(r.clone());
-            }
-        }
-
-        Ok(SessionDetails::from((&session, &res)))
+        Ok(SessionDetails::from((
+            &session,
+            exercises.as_slice(),
+            session.series.as_slice(),
+        )))
     });
 
     match res {

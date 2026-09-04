@@ -1,6 +1,5 @@
-use std::{collections::HashMap, hash::Hash};
+use std::hash::Hash;
 
-use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 
 use crate::dao::{exercise::Exercise, serie::Serie, session::Session};
@@ -41,19 +40,21 @@ impl Hash for SessionListItem {
 pub struct SessionSerie {
     pub ex_cat: String,
     pub ex_id: u16,
+    pub exercise: String,
     pub idx: u8,
     pub reps: u16,
     pub weight: f64,
 }
 
-impl From<&Serie> for SessionSerie {
-    fn from(value: &Serie) -> Self {
+impl From<(&Serie, &str)> for SessionSerie {
+    fn from(value: (&Serie, &str)) -> Self {
         Self {
-            ex_cat: value.ex_cat.clone(),
-            ex_id: value.ex_id,
-            idx: value.idx,
-            reps: value.reps,
-            weight: value.weight,
+            ex_cat: value.0.ex_cat.clone(),
+            ex_id: value.0.ex_id,
+            exercise: value.1.to_string(),
+            idx: value.0.idx,
+            reps: value.0.reps,
+            weight: value.0.weight,
         }
     }
 }
@@ -73,8 +74,7 @@ pub struct SessionDetails {
     pub training_load: u16,
     pub sport: String,
 
-    pub exercises: Vec<String>,
-    pub series: HashMap<String, Vec<SessionSerie>>,
+    pub series: Vec<SessionSerie>,
     pub heart_rates: Vec<Option<u8>>,
     pub coordinates: Vec<Option<(i32, i32)>>,
     pub speeds: Vec<Option<f64>>,
@@ -82,21 +82,8 @@ pub struct SessionDetails {
     pub device: Option<String>,
 }
 
-impl From<(&Session, &IndexMap<Exercise, Vec<Serie>>)> for SessionDetails {
-    fn from(value: (&Session, &IndexMap<Exercise, Vec<Serie>>)) -> Self {
-        let mut exercises = Vec::new();
-        let mut series_d = HashMap::<String, Vec<SessionSerie>>::new();
-
-        for (exercise, series) in value.1 {
-            if !exercises.contains(&exercise.name) {
-                exercises.push(exercise.name.clone())
-            }
-            let entry = series_d.entry(exercise.name.clone()).or_default();
-            for serie in series {
-                entry.push(SessionSerie::from(serie));
-            }
-        }
-
+impl From<(&Session, &[Exercise], &[Serie])> for SessionDetails {
+    fn from(value: (&Session, &[Exercise], &[Serie])) -> Self {
         let device = value
             .0
             .device_obj
@@ -119,6 +106,20 @@ impl From<(&Session, &IndexMap<Exercise, Vec<Serie>>)> for SessionDetails {
             }
         }
 
+        let series = value
+            .2
+            .iter()
+            .map(|s| {
+                let exercise = value
+                    .1
+                    .iter()
+                    .find(|e| e.id == s.ex_id && e.category == s.ex_cat)
+                    .unwrap();
+
+                SessionSerie::from((s, exercise.name.as_str()))
+            })
+            .collect::<Vec<_>>();
+
         Self {
             name: value.0.workout.clone(),
             timestamp: value.0.date as i32,
@@ -128,8 +129,7 @@ impl From<(&Session, &IndexMap<Exercise, Vec<Serie>>)> for SessionDetails {
             total_calories: value.0.total_calories,
             training_load: value.0.training_load.round() as u16,
             sport: value.0.sport.clone(),
-            exercises,
-            series: series_d,
+            series,
             heart_rates,
             device,
             coordinates: gps_coordinates,
