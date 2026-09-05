@@ -12,7 +12,7 @@ use tauri_plugin_log::log::info;
 use crate::{
     SettingsLock,
     dao::{
-        exercise::{self, ExerciseRepository},
+        exercise::ExerciseRepository,
         serie::{self, Serie, SerieRepository},
         session::{self, SessionRepository},
     },
@@ -34,29 +34,24 @@ pub fn get_exercises(
     let res = database.run_in_connection(|conn| {
         let mut result = Vec::new();
 
-        let exercises = ExerciseRepository::select()
-            .order_by(OrderBy::Asc(exercise::entity::columns::NAME))
-            .fetch_in(conn)?;
+        let exercises = ExerciseRepository::select().fetch_in(conn)?;
 
         let prs = SerieRepository::select_by_personal_records_in_conn(conn, true, None)?;
-        let pr_by_exercise: HashMap<(String, u16), &Serie> = prs
-            .iter()
-            .map(|pr| ((pr.ex_cat.clone(), pr.ex_id), pr))
-            .collect();
+        let pr_by_exercise: HashMap<(u16, u16), &Serie> =
+            prs.iter().map(|pr| ((pr.ex_cat, pr.ex_id), pr)).collect();
 
         for exercise in exercises {
-            let key = (exercise.category.clone(), exercise.id);
-            let pr = pr_by_exercise[&key];
-
-            result.push(ExerciseListItem {
-                category: exercise.category,
-                id: exercise.id,
-                name: exercise.name,
-                reps: pr.reps,
-                weight: pr.weight,
-                rm: get_1rm_estimation(pr.weight, pr.reps as f64),
-                date: pr.session as i32,
-            });
+            let key = (exercise.category, exercise.id);
+            if let Some(pr) = pr_by_exercise.get(&key) {
+                result.push(ExerciseListItem {
+                    category: exercise.category,
+                    id: exercise.id,
+                    reps: pr.reps,
+                    weight: pr.weight,
+                    rm: get_1rm_estimation(pr.weight, pr.reps as f64),
+                    date: pr.session as i32,
+                });
+            }
         }
 
         Ok(result)
@@ -82,7 +77,7 @@ pub fn get_exercises(
 pub fn get_exercise_details(
     database: State<'_, DatabasePool>,
     settings: State<'_, SettingsLock>,
-    category: &str,
+    category: u16,
     id: u16,
 ) -> Result<ExerciseDetails, String> {
     info!(
@@ -124,12 +119,11 @@ pub fn get_exercise_details(
             ))
             .fetch_in(conn)?
             .iter()
-            .map(|s| (s.date, s.workout.clone()))
+            .map(|s| (s.date, s.name.clone()))
             .collect::<HashMap<_, _>>();
 
         let mut last_session = None;
         for serie in series {
-            let wk = SessionSerie::from((&serie, exercise.name.as_str()));
             let ex_str = format!(
                 "{}\n{}",
                 workouts.get(&serie.session).unwrap(),
@@ -142,7 +136,7 @@ pub fn get_exercise_details(
             }
 
             let entry = res.series.entry(ex_str).or_default();
-            entry.push(wk);
+            entry.push(SessionSerie::from(&serie));
         }
 
         Ok(res)
@@ -150,7 +144,7 @@ pub fn get_exercise_details(
 
     match res {
         Ok(l) => {
-            info!("Found details for exercise {}", l.name);
+            info!("Found details for exercise {} - {}", category, id);
             Ok(l)
         }
         Err(e) => Err(report_error(

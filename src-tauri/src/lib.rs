@@ -78,6 +78,7 @@ pub fn run() {
                 .level_for(constants::LIB_NAME.clone(), *constants::LOG_LEVEL)
                 .level_for("command", *constants::LOG_LEVEL)
                 .level_for("rusqlite_orm", *constants::LOG_LEVEL)
+                .clear_targets()
                 .target(Target::new(TargetKind::Folder {
                     path: constants::LOGS_DIR.clone(),
                     file_name: None,

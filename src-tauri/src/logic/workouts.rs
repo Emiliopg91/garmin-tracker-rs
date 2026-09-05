@@ -14,6 +14,7 @@ use crate::{
     dao::{
         serie::{self, SerieRepository},
         session::{self, SessionRepository, entity},
+        workout::WorkoutRepository,
     },
     dto::workouts::{WorkoutDetails, WorkoutListItem, WorkoutSession},
     logic::report_error,
@@ -28,21 +29,16 @@ pub fn get_workout_list(
 ) -> Result<Vec<WorkoutListItem>, String> {
     info!("Getting workouts list...");
     let res = database.run_in_connection(|conn| {
-        let subquery = SerieRepository::select().distinct(&[serie::entity::columns::SESSION]);
-
         let sessions = SessionRepository::select()
-            .where_(Where::InSub(
-                session::entity::columns::DATE,
-                subquery.to_subquery(),
-            ))
+            .where_(Where::NotNull(session::entity::columns::WORKOUT))
             .order_by(OrderBy::Desc(entity::columns::DATE))
             .fetch_in(conn)?;
 
         let mut workout_stats = HashMap::new();
         sessions.iter().for_each(|s| {
             let entry = workout_stats
-                .entry(s.workout.clone())
-                .or_insert((0_u32, 0_f64, s.date));
+                .entry(s.name.clone())
+                .or_insert((0_u32, 0_u32, s.date));
             entry.0 += 1_u32;
             entry.1 += s.total_elapsed_time;
             entry.2 = if s.date > entry.2 { s.date } else { entry.2 };
@@ -53,7 +49,7 @@ pub fn get_workout_list(
             .map(|wd| WorkoutListItem {
                 name: wd.0,
                 sessions: wd.1.0,
-                avg_time: (wd.1.1 / (wd.1.0 as f64)).round() as i32,
+                avg_time: wd.1.1 / wd.1.0,
                 latest_session: wd.1.2 as i32,
             })
             .collect::<Vec<_>>();
@@ -87,7 +83,7 @@ pub fn get_workout_details(
     let res = database.run_in_connection(|conn| {
         info!("Getting details for workout {}", name);
 
-        let sessions = SessionRepository::select_by_workout_in_conn(
+        let sessions = SessionRepository::select_by_name_in_conn(
             conn,
             name,
             Some(&[OrderBy::Desc(entity::columns::DATE)]),
@@ -95,7 +91,7 @@ pub fn get_workout_details(
 
         let mut latest = sessions.first().unwrap().clone();
         let mut count = 0_u32;
-        let mut time = 0_f64;
+        let mut time = 0_u32;
         let mut volume = 0_f64;
 
         let series = SerieRepository::select()
@@ -128,7 +124,7 @@ pub fn get_workout_details(
 
         let mut details = WorkoutDetails {
             name: name.to_string(),
-            avg_time: (time / (sessions.len() as f64)).round() as i32,
+            avg_time: time / (sessions.len() as u32),
             latest_session: latest.date as i32,
             avg_volume: volume / (sessions.len() as f64),
             session_count: count,

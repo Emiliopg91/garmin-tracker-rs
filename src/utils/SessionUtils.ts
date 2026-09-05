@@ -81,15 +81,15 @@ export class SessionUtils {
         details.series[idx] = copy;
         details.volume += copy.reps * copy.weight;
 
-        if (!details.exercises.includes(details.series[idx].exercise)) {
-          details.exercises.push(details.series[idx].exercise);
+        const name =
+          details.series[idx].ex_cat + "-" + details.series[idx].ex_id;
+        if (!details.exercises.includes(name)) {
+          details.exercises.push(name);
         }
-        if (!details.grouped_series[details.series[idx].exercise]) {
-          details.grouped_series[details.series[idx].exercise] = [];
+        if (!details.grouped_series[name]) {
+          details.grouped_series[name] = [];
         }
-        details.grouped_series[details.series[idx].exercise].push(
-          details.series[idx],
-        );
+        details.grouped_series[name].push(details.series[idx]);
       });
     }
   }

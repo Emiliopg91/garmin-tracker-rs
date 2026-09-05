@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::dao::body_metrics::BodyMetrics;
+use crate::dao::body_metric::BodyMetric;
 
 #[derive(Serialize, Deserialize)]
 pub struct BodyMetricListItem {
@@ -11,8 +11,8 @@ pub struct BodyMetricListItem {
     pub water_ratio: f32,
 }
 
-impl From<&BodyMetrics> for BodyMetricListItem {
-    fn from(value: &BodyMetrics) -> Self {
+impl From<&BodyMetric> for BodyMetricListItem {
+    fn from(value: &BodyMetric) -> Self {
         Self {
             date: value.date as i32,
             weight: value.weight,
@@ -23,7 +23,7 @@ impl From<&BodyMetrics> for BodyMetricListItem {
     }
 }
 
-impl TryFrom<&BodyMetricListItem> for BodyMetrics {
+impl TryFrom<&BodyMetricListItem> for BodyMetric {
     type Error = Box<dyn std::error::Error + Send + Sync>;
 
     fn try_from(value: &BodyMetricListItem) -> Result<Self, Self::Error> {

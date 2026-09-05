@@ -6,9 +6,8 @@ use crate::{dao::exercise::Exercise, dto::sessions::SessionSerie};
 
 #[derive(Serialize)]
 pub struct ExerciseListItem {
-    pub category: String,
+    pub category: u16,
     pub id: u16,
-    pub name: String,
     pub reps: u16,
     pub weight: f64,
     pub rm: f64,
@@ -18,9 +17,8 @@ pub struct ExerciseListItem {
 impl From<&Exercise> for ExerciseListItem {
     fn from(value: &Exercise) -> Self {
         Self {
-            category: value.category.clone(),
+            category: value.category,
             id: value.id,
-            name: value.name.clone(),
             reps: 0,
             weight: 0_f64,
             rm: 0_f64,
@@ -31,9 +29,8 @@ impl From<&Exercise> for ExerciseListItem {
 
 #[derive(Serialize)]
 pub struct ExerciseDetails {
-    pub category: String,
+    pub category: u16,
     pub id: u16,
-    pub name: String,
     pub reps: u16,
     pub weight: f64,
     pub rm: f64,
@@ -45,9 +42,8 @@ pub struct ExerciseDetails {
 impl From<&Exercise> for ExerciseDetails {
     fn from(value: &Exercise) -> Self {
         Self {
-            category: value.category.clone(),
+            category: value.category,
             id: value.id,
-            name: value.name.clone(),
             reps: 0,
             weight: 0_f64,
             rm: 0_f64,

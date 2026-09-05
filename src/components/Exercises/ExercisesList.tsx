@@ -29,7 +29,7 @@ export function ExercisesList() {
     refreshList();
   }, []);
 
-  const getExerciseDetails = (category: string, id: number) => {
+  const getExerciseDetails = (category: number, id: number) => {
     BackendClient.getExerciseDetails(category, id).then((details) => {
       setExerciseDetails(details);
     });
@@ -59,7 +59,9 @@ export function ExercisesList() {
               style={{ cursor: "pointer" }}
               onClick={() => getExerciseDetails(exercise.category, exercise.id)}
             >
-              <td style={{ textAlign: "left" }}>{exercise.name}</td>
+              <td style={{ textAlign: "left" }}>
+                {translate("exercise_" + exercise.category + "_" + exercise.id)}
+              </td>
               <td>
                 {exercise.reps +
                   "x" +

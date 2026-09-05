@@ -22,6 +22,9 @@ error_session_details:
 error_session_list:
   en: Error getting sessions list
   es: Error obteniendo lista de sesiones
+error_import_sessions:
+  en: Error importing sessions
+  es: Error importando sesiones
 ok_update_session:
   en: Session updated succesfully
   es: Sesión actualizada correctamente
@@ -338,3 +341,6528 @@ ok_update_settings:
 error_update_settings:
   en: Error updating settings
   es: Error actualizando configuración
+exercise_0:
+  en: Bench Press
+  es: Press banca
+exercise_1:
+  en: Calf Raise
+  es: Elevación de talones
+exercise_2:
+  en: Cardio
+  es: Cardio
+exercise_3:
+  en: Carry
+  es: Transporte de carga
+exercise_4:
+  en: Chop
+  es: Leñador
+exercise_5:
+  en: Core
+  es: Core
+exercise_6:
+  en: Crunch
+  es: Abdominal
+exercise_7:
+  en: Curl
+  es: Curl
+exercise_8:
+  en: Deadlift
+  es: Peso muerto
+exercise_9:
+  en: Flye
+  es: Aperturas
+exercise_10:
+  en: Hip Raise
+  es: Elevación de cadera
+exercise_11:
+  en: Hip Stability
+  es: Estabilidad de cadera
+exercise_12:
+  en: Hip Swing
+  es: Balanceo de cadera
+exercise_13:
+  en: Hyperextension
+  es: Hiperextensión
+exercise_14:
+  en: Lateral Raise
+  es: Elevación lateral
+exercise_15:
+  en: Leg Curl
+  es: Curl femoral
+exercise_16:
+  en: Leg Raise
+  es: Elevación de piernas
+exercise_17:
+  en: Lunge
+  es: Zancada
+exercise_18:
+  en: Olympic Lift
+  es: Levantamiento olímpico
+exercise_19:
+  en: Plank
+  es: Plancha
+exercise_20:
+  en: Plyo
+  es: Pliometría
+exercise_21:
+  en: Pull Up
+  es: Dominadas
+exercise_22:
+  en: Push Up
+  es: Flexiones
+exercise_23:
+  en: Row
+  es: Remo
+exercise_24:
+  en: Shoulder Press
+  es: Press de hombro
+exercise_25:
+  en: Shoulder Stability
+  es: Estabilidad de hombro
+exercise_26:
+  en: Shrug
+  es: Encogimiento de hombros
+exercise_27:
+  en: Sit Up
+  es: Abdominales
+exercise_28:
+  en: Squat
+  es: Sentadilla
+exercise_29:
+  en: Total Body
+  es: Cuerpo completo
+exercise_30:
+  en: Triceps Extension
+  es: Extensión de tríceps
+exercise_31:
+  en: Warm Up
+  es: Calentamiento
+exercise_32:
+  en: Run
+  es: Carrera
+exercise_33:
+  en: Bike
+  es: Bicicleta
+exercise_34:
+  en: Cardio Sensors
+  es: Cardio con sensores
+exercise_35:
+  en: Move
+  es: Movimiento
+exercise_36:
+  en: Pose
+  es: Postura
+exercise_37:
+  en: Banded Exercises
+  es: Ejercicios con bandas
+exercise_38:
+  en: Battle Rope
+  es: Cuerda de batalla
+exercise_39:
+  en: Elliptical
+  es: Elíptica
+exercise_40:
+  en: Floor Climb
+  es: Escalador de suelo
+exercise_41:
+  en: Indoor Bike
+  es: Bicicleta indoor
+exercise_42:
+  en: Indoor Row
+  es: Remo indoor
+exercise_43:
+  en: Ladder
+  es: Escalera de agilidad
+exercise_44:
+  en: Sandbag
+  es: Saco de arena
+exercise_45:
+  en: Sled
+  es: Trineo
+exercise_46:
+  en: Sledge Hammer
+  es: Mazo
+exercise_47:
+  en: Stair Stepper
+  es: Escalador
+exercise_49:
+  en: Suspension
+  es: Suspensión
+exercise_50:
+  en: Tire
+  es: Neumático
+exercise_52:
+  en: Run Indoor
+  es: Carrera indoor
+exercise_53:
+  en: Bike Outdoor
+  es: Bicicleta exterior
+exercise_0_0:
+  en: Alternating Dumbbell Chest Press on Swiss Ball
+  es: Press de pecho alterno con mancuernas sobre Pelota Suiza
+exercise_0_1:
+  en: Barbell Bench Press
+  es: Press de banca con barra
+exercise_0_2:
+  en: Barbell Board Bench Press
+  es: Press de banca con tabla y barra de pesas
+exercise_0_3:
+  en: Barbell Floor Press
+  es: Press en el suelo con barra
+exercise_0_4:
+  en: Close-grip Barbell Bench Press
+  es: Press de banca con barra y agarre estrecho
+exercise_0_5:
+  en: Decline Dumbbell Bench Press
+  es: Press de banca declinada con mancuernas
+exercise_0_6:
+  en: Dumbbell Bench Press
+  es: Press de banca con mancuernas
+exercise_0_7:
+  en: Dumbbell Floor Press
+  es: Press en suelo con mancuernas
+exercise_0_8:
+  en: Incline Barbell Bench Press
+  es: Press banca inclinado con barra
+exercise_0_9:
+  en: Incline Dumbbell Bench Press
+  es: Press de banca Inclinada con mancuernas
+exercise_0_10:
+  en: Incline Smith Machine Bench Press
+  es: Press banca inclinado con máquina Smith
+exercise_0_11:
+  en: Isometric Barbell Bench Press
+  es: Press de banca isométrica con barra de pesas
+exercise_0_12:
+  en: Kettlebell Chest Press
+  es: Press de pectorales con Pesas Rusas
+exercise_0_13:
+  en: Neutral-grip Dumbbell Bench Press
+  es: Press de banca con mancuernas y agarre neutro
+exercise_0_14:
+  en: Neutral-grip Dumbbell Incline Bench Press
+  es: Press de banca Inclinada con mancuernas y agarre neutral
+exercise_0_15:
+  en: One-arm Floor Press
+  es: Press en el suelo con un brazo
+exercise_0_16:
+  en: Weighted One-arm Floor Press
+  es: Press en el suelo de un brazo lastrado
+exercise_0_17:
+  en: Partial Lockout
+  es: Estiramiento parcial
+exercise_0_18:
+  en: Reverse-grip Barbell Bench Press
+  es: Press de banca con barra y agarre invertido
+exercise_0_19:
+  en: Reverse-grip Incline Bench Press
+  es: Press de banca inclinada con agarre invertido
+exercise_0_20:
+  en: Single-arm Cable Chest Press
+  es: Press de pectorales a un solo brazo y con polea
+exercise_0_21:
+  en: Single-arm Dumbbell Bench Press
+  es: Press de mancuernas en banca (un brazo)
+exercise_0_22:
+  en: Smith Machine Bench Press
+  es: Press banca con máquina Smith
+exercise_0_23:
+  en: Swiss Ball Dumbbell Chest Press
+  es: Press de pecho con mancuernas sobre Pelota Suiza
+exercise_0_24:
+  en: Triple-stop Barbell Bench Press
+  es: Press de banca con triple parada
+exercise_0_25:
+  en: Wide-grip Barbell Bench Press
+  es: Press de banca con barra y agarre ancho
+exercise_0_26:
+  en: Alternating Dumbbell Chest Press
+  es: Press de pecho alterno con mancuernas
+exercise_1_0:
+  en: 3-way Calf Raise
+  es: Levantamiento de gemelos tres formas
+exercise_1_1:
+  en: 3-way Weighted Calf Raise
+  es: Elevación de talones lastrada en 3 direcciones
+exercise_1_2:
+  en: 3-way Single-leg Calf Raise
+  es: Levantamiento de gemelos de tres formas y una sola pierna
+exercise_1_3:
+  en: 3-way Weighted Single-leg Calf Raise
+  es: Elevación de un talón lastrada en 3 direcciones
+exercise_1_4:
+  en: Donkey Calf Raise
+  es: Elevación de gemelos tipo burro
+exercise_1_5:
+  en: Weighted Donkey Calf Raise
+  es: Elevación de talones lastrada inclinado de pie
+exercise_1_6:
+  en: Seated Calf Raise
+  es: Levantamiento de gemelos sentado
+exercise_1_7:
+  en: Weighted Seated Calf Raise
+  es: Elevación de talones lastrada sentado
+exercise_1_8:
+  en: Seated Dumbbell Toe Raise
+  es: Flexión de dedos sentado con mancuerna
+exercise_1_9:
+  en: Single-leg Bent-knee Calf Raise
+  es: Elevación de gemelos con rodilla flexionada con una sola pierna
+exercise_1_10:
+  en: Weighted Single-leg Bent-knee Calf Raise
+  es: Elevación de un talón lastrada con la rodilla doblada
+exercise_1_11:
+  en: Single-leg Decline Push-up
+  es: Flexión de brazos en declive con una pierna
+exercise_1_12:
+  en: Single-leg Donkey Calf Raise
+  es: Elevación de gemelos tipo burro con una pierna
+exercise_1_13:
+  en: Weighted Single-leg Donkey Calf Raise
+  es: Elevación de un talón lastrada inclinado de pie
+exercise_1_14:
+  en: Single-leg Hip Raise with Knee Hold
+  es: Elevación de caderas con una pierna y con sujeción de rodilla
+exercise_1_15:
+  en: Single-leg Standing Calf Raise
+  es: Elevación de un talón de pie
+exercise_1_16:
+  en: Single-leg Standing Dumbbell Calf Raise
+  es: Elevación de gemelos con una pierna con mancuernas
+exercise_1_17:
+  en: Standing Barbell Calf Raise
+  es: Elevación de talones de pie con barra
+exercise_1_18:
+  en: Standing Calf Raise
+  es: Elevación de talones de pie
+exercise_1_19:
+  en: Weighted Standing Calf Raise
+  es: Elevación de talones de pie lastrado
+exercise_1_20:
+  en: Standing Dumbbell Calf Raise
+  es: Elevación de gemelos de pie con mancuernas
+exercise_2_0:
+  en: Bob and Weave Circle
+  es: Círculos con rotación y agachamiento
+exercise_2_1:
+  en: Weighted Bob and Weave Circle
+  es: Círculos con rotación y agachamiento lastrado
+exercise_2_2:
+  en: Cardio Core Crawl
+  es: Gateo con abdominales para Resistencia Cardiovascular
+exercise_2_3:
+  en: Weighted Cardio Core Crawl
+  es: Gateo cardiovascular con el tronco
+exercise_2_4:
+  en: Double Under
+  es: Dos pasadas por debajo
+exercise_2_5:
+  en: Weighted Double Under
+  es: Salto con cuerda lastrado con doble pasada
+exercise_2_6:
+  en: Jump Rope
+  es: Comba
+exercise_2_7:
+  en: Weighted Jump Rope
+  es: Salto con cuerda lastrado
+exercise_2_8:
+  en: Jump Rope Crossover
+  es: Salto con cuerda cruzado
+exercise_2_9:
+  en: Weighted Jump Rope Crossover
+  es: Salto con cuerda cruzado lastrado
+exercise_2_10:
+  en: Jump Rope Jog
+  es: Trote con cuerda de saltar
+exercise_2_11:
+  en: Weighted Jump Rope Jog
+  es: Trote con cuerda lastrado
+exercise_2_12:
+  en: Jumping Jacks
+  es: Saltos de tijera
+exercise_2_13:
+  en: Weighted Jumping Jacks
+  es: Saltos de tijera lastrados
+exercise_2_14:
+  en: Ski Moguls
+  es: Esquí acrobático
+exercise_2_15:
+  en: Weighted Ski Moguls
+  es: Saltos lastrados con desplazamiento lateral
+exercise_2_16:
+  en: Split Jacks
+  es: Saltos divididos
+exercise_2_17:
+  en: Weighted Split Jacks
+  es: Saltos divididos lastrados
+exercise_2_18:
+  en: Squat Jacks
+  es: Sentadillas con pies juntos y salto
+exercise_2_19:
+  en: Weighted Squat Jacks
+  es: Sentadillas lastradas con cierre de piernas
+exercise_2_20:
+  en: Triple Under
+  es: Salto con cuerda con triple pasada
+exercise_2_21:
+  en: Weighted Triple Under
+  es: Salto con cuerda lastrado con triple pasada
+exercise_2_22:
+  en: Elliptical
+  es: Elíptica
+exercise_2_23:
+  en: Spinning
+  es: Spinning
+exercise_2_24:
+  en: Paddle Forward
+  es: Remo hacia delante
+exercise_2_25:
+  en: Paddle Backward
+  es: Remo hacia atrás
+exercise_2_26:
+  en: Handcycle Forward
+  es: Bicicleta de manos hacia delante
+exercise_2_27:
+  en: Handcycle Backward
+  es: Bicicleta de manos hacia detrás
+exercise_2_28:
+  en: Rainbow
+  es: Arco iris
+exercise_2_29:
+  en: Double Punch Forward
+  es: Puñetazo doble hacia delante
+exercise_2_30:
+  en: Double Punch Down
+  es: Puñetazo doble hacia abajo
+exercise_2_31:
+  en: Double Punch Sideways
+  es: Puñetazo doble lateral
+exercise_2_32:
+  en: Double Punch Up
+  es: Puñetazo doble hacia arriba
+exercise_2_33:
+  en: Sit Ski
+  es: Esquí sentado
+exercise_2_34:
+  en: Sitting Jacks
+  es: Saltos en estrella sentado
+exercise_2_35:
+  en: Punch Forward
+  es: Puñetazo hacia delante
+exercise_2_36:
+  en: Punch Down
+  es: Puñetazo hacia abajo
+exercise_2_37:
+  en: Punch Sideways
+  es: Puñetazo lateral
+exercise_2_38:
+  en: Punch Up
+  es: Puñetazo hacia arriba
+exercise_2_39:
+  en: Speed Bag
+  es: Saco de boxeo
+exercise_2_40:
+  en: Downward Forward Upper
+  es: Hacia abajo, hacia delante y hacia arriba
+exercise_2_41:
+  en: Butterfly Arms
+  es: Brazos de mariposa
+exercise_2_42:
+  en: Punch
+  es: Puñetazo
+exercise_3_0:
+  en: Bar Holds
+  es: Levantamiento de barra sostenido
+exercise_3_1:
+  en: Farmer's Walk
+  es: Paseo del granjero
+exercise_3_2:
+  en: Farmer's Walk on Toes
+  es: Paseo del granjero de puntillas
+exercise_3_3:
+  en: Hex Dumbbell Hold
+  es: Mancuerna hexagonal y sujeción
+exercise_3_4:
+  en: Overhead Carry
+  es: Paseo del granjero por encima de la cabeza
+exercise_3_5:
+  en: Dumbbell Waiter Carry
+  es: Paseo del camarero con mancuerna
+exercise_3_6:
+  en: Farmer's Carry Walk Lunge
+  es: Paseo del granjero con zancada
+exercise_3_7:
+  en: Farmer's Carry
+  es: Paseo del granjero
+exercise_3_8:
+  en: Farmer's Carry on Toes
+  es: Paseo del granjero de puntillas
+exercise_4_0:
+  en: Cable Pull-through
+  es: Estiramiento en polea
+exercise_4_1:
+  en: Cable Rotational Lift
+  es: Levantamiento rotatorio con polea
+exercise_4_2:
+  en: Cable Woodchop
+  es: Leñador con polea alta
+exercise_4_3:
+  en: Cross Chop to Knee
+  es: Leñador cruzado a rodilla
+exercise_4_4:
+  en: Weighted Cross Chop to Knee
+  es: Leñador cruzado a rodilla lastrado
+exercise_4_5:
+  en: Dumbbell Chop
+  es: Leñador con mancuerna
+exercise_4_6:
+  en: Half-kneeling Rotation
+  es: Rotación semiarrodillado
+exercise_4_7:
+  en: Weighted Half-kneeling Rotation
+  es: Rotación a una rodilla lastrado
+exercise_4_8:
+  en: Half-kneeling Rotational Chop
+  es: Leñador rotatorio arrodillado con una pierna
+exercise_4_9:
+  en: Half-kneeling Rotational Reverse Chop
+  es: Leñador inverso (a una rodilla)
+exercise_4_10:
+  en: Half-kneeling Stability Chop
+  es: Leñador de estabilidad (a una rodilla)
+exercise_4_11:
+  en: Half-kneeling Stability Reverse Chop
+  es: Leñador inverso de estabilidad, a una rodilla
+exercise_4_12:
+  en: Kneeling Rotational Chop
+  es: Leñador giratorio (de rodillas)
+exercise_4_13:
+  en: Kneeling Rotational Reverse Chop
+  es: Leñador inverso de rodillas
+exercise_4_14:
+  en: Kneeling Stability Chop
+  es: Chop de estabilidad, arrodillado (con cuerda)
+exercise_4_15:
+  en: Kneeling Woodchopper
+  es: Leñador arrodillado
+exercise_4_16:
+  en: Medicine Ball Wood Chops
+  es: Hachazos con Balón Medicinal
+exercise_4_17:
+  en: Power Squat Chops
+  es: Sentadilla con salto y hachazo
+exercise_4_18:
+  en: Weighted Power Squat Chops
+  es: Sentadilla de leñador con potencia lastrada
+exercise_4_19:
+  en: Standing Rotational Chop
+  es: Standing Rotational Chop
+exercise_4_20:
+  en: Standing Split Rotational Chop
+  es: Standing Split Rotational Chop
+exercise_4_21:
+  en: Standing Split Rotational Reverse Chop
+  es: Leñador inverso rotacional en posición de sentadilla (de pie)
+exercise_4_22:
+  en: Standing Stability Reverse Chop
+  es: Leñador inverso de estabilidad de pie
+exercise_5_0:
+  en: Abs Jabs
+  es: Puñetazos de abdominales
+exercise_5_1:
+  en: Weighted Abs Jabs
+  es: Golpes abdominales lastrados
+exercise_5_2:
+  en: Alternating Plate Reach
+  es: Extensión alterna sobre disco
+exercise_5_3:
+  en: Barbell Roll-out
+  es: Rodar con barra
+exercise_5_4:
+  en: Weighted Barbell Roll-out
+  es: Rodar con barra lastrado
+exercise_5_5:
+  en: Body Bar Oblique Twist
+  es: Giro oblicuo con barra
+exercise_5_6:
+  en: Cable Core Press
+  es: Press de tronco con polea
+exercise_5_7:
+  en: Cable Side Bend
+  es: Flexión lateral con polea
+exercise_5_8:
+  en: Side Bend
+  es: Flexión lateral de tronco
+exercise_5_9:
+  en: Weighted Side Bend
+  es: Flexión lateral de tronco lastrado
+exercise_5_10:
+  en: Crescent Circle
+  es: Círculos crecientes
+exercise_5_11:
+  en: Weighted Crescent Circle
+  es: Círculo creciente lastrado
+exercise_5_12:
+  en: Cycling Russian Twist
+  es: Giros rusos con pedaleo
+exercise_5_13:
+  en: Weighted Cycling Russian Twist
+  es: Giro ruso con pedaleo
+exercise_5_14:
+  en: Elevated-feet Russian Twist
+  es: Giro ruso con pies elevados
+exercise_5_15:
+  en: Weighted Elevated-feet Russian Twist
+  es: Giro ruso con pies elevados
+exercise_5_16:
+  en: Half-Turkish Get-up
+  es: Medio levantamiento turco
+exercise_5_17:
+  en: Kettlebell Windmill
+  es: Molino de viento con Pesas Rusas
+exercise_5_18:
+  en: Kneeling Ab Wheel
+  es: Rueda de Abdominales arrodillado
+exercise_5_19:
+  en: Weighted Kneeling Ab Wheel
+  es: Rueda de abdominales arrodillado lastrado
+exercise_5_20:
+  en: Modified Front Lever
+  es: Palanca frontal modificada
+exercise_5_21:
+  en: Open Knee Tucks
+  es: Flexiones abiertas de rodilla
+exercise_5_22:
+  en: Weighted Open Knee Tucks
+  es: Flexión lastrada con rodillas abiertas y plegadas
+exercise_5_23:
+  en: Side Abs Leg Lift
+  es: Levantamiento de pierna con abdominales laterales
+exercise_5_24:
+  en: Weighted Side Abs Leg Lift
+  es: Abdominales laterales lastrados con elevación de pierna
+exercise_5_25:
+  en: Swiss Ball Jackknife
+  es: Jackknife con Pelota Suiza
+exercise_5_26:
+  en: Weighted Swiss Ball Jackknife
+  es: Jackknife con balón suizo
+exercise_5_27:
+  en: Swiss Ball Pike
+  es: Pico con Pelota Suiza
+exercise_5_28:
+  en: Weighted Swiss Ball Pike
+  es: Pico lastrado con balón suizo
+exercise_5_29:
+  en: Swiss Ball Roll-out
+  es: Rollout con Pelota Suiza (de rodillas)
+exercise_5_30:
+  en: Weighted Swiss Ball Roll-out
+  es: Rodar lastrado con balón suizo
+exercise_5_31:
+  en: Triangle Hip Press
+  es: Press de cadera en triángulo
+exercise_5_32:
+  en: Weighted Triangle Hip Press
+  es: Press de cadera lastrado con triángulo
+exercise_5_33:
+  en: TRX Suspended Jackknife
+  es: Jackknife suspendido con TRX
+exercise_5_34:
+  en: Weighted TRX Suspended Jackknife
+  es: Jackknife lastrado en suspensión con TRX
+exercise_5_35:
+  en: U-Boat
+  es: U boat
+exercise_5_36:
+  en: Weighted U-Boat
+  es: Rotación de piernas en U lastrada
+exercise_5_37:
+  en: Windmill Switches
+  es: Cambios en molino de viento
+exercise_5_38:
+  en: Weighted Windmill Switches
+  es: Molino de viento alterno lastrado
+exercise_5_39:
+  en: Alternating Slide-out
+  es: Deslizamiento lateral alterno
+exercise_5_40:
+  en: Weighted Alternating Slide-out
+  es: Deslizamiento de brazos alternado lastrado
+exercise_5_41:
+  en: GHD Back Extensions
+  es: Extensiones lumbares GHD
+exercise_5_42:
+  en: Weighted GHD Back Extensions
+  es: Extensiones lumbares GHD lastradas
+exercise_5_43:
+  en: Overhead Walk
+  es: Caminar con brazos en alto
+exercise_5_44:
+  en: Inchworm
+  es: Inchworm
+exercise_5_45:
+  en: Weighted Modified Front Lever
+  es: Palanca frontal modificada lastrada
+exercise_5_46:
+  en: Russian Twist
+  es: Giro ruso
+exercise_5_48:
+  en: Arm and Leg Extension on Knees
+  es: Extensión de brazo y pierna sobre las rodillas
+exercise_5_49:
+  en: Bicycle
+  es: Bicicleta
+exercise_5_50:
+  en: Bicep Curl with Leg Extension
+  es: Curl de bíceps con extensión de pierna
+exercise_5_51:
+  en: Cat Cow
+  es: Gato vaca
+exercise_5_52:
+  en: Corkscrew
+  es: Sacacorchos
+exercise_5_53:
+  en: Criss Cross
+  es: Entrelazamiento
+exercise_5_55:
+  en: Double-leg Stretch
+  es: Estiramiento doble de piernas
+exercise_5_56:
+  en: Knee Folds
+  es: Flexiones de rodilla
+exercise_5_57:
+  en: Lower Lift
+  es: Elevación inferior
+exercise_5_58:
+  en: Neck Pull
+  es: Tirón de cuello
+exercise_5_59:
+  en: Pelvic Clocks
+  es: Relojes pélvicos
+exercise_5_60:
+  en: Roll Over
+  es: Rodar hacia atrás
+exercise_5_61:
+  en: Roll Up
+  es: Rodar hacia arriba (Roll up)
+exercise_5_62:
+  en: Rolling
+  es: Rodar
+exercise_5_63:
+  en: Rowing 1
+  es: Remo 1
+exercise_5_64:
+  en: Rowing 2
+  es: Remo 2
+exercise_5_65:
+  en: Scissors
+  es: Tijeras
+exercise_5_66:
+  en: Single-leg Circles
+  es: Círculos con una sola pierna
+exercise_5_67:
+  en: Single-leg Stretch
+  es: Estiramiento con una sola pierna
+exercise_5_69:
+  en: Swan
+  es: Cisne
+exercise_5_70:
+  en: Swimming
+  es: Natación
+exercise_5_71:
+  en: Teaser
+  es: Teaser
+exercise_5_72:
+  en: The Hundred
+  es: El cien
+exercise_5_73:
+  en: Bicep Curl with Leg Extension (with weights)
+  es: Curl de bíceps con extensión de pierna (con pesas)
+exercise_5_75:
+  en: Hanging L Sit
+  es: Isométrico en L en suspensión
+exercise_5_77:
+  en: Lower Lift (with weights)
+  es: Elevación inferior (con pesas)
+exercise_5_79:
+  en: Ring L Sit
+  es: Isométrico en L en anillas
+exercise_5_80:
+  en: Rowing 1 (with weights)
+  es: Remo 1 (con pesas)
+exercise_5_81:
+  en: Rowing 2 (with weights)
+  es: Remo 2 (con pesas)
+exercise_5_82:
+  en: Scissors (with weights)
+  es: Tijeras (con pesas)
+exercise_5_83:
+  en: Single-leg Stretch (with weights)
+  es: Estiramiento de una pierna (con pesas)
+exercise_5_84:
+  en: Toes to Elbows
+  es: Pies a codos
+exercise_5_85:
+  en: Criss Cross (with weights)
+  es: Criss-cross (con pesas)
+exercise_5_86:
+  en: Double-leg Stretch (with weights)
+  es: Estiramiento de las dos piernas (con pesas)
+exercise_5_87:
+  en: The Hundred (with weight)
+  es: El cien (con pesa)
+exercise_5_88:
+  en: L Sit
+  es: Isométrico en L
+exercise_5_89:
+  en: Turkish Get-up
+  es: Levantamiento turco
+exercise_5_90:
+  en: Weighted Ring L Sit
+  es: Isométrico en L lastrado en anillas
+exercise_5_91:
+  en: Weighted Hanging L Sit
+  es: Isométrico en L lastrado en suspensión
+exercise_5_92:
+  en: Weighted L Sit
+  es: Isométrico en L lastrado
+exercise_5_93:
+  en: Side Bend Low
+  es: Flexión lateral baja
+exercise_5_94:
+  en: Side Bend Mid
+  es: Flexión lateral media
+exercise_5_95:
+  en: Side Bend High
+  es: Flexión lateral alta
+exercise_5_96:
+  en: Seated Side Bend
+  es: Flexión lateral de tronco sentado
+exercise_6_0:
+  en: Bicycle Crunch
+  es: Crunch de bicicleta
+exercise_6_1:
+  en: Cable Crunch
+  es: Flexión con polea
+exercise_6_2:
+  en: Circular Arm Crunch
+  es: Abdominales con rotación de brazos
+exercise_6_3:
+  en: Crossed-arms Crunch
+  es: Encogimientos abdominales de brazos cruzados
+exercise_6_4:
+  en: Weighted Crossed-arms Crunch
+  es: Abdominales lastrados con brazos cruzados
+exercise_6_5:
+  en: Crossed-leg Reverse Crunch
+  es: Encogimiento abdominal inverso con pierna cruzada
+exercise_6_6:
+  en: Weighted Crossed-leg Reverse Crunch
+  es: Encogimiento abdominal inverso lastrado con pierna cruzada
+exercise_6_7:
+  en: Crunch Chop
+  es: Abdominales de leñador
+exercise_6_8:
+  en: Weighted Crunch Chop
+  es: Abdominales de leñador lastrados
+exercise_6_9:
+  en: Double Crunch
+  es: Doble Encogimiento
+exercise_6_10:
+  en: Weighted Double Crunch
+  es: Doble abdominal lastrado
+exercise_6_11:
+  en: Elbow-to-Knee Crunch
+  es: Abdominal de codo a rodilla
+exercise_6_12:
+  en: Weighted Elbow-to-Knee Crunch
+  es: Abdominales de codo a rodilla lastrados
+exercise_6_13:
+  en: Flutter Kicks
+  es: Tijera corta
+exercise_6_14:
+  en: Weighted Flutter Kicks
+  es: Tijera corta lastrada
+exercise_6_15:
+  en: Foam Roller Reverse Crunch on Bench
+  es: Abdominales invertidos con rodillo de espuma en banco
+exercise_6_16:
+  en: Weighted Foam Roller Reverse Crunch on Bench
+  es: Abdominales invertidos lastrados con rodillo de espuma en banco
+exercise_6_17:
+  en: Foam Roller Reverse Crunch with Dumbbell
+  es: Abdominales invertidos con rodillo de espuma y mancuerna
+exercise_6_18:
+  en: Foam Roller Reverse Crunch with Medicine Ball
+  es: Abdominales invertidos con rodillo de espuma y Balón Medicinal
+exercise_6_19:
+  en: Frog Press
+  es: Press de la rana
+exercise_6_20:
+  en: Hanging Knee Raise Oblique Crunch
+  es: Encogimientos para oblicuos con flexión y extensión de rodillas en suspensión
+exercise_6_21:
+  en: Weighted Hanging Knee Raise Oblique Crunch
+  es: Abdominales oblicuos lastrados en suspensión con elevación de rodillas
+exercise_6_22:
+  en: Hip Crossover
+  es: Crossover de caderas
+exercise_6_23:
+  en: Weighted Hip Crossover
+  es: Cruce de caderas lastrado
+exercise_6_24:
+  en: Hollow Rock
+  es: Piedra hueca
+exercise_6_25:
+  en: Weighted Hollow Rock
+  es: Piedra hueca lastrada
+exercise_6_26:
+  en: Incline Reverse Crunch
+  es: Abdominales invertidos en banco inclinado
+exercise_6_27:
+  en: Weighted Incline Reverse Crunch
+  es: Abdominales invertidos lastrados en banco inclinado
+exercise_6_28:
+  en: Kneeling Cable Crunch
+  es: Flexión de tronco con polea (de rodillas)
+exercise_6_29:
+  en: Kneeling Cross Crunch
+  es: Encogimiento cruzado de rodillas
+exercise_6_30:
+  en: Weighted Kneeling Cross Crunch
+  es: Codo a rodilla arrodillado lastrado
+exercise_6_31:
+  en: Kneeling Oblique Cable Crunch
+  es: Flexión oblicua de tronco con polea (de rodillas)
+exercise_6_32:
+  en: Knees-to-Elbow
+  es: Rodillas a codo
+exercise_6_33:
+  en: Leg Extensions
+  es: Extensiones de piernas
+exercise_6_34:
+  en: Weighted Leg Extensions
+  es: Extensiones de piernas lastradas
+exercise_6_35:
+  en: Leg Levers
+  es: Elevaciones de piernas
+exercise_6_36:
+  en: McGill Curl-up
+  es: Curl-up McGill
+exercise_6_37:
+  en: Weighted McGill Curl-up
+  es: Elevación parcial McGill lastrada
+exercise_6_38:
+  en: Modified Pilates Roll-up with Ball
+  es: Roll hacia arriba modificado con pelota de Pilates.
+exercise_6_39:
+  en: Weighted Modified Pilates Roll-up with Ball
+  es: Rodar hacia arriba de Pilates modificado lastrado con balón
+exercise_6_40:
+  en: Pilates Crunch
+  es: Encogimientos de abdominales tipo Pilates
+exercise_6_41:
+  en: Weighted Pilates Crunch
+  es: Abdominales de Pilates lastrados
+exercise_6_42:
+  en: Pilates Roll-up with Ball
+  es: Roll hacia arriba de Pilates con pelota
+exercise_6_43:
+  en: Weighted Pilates Roll-up with Ball
+  es: Rodar hacia arriba de Pilates lastrado con balón
+exercise_6_44:
+  en: Raised-legs Crunch
+  es: Encogimientos abdominales con piernas levantadas
+exercise_6_45:
+  en: Weighted Raised-legs Crunch
+  es: Abdominales lastrados con piernas elevadas
+exercise_6_46:
+  en: Reverse Crunch
+  es: Crunch inverso
+exercise_6_47:
+  en: Weighted Reverse Crunch
+  es: Abdominales invertidos lastrados
+exercise_6_48:
+  en: Reverse Crunch on a Bench
+  es: Encogimientos inversos sobre banca
+exercise_6_49:
+  en: Weighted Reverse Crunch on a Bench
+  es: Abdominales invertidos lastrados en banco
+exercise_6_50:
+  en: Reverse Curl and Lift
+  es: Curl inverso y levantamiento
+exercise_6_51:
+  en: Weighted Reverse Curl and Lift
+  es: Encogimiento y elevación de piernas invertido lastrado
+exercise_6_52:
+  en: Rotational Lift
+  es: Levantamiento rotatorio
+exercise_6_53:
+  en: Weighted Rotational Lift
+  es: Elevación lastrada con rotación
+exercise_6_54:
+  en: Seated Alternating Reverse Crunch
+  es: Encogimiento de abdominales inverso, alterno y sentado
+exercise_6_55:
+  en: Weighted Seated Alternating Reverse Crunch
+  es: Encogimiento de abdominales inverso, alterno y sentado lastrado
+exercise_6_56:
+  en: Seated Leg U
+  es: U de piernas sentado
+exercise_6_57:
+  en: Weighted Seated Leg U
+  es: Piernas en U sentado lastrado
+exercise_6_58:
+  en: Side-to-Side Crunch and Weave
+  es: Crunch con rotación alterno
+exercise_6_59:
+  en: Weighted Side-to-Side Crunch and Weave
+  es: Encogimiento y finta de lado a lado lastrado
+exercise_6_60:
+  en: Single-leg Reverse Crunch
+  es: Encogimiento abdominal inverso a una pierna
+exercise_6_61:
+  en: Weighted Single-leg Reverse Crunch
+  es: Encogimiento abdominal inverso lastrado a una pierna
+exercise_6_62:
+  en: Skater Crunch Cross
+  es: Encogimiento cruzado de patinador
+exercise_6_63:
+  en: Weighted Skater Crunch Cross
+  es: Encogimiento cruzado de patinador lastrado
+exercise_6_64:
+  en: Standing Cable Crunch
+  es: Flexión de tronco con polea (de pie)
+exercise_6_65:
+  en: Standing Side Crunch
+  es: Estiramiento lateral de pie
+exercise_6_66:
+  en: Step Climb
+  es: Subida de escalón
+exercise_6_67:
+  en: Weighted Step Climb
+  es: Subida de escalón lastrada
+exercise_6_68:
+  en: Swiss Ball Crunch
+  es: Abdominales con Pelota Suiza
+exercise_6_69:
+  en: Swiss Ball Reverse Crunch
+  es: Abdominales inversos con Pelota Suiza
+exercise_6_70:
+  en: Weighted Swiss Ball Reverse Crunch
+  es: Encogimiento abdominal inverso lastrado con balón suizo
+exercise_6_71:
+  en: Swiss Ball Russian Twist
+  es: Giro ruso con Pelota Suiza
+exercise_6_72:
+  en: Weighted Swiss Ball Russian Twist
+  es: Giro ruso lastrado con balón suizo
+exercise_6_73:
+  en: Swiss Ball Side Crunch
+  es: Abdominal lateral con Pelota Suiza
+exercise_6_74:
+  en: Weighted Swiss Ball Side Crunch
+  es: Encogimiento abdominal lateral lastrado con balón suizo
+exercise_6_75:
+  en: Thoracic Crunches on Foam Roller
+  es: Abdominales torácicos con rodillo de espuma
+exercise_6_76:
+  en: Weighted Thoracic Crunches on Foam Roller
+  es: Encogimientos torácicos lastrados en rodillo de espuma
+exercise_6_77:
+  en: Triceps Crunch
+  es: Encogimientos de tríceps
+exercise_6_78:
+  en: Weighted Bicycle Crunch
+  es: Crunch de bicicleta con peso
+exercise_6_79:
+  en: Weighted Crunch
+  es: Abdominales con peso
+exercise_6_80:
+  en: Weighted Swiss Ball Crunch
+  es: Encogimientos abdominales sobre Pelota Suiza con pesas
+exercise_6_81:
+  en: Toes to Bar
+  es: Pies a barra
+exercise_6_82:
+  en: Weighted Toes to Bar
+  es: Pies a barra lastrado
+exercise_6_83:
+  en: Crunch
+  es: Abdominal
+exercise_6_84:
+  en: Straight-leg Crunch with Ball
+  es: Abdominales con piernas estiradas y pelota
+exercise_6_86:
+  en: Leg Climb Crunch
+  es: Encogimiento abdominal con subida por la pierna
+exercise_7_0:
+  en: Alternating Dumbbell Biceps Curl
+  es: Curl de bíceps alterno con mancuerna
+exercise_7_1:
+  en: Alternating Dumbbell Biceps Curl on Swiss Ball
+  es: Curl de bíceps alterno con mancuerna sobre Pelota Suiza
+exercise_7_2:
+  en: Alternating Incline Dumbbell Biceps Curl
+  es: Curl de bíceps inclinado alterno con mancuernas
+exercise_7_3:
+  en: Barbell Biceps Curl
+  es: Curl de bíceps con barra
+exercise_7_4:
+  en: Barbell Reverse Wrist Curl
+  es: Extensión de muñecas con barra
+exercise_7_5:
+  en: Barbell Wrist Curl
+  es: Flexión de muñecas con barra
+exercise_7_6:
+  en: Behind-the-Back Barbell Reverse Wrist Curl
+  es: Giro inverso de muñeca con barra detrás de la espalda
+exercise_7_7:
+  en: Behind-the-Back One-arm Cable Curl
+  es: Bucle con polea a un solo brazo por detrás de la espalda
+exercise_7_8:
+  en: Cable Biceps Curl
+  es: Flexión de brazos con polea
+exercise_7_9:
+  en: Cable Hammer Curl
+  es: Flexión de bíceps en polea baja
+exercise_7_10:
+  en: Cheating Barbell Biceps Curl
+  es: Curl de bíceps con barra con asistencia lumbar
+exercise_7_11:
+  en: Close-grip EZ-Bar Biceps Curl
+  es: Curl de bíceps con barra Z y agarre corto
+exercise_7_12:
+  en: Cross-body Dumbbell Hammer Curl
+  es: Curl con mancuernas tipo martillo y cruzado
+exercise_7_13:
+  en: Dead-hang Biceps Curl
+  es: Curl de bíceps de pie
+exercise_7_14:
+  en: Decline Hammer Curl
+  es: Curl tipo martillo declinado
+exercise_7_15:
+  en: Dumbbell Biceps Curl with Static Hold
+  es: Curl de bíceps con mancuernas en postura estática
+exercise_7_16:
+  en: Dumbbell Hammer Curl
+  es: Curl De Martillo Con Mancuerna
+exercise_7_17:
+  en: Dumbbell Reverse Wrist Curl
+  es: Flexión de muñecas inversa con mancuernas
+exercise_7_18:
+  en: Dumbbell Wrist Curl
+  es: Flexión de muñeca con mancuerna
+exercise_7_19:
+  en: EZ-Bar Preacher Curl
+  es: Curl de bíceps en banco Scott con barra Z
+exercise_7_20:
+  en: Forward Bend Biceps Curl
+  es: Curl de bíceps con inclinación hacia delante
+exercise_7_21:
+  en: Hammer Curl to Press
+  es: Curl tipo martillo con press
+exercise_7_22:
+  en: Incline Dumbbell Biceps Curl
+  es: Curl de bíceps inclinado con mancuernas
+exercise_7_23:
+  en: Incline Offset Thumb Dumbbell Curl
+  es: Curl inclinado con mancuerna con pulgar desplazado
+exercise_7_24:
+  en: Kettlebell Biceps Curl
+  es: Curl de bíceps con Pesas Rusas
+exercise_7_25:
+  en: Lying Concentration Cable Curl
+  es: Curl concentrado con polea (tumbado)
+exercise_7_26:
+  en: One-arm Preacher Curl
+  es: Curl de bíceps en el banco Scott con un brazo
+exercise_7_27:
+  en: Plate Pinch Curl
+  es: Curl con discos y agarre de pinza
+exercise_7_28:
+  en: Preacher Curl with Cable
+  es: Curl de predicador con polea
+exercise_7_29:
+  en: Reverse EZ-Bar Curl
+  es: Curl inverso con barra EZ
+exercise_7_30:
+  en: Reverse-grip Wrist Curl
+  es: Curl de muñeca con agarre inverso
+exercise_7_31:
+  en: Reverse-grip Barbell Biceps Curl
+  es: Curl de bíceps con barra y agarre en pronación
+exercise_7_32:
+  en: Seated Alternating Dumbbell Biceps Curl
+  es: Curl de bíceps alterno sentado con mancuerna
+exercise_7_33:
+  en: Seated Dumbbell Biceps Curl
+  es: Curl de bíceps sentado con mancuerna
+exercise_7_34:
+  en: Seated Reverse Dumbbell Curl
+  es: Curl inverso con mancuernas, sentado
+exercise_7_35:
+  en: Split-stance Offset Pinky Dumbbell Curl
+  es: Bucle alterno con mancuernas y una pierna apoyada sobre banca
+exercise_7_36:
+  en: Standing Alternating Dumbbell Curls
+  es: Curl alterno con mancuernas de pie
+exercise_7_37:
+  en: Standing Dumbbell Biceps Curl
+  es: Curl de bíceps con mancuernas (de pie)
+exercise_7_38:
+  en: Standing EZ-Bar Biceps Curl
+  es: Curl de bíceps con barra Z y de pie
+exercise_7_39:
+  en: Static Curl
+  es: Bucle estático
+exercise_7_40:
+  en: Swiss Ball Dumbbell Overhead Triceps Extension
+  es: Extensión de tríceps por encima de la cabeza con mancuernas y Pelota Suiza
+exercise_7_41:
+  en: Swiss Ball EZ-Bar Preacher Curl
+  es: Curl de bíceps en banco Scott con barra Z y Pelota Suiza
+exercise_7_42:
+  en: Twisting Standing Dumbbell Biceps Curl
+  es: Curl de bíceps con mancuernas de pie y con giro
+exercise_7_43:
+  en: Wide-grip EZ-Bar Biceps Curl
+  es: Curl de bíceps con barra Z y agarre ancho
+exercise_7_44:
+  en: One-arm Concentration Curl
+  es: Curl concentrado con un brazo
+exercise_7_45:
+  en: Standing Zottman Biceps Curl
+  es: Curl Zottman para bíceps de pie
+exercise_7_46:
+  en: Dumbbell Biceps Curl
+  es: Curl de bíceps con mancuerna
+exercise_7_47:
+  en: Drag Curls
+  es: Curls de arrastre
+exercise_7_48:
+  en: Dumbbell Biceps Curl
+  es: Curl de bíceps con mancuerna
+exercise_7_49:
+  en: Bottle Curl
+  es: Curl con botella
+exercise_7_50:
+  en: Seated Bottle Curl
+  es: Curl con botella sentado
+exercise_8_0:
+  en: Barbell Deadlift
+  es: Peso muerto con barra
+exercise_8_1:
+  en: Barbell Straight-leg Deadlift
+  es: Peso muerto con barra y pierna estirada
+exercise_8_2:
+  en: Dumbbell Deadlift
+  es: Peso muerto con mancuernas
+exercise_8_3:
+  en: Dumbbell Single-leg Deadlift to Row
+  es: Peso muerto y remo con mancuerna sobre una pierna
+exercise_8_4:
+  en: Dumbbell Straight-leg Deadlift
+  es: Peso Muerto Con Mancuernas Y Pierna Estirada
+exercise_8_5:
+  en: Kettlebell Floor to Shelf
+  es: Floor to shelf con pesa rusa
+exercise_8_6:
+  en: One-arm One-leg Deadlift
+  es: Peso muerto con un brazo y con una pierna
+exercise_8_7:
+  en: Rack Pull
+  es: Tirón en Jaula de Sentadillas
+exercise_8_8:
+  en: Rotational Dumbbell Straight-leg Deadlift
+  es: Peso muerto rotatorio con una pierna estirada y mancuerna
+exercise_8_9:
+  en: Single-arm Deadlift
+  es: Peso muerto con un solo brazo
+exercise_8_10:
+  en: Single-leg Barbell Deadlift
+  es: Peso muerto con barra y una pierna
+exercise_8_11:
+  en: Single-leg Barbell Straight-leg Deadlift
+  es: Peso muerto con barra y una sola pierna estirada
+exercise_8_12:
+  en: Single-leg Deadlift with Barbell
+  es: Peso muerto con barra unilateral
+exercise_8_13:
+  en: Single-leg RDL Circuit
+  es: Circuito con peso muerto rumano y con una pierna
+exercise_8_14:
+  en: Single-leg Romanian Deadlift with Dumbbell
+  es: Peso muerto a una pierna con mancuernas
+exercise_8_15:
+  en: Sumo Deadlift
+  es: Peso muerto estilo sumo
+exercise_8_16:
+  en: Sumo Deadlift High Pull
+  es: Peso muerto estilo sumo con tirón alto
+exercise_8_17:
+  en: Trap-bar Deadlift
+  es: Peso muerto con Barra de Trapecios
+exercise_8_18:
+  en: Wide-grip Barbell Deadlift
+  es: Peso muerto de agarre ancho
+exercise_8_20:
+  en: Kettlebell Deadlift
+  es: Peso muerto con pesa rusa
+exercise_8_21:
+  en: Kettlebell Sumo Deadlift
+  es: Peso muerto sumo con pesa rusa
+exercise_8_23:
+  en: Romanian Deadlift
+  es: Peso muerto rumano
+exercise_8_24:
+  en: Single-leg Romanian Deadlift Circuit
+  es: Circuito de peso muerto rumano a una pierna
+exercise_8_25:
+  en: Straight-leg Deadlift
+  es: Peso muerto con pierna estirada
+exercise_9_0:
+  en: Cable Crossover
+  es: Crossover con polea
+exercise_9_1:
+  en: Decline Dumbbell Fly
+  es: Aperturas con mancuernas en banco inclinado
+exercise_9_2:
+  en: Dumbbell Fly
+  es: Vuelo con mancuernas
+exercise_9_3:
+  en: Incline Dumbbell Fly
+  es: Vuelo inclinado con mancuernas
+exercise_9_4:
+  en: Kettlebell Fly
+  es: Aperturas con Pesas Rusas
+exercise_9_5:
+  en: Kneeling Rear Fly
+  es: Apertura trasera arrodillado
+exercise_9_6:
+  en: Single-arm Standing Cable Reverse Fly
+  es: Apertura inversa con polea a un solo brazo y de pie
+exercise_9_7:
+  en: Swiss Ball Dumbbell Fly
+  es: Aperturas con mancuernas con Pelota Suiza
+exercise_9_8:
+  en: Arm Rotations
+  es: Rotaciones de brazo
+exercise_9_9:
+  en: Hug a Tree
+  es: Abrazo del árbol
+exercise_9_10:
+  en: Face-down Incline Reverse Flye
+  es: Apertura inversa inclinada boca abajo
+exercise_9_11:
+  en: Incline Reverse Fly
+  es: Apertura inversa inclinada
+exercise_9_12:
+  en: Rear Delt Fly
+  es: Pájaros laterales
+exercise_10_0:
+  en: Barbell Hip Thrust on Floor
+  es: Levantamiento de barra sobre cadera en el suelo
+exercise_10_1:
+  en: Barbell Hip Thrust with Bench
+  es: Levantamiento de barra sobre cadera, en banca
+exercise_10_2:
+  en: Bent-knee Swiss Ball Reverse Hip Raise
+  es: Elevación de caderas inversa en Pelota Suiza con rodillas flexionadas
+exercise_10_3:
+  en: Weighted Bent-knee Swiss Ball Reverse Hip Raise
+  es: Elevación de cadera inversa lastrada con balón suizo y rodillas dobladas
+exercise_10_4:
+  en: Bridge with Leg Extension
+  es: Puente con extensión de pierna
+exercise_10_5:
+  en: Weighted Bridge with Leg Extension
+  es: Puente con extensión de piernas lastrado
+exercise_10_6:
+  en: Clam Bridge
+  es: Puente con apertura tipo almeja
+exercise_10_7:
+  en: Front Kick Tabletop
+  es: Fondos con patada frontal
+exercise_10_8:
+  en: Weighted Front Kick Tabletop
+  es: Fondos lastrados con patada frontal
+exercise_10_9:
+  en: Hip Extension and Cross
+  es: Extensión y cruce de caderas
+exercise_10_10:
+  en: Weighted Hip Extension and Cross
+  es: Extensión y cruce de caderas lastrado
+exercise_10_11:
+  en: Hip Raise
+  es: Levantamiento de caderas
+exercise_10_12:
+  en: Weighted Hip Raise
+  es: Elevación de caderas lastrada
+exercise_10_13:
+  en: Hip Raise with Feet on Swiss Ball
+  es: Elevación de caderas con los pies en Pelota Suiza
+exercise_10_14:
+  en: Weighted Hip Raise with Feet on Swiss Ball
+  es: Elevación de caderas lastrada con pies en balón suizo
+exercise_10_15:
+  en: Hip Raise with Head on Bosu® Balance Trainer
+  es: Elevación de caderas con cabeza en semiesfera de equilibrio Bosu®
+exercise_10_16:
+  en: Weighted Hip Raise with Head on Bosu® Balance Trainer
+  es: Elevación de caderas lastrada con cabeza en semiesfera de equilibrio Bosu®
+exercise_10_17:
+  en: Hip Raise with Head on Swiss Ball
+  es: Elevación de caderas con la cabeza en Pelota Suiza
+exercise_10_18:
+  en: Weighted Hip Raise with Head on Swiss Ball
+  es: Elevación de caderas lastrada con cabeza en balón suizo
+exercise_10_19:
+  en: Hip Raise with Knee Squeeze
+  es: Elevación de caderas con contracción de rodilla
+exercise_10_20:
+  en: Weighted Hip Raise with Knee Squeeze
+  es: Elevación de caderas lastrada con presión de rodillas
+exercise_10_21:
+  en: Incline Rear-leg Extension
+  es: Extensión de piernas con inclinación
+exercise_10_22:
+  en: Weighted Incline Rear-leg Extension
+  es: Extensión lastrada con pierna inclinada hacia atrás
+exercise_10_23:
+  en: Kettlebell Swing
+  es: Balanceo Con Pesas Rusas
+exercise_10_24:
+  en: Marching Hip Raise
+  es: Elevación de caderas en movimiento
+exercise_10_25:
+  en: Weighted Marching Hip Raise
+  es: Elevación de caderas lastrada con marcha
+exercise_10_26:
+  en: Marching Hip Raise with Feet on a Swiss Ball
+  es: Elevación de caderas con marcha y pies en balón suizo
+exercise_10_27:
+  en: Weighted Marching Hip Raise with Feet on a Swiss Ball
+  es: Elevación de caderas lastrada con marcha y pies en balón suizo
+exercise_10_28:
+  en: Reverse Hip Raise
+  es: Elevación de caderas inversa
+exercise_10_29:
+  en: Weighted Reverse Hip Raise
+  es: Elevación de caderas inversa lastrada
+exercise_10_30:
+  en: Single-leg Hip Raise
+  es: Elevación de caderas con una pierna
+exercise_10_31:
+  en: Weighted Single-leg Hip Raise
+  es: Elevación de caderas lastrada a una pierna
+exercise_10_32:
+  en: Single-leg Hip Raise with Foot on Bench
+  es: Elevación de caderas con una pierna y pie en un banco
+exercise_10_33:
+  en: Weighted Single-leg Hip Raise with Foot on Bench
+  es: Elevación de caderas lastrada a una pierna con pie en banco
+exercise_10_34:
+  en: Single-leg Hip Raise with Foot on Bosu® Balance Trainer
+  es: Elevación de caderas a una pierna con pie en semiesfera de equilibrio Bosu®
+exercise_10_35:
+  en: Weighted Single-leg Hip Raise with Foot on Bosu® Balance Trainer
+  es: Elevación de caderas lastrada a una pierna con pie en semiesfera de equilibrio Bosu®
+exercise_10_36:
+  en: Single-leg Hip Raise with Foot on Foam Roller
+  es: Elevación de caderas con una pierna y pie en rodillo de espuma
+exercise_10_37:
+  en: Weighted Single-leg Hip Raise with Foot on Foam Roller
+  es: Elevación de caderas lastrada a una pierna con pie en rodillo de espuma
+exercise_10_38:
+  en: Single-leg Hip Raise with Foot on Medicine Ball
+  es: Elevación de caderas con una pierna y pie en Balón Medicinal
+exercise_10_39:
+  en: Weighted Single-leg Hip Raise with Foot on Medicine Ball
+  es: Elevación de caderas lastrada a una pierna con pie en balón medicinal
+exercise_10_40:
+  en: Single-leg Hip Raise with Head on Bosu® Balance Trainer
+  es: Elevación de caderas a una pierna con cabeza en semiesfera de equilibrio Bosu®
+exercise_10_41:
+  en: Weighted Single-leg Hip Raise with Head on Bosu® Balance Trainer
+  es: Elevación de caderas lastrada a una pierna con cabeza en semiesfera de equilibrio Bosu®
+exercise_10_42:
+  en: Weighted Clam Bridge
+  es: Puente con peso
+exercise_10_43:
+  en: Single-leg Swiss Ball Hip Raise and Leg Curl
+  es: Elevación de caderas y curl de una pierna con balón suizo
+exercise_10_44:
+  en: Clams
+  es: Almeja
+exercise_10_47:
+  en: Leg Circles
+  es: Círculos de piernas
+exercise_10_48:
+  en: Leg Lift
+  es: Levantamiento de pierna
+exercise_10_49:
+  en: Leg Lift in External Rotation
+  es: levantamiento de pierna con rotación externa
+exercise_11_0:
+  en: Band Side-lying Leg Raise
+  es: Elevación de piernas tumbado de lado con cinta
+exercise_11_1:
+  en: Dead Bug
+  es: Insecto muerto
+exercise_11_2:
+  en: Weighted Dead Bug
+  es: Dead bug lastrado
+exercise_11_3:
+  en: External Hip Raise
+  es: Levantamiento exterior de caderas
+exercise_11_4:
+  en: Weighted External Hip Raise
+  es: Elevación de caderas externa lastrada
+exercise_11_5:
+  en: Fire Hydrant Kicks
+  es: Patadas laterales de rodillas
+exercise_11_6:
+  en: Weighted Fire Hydrant Kicks
+  es: Patadas boca de incendio lastradas
+exercise_11_7:
+  en: Hip Circles
+  es: Círculos de cadera
+exercise_11_8:
+  en: Weighted Hip Circles
+  es: Círculos de caderas lastrados
+exercise_11_9:
+  en: Inner-thigh Lift
+  es: Elevación de muslo interior
+exercise_11_10:
+  en: Weighted Inner-thigh Lift
+  es: Elevación lastrada de muslo interior
+exercise_11_11:
+  en: Lateral Walks with Band at Ankles
+  es: Pasos laterales con banda elástica en los tobillos
+exercise_11_12:
+  en: Pretzel Side Kick
+  es: Patada lateral Pretzel
+exercise_11_13:
+  en: Weighted Pretzel Side Kick
+  es: Patada lateral Pretzel lastrada
+exercise_11_14:
+  en: Prone Hip Internal Rotation
+  es: Rotación interna de caderas en decúbito prono
+exercise_11_15:
+  en: Weighted Prone Hip Internal Rotation
+  es: Rotación interna de caderas lastrada en decúbito prono
+exercise_11_16:
+  en: Quadruped
+  es: Cuadrúpedo
+exercise_11_17:
+  en: Quadruped Hip Extension
+  es: Extensión de caderas cuadrúpeda
+exercise_11_18:
+  en: Weighted Quadruped Hip Extension
+  es: Extensión de cadera lastrada en cuadrupedia
+exercise_11_19:
+  en: Quadruped with Leg Lift
+  es: Cuadrúpedo con elevación de pierna
+exercise_11_20:
+  en: Weighted Quadruped with Leg Lift
+  es: Cuadrúpedo lastrado con elevación de pierna
+exercise_11_21:
+  en: Side-lying Leg Raise
+  es: Elevación de pierna tumbado de lado
+exercise_11_22:
+  en: Weighted Side-lying Leg Raise
+  es: Elevación de pierna lastrada tumbado de lado
+exercise_11_23:
+  en: Sliding Hip Adduction
+  es: Aducción de caderas con deslizamiento
+exercise_11_24:
+  en: Weighted Sliding Hip Adduction
+  es: Abducción de cadera deslizante lastrada
+exercise_11_25:
+  en: Standing Adduction
+  es: Abducción de pie
+exercise_11_26:
+  en: Weighted Standing Adduction
+  es: Abducción de pie lastrada
+exercise_11_27:
+  en: Standing Cable Hip Abduction
+  es: Flexión de cadera con polea (de pie)
+exercise_11_28:
+  en: Standing Hip Abduction
+  es: Flexión de caderas de pie
+exercise_11_29:
+  en: Weighted Standing Hip Abduction
+  es: Abducción de cadera de pie lastrada
+exercise_11_30:
+  en: Standing Rear-leg Raise
+  es: Elevación posterior de pierna de pie
+exercise_11_31:
+  en: Weighted Standing Rear-leg Raise
+  es: Elevación posterior de pierna lastrada de pie
+exercise_11_32:
+  en: Supine Hip Internal Rotation
+  es: Rotación interna de caderas en decúbito supino
+exercise_11_33:
+  en: Weighted Supine Hip Internal Rotation
+  es: Rotación interna de caderas lastrada en decúbito supino
+exercise_11_34:
+  en: Lying Abduction Stretch
+  es: Estiramiento de abductores acostado
+exercise_12_0:
+  en: Single-arm Kettlebell Swing
+  es: Balanceo a un brazo con pesa rusa
+exercise_12_1:
+  en: Single-arm Dumbbell Swing
+  es: Balanceo con un solo brazo y con mancuerna
+exercise_12_2:
+  en: Step-out Swing
+  es: Balanceo con paso lateral
+exercise_12_3:
+  en: One-arm Swing
+  es: Balanceo con un brazo
+exercise_13_0:
+  en: Back Extension with Opposite Arm and Leg Reach
+  es: Extensión de espalda con estiramiento de pierna y brazo opuestos
+exercise_13_1:
+  en: Weighted Back Extension with Opposite Arm and Leg Reach
+  es: Extensión de espalda lastrada con alcance de brazo y pierna opuestos
+exercise_13_2:
+  en: Base Rotations
+  es: Rotaciones de base
+exercise_13_3:
+  en: Weighted Base Rotations
+  es: Rotaciones básicas lastradas
+exercise_13_4:
+  en: Bent-knee Reverse Hyperextension
+  es: Hiperextensión inversa con rodilla flexionada
+exercise_13_5:
+  en: Weighted Bent-knee Reverse Hyperextension
+  es: Hiperextensión inversa lastrada con rodilla flexionada
+exercise_13_6:
+  en: Hollow, Hold, and Roll
+  es: Brazos-piernas elevados, aguantar y rodar
+exercise_13_7:
+  en: Weighted Hollow, Hold, and Roll
+  es: Contracción, mantener posición y rodar lastrado
+exercise_13_8:
+  en: Kicks
+  es: Patadas
+exercise_13_9:
+  en: Weighted Kicks
+  es: Patadas lastradas
+exercise_13_10:
+  en: Knee Raises
+  es: Elevaciones de rodillas
+exercise_13_11:
+  en: Weighted Knee Raises
+  es: Elevaciones de rodillas lastradas
+exercise_13_12:
+  en: Kneeling Superman
+  es: Supermán arrodillado
+exercise_13_13:
+  en: Weighted Kneeling Superman
+  es: Superman de rodillas lastrado
+exercise_13_14:
+  en: Lat Pull-down with Row
+  es: Pulldown lateral con remo
+exercise_13_15:
+  en: Medicine Ball Deadlift-to-Reach
+  es: Peso muerto a elongación con balón medicinal
+exercise_13_16:
+  en: One-arm One-leg Row
+  es: Remo a una pierna y un brazo
+exercise_13_17:
+  en: One-arm Row with Band
+  es: Remo a un brazo con banda
+exercise_13_18:
+  en: Overhead Lunge with Medicine Ball
+  es: Zancada con balón medicinal por encima de la cabeza
+exercise_13_19:
+  en: Plank Knee Tucks
+  es: Carpado con plancha de rodillas
+exercise_13_20:
+  en: Weighted Plank Knee Tucks
+  es: Plancha lastrada con flexiones de rodilla
+exercise_13_21:
+  en: Side Step
+  es: Zancada lateral
+exercise_13_22:
+  en: Weighted Side Step
+  es: Paso lateral lastrado
+exercise_13_23:
+  en: Single-leg Back Extension
+  es: Extensión de espalda con una pierna
+exercise_13_24:
+  en: Weighted Single-leg Back Extension
+  es: Extensión de espalda lastrada con una pierna
+exercise_13_25:
+  en: Spine Extension
+  es: Extensión de  columna
+exercise_13_26:
+  en: Weighted Spine Extension
+  es: Extensión espinal lastrada
+exercise_13_27:
+  en: Static Back Extension
+  es: Extensión de espalda estática
+exercise_13_28:
+  en: Weighted Static Back Extension
+  es: Extensión de espalda estática lastrada
+exercise_13_29:
+  en: Superman from Floor
+  es: Superman desde el suelo
+exercise_13_30:
+  en: Weighted Superman from Floor
+  es: Superman desde el suelo lastrado
+exercise_13_31:
+  en: Swiss Ball Back Extension
+  es: Extensión de espalda con Pelota Suiza
+exercise_13_32:
+  en: Weighted Swiss Ball Back Extension
+  es: Extensión de espalda lastrada con balón suizo
+exercise_13_33:
+  en: Swiss Ball Hyperextension
+  es: Hiperextensión con Pelota Suiza
+exercise_13_34:
+  en: Weighted Swiss Ball Hyperextension
+  es: Hiperextensión lastrada con balón suizo
+exercise_13_35:
+  en: Swiss Ball Opposite Arm and Leg Lift
+  es: Elevación de pierna y brazo contrario sobre Pelota Suiza
+exercise_13_36:
+  en: Weighted Swiss Ball Opposite Arm and Leg Lift
+  es: Elevación de brazo y pierna opuestos lastrada con balón suizo
+exercise_13_37:
+  en: Superman on Swiss Ball
+  es: Superman con balón suizo
+exercise_13_38:
+  en: Cobra
+  es: Cobra
+exercise_14_0:
+  en: 45-degree Cable External Rotation
+  es: Rotación Externa De 45 Grados Con Polea
+exercise_14_1:
+  en: Alternating Lateral Raise with Static Hold
+  es: Elevaciones laterales alternas en postura estática
+exercise_14_2:
+  en: Bar Muscle-up
+  es: Dominada de bombero en barra
+exercise_14_3:
+  en: Bent-over Lateral Raise
+  es: Elevaciones laterales con el tronco inclinado
+exercise_14_4:
+  en: Cable Diagonal Raise
+  es: Elevación diagonal con polea
+exercise_14_5:
+  en: Cable Front Raise
+  es: Levantamiento frontal con polea
+exercise_14_6:
+  en: Calorie Row
+  es: Remo quemacalorías
+exercise_14_7:
+  en: Combo Shoulder Raise
+  es: Elevación de hombros combinada
+exercise_14_8:
+  en: Dumbbell Diagonal Raise
+  es: Levantamientos en diagonal con mancuernas
+exercise_14_9:
+  en: Dumbbell V Raise
+  es: Levantamiento en V de mancuernas
+exercise_14_10:
+  en: Front Raise
+  es: Elevación frontal
+exercise_14_11:
+  en: Leaning Dumbbell Lateral Raise
+  es: Zancada lateral inclinada con mancuerna
+exercise_14_12:
+  en: Lying Dumbbell Raise
+  es: Elevaciones con mancuernas tumbado
+exercise_14_13:
+  en: Muscle-up (progression)
+  es: Dominada de bombero (progresión)
+exercise_14_14:
+  en: One-arm Cable Lateral Raise
+  es: Elevación lateral de polea a un solo brazo
+exercise_14_15:
+  en: Overhand-grip Rear Lateral Raise
+  es: Elevación lateral trasera con agarre por encima
+exercise_14_16:
+  en: Plate Raises
+  es: Levantamientos de disco
+exercise_14_17:
+  en: Ring Dip
+  es: Fondos de anillas
+exercise_14_18:
+  en: Weighted Ring Dip
+  es: Fondos de anillas lastrados
+exercise_14_19:
+  en: Ring Muscle-up
+  es: Dominada de bombero en anillas
+exercise_14_20:
+  en: Weighted Ring Muscle-up
+  es: Dominada de bombero lastrada en anillas
+exercise_14_21:
+  en: Rope Climb
+  es: Escalada con cuerda
+exercise_14_22:
+  en: Weighted Rope Climb
+  es: Escalada con cuerda lastrada
+exercise_14_23:
+  en: Scaption
+  es: Scaption (vuelos laterales)
+exercise_14_24:
+  en: Seated Lateral Raise
+  es: Elevaciones laterales sentado
+exercise_14_25:
+  en: Seated Rear Lateral Raise
+  es: Elevaciones laterales traseras sentado
+exercise_14_26:
+  en: Side-lying Lateral Raise
+  es: Elevación lateral tumbado de lado
+exercise_14_27:
+  en: Standing Lift
+  es: Elevación en posición de pie
+exercise_14_28:
+  en: Suspended Row
+  es: Remo suspendido
+exercise_14_29:
+  en: Underhand-grip Rear Lateral Raise
+  es: Elevaciones laterales traseras con agarre en supinación.
+exercise_14_30:
+  en: Wall Slide
+  es: Deslizamiento contra la pared.
+exercise_14_31:
+  en: Weighted Wall Slide
+  es: Deslizamiento contra la pared lastrado
+exercise_14_32:
+  en: Arm Circles
+  es: Círculos de brazos
+exercise_14_33:
+  en: Shaving the Head
+  es: Afeitado de cabeza
+exercise_14_34:
+  en: Dumbbell Lateral Raise
+  es: Elevación lateral con mancuerna
+exercise_14_36:
+  en: Kipping Ring Dip
+  es: Fondo con balanceo en anillas
+exercise_14_37:
+  en: Wall Walk
+  es: Caminata en pared
+exercise_14_38:
+  en: Front Raise
+  es: Elevación frontal
+exercise_14_39:
+  en: Lateral Raise
+  es: Elevación lateral
+exercise_14_40:
+  en: Double-arm Forward/Overhead
+  es: Elevación de los dos brazos hacia delante/sobre la cabeza
+exercise_14_41:
+  en: Straight-arm Overhead
+  es: Elevación sobre la cabeza con el brazo recto
+exercise_15_0:
+  en: Leg Curl
+  es: Curl de pierna
+exercise_15_1:
+  en: Weighted Leg Curl
+  es: Curl de pierna lastrado
+exercise_15_2:
+  en: Good Morning
+  es: Buenos Días
+exercise_15_3:
+  en: Seated Barbell Good Morning
+  es: Buenos días con Barra de Pesas sentado
+exercise_15_4:
+  en: Single-leg Barbell Good Morning
+  es: Buenos días con Barra de Pesas a una sola pierna
+exercise_15_5:
+  en: Single-leg Sliding Leg Curl
+  es: Levantamiento de pierna deslizante con una pierna
+exercise_15_6:
+  en: Sliding Leg Curl
+  es: Levantamiento de pierna con deslizamiento
+exercise_15_7:
+  en: Split Barbell Good Morning
+  es: Buenos días dividido con Barra de Pesas
+exercise_15_8:
+  en: Split-stance Extension
+  es: Extensión con piernas abiertas
+exercise_15_9:
+  en: Staggered-stance Good Morning
+  es: Buenos días en posición escalonada
+exercise_15_10:
+  en: Swiss Ball Hip Raise and Leg Curl
+  es: Elevación de cadera y encogimiento de piernas con Pelota Suiza
+exercise_15_11:
+  en: Zercher Good Morning
+  es: Buenos días Zercher
+exercise_15_12:
+  en: Band Good Morning
+  es: Buenos días con goma elástica
+exercise_15_13:
+  en: Bar Good Morning
+  es: Buenos días con barra
+exercise_16_0:
+  en: Hanging Knee Raise
+  es: Extensión de rodillas en suspensión
+exercise_16_1:
+  en: Hanging Leg Raise
+  es: Elevación de piernas colgado
+exercise_16_2:
+  en: Weighted Hanging Leg Raise
+  es: Elevación de piernas lastrada en suspensión
+exercise_16_3:
+  en: Hanging Single-leg Raise
+  es: Elevación de una pierna colgado
+exercise_16_4:
+  en: Weighted Hanging Single-leg Raise
+  es: Elevación de una pierna lastrada en suspensión
+exercise_16_5:
+  en: Kettlebell Leg Raises
+  es: Levantamiento de pierna con Pesas Rusas
+exercise_16_6:
+  en: Leg Lowering Drill
+  es: Rutina de descenso de piernas
+exercise_16_7:
+  en: Weighted Leg Lowering Drill
+  es: Rutina de descenso de piernas lastrada
+exercise_16_8:
+  en: Lying Straight-leg Raise
+  es: Elevación de piernas rectas tumbado
+exercise_16_9:
+  en: Weighted Lying Straight-leg Raise
+  es: Elevación de piernas rectas lastrada tumbado
+exercise_16_10:
+  en: Medicine Ball Leg Drops
+  es: Caídas de pierna con Balón Medicinal
+exercise_16_11:
+  en: Quadruped Leg Raise
+  es: Levantamiento cuadrúpedo de pierna
+exercise_16_12:
+  en: Weighted Quadruped Leg Raise
+  es: Elevación de piernas lastrada en cuadrupedia
+exercise_16_13:
+  en: Reverse Leg Raise
+  es: Elevación de pierna inversa
+exercise_16_14:
+  en: Weighted Reverse Leg Raise
+  es: Elevación de piernas inversa lastrada
+exercise_16_15:
+  en: Reverse Leg Raise on Swiss Ball
+  es: Elevación inversa de pierna en Pelota Suiza
+exercise_16_16:
+  en: Weighted Reverse Leg Raise on Swiss Ball
+  es: Elevación de piernas inversa lastrada en balón suizo
+exercise_16_17:
+  en: Single-leg Lowering Drill
+  es: Rutina de descenso de una sola pierna
+exercise_16_18:
+  en: Weighted Single-leg Lowering Drill
+  es: Rutina de descenso de una pierna lastrada
+exercise_16_19:
+  en: Weighted Hanging Knee Raise
+  es: Extensión de rodillas en suspensión y con peso
+exercise_16_20:
+  en: Lateral Step-over
+  es: Stepover lateral
+exercise_16_21:
+  en: Weighted Lateral Step-over
+  es: Paso lateral lastrado
+exercise_17_0:
+  en: Overhead Lunge
+  es: Zancada con brazos en alto
+exercise_17_1:
+  en: Lunge Matrix
+  es: Matriz de zancadas
+exercise_17_2:
+  en: Weighted Lunge Matrix
+  es: Matriz de zancadas lastrada
+exercise_17_3:
+  en: Alternating Barbell Forward Lunge
+  es: Zancada alterna hacia delante con barra
+exercise_17_4:
+  en: Alternating Dumbbell Lunge with Reach
+  es: Zancada alterna con mancuerna
+exercise_17_5:
+  en: Back-foot Elevated Dumbbell Split Squat
+  es: Sentadilla dividida con mancuernas y pie trasero elevado
+exercise_17_6:
+  en: Barbell Box Lunge
+  es: Zancada con caja y barra
+exercise_17_7:
+  en: Barbell Bulgarian Split Squat
+  es: Sentadilla Búlgara Dividida Con Barra
+exercise_17_8:
+  en: Barbell Crossover Lunge
+  es: Zancada cruzada con barra
+exercise_17_9:
+  en: Barbell Front Split Squat
+  es: Sentadilla frontal en tijeras con barra
+exercise_17_10:
+  en: Barbell Lunge
+  es: Zancada con Barra de Pesas
+exercise_17_11:
+  en: Barbell Reverse Lunge
+  es: Zancada inversa con barra
+exercise_17_12:
+  en: Barbell Side Lunge
+  es: Zancada lateral con barra
+exercise_17_13:
+  en: Barbell Split Squat
+  es: Sentadilla frontal con barra
+exercise_17_14:
+  en: Core Control Rear Lunge
+  es: Zancada trasera con control de abdominales
+exercise_17_15:
+  en: Diagonal Lunge
+  es: Zancada diagonal
+exercise_17_16:
+  en: Drop Lunge
+  es: Zancada con flexión profunda
+exercise_17_17:
+  en: Dumbbell Box Lunge
+  es: Zancada con caja y mancuernas
+exercise_17_18:
+  en: Dumbbell Bulgarian Split Squat
+  es: Sentadilla búlgara en tijera con mancuernas
+exercise_17_19:
+  en: Dumbbell Crossover Lunge
+  es: Zancada cruzada con mancuernas
+exercise_17_20:
+  en: Dumbbell Diagonal Lunge
+  es: Zancada diagonal con mancuernas
+exercise_17_21:
+  en: Dumbbell Lunge
+  es: Zancada con mancuernas
+exercise_17_22:
+  en: Dumbbell Lunge and Rotation
+  es: Zancada con mancuernas y rotación
+exercise_17_23:
+  en: Dumbbell Overhead Bulgarian Split Squat
+  es: Sentadilla búlgara split con mancuernas por encima de la cabeza
+exercise_17_24:
+  en: Dumbbell Reverse Lunge to High Knee and Press
+  es: Zancada inversa a rodilla alta con mancuerna y press
+exercise_17_25:
+  en: Dumbbell Side Lunge
+  es: Zancada lateral con mancuernas
+exercise_17_26:
+  en: Elevated Front-foot Barbell Split Squat
+  es: Sentadilla dividida con barra y pie delantero elevado
+exercise_17_27:
+  en: Elevated Front-foot Dumbbell Split Squat
+  es: Sentadilla búlgara con mancuerna y pie anterior elevado
+exercise_17_28:
+  en: Gunslinger Lunge
+  es: Zancada de pistolero
+exercise_17_29:
+  en: Lawnmower Lunge
+  es: Zancada cortacésped
+exercise_17_30:
+  en: Low Lunge with Isometric Adduction
+  es: Zancada baja con aducción isométrica (del hombro)
+exercise_17_31:
+  en: Low Side-to-Side Lunge
+  es: Zancada corta de lado a lado
+exercise_17_32:
+  en: Lunge
+  es: Zancada
+exercise_17_33:
+  en: Weighted Lunge
+  es: Zancada lastrada
+exercise_17_34:
+  en: Lunge with Arm Reach
+  es: Zancada con alcance de brazo
+exercise_17_35:
+  en: Lunge with Diagonal Reach
+  es: Zancada con extensión en diagonal
+exercise_17_36:
+  en: Lunge with Side Bend
+  es: Zancada con flexión lateral
+exercise_17_37:
+  en: Offset Dumbbell Lunge
+  es: Zancada inversa con mancuerna
+exercise_17_38:
+  en: Offset Dumbbell Reverse Lunge
+  es: Zancada inversa con mancuerna
+exercise_17_39:
+  en: Overhead Bulgarian Split Squat
+  es: Sentadilla búlgara dividida por encima de la cabeza
+exercise_17_40:
+  en: Overhead Dumbbell Reverse Lunge
+  es: Zancada inversa con mancuerna por encima de la cabeza
+exercise_17_41:
+  en: Overhead Dumbbell Split Squat
+  es: Sentadilla dividida con mancuernas por encima de la cabeza
+exercise_17_42:
+  en: Overhead Lunge with Rotation
+  es: Zancada con rotación y brazos por encima de la cabeza
+exercise_17_43:
+  en: Reverse Barbell Box Lunge
+  es: Zancada inversa con caja y barra
+exercise_17_44:
+  en: Reverse Box Lunge
+  es: Zancada inversa con cajón
+exercise_17_45:
+  en: Reverse Dumbbell Box Lunge
+  es: Zancada inversa con caja y mancuernas
+exercise_17_46:
+  en: Reverse Dumbbell Crossover Lunge
+  es: Zancada cruzada con mancuernas inversa
+exercise_17_47:
+  en: Reverse Dumbbell Diagonal Lunge
+  es: Zancada diagonal inversa con mancuernas
+exercise_17_48:
+  en: Reverse Lunge with Reach Back
+  es: Zancada inversa con extensión hacia atrás
+exercise_17_49:
+  en: Weighted Reverse Lunge with Reach Back
+  es: Zancada inversa lastrada con extensión hacia atrás
+exercise_17_50:
+  en: Reverse Lunge with Twist and Overhead Reach
+  es: Zancada inversa con giro y extensión por encima de la cabeza.
+exercise_17_51:
+  en: Weighted Reverse Lunge with Twist and Overhead Reach
+  es: Zancada inversa lastrada con rotación y extensión superior
+exercise_17_52:
+  en: Reverse Sliding Box Lunge
+  es: Zancada inversa con deslizamiento con cajón
+exercise_17_53:
+  en: Weighted Reverse Sliding Box Lunge
+  es: Zancada inversa lastrada deslizante con cajón
+exercise_17_54:
+  en: Reverse Sliding Lunge
+  es: Zancada inversa deslizante
+exercise_17_55:
+  en: Weighted Reverse Sliding Lunge
+  es: Zancada inversa lastrada deslizante
+exercise_17_56:
+  en: Runner's Lunge to Balance
+  es: Zancada de corredor en equilibrio
+exercise_17_57:
+  en: Weighted Runner's Lunge to Balance
+  es: Zancada de corredor en equilibrio lastrada
+exercise_17_58:
+  en: Shifting Side Lunge
+  es: Zancada lateral y cambio
+exercise_17_59:
+  en: Side and Crossover Lunge
+  es: Zancada cruzada y lateral
+exercise_17_60:
+  en: Weighted Side and Crossover Lunge
+  es: Zancada cruzada y lateral lastrada
+exercise_17_61:
+  en: Side Lunge
+  es: Zancada lateral
+exercise_17_62:
+  en: Weighted Side Lunge
+  es: Zancada lateral lastrada
+exercise_17_63:
+  en: Side Lunge and Press
+  es: Zancada lateral y press
+exercise_17_64:
+  en: Side Lunge Jump Off
+  es: Salto con zancada lateral
+exercise_17_65:
+  en: Side Lunge Sweep
+  es: Zancada lateral con movimiento circular
+exercise_17_66:
+  en: Weighted Side Lunge Sweep
+  es: Zancada lateral lastrada con barrido
+exercise_17_67:
+  en: Side Lunge to Crossover Tap
+  es: Zancada lateral con toque cruzado
+exercise_17_68:
+  en: Weighted Side Lunge to Crossover Tap
+  es: Zancada lateral lastrada con toque cruzado
+exercise_17_69:
+  en: Side-to-Side Lunge Chops
+  es: Zancadas laterales de lado a lado
+exercise_17_70:
+  en: Weighted Side-to-Side Lunge Chops
+  es: Zancada lateral lastrada lado a lado de leñador
+exercise_17_71:
+  en: Siff Jump Lunge
+  es: Zancadas con saltos siff
+exercise_17_72:
+  en: Weighted Siff Jump Lunge
+  es: Zancada alterna lastrada con salto
+exercise_17_73:
+  en: Single-arm Reverse Lunge and Press
+  es: Zancada inversa con un brazo y press
+exercise_17_74:
+  en: Sliding Lateral Lunge
+  es: Zancada lateral deslizante
+exercise_17_75:
+  en: Weighted Sliding Lateral Lunge
+  es: Zancada lateral deslizante lastrada
+exercise_17_76:
+  en: Walking Barbell Lunge
+  es: Zancada caminando con Barra de Pesas
+exercise_17_77:
+  en: Walking Dumbbell Lunge
+  es: Zancada caminando con mancuerna
+exercise_17_78:
+  en: Walking Lunge
+  es: Zancada caminando
+exercise_17_79:
+  en: Weighted Walking Lunge
+  es: Zancada lastrada caminando
+exercise_17_80:
+  en: Wide-grip Overhead Barbell Split Squat
+  es: Sentadilla dividida frontal con barra por encima de la cabeza y agarre ancho
+exercise_17_81:
+  en: Alternating Dumbbell Lunge
+  es: Zancada alterna con mancuernas
+exercise_17_82:
+  en: Dumbbell Reverse Lunge
+  es: Zancada inversa con mancuernas
+exercise_17_83:
+  en: Overhead Dumbbell Lunge
+  es: Zancada con mancuernas por encima de la cabeza
+exercise_17_84:
+  en: Scissor Power Switch
+  es: Zancada con salto en tijera
+exercise_17_85:
+  en: Dumbbell Overhead Walking Lunge
+  es: Zancadas andando con mancuerna en alto
+exercise_17_86:
+  en: Curtsy Lunge
+  es: Zancada Curtsy
+exercise_17_87:
+  en: Weighted Curtsy Lunge
+  es: Zancada Curtsy lastrada
+exercise_17_88:
+  en: Weighted Shifting Side Lunge
+  es: Zancada lateral lastrada con desplazamiento de peso
+exercise_17_89:
+  en: Weighted Side Lunge and Press
+  es: Zancada lateral lastrada con press
+exercise_17_90:
+  en: Weighted Side Lunge Jump Off
+  es: Zancada lateral lastrada con salto
+exercise_18_0:
+  en: Barbell Hang Power Clean
+  es: Cargada de potencia desde colgante con barra
+exercise_18_1:
+  en: Barbell Hang Squat Clean
+  es: Cargada en sentadilla desde colgante con barra
+exercise_18_2:
+  en: Barbell Power Clean
+  es: Cargada de potencia con barra
+exercise_18_3:
+  en: Barbell Power Snatch
+  es: Arrancada de potencia con barra
+exercise_18_4:
+  en: Barbell Squat Clean
+  es: Cargada en sentadilla con barra
+exercise_18_5:
+  en: Clean and Jerk
+  es: Cargada y envión (dos tiempos)
+exercise_18_6:
+  en: Barbell Hang Power Snatch
+  es: Arrancada de potencia desde colgante con barra
+exercise_18_7:
+  en: Barbell Hang Pull
+  es: Tirón colgado con barra
+exercise_18_8:
+  en: Barbell High Pull
+  es: Tirón alto con Barra de Pesas
+exercise_18_9:
+  en: Barbell Snatch
+  es: Arrancada con Barra de Pesas
+exercise_18_10:
+  en: Barbell Split Jerk
+  es: Jalón dividido con barra
+exercise_18_11:
+  en: Barbell Clean
+  es: Cargada con barra
+exercise_18_12:
+  en: Dumbbell Clean
+  es: Levantamiento limpio de mancuernas
+exercise_18_13:
+  en: Dumbbell Hang Pull
+  es: Remo erguido con mancuernas
+exercise_18_14:
+  en: One-hand Dumbbell Split Snatch
+  es: Arrancada dividida a una mano con mancuerna
+exercise_18_15:
+  en: Push Jerk
+  es: Envión con empuje
+exercise_18_16:
+  en: Single-arm Dumbbell Snatch
+  es: Snatch con mancuerna con un solo brazo
+exercise_18_17:
+  en: Single-arm Hang Snatch
+  es: Arrancada con un solo brazo
+exercise_18_18:
+  en: Single-arm Kettlebell Snatch
+  es: Arrancada con pesa rusa con un solo brazo
+exercise_18_19:
+  en: Split Jerk
+  es: Envión dividido
+exercise_18_20:
+  en: Squat Clean and Jerk
+  es: Cargada y envión en sentadilla
+exercise_18_21:
+  en: Dumbbell Hang Snatch
+  es: Arranque colgante con mancuerna
+exercise_18_22:
+  en: Dumbbell Power Clean and Jerk
+  es: Cargada y envión de potencia con mancuerna
+exercise_18_23:
+  en: Dumbbell Power Clean and Push Press
+  es: Cargada y push press de potencia con mancuerna
+exercise_18_24:
+  en: Dumbbell Power Clean and Strict Press
+  es: Cargada y press estricto de potencia con mancuerna
+exercise_18_25:
+  en: Dumbbell Snatch
+  es: Arranque con mancuerna
+exercise_18_26:
+  en: Medicine Ball Clean
+  es: Cargada con balón medicinal
+exercise_18_27:
+  en: Clean and Press
+  es: Cargada y press
+exercise_18_28:
+  en: Snatch
+  es: Arrancada
+exercise_19_0:
+  en: 45-degree Plank
+  es: Plancha a 45 grados
+exercise_19_1:
+  en: Weighted 45-degree Plank
+  es: Plancha lastrada a 45 grados
+exercise_19_2:
+  en: 90-degree Static Hold
+  es: Mantenimiento de posición a 90 grados
+exercise_19_3:
+  en: Weighted 90-degree Static Hold
+  es: Mantenimiento de posición a 90 grados lastrada
+exercise_19_4:
+  en: Bear Crawl
+  es: Gateo de oso
+exercise_19_5:
+  en: Weighted Bear Crawl
+  es: Gateo de oso lastrado
+exercise_19_6:
+  en: Cross-body Mountain Climber
+  es: Escalador de montañas con cruce de rodilla
+exercise_19_7:
+  en: Weighted Cross-body Mountain Climber
+  es: Escalador de montaña cruzado lastrado
+exercise_19_8:
+  en: Elbow Plank Pike Jacks
+  es: Plancha pike sobre codos con elevación de cadera
+exercise_19_9:
+  en: Weighted Elbow Plank Pike Jacks
+  es: Plancha sobre codos lastrada con pico
+exercise_19_10:
+  en: Elevated-feet Plank
+  es: Plancha con pies en alto
+exercise_19_11:
+  en: Weighted Elevated-feet Plank
+  es: Plancha lastrada con la pierna levantada
+exercise_19_12:
+  en: Elevator Abs
+  es: Abdominales en ascensor
+exercise_19_13:
+  en: Weighted Elevator Abs
+  es: Abdominales en ascensor lastrados
+exercise_19_14:
+  en: Extended Plank
+  es: Plancha extendida
+exercise_19_15:
+  en: Weighted Extended Plank
+  es: Plancha extendida lastrada
+exercise_19_16:
+  en: Full Plank Passé Twist
+  es: Plancha total con cruce y giro
+exercise_19_17:
+  en: Weighted Full Plank Passé Twist
+  es: Plancha completa lastrada con paso con giro
+exercise_19_18:
+  en: Inching Elbow Plank
+  es: Plancha sobre codos con avance lento
+exercise_19_19:
+  en: Weighted Inching Elbow Plank
+  es: Plancha sobre codos lastrada con avance lento
+exercise_19_20:
+  en: Inchworm to Side Plank
+  es: Caminar sobre las manos y plancha lateral
+exercise_19_21:
+  en: Weighted Inchworm to Side Plank
+  es: Caminata de oruga a plancha lateral lastrada
+exercise_19_22:
+  en: Kneeling Plank
+  es: Plancha de rodillas
+exercise_19_23:
+  en: Weighted Kneeling Plank
+  es: Plancha de rodillas lastrada
+exercise_19_24:
+  en: Kneeling Side Plank with Leg Lift
+  es: Plancha lateral  arrodillado y con la pierna levantada
+exercise_19_25:
+  en: Weighted Kneeling Side Plank with Leg Lift
+  es: Plancha lateral lastrada de rodillas con elevación de pierna
+exercise_19_26:
+  en: Lateral Roll
+  es: Movimientos oscilantes laterales
+exercise_19_27:
+  en: Weighted Lateral Roll
+  es: Rodamiento lateral lastrado
+exercise_19_28:
+  en: Lying Reverse Plank
+  es: Plancha inversa tumbado
+exercise_19_29:
+  en: Weighted Lying Reverse Plank
+  es: Plancha inversa tumbado lastrada
+exercise_19_30:
+  en: Medicine Ball Mountain Climber
+  es: Escalador de montaña con Balón Medicinal
+exercise_19_31:
+  en: Weighted Medicine Ball Mountain Climber
+  es: Escalador de montaña lastrado con balón medicinal
+exercise_19_32:
+  en: Modified Mountain Climber and Extension
+  es: Escalador de montaña modificado y extensión
+exercise_19_33:
+  en: Weighted Modified Mountain Climber and Extension
+  es: Escalador de montaña modificado y extensión lastrado
+exercise_19_34:
+  en: Mountain Climber
+  es: Escalador de montaña
+exercise_19_35:
+  en: Weighted Mountain Climber
+  es: Escalador de montaña lastrado
+exercise_19_36:
+  en: Mountain Climber on Sliding Discs
+  es: Escalador sobre Discos Deslizantes
+exercise_19_37:
+  en: Weighted Mountain Climber on Sliding Discs
+  es: Escalador de montaña lastrado en discos deslizantes
+exercise_19_38:
+  en: Mountain Climber with Feet on Bosu® Balance Trainer
+  es: Escalador con pies en semiesfera de equilibrio Bosu®
+exercise_19_39:
+  en: Weighted Mountain Climber with Feet on Bosu® Balance Trainer
+  es: Escalador lastrado con pies en semiesfera de equilibrio Bosu®
+exercise_19_40:
+  en: Mountain Climber with Hands on Bench
+  es: Escalador con manos en banco
+exercise_19_41:
+  en: Mountain Climber with Hands on Swiss Ball
+  es: Escalador con manos sobre Pelota Suiza
+exercise_19_42:
+  en: Weighted Mountain Climber with Hands on Swiss Ball
+  es: Escalador de montaña lastrado con manos en balón suizo
+exercise_19_43:
+  en: Plank
+  es: Plancha
+exercise_19_44:
+  en: Plank Jacks with Feet on Sliding Discs
+  es: Plancha con piernas separadas y pies sobre Discos Deslizantes
+exercise_19_45:
+  en: Weighted Plank Jacks with Feet on Sliding Discs
+  es: Plancha lastrada con las piernas separadas y los pies en discos deslizantes
+exercise_19_46:
+  en: Plank Knee Twist
+  es: Giro de rodilla en plancha
+exercise_19_47:
+  en: Weighted Plank Knee Twist
+  es: Plancha lastrada con giro de rodilla
+exercise_19_48:
+  en: Plank Pike Jumps
+  es: Plancha pike con saltos
+exercise_19_49:
+  en: Weighted Plank Pike Jumps
+  es: Plancha de pico lastrada con saltos
+exercise_19_50:
+  en: Plank Pikes
+  es: Plancha pike
+exercise_19_51:
+  en: Weighted Plank Pikes
+  es: Plancha de pico lastrada
+exercise_19_52:
+  en: Plank to Stand-up
+  es: De plancha a de pie
+exercise_19_53:
+  en: Weighted Plank to Stand-up
+  es: De plancha a de pie lastrado
+exercise_19_54:
+  en: Plank with Arm Raise
+  es: Plancha con levantamiento de brazo
+exercise_19_55:
+  en: Weighted Plank with Arm Raise
+  es: Plancha lastrada con levantamiento de brazo
+exercise_19_56:
+  en: Plank with Knee-to-Elbow
+  es: Plancha con rodilla a codo
+exercise_19_57:
+  en: Weighted Plank with Knee-to-Elbow
+  es: Plancha lastrada con rodilla a codo
+exercise_19_58:
+  en: Plank with Oblique Crunch
+  es: Plancha con encogimiento de oblicuos
+exercise_19_59:
+  en: Weighted Plank with Oblique Crunch
+  es: Plancha lastrada con encogimiento de oblicuos
+exercise_19_60:
+  en: Plyometric Side Plank
+  es: Plancha lateral con ejercicios pliométricos
+exercise_19_61:
+  en: Weighted Plyometric Side Plank
+  es: Plancha pliométrica lateral lastrada
+exercise_19_62:
+  en: Rolling Side Plank
+  es: Plancha lateral rodante
+exercise_19_63:
+  en: Weighted Rolling Side Plank
+  es: Plancha lateral rodante lastrada
+exercise_19_64:
+  en: Side Kick Plank
+  es: Plancha lateral con patada
+exercise_19_65:
+  en: Weighted Side Kick Plank
+  es: Plancha lateral lastrada con patada
+exercise_19_66:
+  en: Side Plank
+  es: Plancha lateral
+exercise_19_67:
+  en: Weighted Side Plank
+  es: Plancha lateral lastrada
+exercise_19_68:
+  en: Side Plank and Row
+  es: Plancha lateral con remo
+exercise_19_69:
+  en: Weighted Side Plank and Row
+  es: Plancha lateral lastrada y remo
+exercise_19_70:
+  en: Side Plank Lift
+  es: Plancha lateral con elevación
+exercise_19_71:
+  en: Weighted Side Plank Lift
+  es: Plancha lateral lastrada con elevación
+exercise_19_72:
+  en: Side Plank with Elbow on Bosu® Balance Trainer
+  es: Plancha lateral con codo en semiesfera de equilibrio Bosu®
+exercise_19_73:
+  en: Weighted Side Plank with Elbow on Bosu® Balance Trainer
+  es: Plancha lateral lastrada con codo en semiesfera de equilibrio Bosu®
+exercise_19_74:
+  en: Side Plank with Feet on Bench
+  es: Plancha lateral con pies sobre el banco
+exercise_19_75:
+  en: Weighted Side Plank with Feet on Bench
+  es: Plancha lateral lastrada con pies en banco
+exercise_19_76:
+  en: Side Plank with Knee Circle
+  es: Plancha lateral con círculos de rodilla
+exercise_19_77:
+  en: Weighted Side Plank with Knee Circle
+  es: Plancha lateral lastrada con círculo de rodilla
+exercise_19_78:
+  en: Side Plank with Knee Tuck
+  es: Plancha lateral con carpado de rodilla
+exercise_19_79:
+  en: Weighted Side Plank with Knee Tuck
+  es: Plancha lateral lastrada con flexión de rodilla
+exercise_19_80:
+  en: Side Plank with Leg Lift
+  es: Plancha lateral con elevación de pierna
+exercise_19_81:
+  en: Weighted Side Plank with Leg Lift
+  es: Plancha lateral lastrada con elevación de pierna
+exercise_19_82:
+  en: Side Plank with Reach Under
+  es: Plancha lateral con extensión debajo del cuerpo
+exercise_19_83:
+  en: Weighted Side Plank with Reach Under
+  es: Plancha lateral lastrada con extensión debajo del cuerpo
+exercise_19_84:
+  en: Single-leg Elevated-feet Plank
+  es: Plancha con pies en alto y una pierna
+exercise_19_85:
+  en: Weighted Single-leg Elevated-feet Plank
+  es: Plancha lastrada de una pierna con pies elevados
+exercise_19_86:
+  en: Single-leg Flex and Extend
+  es: Flexión y extensión de una pierna
+exercise_19_87:
+  en: Weighted Single-leg Flex and Extend
+  es: Flexión y extensión lastrada de una pierna
+exercise_19_88:
+  en: Single-leg Side Plank
+  es: Plancha lateral con una sola pierna
+exercise_19_89:
+  en: Weighted Single-leg Side Plank
+  es: Plancha lateral lastrada de una pierna
+exercise_19_90:
+  en: Spiderman Plank
+  es: Plancha spiderman
+exercise_19_91:
+  en: Weighted Spiderman Plank
+  es: Plancha spiderman lastrada
+exercise_19_92:
+  en: Straight-arm Plank
+  es: Plancha con brazos extendidos
+exercise_19_93:
+  en: Weighted Straight-arm Plank
+  es: Plancha lastrada con brazo recto
+exercise_19_94:
+  en: Straight-arm Plank with Shoulder Touch
+  es: Plancha con brazos extendidos y toque de hombro
+exercise_19_95:
+  en: Weighted Straight-arm Plank with Shoulder Touch
+  es: Plancha lastrada con brazo recto y toque en el hombro
+exercise_19_96:
+  en: Swiss Ball Plank
+  es: Plancha con Pelota Suiza
+exercise_19_97:
+  en: Weighted Swiss Ball Plank
+  es: Plancha lastrada con balón suizo
+exercise_19_98:
+  en: Swiss Ball Plank Leg Lift
+  es: Plancha con levantamiento de pierna en Pelota Suiza
+exercise_19_99:
+  en: Weighted Swiss Ball Plank Leg Lift
+  es: Plancha lastrada con balón suizo y elevación de pierna
+exercise_19_100:
+  en: Swiss Ball Plank Leg Lift and Hold
+  es: Plancha con levantamiento de pierna en Pelota Suiza aguantando la posición
+exercise_19_101:
+  en: Swiss Ball Plank with Feet on Bench
+  es: Plancha con Pelota Suiza y los pies sobre una banca
+exercise_19_102:
+  en: Weighted Swiss Ball Plank with Feet on Bench
+  es: Plancha lastrada con balón suizo y pies en banco
+exercise_19_103:
+  en: Swiss Ball Prone Jackknife
+  es: Jackknife en pronación sobre Pelota Suiza
+exercise_19_104:
+  en: Weighted Swiss Ball Prone Jackknife
+  es: Jackknife en decúbito prono con balón suizo
+exercise_19_105:
+  en: Swiss Ball Side Plank
+  es: Plancha lateral con Pelota Suiza
+exercise_19_106:
+  en: Weighted Swiss Ball Side Plank
+  es: Plancha lateral lastrada con balón suizo
+exercise_19_107:
+  en: Three-way Plank
+  es: Plancha en tres posiciones
+exercise_19_108:
+  en: Weighted Three-way Plank
+  es: Plancha en tres posiciones lastrada
+exercise_19_109:
+  en: Towel Plank and Knee-in
+  es: Plancha con rodillas adelantadas y toallas
+exercise_19_110:
+  en: Weighted Towel Plank and Knee-in
+  es: Plancha lastrada con rodillas adelantadas y toallas
+exercise_19_111:
+  en: T-Stabilization
+  es: Estabilización en T
+exercise_19_112:
+  en: Weighted T-Stabilization
+  es: Estabilización en T lastrada
+exercise_19_113:
+  en: Turkish Get-up to Side Plank
+  es: De levantamiento turco a plancha lateral
+exercise_19_114:
+  en: Weighted Turkish Get-up to Side Plank
+  es: De levantamiento turco a plancha lateral lastrado
+exercise_19_115:
+  en: Two-Point Plank
+  es: Plancha de dos posiciones
+exercise_19_116:
+  en: Weighted Two-Point Plank
+  es: Plancha de dos posiciones lastrada
+exercise_19_117:
+  en: Weighted Plank
+  es: Plancha con peso
+exercise_19_118:
+  en: Wide-stance Plank with Diagonal Arm Lift
+  es: Plancha con las piernas separadas y elevación diagonal de brazo
+exercise_19_119:
+  en: Weighted Wide-stance Plank with Diagonal Arm Lift
+  es: Plancha amplia lastrada con elevación de brazo diagonal
+exercise_19_120:
+  en: Wide-stance Plank with Diagonal Leg Lift
+  es: Plancha con las piernas separadas y elevación diagonal de pierna
+exercise_19_121:
+  en: Weighted Wide-stance Plank with Diagonal Leg Lift
+  es: Plancha amplia lastrada con elevación de pierna diagonal
+exercise_19_122:
+  en: Wide-stance Plank with Leg Lift
+  es: Plancha con las piernas separadas y elevación de pierna
+exercise_19_123:
+  en: Weighted Wide-stance Plank with Leg Lift
+  es: Plancha amplia lastrada con elevación de pierna
+exercise_19_124:
+  en: Wide-stance Plank with Opposite Arm and Leg Lift
+  es: Plancha ampliada con elevación de brazo y pierna opuestos
+exercise_19_125:
+  en: Weighted Mountain Climber with Hands on Bench
+  es: Escalador lastrado con manos en banco
+exercise_19_126:
+  en: Weighted Swiss Ball Plank Leg Lift and Hold
+  es: Plancha lastrada con balón suizo, elevación de pierna y mantener
+exercise_19_127:
+  en: Weighted Wide-stance Plank with Opposite Arm and Leg Lift
+  es: Plancha amplia lastrada con elevación de brazo y pierna opuestos
+exercise_19_128:
+  en: Plank with Feet on Swiss Ball
+  es: Plancha con pies en balón suizo
+exercise_19_129:
+  en: Side Plank to Plank with Reach Under
+  es: Plancha lateral con extensión de brazo debajo del cuerpo
+exercise_19_130:
+  en: Bridge with Glute Lower Lift
+  es: Puente con elevación inferior de glúteo
+exercise_19_131:
+  en: "Bridge: One-leg Bridge"
+  es: "Puente: Puente a una pierna"
+exercise_19_132:
+  en: Plank (with Arm Variations)
+  es: Plancha (con variaciones de brazo)
+exercise_19_133:
+  en: Plank with Leg Lift
+  es: Plancha con la pierna levantada
+exercise_19_134:
+  en: Reverse Plank (with Leg Pull)
+  es: Plancha inversa (con elevación de pierna)
+exercise_19_135:
+  en: Ring Plank Sprawls
+  es: Planchas con extensión en anillas
+exercise_20_0:
+  en: Alternating Jump Lunge
+  es: Zancadas con saltos alternos
+exercise_20_1:
+  en: Weighted Alternating Jump Lunge
+  es: Zancada alterna lastrada con salto
+exercise_20_2:
+  en: Barbell Jump Squat
+  es: Sentadilla con salto y barra
+exercise_20_3:
+  en: Body-weight Jump Squat
+  es: Sentadilla con salto con peso corporal
+exercise_20_4:
+  en: Weighted Jump Squat
+  es: Sentadilla lastrada con salto
+exercise_20_5:
+  en: Cross Knee Strike
+  es: Rodillazo cruzado
+exercise_20_6:
+  en: Weighted Cross Knee Strike
+  es: Golpe de rodilla cruzado lastrado
+exercise_20_7:
+  en: Depth Jump
+  es: Salto de profundidad
+exercise_20_8:
+  en: Weighted Depth Jump
+  es: Salto profundo lastrado
+exercise_20_9:
+  en: Dumbbell Jump Squat
+  es: Sentadilla con salto y mancuernas
+exercise_20_10:
+  en: Dumbbell Split Jump
+  es: Salto en tijeras con mancuernas
+exercise_20_11:
+  en: Front Knee Strike
+  es: Rodillazo frontal
+exercise_20_12:
+  en: Weighted Front Knee Strike
+  es: Golpe de rodilla frontal lastrado
+exercise_20_13:
+  en: High Box Jump
+  es: Saltos en caja alta
+exercise_20_14:
+  en: Weighted High Box Jump
+  es: Salto lastrado con cajón alto
+exercise_20_15:
+  en: Isometric-explosive Body-weight Jump Squat
+  es: Sentadilla con salto isométrica explosiva con el Peso Corporal
+exercise_20_16:
+  en: Weighted Isometric-explosive Jump Squat
+  es: Sentadilla isométrica explosiva lastrada con salto
+exercise_20_17:
+  en: Lateral Leap and Hop
+  es: Brinco y salto lateral
+exercise_20_18:
+  en: Weighted Lateral Leap and Hop
+  es: Salto lateral lastrado con flexión
+exercise_20_19:
+  en: Lateral Plyo Squats
+  es: Sentadillas laterales pliométricas
+exercise_20_20:
+  en: Weighted Lateral Plyo Squats
+  es: Sentadillas pliométricas laterales lastradas
+exercise_20_21:
+  en: Lateral Slide
+  es: Deslizamiento lateral
+exercise_20_22:
+  en: Weighted Lateral Slide
+  es: Deslizamiento lateral lastrado
+exercise_20_23:
+  en: Medicine Ball Overhead Throws
+  es: Lanzamientos por encima de la cabeza de Balón Medicinal
+exercise_20_24:
+  en: Medicine Ball Side Throw
+  es: Lanzamiento lateral con Balón Medicinal
+exercise_20_25:
+  en: Medicine Ball Slam
+  es: Slams con Balón Medicinal
+exercise_20_26:
+  en: Side-to-Side Medicine Ball Throws
+  es: Lanzamientos de Balón Medicinal de lado a lado
+exercise_20_27:
+  en: Side-to-Side Shuffle Jump
+  es: Saltos con desplazamiento de lado a lado
+exercise_20_28:
+  en: Weighted Side-to-Side Shuffle Jump
+  es: Saltos lastrados con desplazamiento de lado a lado
+exercise_20_29:
+  en: Squat Jump Onto Box
+  es: Sentadilla con salto sobre caja
+exercise_20_30:
+  en: Weighted Squat Jump Onto Box
+  es: Sentadilla lastrada con salto sobre caja
+exercise_20_31:
+  en: Squat Jumps In and Out
+  es: Sentadillas con saltos
+exercise_20_32:
+  en: Weighted Squat Jumps In and Out
+  es: Sentadillas lastradas con saltos adentro y afuera
+exercise_20_33:
+  en: Box Jump
+  es: Salto en cajón
+exercise_20_34:
+  en: Box Jump Overs
+  es: Salto en cajón con cambio de lado
+exercise_20_35:
+  en: Box Jump Overs Over the Box
+  es: Salto en cajón con giro y cambio de lado
+exercise_20_36:
+  en: Star Jump Squats
+  es: Sentadilla con salto de estrella
+exercise_20_37:
+  en: Jump Squat
+  es: Sentadilla con salto
+exercise_21_0:
+  en: Banded Pull-ups (Progression)
+  es: Dominadas con cinta (progresión)
+exercise_21_1:
+  en: 30-degree Lat Pull-down
+  es: Tirones laterales a 30 grados.
+exercise_21_2:
+  en: Band-assisted Chin-up
+  es: Dominada Chin-up con cinta
+exercise_21_3:
+  en: Close-grip Chin-up
+  es: Dominada Chin-up con agarre cerrado
+exercise_21_4:
+  en: Weighted Close-grip Chin-up
+  es: Dominada Chin-up lastrada con agarre cerrado
+exercise_21_5:
+  en: Close-grip Lat Pull-down
+  es: Tirones laterales con agarre corto
+exercise_21_6:
+  en: Crossover Chin-up
+  es: Dominada Chin-up cruzada
+exercise_21_7:
+  en: Weighted Crossover Chin-up
+  es: Dominada Chin-up cruzada lastrada
+exercise_21_8:
+  en: EZ-Bar Pull-over
+  es: Extensión de tríceps-dorsal con barra EZ
+exercise_21_9:
+  en: Hanging Hurdle
+  es: Abdominales oblicuos colgado
+exercise_21_10:
+  en: Weighted Hanging Hurdle
+  es: Encogimiento lastrado en suspensión
+exercise_21_11:
+  en: Kneeling Lat Pull-down
+  es: Tirón en polea arrodillado
+exercise_21_12:
+  en: Kneeling Underhand-grip Lat Pull-down
+  es: Tirón en polea con agarre invertido y arrodillado
+exercise_21_13:
+  en: Lat Pull-down
+  es: Tirones laterales
+exercise_21_14:
+  en: Mixed-grip Chin-up
+  es: Dominada Chin-up con agarre mixto
+exercise_21_15:
+  en: Weighted Mixed-grip Chin-up
+  es: Dominada Chin-up lastrada con agarre mixto
+exercise_21_16:
+  en: Mixed-grip Pull-up
+  es: Dominada con agarre mixto
+exercise_21_17:
+  en: Weighted Mixed-grip Pull-up
+  es: Dominada lastrada con agarre mixto
+exercise_21_18:
+  en: Reverse-grip Pull-down
+  es: Jalón con polea con agarre invertido
+exercise_21_19:
+  en: Standing Cable Pull-over
+  es: Tirones con polea (de pie)
+exercise_21_20:
+  en: Straight-arm Pull-down
+  es: Tirón en polea, brazos rectos
+exercise_21_21:
+  en: Swiss Ball EZ-Bar Pull-over
+  es: Extensión con barra EZ y Pelota Suiza
+exercise_21_22:
+  en: Towel Pull-up
+  es: Dominada con toalla
+exercise_21_23:
+  en: Weighted Towel Pull-up
+  es: Dominada lastrada con toalla
+exercise_21_24:
+  en: Weighted Pull-up
+  es: Dominada lastrada
+exercise_21_25:
+  en: Wide-grip Lat Pull-down
+  es: Tirones con polea y agarre amplio
+exercise_21_26:
+  en: Wide-grip Pull-up
+  es: Dominada con agarre amplio
+exercise_21_27:
+  en: Weighted Wide-grip Pull-up
+  es: Dominada lastrada con agarre amplio
+exercise_21_28:
+  en: Burpee Pull-up
+  es: Burpee con dominada
+exercise_21_29:
+  en: Weighted Burpee Pull-up
+  es: Burpee con dominada lastrado
+exercise_21_30:
+  en: Jumping Pull-ups
+  es: Dominadas con salto
+exercise_21_31:
+  en: Weighted Jumping Pull-ups
+  es: Dominadas con salto lastradas
+exercise_21_32:
+  en: Kipping Pull-up
+  es: Dominada con balanceo
+exercise_21_33:
+  en: Weighted Kipping Pull-up
+  es: Dominada lastrada con balanceo
+exercise_21_34:
+  en: L Pull-up
+  es: Dominada en L
+exercise_21_35:
+  en: Weighted L Pull-up
+  es: Dominada en L lastrada
+exercise_21_36:
+  en: Suspended Chin-up
+  es: Dominada Chin-up en suspensión
+exercise_21_37:
+  en: Weighted Suspended Chin-up
+  es: Dominada Chin-up lastrada en suspensión
+exercise_21_38:
+  en: Pull-up
+  es: Dominadas
+exercise_21_39:
+  en: Chin-up
+  es: Dominada Chin-up
+exercise_21_40:
+  en: Neutral-grip Chin-up
+  es: Dominada Chin-up con agarre neutro
+exercise_21_41:
+  en: Weighted Chin-up
+  es: Dominada Chin-up lastrada
+exercise_21_42:
+  en: Band-assisted Pull-up
+  es: Dominada asistida con goma elástica
+exercise_21_43:
+  en: Neutral-grip Pull-up
+  es: Dominada con agarre neutro
+exercise_21_44:
+  en: Weighted Neutral-grip Chin-up
+  es: Dominada Chin-up lastrada con agarre neutro
+exercise_21_45:
+  en: Weighted Neutral-grip Pull-up
+  es: Dominada lastrada con agarre neutro
+exercise_22_0:
+  en: Chest Press with Band
+  es: Press de tórax con banda elástica
+exercise_22_1:
+  en: Alternating Staggered Push-up
+  es: Flexión de brazos escalonada alterna
+exercise_22_2:
+  en: Weighted Alternating Staggered Push-up
+  es: Flexión de brazos escalonada alterna lastrada
+exercise_22_3:
+  en: Alternating-hands Medicine Ball Push-up
+  es: Flexión de brazos con balón medicinal alternando los brazos
+exercise_22_4:
+  en: Weighted Alternating-hands Medicine Ball Push-up
+  es: Flexión de brazos lastrada con balón medicinal alternando los brazos
+exercise_22_5:
+  en: Push-up on Bosu® Balance Trainer
+  es: Flexión en semiesfera de equilibrio Bosu®
+exercise_22_6:
+  en: Weighted Push-up on Bosu® Balance Trainer
+  es: Flexión lastrada en semiesfera de equilibrio Bosu®
+exercise_22_7:
+  en: Clapping Push-up
+  es: Flexión de brazos con palmada
+exercise_22_8:
+  en: Weighted Clapping Push-up
+  es: Flexión de brazos lastrada con palmada
+exercise_22_9:
+  en: Close-grip Medicine Ball Push-up
+  es: Flexión de brazos con balón medicinal y apoyo cerrado
+exercise_22_10:
+  en: Weighted Close-grip Medicine Ball Push-up
+  es: Flexión de brazos lastrada con balón medicinal y apoyo cerrado
+exercise_22_11:
+  en: Close-hands Push-up
+  es: Flexión de brazos con apoyo cerrado
+exercise_22_12:
+  en: Weighted Close-hands Push-up
+  es: Flexión de brazos lastrada con apoyo cerrado
+exercise_22_13:
+  en: Decline Push-up
+  es: Flexión de brazos en declive
+exercise_22_14:
+  en: Weighted Decline Push-up
+  es: Flexión de brazos lastrada en declive
+exercise_22_15:
+  en: Diamond Push-up
+  es: Flexión de brazos en diamante
+exercise_22_16:
+  en: Weighted Diamond Push-up
+  es: Flexión de brazos lastrada en diamante
+exercise_22_17:
+  en: Explosive Crossover Push-up
+  es: Flexión de brazos cruzada explosiva
+exercise_22_18:
+  en: Weighted Explosive Crossover Push-up
+  es: Flexión de brazos cruzada explosiva lastrada
+exercise_22_19:
+  en: Explosive Push-up
+  es: Flexión de brazos explosiva
+exercise_22_20:
+  en: Weighted Explosive Push-up
+  es: Flexión de brazos explosiva lastrada
+exercise_22_21:
+  en: Feet-elevated Side-to-Side Push-up
+  es: Flexión de brazos de lado a lado con los pies elevados
+exercise_22_22:
+  en: Weighted Feet-elevated Side-to-Side Push-up
+  es: Flexión de brazos lastrada de lado a lado con los pies elevados
+exercise_22_23:
+  en: Hand Release Push-up
+  es: Flexión de brazos con retirada de manos
+exercise_22_24:
+  en: Weighted Hand Release Push-up
+  es: Flexión de brazos lastrada con retirada de manos
+exercise_22_25:
+  en: Handstand Push-up
+  es: Flexión de brazos vertical
+exercise_22_26:
+  en: Weighted Handstand Push-up
+  es: Flexión de brazos vertical lastrada
+exercise_22_27:
+  en: Incline Push-up
+  es: Flexión de brazos inclinada
+exercise_22_28:
+  en: Weighted Incline Push-up
+  es: Flexión de brazos inclinada lastrada
+exercise_22_29:
+  en: Isometric-explosive Push-up
+  es: Flexión de brazos isométrica explosiva
+exercise_22_30:
+  en: Weighted Isometric-explosive Push-up
+  es: Flexión de brazos isométrica explosiva lastrada
+exercise_22_31:
+  en: Judo Push-up
+  es: Flexión de brazos judo
+exercise_22_32:
+  en: Weighted Judo Push-up
+  es: Flexión de brazos judo lastrada
+exercise_22_33:
+  en: Kneeling Push-up
+  es: Flexión de brazos de rodillas
+exercise_22_34:
+  en: Weighted Kneeling Push-up
+  es: Flexión de brazos lastrada de rodillas
+exercise_22_35:
+  en: Medicine Ball Chest Pass
+  es: Pase de pecho con Balón Medicinal
+exercise_22_36:
+  en: Medicine Ball Push-up
+  es: Flexión de brazos con balón medicinal
+exercise_22_37:
+  en: Weighted Medicine Ball Push-up
+  es: Flexión de brazos lastrada con balón medicinal
+exercise_22_38:
+  en: One-arm Push-up
+  es: Flexión de brazos con una mano
+exercise_22_39:
+  en: Weighted One-arm Push-up
+  es: Flexión de brazos lastrada con una mano
+exercise_22_40:
+  en: Weighted Push-up
+  es: Flexión de brazos lastrada
+exercise_22_41:
+  en: Push-up and Row
+  es: Flexión de brazos y remo
+exercise_22_42:
+  en: Weighted Push-up and Row
+  es: Flexión de brazos y remo lastrada
+exercise_22_43:
+  en: Push-up Plus
+  es: Flexión de brazos plus
+exercise_22_44:
+  en: Weighted Push-up Plus
+  es: Flexión de brazos plus lastrada
+exercise_22_45:
+  en: Push-up with Feet on Swiss Ball
+  es: Flexión de brazos con los pies en balón suizo
+exercise_22_46:
+  en: Weighted Push-up with Feet on Swiss Ball
+  es: Flexión de brazos lastrada con los pies en balón suizo
+exercise_22_47:
+  en: Push-up with One Hand on Medicine Ball
+  es: Flexión de brazos con una mano en balón medicinal
+exercise_22_48:
+  en: Weighted Push-up with One Hand on Medicine Ball
+  es: Flexión de brazos lastrada con una mano en balón medicinal
+exercise_22_49:
+  en: Shoulder Push-up
+  es: Flexión de hombros
+exercise_22_50:
+  en: Weighted Shoulder Push-up
+  es: Flexión de hombros lastrada
+exercise_22_51:
+  en: Single-arm Medicine Ball Push-up
+  es: Flexión de brazos con una mano y balón medicinal
+exercise_22_52:
+  en: Weighted Single-arm Medicine Ball Push-up
+  es: Flexión de brazos lastrada con una mano y balón medicinal
+exercise_22_53:
+  en: Spiderman Push-up
+  es: Flexión de brazos spiderman
+exercise_22_54:
+  en: Weighted Spiderman Push-up
+  es: Flexión de brazos spiderman lastrada
+exercise_22_55:
+  en: Stacked-feet Push-up
+  es: Flexión de brazos con los pies apilados
+exercise_22_56:
+  en: Weighted Stacked-feet Push-up
+  es: Flexión de brazos lastrada con los pies apilados
+exercise_22_57:
+  en: Staggered-hands Push-up
+  es: Flexión de brazos con las manos escalonadas
+exercise_22_58:
+  en: Weighted Staggered-hands Push-up
+  es: Flexión de brazos lastrada con las manos escalonadas
+exercise_22_59:
+  en: Suspended Push-up
+  es: Flexión de brazos en suspensión
+exercise_22_60:
+  en: Weighted Suspended Push-up
+  es: Flexión de brazos en suspensión lastrada
+exercise_22_61:
+  en: Swiss Ball Push-up
+  es: Flexión de brazos con balón suizo
+exercise_22_62:
+  en: Weighted Swiss Ball Push-up
+  es: Flexión de brazos lastrada con balón suizo
+exercise_22_63:
+  en: Swiss Ball Push-up Plus
+  es: Flexión de brazos plus con balón suizo
+exercise_22_64:
+  en: Weighted Swiss Ball Push-up Plus
+  es: Flexión de brazos plus lastrada con balón suizo
+exercise_22_65:
+  en: T Push-up
+  es: Flexión de brazos abriendo hacia arriba
+exercise_22_66:
+  en: Weighted T Push-up
+  es: Flexión de brazos lastrada abriendo hacia arriba
+exercise_22_67:
+  en: Triple-stop Push-up
+  es: Flexión de brazos con triple parada
+exercise_22_68:
+  en: Weighted Triple-stop Push-up
+  es: Flexión de brazos lastrada con triple parada
+exercise_22_69:
+  en: Wide-hands Push-up
+  es: Flexión de brazos con las manos separadas
+exercise_22_70:
+  en: Weighted Wide-hands Push-up
+  es: Flexión de brazos lastrada con las manos separadas
+exercise_22_71:
+  en: Parallette Handstand Push-up
+  es: Flexión de brazos vertical en barras paralelas
+exercise_22_72:
+  en: Weighted Parallette Handstand Push-up
+  es: Flexión de brazos vertical lastrada en barras paralelas
+exercise_22_73:
+  en: Ring Handstand Push-up
+  es: Flexión de brazos vertical en anillas
+exercise_22_74:
+  en: Weighted Ring Handstand Push-up
+  es: Flexión de brazos vertical lastrada en anillas
+exercise_22_75:
+  en: Ring Push-up
+  es: Flexión de brazos en anillas
+exercise_22_76:
+  en: Weighted Ring Push-up
+  es: Flexión lastrada en anillas
+exercise_22_77:
+  en: Push-up
+  es: Flexión de brazos
+exercise_22_78:
+  en: Pilates Pushup
+  es: Flexión de Pilates
+exercise_22_79:
+  en: Dynamic Push-up
+  es: Flexión dinámica
+exercise_22_80:
+  en: Kipping Handstand Push-up
+  es: Flexión de brazos vertical con balanceo
+exercise_22_81:
+  en: Shoulder Tapping Push-up
+  es: Flexión con toque de hombro
+exercise_22_82:
+  en: Biceps Push-up
+  es: Flexión de bíceps
+exercise_22_83:
+  en: Hindu Push-up
+  es: Flexión hindú
+exercise_22_84:
+  en: Pike Push-up
+  es: Flexión en pica
+exercise_22_85:
+  en: Wide-grip Push-up
+  es: Flexión con agarre amplio
+exercise_22_86:
+  en: Weighted Biceps Push-up
+  es: Flexión de bíceps lastrada
+exercise_22_87:
+  en: Weighted Hindu Push-up
+  es: Flexión hindú lastrada
+exercise_22_88:
+  en: Weighted Pike Push-up
+  es: Flexión en pica lastrada
+exercise_22_89:
+  en: Kipping Parallette Handstand Push-up
+  es: Flexión de brazos vertical con balanceo en barras paralelas
+exercise_22_90:
+  en: Wall Push-up
+  es: Flexión en pared
+exercise_23_0:
+  en: Barbell Straight-leg Deadlift to Row
+  es: Peso muerto y remo con barra con la pierna estirada
+exercise_23_1:
+  en: Cable Row Standing
+  es: Remo con polea  (posición de pie)
+exercise_23_2:
+  en: Dumbbell Row
+  es: Remo con mancuernas
+exercise_23_3:
+  en: Elevated-feet Inverted Row
+  es: Remo invertido con pies en alto
+exercise_23_4:
+  en: Weighted Elevated-feet Inverted Row
+  es: Remo invertido lastrado con los pies elevados
+exercise_23_5:
+  en: Face Pull
+  es: Tirones frontales
+exercise_23_6:
+  en: Face Pull with External Rotation
+  es: Tirones frontales con rotación externa
+exercise_23_7:
+  en: Inverted Row with Feet on Swiss Ball
+  es: Remo invertido con pies en Pelota Suiza
+exercise_23_8:
+  en: Weighted Inverted Row with Feet on Swiss Ball
+  es: Remo invertido lastrado con los pies en balón suizo
+exercise_23_9:
+  en: Kettlebell Row
+  es: Remo con Pesas Rusas
+exercise_23_10:
+  en: Modified Inverted Row
+  es: Remo invertido modificado
+exercise_23_11:
+  en: Weighted Modified Inverted Row
+  es: Remo invertido modificado lastrado
+exercise_23_12:
+  en: Neutral-grip Alternating Dumbbell Row
+  es: Remo alterno con mancuernas y agarre neutro
+exercise_23_13:
+  en: One-arm Bent-over Row
+  es: Remo inclinado con un brazo
+exercise_23_14:
+  en: One-legged Dumbbell Row
+  es: Remo a una pierna con mancuerna
+exercise_23_15:
+  en: Renegade Row
+  es: Remo renegado
+exercise_23_16:
+  en: Reverse-grip Barbell Row
+  es: Remo con barra y agarre invertido
+exercise_23_17:
+  en: Rope-handle Cable Row
+  es: Remo sentado con cuerdas
+exercise_23_18:
+  en: Seated Cable Row
+  es: Remo con polea (sentado)
+exercise_23_19:
+  en: Seated Dumbbell Row
+  es: Remo sentado con mancuernas
+exercise_23_20:
+  en: Single-arm Cable Row
+  es: Remo A Un Brazo En Polea
+exercise_23_21:
+  en: Single-arm Cable Row and Rotation
+  es: Remo a un brazo en polea y rotación
+exercise_23_22:
+  en: Single-arm Inverted Row
+  es: Remo invertido con un brazo
+exercise_23_23:
+  en: Weighted Single-arm Inverted Row
+  es: Remo invertido lastrado con un brazo
+exercise_23_24:
+  en: Single-arm Neutral-grip Dumbbell Row
+  es: Remo con mancuerna a un brazo y agarre neutro
+exercise_23_25:
+  en: Single-arm Neutral-grip Dumbbell Row and Rotation
+  es: Remo y rotación a un brazo con agarre neutro y mancuerna
+exercise_23_26:
+  en: Suspended Inverted Row
+  es: Remo invertido suspendido
+exercise_23_27:
+  en: Weighted Suspended Inverted Row
+  es: Remo invertido lastrado en suspensión
+exercise_23_28:
+  en: T-Bar Row
+  es: Remo con barra T
+exercise_23_29:
+  en: Towel-grip Inverted Row
+  es: Remo invertido con agarre en toallas
+exercise_23_30:
+  en: Weighted Towel-grip Inverted Row
+  es: Remo invertido lastrado con toalla
+exercise_23_31:
+  en: Underhand-grip Cable Row
+  es: Remo con polea y agarre invertido
+exercise_23_32:
+  en: V-grip Cable Row
+  es: Remo con polea (Asa en Forma de V)
+exercise_23_33:
+  en: Wide-grip Seated Cable Row
+  es: Remo con polea con agarre ancho (sentado)
+exercise_23_34:
+  en: Alternating Dumbbell Row
+  es: Remo alterno con mancuernas
+exercise_23_35:
+  en: Inverted Row
+  es: Remo invertido
+exercise_23_36:
+  en: Row
+  es: Remo
+exercise_23_37:
+  en: Weighted Row
+  es: Remo con peso
+exercise_23_38:
+  en: Rowing Machine
+  es: Máquina de remo
+exercise_23_39:
+  en: Banded Face Pulls
+  es: Jalones a la cara con goma elástica
+exercise_23_40:
+  en: Chest Supported Dumbbell Row
+  es: Remo con apoyo en el pecho con mancuerna
+exercise_23_41:
+  en: Decline Ring Row
+  es: Remo en anillas declinado
+exercise_23_42:
+  en: Elevated Ring Row
+  es: Remo en anillas con pies elevados
+exercise_23_43:
+  en: RDL Bent-over Row with Barbell or Dumbbell
+  es: Remo inclinado tipo peso muerto rumano con barra o mancuerna
+exercise_23_44:
+  en: Ring Row
+  es: Remo en anillas
+exercise_23_45:
+  en: Barbell Row
+  es: Remo con barra
+exercise_23_46:
+  en: Bent-over Row with Barbell
+  es: Remo inclinado con barra
+exercise_23_47:
+  en: Bent-over Row with Dumbbell
+  es: Remo inclinado con mancuernas
+exercise_23_48:
+  en: Seated Underhand-grip Cable Row
+  es: Remo sentado con cable con agarre inferior
+exercise_23_49:
+  en: TRX Inverted Row
+  es: Remo invertido TRX
+exercise_23_50:
+  en: Weighted Inverted Row
+  es: Remo invertido lastrado
+exercise_23_51:
+  en: Weighted TRX Inverted Row
+  es: Remo invertido lastrado TRX
+exercise_23_52:
+  en: Dumbbell Row
+  es: Remo con mancuernas
+exercise_24_0:
+  en: Alternating Dumbbell Shoulder Press
+  es: Press de hombros alterno con mancuernas
+exercise_24_1:
+  en: Arnold Press
+  es: Press de Arnold
+exercise_24_2:
+  en: Barbell Front Squat to Push Press
+  es: Sentadilla frontal con barra y push press
+exercise_24_3:
+  en: Barbell Push Press
+  es: Push press con barra
+exercise_24_4:
+  en: Barbell Shoulder Press
+  es: Press de hombros con barra
+exercise_24_5:
+  en: Dead-curl Press
+  es: Press de curl con peso muerto
+exercise_24_6:
+  en: Dumbbell Alternating Shoulder Press and Twist
+  es: Press de hombro alterno y giro con mancuernas
+exercise_24_7:
+  en: Dumbbell Hammer Curl to Lunge to Press
+  es: Curl tipo martillo con mancuernas a zancada con elevación
+exercise_24_8:
+  en: Dumbbell Push Press
+  es: Push press con mancuernas
+exercise_24_9:
+  en: Floor Inverted Shoulder Press
+  es: Press de hombros invertido en el suelo
+exercise_24_10:
+  en: Weighted Floor Inverted Shoulder Press
+  es: Press de hombros invertido lastrado en el suelo
+exercise_24_11:
+  en: Inverted Shoulder Press
+  es: Press de hombros invertido
+exercise_24_12:
+  en: Weighted Inverted Shoulder Press
+  es: Press de hombros invertido lastrado
+exercise_24_13:
+  en: One-arm Push Press
+  es: Push press a un brazo
+exercise_24_14:
+  en: Barbell Overhead Press
+  es: Press por encima de la cabeza con barra
+exercise_24_15:
+  en: Overhead Dumbbell Press
+  es: Press con mancuernas por encima de la cabeza
+exercise_24_16:
+  en: Seated Barbell Shoulder Press
+  es: Press de hombros con barra sentado
+exercise_24_17:
+  en: Seated Dumbbell Shoulder Press
+  es: Press de hombros con mancuernas sentado
+exercise_24_18:
+  en: Single-arm Dumbbell Shoulder Press
+  es: Press de hombros con mancuerna en un solo brazo
+exercise_24_19:
+  en: Single-arm Step-up and Press
+  es: Step y levantamiento a un solo brazo
+exercise_24_20:
+  en: Smith Machine Overhead Press
+  es: Press por encima de la cabeza con máquina Smith
+exercise_24_21:
+  en: Split-stance Hammer Curl to Press
+  es: Curl tipo martillo con piernas separadas a press
+exercise_24_22:
+  en: Swiss Ball Dumbbell Shoulder Press
+  es: Press de hombros con mancuernas en Pelota Suiza
+exercise_24_23:
+  en: Weight-plate Front Raise
+  es: Elevación frontal de disco de pesa
+exercise_24_24:
+  en: Dumbbell Shoulder Press
+  es: Press de hombros con mancuernas
+exercise_24_25:
+  en: Military Press
+  es: Press militar
+exercise_24_27:
+  en: Strict Press
+  es: Press estricto
+exercise_24_28:
+  en: Dumbbell Front Raise
+  es: Levantamiento frontal con mancuerna
+exercise_24_29:
+  en: Curl to Overhead Press
+  es: Curl a Press sobre la cabeza
+exercise_24_30:
+  en: Arnold Press
+  es: Press Arnold
+exercise_24_31:
+  en: Overhead Dumbbell Press
+  es: Press con mancuernas sobre la cabeza
+exercise_25_0:
+  en: 90-degree Cable External Rotation
+  es: Rotación externa de 90 grados con polea
+exercise_25_1:
+  en: Band External Rotation
+  es: Rotación externa con cinta
+exercise_25_2:
+  en: Band Internal Rotation
+  es: Rotación interna con cinta
+exercise_25_3:
+  en: Bent-arm Lateral Raise and External Rotation
+  es: Elevación lateral y rotación externa con brazos flexionados
+exercise_25_4:
+  en: Cable External Rotation
+  es: Rotación externa en polea
+exercise_25_5:
+  en: Dumbbell Face Pull with External Rotation
+  es: Tirones frontales con rotación externa con mancuernas
+exercise_25_6:
+  en: Floor I Raise
+  es: Elevación en suelo con cuerpo recto
+exercise_25_7:
+  en: Weighted Floor I Raise
+  es: Elevación en I lastrada en el suelo
+exercise_25_8:
+  en: Floor T Raise
+  es: Elevación en suelo con brazos abiertos
+exercise_25_9:
+  en: Weighted Floor T Raise
+  es: Elevación en T lastrada en el suelo
+exercise_25_10:
+  en: Floor Y Raise
+  es: Elevación en suelo con brazos en Y
+exercise_25_11:
+  en: Weighted Floor Y Raise
+  es: Elevación en Y lastrada en el suelo
+exercise_25_12:
+  en: Incline I Raise
+  es: Elevación con cuerpo recto en banco inclinado
+exercise_25_13:
+  en: Weighted Incline I Raise
+  es: Elevación en I lastrada en banco inclinado
+exercise_25_14:
+  en: Incline L Raise
+  es: Elevación en L con banco inclinado
+exercise_25_15:
+  en: Weighted Incline L Raise
+  es: Elevación en L lastrada en banco inclinado
+exercise_25_16:
+  en: Incline T Raise
+  es: Elevación en T con banco inclinado
+exercise_25_17:
+  en: Weighted Incline T Raise
+  es: Elevación en T lastrada en banco inclinado
+exercise_25_18:
+  en: Incline W Raise
+  es: Elevación en W con banco inclinado
+exercise_25_19:
+  en: Weighted Incline W Raise
+  es: Elevación en W lastrada en banco inclinado
+exercise_25_20:
+  en: Incline Y Raise
+  es: Elevación en Y con banco inclinado
+exercise_25_21:
+  en: Weighted Incline Y Raise
+  es: Elevación en Y lastrada en banco inclinado
+exercise_25_22:
+  en: Lying External Rotation
+  es: Rotación externa tumbado
+exercise_25_23:
+  en: Seated Dumbbell External Rotation
+  es: Rotación externa con mancuerna sentado
+exercise_25_24:
+  en: Standing L Raise
+  es: Elevación en L de pie
+exercise_25_25:
+  en: Swiss Ball I Raise
+  es: Elevación con el cuerpo recto con Pelota Suiza
+exercise_25_26:
+  en: Weighted Swiss Ball I Raise
+  es: Elevación en I lastrada con balón suizo
+exercise_25_27:
+  en: Swiss Ball T Raise
+  es: Elevación con brazos abiertos con Pelota Suiza
+exercise_25_28:
+  en: Weighted Swiss Ball T Raise
+  es: Elevación en T lastrada con balón suizo
+exercise_25_29:
+  en: Swiss Ball W Raise
+  es: Elevación en W con Pelota Suiza
+exercise_25_30:
+  en: Weighted Swiss Ball W Raise
+  es: Elevación en W lastrada con balón suizo
+exercise_25_31:
+  en: Swiss Ball Y Raise
+  es: Elevación en Y con Pelota Suiza
+exercise_25_32:
+  en: Weighted Swiss Ball Y Raise
+  es: Elevación en Y lastrada con balón suizo
+exercise_25_33:
+  en: Cable Internal Rotation
+  es: Rotación interna con cable
+exercise_25_34:
+  en: Lying Internal Rotation
+  es: Rotación interna tumbado
+exercise_25_35:
+  en: Seated Dumbbell Internal Rotation
+  es: Rotación interna sentado con mancuerna
+exercise_26_0:
+  en: Barbell Jump Shrug
+  es: Encogimiento de hombros con salto y barra
+exercise_26_1:
+  en: Barbell Shrug
+  es: Encogimiento de hombros con barra
+exercise_26_2:
+  en: Barbell Upright Row
+  es: Barra vertical
+exercise_26_3:
+  en: Behind-the-Back Smith Machine Shrug
+  es: Encogimiento de hombros con barra por detrás en multipower
+exercise_26_4:
+  en: Dumbbell Jump Shrug
+  es: Encogimiento de hombros con salto y mancuernas
+exercise_26_5:
+  en: Dumbbell Shrug
+  es: Encogimiento de hombros con mancuernas
+exercise_26_6:
+  en: Dumbbell Upright Row
+  es: Remo en vertical con mancuernas
+exercise_26_7:
+  en: Incline Dumbbell Shrug
+  es: Encogimiento de hombros en banco inclinado con mancuernas
+exercise_26_8:
+  en: Overhead Barbell Shrug
+  es: Encogimiento  de hombros con barra por encima de la cabeza
+exercise_26_9:
+  en: Overhead Dumbbell Shrug
+  es: Encogimiento de hombros con mancuernas por encima de la cabeza
+exercise_26_10:
+  en: Scaption and Shrug
+  es: Vuelos laterales y encogimiento de hombros
+exercise_26_11:
+  en: Scapular Retraction
+  es: Retracción escapular
+exercise_26_12:
+  en: Serratus Chair Shrug
+  es: Encogimiento del serrato con silla
+exercise_26_13:
+  en: Weighted Serratus Chair Shrug
+  es: Encogimiento de serrato lastrado en silla
+exercise_26_14:
+  en: Serratus Shrug
+  es: Encogimiento de serrato
+exercise_26_15:
+  en: Weighted Serratus Shrug
+  es: Encogimiento de serrato lastrado
+exercise_26_16:
+  en: Wide-grip Jump Shrug
+  es: Encogimiento de hombros con agarre ancho.
+exercise_26_17:
+  en: Wide-grip Barbell Shrug
+  es: Encogimiento con barra y agarre amplio
+exercise_26_18:
+  en: Behind-the-Back Shrug
+  es: Contracción detrás de la espalda
+exercise_26_19:
+  en: Shrug
+  es: Encogimiento de hombros
+exercise_26_20:
+  en: Shrug Pose
+  es: Postura de encogimiento
+exercise_26_21:
+  en: Shrug Arms Down Pose
+  es: Postura de encogimiento de hombros hacia abajo
+exercise_26_22:
+  en: Shrug Arms Mid Pose
+  es: Postura de encogimiento de hombros en el centro
+exercise_26_23:
+  en: Shrug Arm Up Pose
+  es: Postura de encogimiento de hombros hacia arriba
+exercise_26_24:
+  en: Upright Row
+  es: Remo vertical
+exercise_27_0:
+  en: Alternating Sit-up
+  es: Abdominales alternos
+exercise_27_1:
+  en: Weighted Alternating Sit-up
+  es: Abdominal sit-up alterno lastrado
+exercise_27_2:
+  en: Bent-knee V-up
+  es: Flexiones en V con flexión de rodillas hacia el pecho
+exercise_27_3:
+  en: Weighted Bent-knee V-up
+  es: Abdominal en V lastrado con las rodillas flexionadas
+exercise_27_4:
+  en: Butterfly Sit-up
+  es: Abdominal sit-up de mariposa
+exercise_27_5:
+  en: Weighted Butterfly Sit-up
+  es: Abdominal sit-up de mariposa lastrado
+exercise_27_6:
+  en: Cross Punch Roll-up
+  es: Abdominal con puñetazo cruzado
+exercise_27_7:
+  en: Weighted Cross Punch Roll-up
+  es: Abdominal lastrado con puñetazo cruzado
+exercise_27_8:
+  en: Crossed-arms Sit-up
+  es: Abdominales con brazos cruzados
+exercise_27_9:
+  en: Weighted Crossed-arms Sit-up
+  es: Abdominal sit-up con los brazos cruzados
+exercise_27_10:
+  en: Get-up Sit-up
+  es: Abdominales con levantamiento
+exercise_27_11:
+  en: Weighted Get-up Sit-up
+  es: Abdominal sit-up lastrado con brazo levantado
+exercise_27_12:
+  en: Hovering Sit-up
+  es: Abdominales sin tocar el suelo
+exercise_27_13:
+  en: Weighted Hovering Sit-up
+  es: Abdominal sit-up lastrado con encogimiento de piernas
+exercise_27_14:
+  en: Kettlebell Sit-up
+  es: Abdominal con pesa rusa
+exercise_27_15:
+  en: Medicine Ball Alternating V-up
+  es: Abdominal en V alterno con balón medicinal
+exercise_27_16:
+  en: Medicine Ball Sit-up
+  es: Abdominales con Balón Medicinal.
+exercise_27_17:
+  en: Medicine Ball V-up
+  es: Flexiones en V alternas con Balón Medicinal
+exercise_27_18:
+  en: Modified Sit-up
+  es: Abdominal modificado
+exercise_27_19:
+  en: Negative Sit-up
+  es: Abdominal negativo
+exercise_27_20:
+  en: One-arm Full Sit-up
+  es: Abdominales completos con un brazo
+exercise_27_21:
+  en: Reclining Circle
+  es: Círculos reclinado
+exercise_27_22:
+  en: Weighted Reclining Circle
+  es: Círculo reclinado lastrado
+exercise_27_23:
+  en: Reverse Curl-up
+  es: Curl-arriba inverso
+exercise_27_24:
+  en: Weighted Reverse Curl-up
+  es: Elevación de piernas inversa lastrada
+exercise_27_25:
+  en: Single-leg Swiss Ball Jackknife
+  es: Jackknife con Pelota Suiza y una pierna
+exercise_27_26:
+  en: Weighted Single-leg Swiss Ball Jackknife
+  es: Jackknife de una pierna lastrado con balón medicinal
+exercise_27_27:
+  en: The Teaser
+  es: Teaser
+exercise_27_28:
+  en: The Teaser, Weighted
+  es: El bromista, lastrado
+exercise_27_29:
+  en: Three-part Roll-down
+  es: Bajada en tres tiempos
+exercise_27_30:
+  en: Weighted Three-part Roll-down
+  es: Abdominal de tres partes lastrado
+exercise_27_31:
+  en: V-up
+  es: Levantamiento en V
+exercise_27_32:
+  en: Weighted V-up
+  es: Abdominal en V lastrado
+exercise_27_33:
+  en: Weighted Russian Twist on Swiss Ball
+  es: Giro ruso con pesas en Pelota Suiza
+exercise_27_34:
+  en: Weighted Sit-up
+  es: Abdominales con peso
+exercise_27_35:
+  en: X Abs
+  es: Abdominales X
+exercise_27_36:
+  en: Weighted X Abs
+  es: Abdominales X lastrados
+exercise_27_37:
+  en: Sit-up
+  es: Abdominales
+exercise_27_38:
+  en: GHD Sit-ups
+  es: Abdominales GHD
+exercise_27_39:
+  en: Sit-up Turkish Get-up
+  es: Abdominales con levantamiento turco
+exercise_27_40:
+  en: Russian Twist on Swiss Ball
+  es: Giro ruso con balón suizo
+exercise_28_0:
+  en: Leg Press
+  es: Press de piernas
+exercise_28_1:
+  en: Back Squat with Body Bar
+  es: Sentadilla de espalda con barra
+exercise_28_2:
+  en: Back Squats
+  es: Sentadillas de espalda con barra
+exercise_28_3:
+  en: Weighted Back Squats
+  es: Sentadilla de espalda lastrada
+exercise_28_4:
+  en: Balancing Squat
+  es: Sentadilla en equilibrio
+exercise_28_5:
+  en: Weighted Balancing Squat
+  es: Sentadilla lastrada en equilibrio
+exercise_28_6:
+  en: Barbell Back Squat
+  es: Sentadilla trasera
+exercise_28_7:
+  en: Barbell Box Squat
+  es: Sentadilla sobre caja con barra
+exercise_28_8:
+  en: Barbell Front Squat
+  es: Sentadilla frontal con barra
+exercise_28_9:
+  en: Barbell Hack Squat
+  es: Sentadilla de espalda con barra
+exercise_28_10:
+  en: Barbell Hang Squat Snatch
+  es: Arrancada en sentadilla desde colgante con barra
+exercise_28_11:
+  en: Barbell Lateral Step-up
+  es: Paso arriba lateral con barra
+exercise_28_12:
+  en: Barbell Quarter Squat
+  es: Cuarto de sentadilla con barra
+exercise_28_13:
+  en: Barbell Siff Squat
+  es: Sentadilla con barra
+exercise_28_14:
+  en: Barbell Squat Snatch
+  es: Arrancada en sentadilla con barra
+exercise_28_15:
+  en: Barbell Squat with Heels Raised
+  es: Sentadilla con barra y los talones levantados
+exercise_28_16:
+  en: Barbell Step-over
+  es: Stepover con barra
+exercise_28_17:
+  en: Barbell Step-up
+  es: Subir Escalón Con Barra
+exercise_28_18:
+  en: Bench Squat with Rotational Chop
+  es: Sentadilla en banca con leñador
+exercise_28_19:
+  en: Weighted Bench Squat with Rotational Chop
+  es: Sentadilla lastrada de banco con leñador rotacional
+exercise_28_20:
+  en: Body-weight Wall Squat
+  es: Sentadilla de pared con peso corporal
+exercise_28_21:
+  en: Weighted Wall Squat
+  es: Sentadilla lastrada de pared
+exercise_28_22:
+  en: Box Step Squat
+  es: Sentadilla en figura de caja
+exercise_28_23:
+  en: Weighted Box Step Squat
+  es: Sentadilla lastrada de cajón
+exercise_28_24:
+  en: Braced Squat
+  es: Sentadilla con disco y brazos estirados
+exercise_28_25:
+  en: Crossed-arm Barbell Front Squat
+  es: Sentadilla frontal con barra y brazos cruzados
+exercise_28_26:
+  en: Crossover Dumbbell Step-up
+  es: Step cruzado con mancuernas
+exercise_28_27:
+  en: Dumbbell Front Squat
+  es: Sentadilla frontal con mancuernas
+exercise_28_28:
+  en: Dumbbell Split Squat
+  es: Sentadilla dividida con mancuernas
+exercise_28_29:
+  en: Dumbbell Squat
+  es: Sentadilla con mancuernas
+exercise_28_30:
+  en: Dumbbell Squat Clean
+  es: Cargada en sentadilla con mancuerna
+exercise_28_31:
+  en: Dumbbell Step-over
+  es: Stepover con mancuerna
+exercise_28_32:
+  en: Dumbbell Step-up
+  es: Paso Arriba Con Mancuernas
+exercise_28_33:
+  en: Elevated Single-leg Squat
+  es: Sentadilla elevada a una sola pierna
+exercise_28_34:
+  en: Weighted Elevated Single-leg Squat
+  es: Sentadilla lastrada elevada a una sola pierna
+exercise_28_35:
+  en: Figure Four Squats
+  es: Sentadillas en figura de cuatro
+exercise_28_36:
+  en: Weighted Figure Four Squats
+  es: Sentadillas lastradas en figura de cuatro
+exercise_28_37:
+  en: Goblet Squat
+  es: Sentadilla goblet
+exercise_28_38:
+  en: Kettlebell Squat
+  es: Sentadilla con Pesas Rusas
+exercise_28_39:
+  en: Kettlebell Swing Overhead
+  es: Balanceo sobre la cabeza con pesa rusa
+exercise_28_40:
+  en: Kettlebell Swing with Flip to Squat
+  es: Balanceo con pesa rusa con giro hasta ponerse en cuclillas
+exercise_28_41:
+  en: Lateral Dumbbell Step-up
+  es: Paso arriba lateral con mancuernas
+exercise_28_42:
+  en: One-legged Squat
+  es: Sentadilla sobre una pierna
+exercise_28_43:
+  en: Overhead Dumbbell Squat
+  es: Sentadilla con mancuernas por encima de la cabeza
+exercise_28_44:
+  en: Overhead Squat
+  es: Sentadilla con los brazos levantados
+exercise_28_45:
+  en: Partial Single-leg Squat
+  es: Sentadilla parcial a una pierna
+exercise_28_46:
+  en: Weighted Partial Single-leg Squat
+  es: Sentadilla parcial lastrada a una pierna
+exercise_28_47:
+  en: Pistol Squat
+  es: Sentadilla de pistola
+exercise_28_48:
+  en: Weighted Pistol Squat
+  es: Sentadilla lastrada de pistola
+exercise_28_49:
+  en: Plié Slides
+  es: Deslizamientos en plié
+exercise_28_50:
+  en: Weighted Plié Slides
+  es: Deslizamientos plié lastrados
+exercise_28_51:
+  en: Plié Squat
+  es: Sentadillas de sumo
+exercise_28_52:
+  en: Weighted Plié Squat
+  es: Sentadilla plié lastrada
+exercise_28_53:
+  en: Prisoner Squat
+  es: Sentadilla de prisionero
+exercise_28_54:
+  en: Weighted Prisoner Squat
+  es: Sentadilla de prisionero lastrada
+exercise_28_55:
+  en: Single-leg Bench Get-up
+  es: Levantamiento en banca con una pierna
+exercise_28_56:
+  en: Weighted Single-leg Bench Get-up
+  es: Levantamiento lastrado de una pierna en banco
+exercise_28_57:
+  en: Single-leg Bench Squat
+  es: Sentadilla con banco y una pierna
+exercise_28_58:
+  en: Weighted Single-leg Bench Squat
+  es: Sentadilla lastrada de una pierna en banco
+exercise_28_59:
+  en: Single-leg Squat on Swiss Ball
+  es: Sentadilla a una sola pierna en balón suizo
+exercise_28_60:
+  en: Weighted Single-leg Squat on Swiss Ball
+  es: Sentadilla lastrada de una pierna en balón suizo
+exercise_28_61:
+  en: Squat
+  es: Sentadilla
+exercise_28_62:
+  en: Weighted Squat
+  es: Sentadilla lastrada
+exercise_28_63:
+  en: Squats with Band
+  es: Sentadillas con cinta
+exercise_28_64:
+  en: Staggered Squat
+  es: Sentadilla escalonada
+exercise_28_65:
+  en: Weighted Staggered Squat
+  es: Sentadilla escalonada lastrada
+exercise_28_66:
+  en: Step-up
+  es: Steps
+exercise_28_67:
+  en: Weighted Step-up
+  es: Subida de escalón lastrada
+exercise_28_68:
+  en: Suitcase Squats
+  es: Sentadillas maleta
+exercise_28_69:
+  en: Sumo Squat
+  es: Sentadilla de sumo
+exercise_28_70:
+  en: Sumo Squat Slide-in
+  es: Sentadilla de sumo con deslizamiento hacia dentro
+exercise_28_71:
+  en: Weighted Sumo Squat Slide-in
+  es: Sentadilla de sumo lastrada con deslizamiento hacia dentro
+exercise_28_72:
+  en: Sumo Squat to High Pull
+  es: Sentadilla de sumo a tirón alto
+exercise_28_73:
+  en: Sumo Squat to Stand
+  es: Sentadilla de sumo hasta posición en pie
+exercise_28_74:
+  en: Weighted Sumo Squat to Stand
+  es: Sentadilla de sumo lastrada a de pie
+exercise_28_75:
+  en: Sumo Squat with Rotation
+  es: Sentadilla de sumo con rotación.
+exercise_28_76:
+  en: Weighted Sumo Squat with Rotation
+  es: Sentadilla de sumo lastrada con rotación
+exercise_28_77:
+  en: Swiss Ball Body-weight Wall Squat
+  es: Sentadilla contra la pared con el peso del cuerpo y Pelota Suiza
+exercise_28_78:
+  en: Weighted Swiss Ball Wall Squat
+  es: Sentadilla de pared lastrada con balón suizo
+exercise_28_79:
+  en: Thrusters
+  es: Thrusters con mancuernas
+exercise_28_80:
+  en: Uneven Squat
+  es: Sentadilla desigual
+exercise_28_81:
+  en: Weighted Uneven Squat
+  es: Sentadilla desigual lastrada
+exercise_28_82:
+  en: Waist-slimming Squat
+  es: Sentadillas para adelgazamiento de caderas
+exercise_28_83:
+  en: Wall Ball
+  es: Balón Medicinal contra la pared
+exercise_28_84:
+  en: Wide-stance Barbell Squat
+  es: Sentadilla abierta
+exercise_28_85:
+  en: Wide-stance Goblet Squat
+  es: Sentadilla goblet con piernas abiertas
+exercise_28_86:
+  en: Zercher Squat
+  es: Sentadilla Zercher
+exercise_28_88:
+  en: Squat and Side Kick
+  es: Sentadilla con patada lateral
+exercise_28_89:
+  en: Squat Jumps In N' Out
+  es: Sentadillas con salto y apertura y cierre de piernas
+exercise_28_90:
+  en: Pilates Plie Squats (Parallel, Turned Out, Flat, and Heels)
+  es: Sentadilla plié de Pilates (en paralelo, girado hacia afuera,  nivelado y talones)
+exercise_28_91:
+  en: Releve, Straight-leg and Knee Bent (with One-leg Variation)
+  es: Relevo, pierna estirada y rodilla flexionada (con variación de una pierna)
+exercise_28_92:
+  en: Alternating Box Dumbbell Step-ups
+  es: Escalones alternos en cajón con mancuerna
+exercise_28_93:
+  en: Dumbbell Overhead Squat Single-arm
+  es: Sentadilla con mancuerna en alto a un brazo
+exercise_28_94:
+  en: Dumbbell Squat Snatch
+  es: Arranque en sentadilla con mancuerna
+exercise_28_95:
+  en: Medicine Ball Squat
+  es: Sentadilla con balón medicinal
+exercise_28_97:
+  en: Wall Ball Squat and Press
+  es: Sentadilla y press con lanzamiento de balón a la pared
+exercise_28_98:
+  en: American Swing
+  es: Giro americano
+exercise_28_100:
+  en: Air Squat
+  es: Sentadilla básica
+exercise_28_101:
+  en: Dumbbell Thrusters
+  es: Thrusters con mancuerna
+exercise_28_102:
+  en: Overhead Barbell Squat
+  es: Sentadilla con barra en alto
+exercise_29_0:
+  en: Burpee
+  es: Burpee
+exercise_29_1:
+  en: Weighted Burpee
+  es: Burpee lastrado
+exercise_29_2:
+  en: Burpee Box Jump
+  es: Burpee con salto en cajón
+exercise_29_3:
+  en: Weighted Burpee Box Jump
+  es: Burpee lastrado con salto en cajón
+exercise_29_4:
+  en: High Pull Burpee
+  es: Burpee con remo vertical
+exercise_29_5:
+  en: Man Makers
+  es: Man Maker
+exercise_29_6:
+  en: One-arm Burpee
+  es: Burpee a un brazo
+exercise_29_7:
+  en: Squat Thrusts (Up-downs)
+  es: Planchas con sentadilla
+exercise_29_8:
+  en: Weighted Squat Thrusts (Up-downs)
+  es: Planchas con sentadilla lastradas
+exercise_29_9:
+  en: Squat, Plank, Push-up
+  es: Sentadilla, plancha y flexión de brazos
+exercise_29_10:
+  en: Weighted Squat, Plank, Push-up
+  es: Sentadilla, plancha y flexión de brazos lastrada
+exercise_29_11:
+  en: Standing T-rotation Balance
+  es: Equilibrio de pie con rotación en T
+exercise_29_12:
+  en: Weighted Standing T-rotation Balance
+  es: Equilibrio de pie lastrado con rotación en T
+exercise_29_13:
+  en: Barbell Burpee
+  es: Burpee con barra
+exercise_29_15:
+  en: Burpee Box Jump Over
+  es: Burpee con salto en cajón y cambio de lado
+exercise_29_16:
+  en: Burpee Box Jump Step-up Over
+  es: Burpee con salto en cajón y cambio de lado andando
+exercise_29_17:
+  en: Lateral Barbell Burpee
+  es: Burpee lateral con barra
+exercise_29_18:
+  en: Total Body Burpee Over Bar
+  es: Burpee completo con salto sobre barra
+exercise_29_19:
+  en: Burpee Box Jump Over
+  es: Burpee con salto en cajón y cambio de lado
+exercise_29_20:
+  en: Burpee
+  es: Burpee
+exercise_30_0:
+  en: Bench Dip
+  es: Fondos con bancos
+exercise_30_1:
+  en: Weighted Bench Dip
+  es: Fondos lastrados en banco
+exercise_30_2:
+  en: Body-weight Dip
+  es: Fondos con peso corporal
+exercise_30_3:
+  en: Cable Tricep Kick-back
+  es: Extensión posterior de tríceps con cable
+exercise_30_4:
+  en: Cable Lying Triceps Extension
+  es: Extensión de tríceps tumbado y con polea
+exercise_30_5:
+  en: Cable Overhead Triceps Extension
+  es: Extensiones de tríceps con polea por encima de la cabeza
+exercise_30_6:
+  en: Dumbbell Kick-back
+  es: Patada Atrás Con Mancuernas
+exercise_30_7:
+  en: Dumbbell Lying Triceps Extension
+  es: Extensión de tríceps tumbado con mancuernas
+exercise_30_8:
+  en: EZ-Bar Overhead Triceps Extension
+  es: Extensión de tríceps por encima de la cabeza con barra Z
+exercise_30_9:
+  en: Incline Dip
+  es: Fondos inclinados en paralelas
+exercise_30_10:
+  en: Weighted Incline Dip
+  es: Fondos lastrados inclinados
+exercise_30_11:
+  en: Incline EZ-Bar Lying Triceps Extension
+  es: Extensión de tríceps en banco inclinado con barra Z
+exercise_30_12:
+  en: Lying Dumbbell Pull-over to Extension
+  es: Tirones a extensiones tumbado con mancuernas
+exercise_30_13:
+  en: Lying EZ-Bar Triceps Extension
+  es: Extensión de tríceps con barra EZ, estirado
+exercise_30_14:
+  en: Lying Triceps Extension to Close-grip Bench Press
+  es: Extensión de tríceps tumbado y press de banca con agarre estrecho
+exercise_30_15:
+  en: Overhead Dumbbell Triceps Extension
+  es: Extensión de tríceps por encima de la cabeza con mancuernas
+exercise_30_16:
+  en: Reclining Triceps Press
+  es: Press de tríceps reclinado
+exercise_30_17:
+  en: Reverse-grip Press-down
+  es: Press de banca con agarre Invertido
+exercise_30_18:
+  en: Reverse-grip Triceps Press-down
+  es: Press hacia abajo de tríceps con agarre invertido
+exercise_30_19:
+  en: Rope Press-down
+  es: Press hacia abajo con cuerda
+exercise_30_20:
+  en: Seated Barbell Overhead Triceps Extension
+  es: Extensión de tríceps por encima de la cabeza con barra (sentado)
+exercise_30_21:
+  en: Seated Dumbbell Overhead Triceps Extension
+  es: Extensión de tríceps por encima de la cabeza con mancuerna y sentado
+exercise_30_22:
+  en: Seated EZ-Bar Overhead Triceps Extension
+  es: Extensión de tríceps por encima de la cabeza con barra Z y sentado
+exercise_30_23:
+  en: Seated Single-arm Overhead Dumbbell Extension
+  es: Extensión por encima de la cabeza con mancuerna, un solo brazo y sentado
+exercise_30_24:
+  en: Single-arm Dumbbell Overhead Triceps Extension
+  es: Extensión de tríceps de un solo brazo con mancuerna por encima de la cabeza
+exercise_30_25:
+  en: Single-dumbbell Seated Overhead Triceps Extension
+  es: Extensión de tríceps sentado con mancuerna por encima de la cabeza
+exercise_30_26:
+  en: Single-leg Bench Dip and Kick
+  es: Fondos con banco y patada con una pierna
+exercise_30_27:
+  en: Weighted Single-leg Bench Dip and Kick
+  es: Fondos lastrados en banco a una pierna y patada
+exercise_30_28:
+  en: Single-leg Dip
+  es: Fondo con una pierna
+exercise_30_29:
+  en: Weighted Single-leg Dip
+  es: Fondos lastrados a una pierna
+exercise_30_30:
+  en: Static Lying Triceps Extension
+  es: Extensión de tríceps tumbado y estático
+exercise_30_31:
+  en: Suspended Dip
+  es: Fondos en suspensión
+exercise_30_32:
+  en: Weighted Suspended Dip
+  es: Fondos lastrados en suspensión
+exercise_30_33:
+  en: Swiss Ball Dumbbell Lying Triceps Extension
+  es: Extensión de tríceps con mancuernas y tumbado sobre Pelota Suiza
+exercise_30_34:
+  en: Swiss Ball EZ-Bar Lying Triceps Extension
+  es: Extensión de tríceps estirado con barra EZ y Pelota Suiza
+exercise_30_35:
+  en: Swiss Ball EZ-Bar Overhead Triceps Extension
+  es: Extensión de tríceps por encima de la cabeza con barra Z y Pelota Suiza
+exercise_30_36:
+  en: Tabletop Dip
+  es: Fondos en caja o banco
+exercise_30_37:
+  en: Weighted Tabletop Dip
+  es: Fondos lastrados en mesa
+exercise_30_38:
+  en: Triceps Extension on Floor
+  es: Extensión de tríceps en suelo
+exercise_30_39:
+  en: Triceps Press-down
+  es: Press Hacia Abajo De Tríceps
+exercise_30_40:
+  en: Weighted Dip
+  es: Fondos con pesas
+exercise_30_41:
+  en: Alternating Dumbbell Lying Triceps Extension
+  es: Extensión alterna de tríceps con mancuernas (acostado)
+exercise_30_42:
+  en: Triceps Press
+  es: Press de tríceps
+exercise_30_43:
+  en: Tricep Kickbacks
+  es: Patadas de tríceps
+exercise_30_44:
+  en: Overhead Triceps Extension
+  es: Extensión de tríceps por encima de la cabeza
+exercise_31_0:
+  en: Quadruped Rocking
+  es: Balanceo cuadrúpedo
+exercise_31_1:
+  en: Neck Tilts
+  es: Inclinaciones de cuello
+exercise_31_2:
+  en: Ankle Circles
+  es: Círculos con los tobillos
+exercise_31_3:
+  en: Ankle Dorsiflexion with Band
+  es: Flexión dorsal de tobillo con cinta
+exercise_31_4:
+  en: Ankle Internal Rotation
+  es: Rotación interna del tobillo
+exercise_31_5:
+  en: Arm Circles
+  es: Círculos de brazos
+exercise_31_6:
+  en: Bent-over Reach to Sky
+  es: Inclinación hacia delante y extensión hacia el cielo
+exercise_31_7:
+  en: Cat Camel
+  es: Postura de gato
+exercise_31_8:
+  en: Elbow-to-Foot Lunge
+  es: Zancada llevando el codo al pie
+exercise_31_9:
+  en: Forward and Backward Leg Swings
+  es: Balanceo de pierna hacia delante y hacia atrás
+exercise_31_10:
+  en: Groiners
+  es: Groiners (estiramiento de aductores)
+exercise_31_11:
+  en: Inverted Hamstring Stretch
+  es: Estiramientos de isquiotibiales invertidos
+exercise_31_12:
+  en: Lateral Duck Under
+  es: Paso lateral bajo barra
+exercise_31_13:
+  en: Neck Rotations
+  es: Rotaciones de cuello
+exercise_31_14:
+  en: Opposite Arm and Leg Balance
+  es: Brazo opuesto y equilibrio de piernas
+exercise_31_15:
+  en: Reach, Roll, and Lift
+  es: Extensión, rodamiento y elevación
+exercise_31_17:
+  en: Shoulder Circles
+  es: Círculos de hombros
+exercise_31_18:
+  en: Side-to-Side Leg Swings
+  es: Balanceo de pierna lateral
+exercise_31_19:
+  en: Sleeper Stretch
+  es: Estiramiento tumbado
+exercise_31_20:
+  en: Slide Out
+  es: Deslizamiento lateral
+exercise_31_21:
+  en: Swiss Ball Hip Crossover
+  es: Crossover de caderas sobre Pelota Suiza
+exercise_31_22:
+  en: Swiss Ball Reach, Roll, and Lift
+  es: Pelota Suiza, giro y levatamiento
+exercise_31_23:
+  en: Swiss Ball Windshield Wipers
+  es: Abdominales limpiaparabrisas con Pelota Suiza
+exercise_31_24:
+  en: Thoracic Rotation
+  es: Rotación torácica
+exercise_31_25:
+  en: Walking High Kicks
+  es: Patada alta caminando
+exercise_31_26:
+  en: Walking High Knees
+  es: Elevación de rodillas caminando
+exercise_31_27:
+  en: Walking Knee Hugs
+  es: Abrazos de rodilla caminando
+exercise_31_28:
+  en: Walking Leg Cradles
+  es: Suspensión de piernas caminando
+exercise_31_29:
+  en: Walkout
+  es: Walkout
+exercise_31_30:
+  en: Walkout from Push-up Position
+  es: Andar desde posición de flexión de brazos
+exercise_31_31:
+  en: Biceps Stretch
+  es: Estiramiento de bíceps
+exercise_31_32:
+  en: Glutes Stretch
+  es: Estiramiento de glúteos
+exercise_31_33:
+  en: Standing Hamstring Stretch
+  es: Estiramiento de isquiotibiales de pie
+exercise_31_34:
+  en: 90/90 Stretch
+  es: Estiramiento 90/90
+exercise_31_35:
+  en: Abs Stretch
+  es: Estiramiento de abdominales
+exercise_31_36:
+  en: Butterfly Stretch
+  es: Estiramiento de mariposa
+exercise_31_37:
+  en: Calf Stretch
+  es: Estiramiento de gemelos
+exercise_31_38:
+  en: Cat Cow Stretch
+  es: Estiramiento gato-vaca
+exercise_31_39:
+  en: Child's Pose Stretch
+  es: Estiramiento de la postura del niño
+exercise_31_40:
+  en: Cobra Stretch
+  es: Estiramiento de la cobra
+exercise_31_41:
+  en: Forearm Stretch
+  es: Estiramiento de antebrazo
+exercise_31_42:
+  en: Forward Glutes Stretch
+  es: Estiramiento de glúteos hacia delante
+exercise_31_43:
+  en: Front Split Stretch
+  es: Estiramiento con split frontal
+exercise_31_44:
+  en: Hamstring Stretch
+  es: Estiramiento de isquiotibiales
+exercise_31_45:
+  en: Hip Flexor and Quad Stretch
+  es: Estiramiento de cuádriceps y flexor de cadera
+exercise_31_46:
+  en: Lat Stretch
+  es: Estiramiento lateral
+exercise_31_47:
+  en: Levator Scapulae Stretch
+  es: Estiramiento angular de la escápula
+exercise_31_48:
+  en: Lunge with Spinal Twist Stretch
+  es: Zancada con estiramiento con torsión espinal
+exercise_31_49:
+  en: Lunging Hip Flexor Stretch
+  es: Estiramiento del flexor de cadera con zancada
+exercise_31_50:
+  en: Stretch Lying Abduction
+  es: Estiramiento tumbado con abducción
+exercise_31_51:
+  en: Lying IT Band Stretch
+  es: Estiramiento tumbado con pierna cruzada
+exercise_31_52:
+  en: Lying Knee-to-Chest Stretch
+  es: Estiramiento tumbado de rodillas a pecho
+exercise_31_53:
+  en: Lying Piriformis Stretch
+  es: Estiramiento tumbado del piramidal
+exercise_31_54:
+  en: Lying Spinal Twist Stretch
+  es: Estiramiento tumbado con torsión espinal
+exercise_31_55:
+  en: Neck Stretch
+  es: Estiramiento cervical
+exercise_31_56:
+  en: Obliques Stretch
+  es: Estiramiento de los oblicuos
+exercise_31_57:
+  en: Over-under Shoulder Stretch
+  es: Estiramiento de hombros por la espalda
+exercise_31_58:
+  en: Pectoral Stretch
+  es: Estiramiento pectoral
+exercise_31_59:
+  en: Pigeon Pose Stretch
+  es: Estiramiento de la postura de la paloma
+exercise_31_60:
+  en: Piriformis Stretch
+  es: Estiramiento del piramidal
+exercise_31_61:
+  en: Quad Stretch
+  es: Estiramiento de cuádriceps
+exercise_31_62:
+  en: Scorpion Stretch
+  es: Estiramiento del escorpión
+exercise_31_63:
+  en: Shoulder Stretch
+  es: Estiramiento de hombros
+exercise_31_64:
+  en: Side Stretch
+  es: Estiramiento lateral
+exercise_31_65:
+  en: Side Lunge Stretch
+  es: Estiramiento con zancada lateral
+exercise_31_66:
+  en: Side Split Stretch
+  es: Estiramiento con split lateral
+exercise_31_67:
+  en: Standing IT Band Stretch
+  es: Estiramiento de pie con pierna cruzada
+exercise_31_68:
+  en: Straddle Stretch
+  es: Estiramiento con piernas abiertas
+exercise_31_69:
+  en: Triceps Stretch
+  es: Estiramiento de tríceps
+exercise_31_70:
+  en: Wall Chest and Shoulder Stretch
+  es: Estiramiento pectoral y de hombros en pared
+exercise_31_71:
+  en: Neck Rotation Pose
+  es: Posición de rotación del cuello
+exercise_31_72:
+  en: Half-Kneeling Arm Rotation
+  es: Zancadas con rotación
+exercise_31_73:
+  en: Three-Way Ankle Mobilization
+  es: Movimiento del tobillo en 3 direcciones
+exercise_31_74:
+  en: 90/90 Hip Switch with Reach
+  es: Rotación de cadera 90/90 con estiramiento
+exercise_31_75:
+  en: Active Frog
+  es: Estiramiento de la rana
+exercise_31_76:
+  en: Shoulder Sweeps
+  es: Rotaciones de hombro
+exercise_31_77:
+  en: Ankle Lunges
+  es: Zancadas con flexión de tobillo
+exercise_31_78:
+  en: Back Roll on Foam Roller
+  es: Estiramiento de espalda en rodillo de espuma
+exercise_31_79:
+  en: Bear Crawl
+  es: Gateo de oso
+exercise_31_80:
+  en: Latissimus Dorsi Foam Roll
+  es: Dorsal ancho en rollo de espuma
+exercise_31_81:
+  en: Reverse T Hip Opener
+  es: Zancada inversa con giro de cintura
+exercise_31_82:
+  en: Shoulder Rolls
+  es: Círculos con los hombros
+exercise_31_83:
+  en: Chest Openers
+  es: Aperturas de tórax
+exercise_31_84:
+  en: Triceps Stretch
+  es: Estiramiento de tríceps
+exercise_31_85:
+  en: Upper Back Stretch
+  es: Estiramiento de la espalda alta
+exercise_31_86:
+  en: Hip Circles
+  es: Círculos de cadera
+exercise_31_87:
+  en: Ankle Stretch
+  es: Estiramiento de tobillos
+exercise_31_88:
+  en: Marching in Place
+  es: Marcha en el sitio
+exercise_31_89:
+  en: Triceps Stretch
+  es: Estiramiento de tríceps
+exercise_31_90:
+  en: Upper Back Stretch
+  es: Estiramiento de la espalda alta
+exercise_32_0:
+  en: Run
+  es: Carrera
+exercise_32_1:
+  en: Walk
+  es: Caminar
+exercise_32_2:
+  en: Jog
+  es: Footing
+exercise_32_3:
+  en: Sprint
+  es: Sprint
+exercise_32_4:
+  en: Run or Walk
+  es: Correr o caminar
+exercise_32_5:
+  en: Speed Walk
+  es: Marcha rápida
+exercise_32_6:
+  en: Warm Up
+  es: Calentamiento
+exercise_33_0:
+  en: Bike
+  es: Bicicleta
+exercise_33_1:
+  en: Ride
+  es: Paseo en bicicleta
+exercise_33_2:
+  en: Sprint
+  es: Sprint
+exercise_35_0:
+  en: Arch and Curl
+  es: Arco y curl
+exercise_35_1:
+  en: Arm Circles (with ball, band and weight)
+  es: Círculos con los brazos (con pelota, cinta y pesa)
+exercise_35_2:
+  en: Arm Stretch
+  es: Estiramiento de brazos
+exercise_35_3:
+  en: Back Massage
+  es: Masaje de espalda
+exercise_35_4:
+  en: Belly Breathing
+  es: Respiración abdominal
+exercise_35_5:
+  en: Bridge (with ball)
+  es: Puente (con pelota)
+exercise_35_6:
+  en: Diamond Leg Crunch
+  es: Crunch con abertura de tipo diamante
+exercise_35_7:
+  en: Diamond Leg Lift
+  es: Elevación de piernas flexionadas
+exercise_35_8:
+  en: Eight-point Shoulder Opener
+  es: Apertura de hombros de ocho puntos
+exercise_35_9:
+  en: Foot Rolling
+  es: Pie rodando
+exercise_35_10:
+  en: Footwork
+  es: Trabajo de pies
+exercise_35_11:
+  en: Footwork (on disc)
+  es: Trabajo de pies (en disco)
+exercise_35_12:
+  en: Forward Fold
+  es: Flexión hacia delante
+exercise_35_13:
+  en: Frog (with Band)
+  es: Rana (con cinta)
+exercise_35_14:
+  en: Half Roll Up
+  es: Medio rodar hacia arriba
+exercise_35_15:
+  en: Hamstring Curl
+  es: Curl de isquiotibiales
+exercise_35_16:
+  en: Hamstring Stretch
+  es: Estiramiento de isquiotibiales
+exercise_35_17:
+  en: Hip Stretch
+  es: Estiramiento de cadera
+exercise_35_18:
+  en: Hug a Tree (with ball, band and weight)
+  es: Abrazo del árbol (con pelota, cinta y pesa)
+exercise_35_19:
+  en: Knee Circles
+  es: Círculos de rodilla
+exercise_35_20:
+  en: Knee Folds (on disc)
+  es: Flexiones de rodilla (en disco)
+exercise_35_21:
+  en: Lateral Flexion
+  es: Flexión lateral
+exercise_35_22:
+  en: Leg Stretch (with Band)
+  es: Estiramiento de piernas (con cinta)
+exercise_35_23:
+  en: Leg Stretch with Leg Circles
+  es: Estiramiento de piernas con círculos con las piernas
+exercise_35_24:
+  en: Lower Lift (on disc)
+  es: Elevación inferior (en disco)
+exercise_35_25:
+  en: Lunge Squat
+  es: Sentadilla con zancada
+exercise_35_26:
+  en: Lunges (with knee lift)
+  es: Zancadas (con elevación de rodilla)
+exercise_35_27:
+  en: Mermaid Stretch
+  es: Estiramiento de sirena
+exercise_35_28:
+  en: Neutral Pelvic Position
+  es: Pelvis neutra
+exercise_35_29:
+  en: Pelvic Clocks (on disc)
+  es: Reloj pélvico (en disco)
+exercise_35_30:
+  en: Pilates Plie Squats (Parallel, Turned Out, Flat, and Heels) (with chair)
+  es: Sentadillas plié estilo pilates (pies en paralelo, hacia afuera, apoyados y con talones levantados) (con silla)
+exercise_35_31:
+  en: Piriformis Stretch
+  es: Estiramiento del piramidal
+exercise_35_32:
+  en: "Plank: Knee Crosses"
+  es: "Plancha: rodilla al pecho"
+exercise_35_33:
+  en: "Plank: Knee Pulls"
+  es: "Plancha: elevación de pierna y flexión de rodilla"
+exercise_35_34:
+  en: Plank Up/Downs
+  es: Plancha arriba/abajo
+exercise_35_35:
+  en: Prayer Mudra
+  es: Oración mudra
+exercise_35_36:
+  en: Psoas Lunge Stretch
+  es: Zancada con estiramiento del psoas
+exercise_35_37:
+  en: Ribcage Breathing
+  es: Respiración torácica
+exercise_35_38:
+  en: Roll Down
+  es: Lastrado
+exercise_35_39:
+  en: Roll Up (with weight and band)
+  es: Rodar hacia delante (con pesa y cinta)
+exercise_35_40:
+  en: Saw
+  es: Sierra
+exercise_35_41:
+  en: Scapular Stabilization
+  es: Estabilización escapular
+exercise_35_42:
+  en: Scissors (on disc)
+  es: Tijeras (en disco)
+exercise_35_43:
+  en: Seated Hip Stretch
+  es: Estiramiento de cadera sentado
+exercise_35_44:
+  en: Seated Twist
+  es: Torsión sentada
+exercise_35_45:
+  en: Shaving the Head (with ball, band and weight)
+  es: Afeitado de cabeza (con pelota, cinta y pesa)
+exercise_35_46:
+  en: Spinal Twist
+  es: Torsión espinal
+exercise_35_47:
+  en: Spinal Twist Stretch
+  es: Estiramiento con torsión espinal
+exercise_35_48:
+  en: Spine Stretch Forward
+  es: Estiramiento hacia delante de la columna
+exercise_35_49:
+  en: Squat Open Arm Twist Pose
+  es: Postura de sentadilla con giro y brazos abiertos
+exercise_35_50:
+  en: Squats (with ball)
+  es: Sentadillas (con pelota)
+exercise_35_51:
+  en: Stand and Hang
+  es: De pie y con el cuerpo relajado
+exercise_35_52:
+  en: Standing Side Stretch
+  es: Estiramiento lateral de pie
+exercise_35_53:
+  en: Standing Single Leg Forward Bend with IT Band Opener
+  es: Postura de pierna flexionada hacia adelante con banda IT para apertura
+exercise_35_54:
+  en: Straight-leg Crunch with Leg Lift
+  es: Abdominales con piernas rectas y elevadas
+exercise_35_55:
+  en: Straight-leg Crunch with Leg Lift (with ball)
+  es: Abdominales con piernas rectas y con elevación de pierna (con pelota)
+exercise_35_56:
+  en: Straight-leg Crunch with legs crossed
+  es: Abdominales con piernas rectas y cruzadas
+exercise_35_57:
+  en: Straight-leg Crunch with legs crossed (with ball)
+  es: Abdominales con piernas rectas y cruzadas (con pelota)
+exercise_35_58:
+  en: Straight-leg Diagonal Crunch
+  es: Abdominales en diagonal con piernas rectas
+exercise_35_59:
+  en: Straight-leg Diagonal Crunch (with ball)
+  es: Crunch en diagonal con piernas estiradas (con pelota)
+exercise_35_60:
+  en: Tailbone Curl
+  es: Curl de coxis
+exercise_35_61:
+  en: Throat Lock
+  es: Bloqueo de garganta
+exercise_35_62:
+  en: Tick-Tock (Side Roll)
+  es: Tic tac (con giro lateral)
+exercise_35_63:
+  en: Twist
+  es: Giro
+exercise_35_64:
+  en: V Leg Crunches
+  es: Abdominales con piernas extendidas
+exercise_35_65:
+  en: V Sit
+  es: Sentada en V
+exercise_35_66:
+  en: Forward Fold Pose
+  es: Postura de flexión hacia delante
+exercise_35_67:
+  en: Forward Fold Plus
+  es: Flexión hacia delante
+exercise_35_68:
+  en: Arm Circles Low Forward
+  es: Círculos de brazo bajos hacia delante
+exercise_35_69:
+  en: Arm Circles Mid Forward
+  es: Círculos de brazos en el centro hacia delante
+exercise_35_70:
+  en: Arm Circles High Forward
+  es: Círculos de brazos altos hacia delante
+exercise_35_71:
+  en: Arm Circles Low Backward
+  es: Círculos de brazos bajos hacia atrás
+exercise_35_72:
+  en: Arm Circles Mid Backward
+  es: Círculos de brazos en el centro hacia atrás
+exercise_35_73:
+  en: Arm Circles High Backward
+  es: Círculos de brazos altos hacia atrás
+exercise_35_74:
+  en: Core Twists
+  es: Giros del torso
+exercise_35_75:
+  en: Arm Raise
+  es: Elevación de brazo
+exercise_35_76:
+  en: Chest Expand
+  es: Apertura de pecho
+exercise_35_77:
+  en: Arm Extend
+  es: Estiramiento de brazo
+exercise_35_78:
+  en: Forward Bend
+  es: Inclinación hacia delante
+exercise_35_79:
+  en: Toe Touch
+  es: Tocarse los dedos de los pies
+exercise_35_80:
+  en: Extended Toe Touch
+  es: Toque de pie extendido
+exercise_35_81:
+  en: Seated Arm Circles
+  es: Círculos con los brazos sentado
+exercise_35_82:
+  en: Trunk Rotations
+  es: Rotaciones de tronco
+exercise_35_83:
+  en: Seated Trunk Rotations
+  es: Rotaciones de tronco sentado
+exercise_35_84:
+  en: Toe Touch
+  es: Tocarse los dedos de los pies
+exercise_36_0:
+  en: All Fours Pose
+  es: Postura en cuatro puntos
+exercise_36_1:
+  en: Ankle to Knee Pose
+  es: Postura de tobillo a rodilla
+exercise_36_2:
+  en: Baby Cobra Pose
+  es: Postura de media cobra
+exercise_36_3:
+  en: Boat Pose
+  es: Postura de bote
+exercise_36_4:
+  en: Bound Angle Pose
+  es: Postura de ángulo unido o mariposa
+exercise_36_5:
+  en: Bound Seated Single-Leg Forward Bend Pose
+  es: Postura amarrada y sentada con una pierna de adelante flexionada
+exercise_36_6:
+  en: Bow Pose
+  es: Postura del arco o columpio
+exercise_36_7:
+  en: Bowed Half Moon Pose
+  es: Postura de caña de azúcar
+exercise_36_8:
+  en: Bridge Pose
+  es: Postura del puente
+exercise_36_9:
+  en: Cat Pose
+  es: Posición de gato
+exercise_36_10:
+  en: Chair Pose
+  es: Postura de la silla
+exercise_36_11:
+  en: Child’s Pose
+  es: Postura del niño
+exercise_36_12:
+  en: Corpse Pose
+  es: Postura de cadáver
+exercise_36_13:
+  en: Cow Face Pose
+  es: Postura cara de vaca
+exercise_36_14:
+  en: Cow Pose
+  es: Pose de vaca
+exercise_36_15:
+  en: Devotional Warrior Pose
+  es: Postura de guerrero devoto
+exercise_36_16:
+  en: Dolphin Plank Pose
+  es: Postura de plancha de delfín
+exercise_36_17:
+  en: Dolphin Pose
+  es: Postura de delfín
+exercise_36_18:
+  en: Down Dog Knee to Nose Pose
+  es: Postura de perro cabeza abajo con rodilla a nariz
+exercise_36_19:
+  en: Down Dog Split Pose
+  es: Postura de perro cabeza abajo con una pierna extendida hacia arriba
+exercise_36_20:
+  en: Down Dog Split Pose, Open Hip Bent Knee
+  es: Postura de perro cabeza abajo con una pierna extendida hacia arriba, cadera abierta rodilla flexionada
+exercise_36_21:
+  en: Downward Facing Dog Pose
+  es: Postura de perro bocabajo
+exercise_36_22:
+  en: Eagle Pose
+  es: Postura del águila
+exercise_36_23:
+  en: Easy Seated Pose
+  es: Postura fácil
+exercise_36_24:
+  en: Extended Puppy Pose
+  es: Postura del cachorro estirado
+exercise_36_25:
+  en: Extended Side Angle Pose
+  es: Postura de ángulo lateral extendido
+exercise_36_26:
+  en: Fish Pose
+  es: Postura de pez
+exercise_36_27:
+  en: Four-Limbed Staff Pose
+  es: Postura de bastón con las cuatro extremidades
+exercise_36_28:
+  en: Full Split Pose
+  es: Postura del mono completo
+exercise_36_29:
+  en: Gate Pose
+  es: Postura de la puerta
+exercise_36_30:
+  en: Half Chair Half Ankle to Knee Pose
+  es: Postura de media silla y medio tobillo a rodilla
+exercise_36_31:
+  en: Half Moon Pose
+  es: Postura de la media luna
+exercise_36_32:
+  en: Head to Knee Pose
+  es: Pose de cabeza a rodilla
+exercise_36_33:
+  en: Heron Pose
+  es: Postura de garza
+exercise_36_34:
+  en: Hero’s Pose
+  es: Postura del héroe
+exercise_36_35:
+  en: High Lunge Pose
+  es: Postura de estocada alta
+exercise_36_36:
+  en: Knees Chest Chin Pose
+  es: Postura rodilla pecho barbilla
+exercise_36_37:
+  en: Lizard Pose
+  es: Postura de lagarto
+exercise_36_38:
+  en: Locust Pose
+  es: Postura de la langosta
+exercise_36_39:
+  en: Low Lunge Pose
+  es: Postura de estocada baja
+exercise_36_40:
+  en: Low Lunge Twist Pose
+  es: Postura de estocada baja con giro
+exercise_36_41:
+  en: Low Lunge with Knee Down Pose
+  es: Postura de estocada baja con rodilla en el piso
+exercise_36_42:
+  en: Mermaid Pose
+  es: Abridor de hombros
+exercise_36_43:
+  en: Mountain Pose
+  es: Postura de la  montaña
+exercise_36_44:
+  en: One-Legged Downward-Facing Dog Pose Open Hip Bent Knee
+  es: Postura de perro bocabajo a una pierna con apertura de cadera y flexión de rodilla
+exercise_36_45:
+  en: One-Legged Pigeon Pose
+  es: Postura de paloma sobre una pierna
+exercise_36_46:
+  en: Peaceful Warrior Pose
+  es: Postura de guerrero pacífico
+exercise_36_47:
+  en: Plank Pose
+  es: Postura de la plancha
+exercise_36_48:
+  en: Plow Pose
+  es: Postura de arado
+exercise_36_49:
+  en: Reclined Hand to Foot Pose
+  es: Postura reclinada desde mano hasta pie
+exercise_36_50:
+  en: Revolved Half Moon Pose
+  es: Postura de media luna girada
+exercise_36_51:
+  en: Revolved Head to Knee Pose
+  es: Postura de cabeza a rodilla con giro
+exercise_36_52:
+  en: Revolved Triangle Pose
+  es: Postura del triángulo girado
+exercise_36_53:
+  en: Runner’s Lunge Pose
+  es: Postura de zancada de corredor
+exercise_36_54:
+  en: Seated Easy Side Bend Pose
+  es: Postura de flexión lateral simple en posición sentada
+exercise_36_55:
+  en: Seated Easy Twist Pose
+  es: Postura de giro simple y en posición sentada
+exercise_36_56:
+  en: Seated Long-Leg Forward Bend Pose
+  es: Postura inclinada con las piernas extendidas hacia adelante y en posición sentada
+exercise_36_57:
+  en: Seated Wide-Leg Forward Bend Pose
+  es: Postura inclinada con las piernas ampliamente abiertas al frente y en posición sentada
+exercise_36_58:
+  en: Shoulder Stand Pose
+  es: Postura parado sobre los hombros
+exercise_36_59:
+  en: Side Boat Pose
+  es: Postura de bote lateral
+exercise_36_60:
+  en: Side Plank Pose
+  es: Postura de la plancha lateral
+exercise_36_61:
+  en: Sphinx Pose
+  es: Postura de la esfinge
+exercise_36_62:
+  en: Squat Open Arm Twist Pose
+  es: Postura de sentadilla con brazos abiertos girada
+exercise_36_63:
+  en: Squat Palm Press Pose
+  es: Postura de la guirnalda
+exercise_36_64:
+  en: Staff Pose
+  es: Postura del bastón
+exercise_36_65:
+  en: Standing Arms Up Pose
+  es: Pose con los brazos hacia arriba y de pie
+exercise_36_66:
+  en: Standing Forward Bend, Halfway Up Pose
+  es: Postura con inclinación media frontal de pie
+exercise_36_67:
+  en: Standing Forward Bend Pose
+  es: Postura con inclinación frontal y de pie
+exercise_36_68:
+  en: Standing Side Opener Pose
+  es: Postura con apertura lateral y de pie
+exercise_36_69:
+  en: Standing Single Leg Forward Bend Pose
+  es: Postura de pierna flexionada hacia adelante parado
+exercise_36_70:
+  en: Standing Split Pose
+  es: Postura de una pierna extendida hacia arriba
+exercise_36_71:
+  en: Standing Wide-Leg Forward Bend Pose
+  es: Postura inclinada con las piernas abiertas ampliamente hacia adelante y de pie.
+exercise_36_72:
+  en: Standing Wide-Leg Forward Bend with Twist Pose
+  es: Postura inclinada con giro y amplia apertura de piernas adelante y en posición de pie
+exercise_36_73:
+  en: Supine Spinal Twist Pose
+  es: Postura de torsión de columna supina
+exercise_36_74:
+  en: Table Top Pose
+  es: Postura de mesa
+exercise_36_75:
+  en: Thread the Needle Pose
+  es: Postura de enhebrar la aguja
+exercise_36_76:
+  en: Thunderbolt Pose
+  es: Postura del rayo
+exercise_36_77:
+  en: Thunderbolt Pose Both Sides Arm Stretch
+  es: Estiramiento de brazos con postura del diamante
+exercise_36_78:
+  en: Tree Pose
+  es: Postura del árbol
+exercise_36_79:
+  en: Triangle Pose
+  es: Postura del triángulo
+exercise_36_80:
+  en: Up Dog Pose
+  es: Postura de perro cabeza arriba.
+exercise_36_81:
+  en: Upward Facing Plank Pose
+  es: Postura de plancha mirando hacia arriba
+exercise_36_82:
+  en: Warrior One Pose
+  es: Postura de guerrero uno
+exercise_36_83:
+  en: Warrior Three Pose
+  es: Postura de guerrero tres
+exercise_36_84:
+  en: Warrior Two Pose
+  es: Postura de guerrero dos
+exercise_36_85:
+  en: Wheel Pose
+  es: Postura de la rueda
+exercise_36_86:
+  en: Wide Side Lunge Pose
+  es: Postura de estocada lateral ancha
+exercise_36_87:
+  en: Deep Breathing Pose
+  es: Postura de respiración profunda
+exercise_36_88:
+  en: Deep Breathing Low Pose
+  es: Respiración profunda con los brazos hacia abajo
+exercise_36_89:
+  en: Deep Breathing Mid Pose
+  es: Respiración profunda con los brazos hacia el centro
+exercise_36_90:
+  en: Deep Breathing High Pose
+  es: Respiración profunda con los brazos hacia arriba
+exercise_36_91:
+  en: Prayer Pose
+  es: Postura de oración
+exercise_36_92:
+  en: Overhead Prayer Pose
+  es: Postura de oración sobre la cabeza
+exercise_36_93:
+  en: Cactus Pose
+  es: Postura de cactus
+exercise_36_94:
+  en: Breathing Punches Pose
+  es: Postura de puñetazo con respiración
+exercise_36_95:
+  en: Breathing Punches Extended Pose
+  es: Postura extendida de puñetazos con respiración
+exercise_36_96:
+  en: Breathing Punches Overhead Pose
+  es: Postura de puñetazos con respiración sobre la cabeza
+exercise_36_97:
+  en: Breathing Punches Overhead & Down Pose
+  es: Postura de puñetazo con respiración sobre la cabeza y hacia abajo
+exercise_36_98:
+  en: Breathing Punches Side Pose
+  es: Postura puñetazos laterales con respiración
+exercise_36_99:
+  en: Breathing Punches Extended Side Pose
+  es: Postura extendida de puñetazos laterales con respiración
+exercise_36_100:
+  en: Breathing Punches Overhead Side Pose
+  es: Postura de puñetazos laterales con respiración sobre la cabeza
+exercise_36_101:
+  en: Breathing Punches Overhead & Down Side Pose
+  es: Postura de puñetazos laterales con respiración hacia abajo y sobre la cabeza
+exercise_36_102:
+  en: Left Hand Back (Triangle Thread The Needle) Pose
+  es: Postura de la mano izquierda hacia atrás (enhebrar la aguja)
+exercise_36_103:
+  en: Triangle Pose
+  es: Postura del triángulo
+exercise_36_104:
+  en: Thread Needle Pose
+  es: Postura de enhebrar la aguja
+exercise_36_105:
+  en: Neck Flexion & Extension Pose
+  es: Postura de flexión y extensión del cuello
+exercise_36_106:
+  en: Neck Lateral Flexion Pose
+  es: Posición de flexión lateral del cuello
+exercise_36_107:
+  en: Spine Flexion & Extension Pose
+  es: Postura de flexión y extensión espinal
+exercise_36_108:
+  en: Spine Rotation Pose
+  es: Posición de rotación de columna
+exercise_36_109:
+  en: Spine Lateral Flexion Pose
+  es: Posición de flexión lateral de la columna vertebral
+exercise_36_110:
+  en: Alternative Skiing Pose
+  es: Postura de esquí de nivel avanzado
+exercise_36_111:
+  en: Reach Forward Pose
+  es: Postura de flexión hacia delante
+exercise_36_112:
+  en: Warrior Pose
+  es: Postura del guerrero
+exercise_36_113:
+  en: Reverse Warrior Pose
+  es: Postura del guerrero invertido
+exercise_36_114:
+  en: Downward Facing Dog to Cobra
+  es: Perro boca abajo a cobra
+exercise_36_115:
+  en: Seated Cat-Cow
+  es: Gato-vaca sentado
+exercise_37_1:
+  en: Banded Ab Twist
+  es: Abdominales oblicuos con goma elástica
+exercise_37_2:
+  en: Banded Back Extension
+  es: Extensión de espalda con goma elástica
+exercise_37_3:
+  en: Banded Bicycle Crunch
+  es: Encogimiento abdominal de bicicleta con goma elástica
+exercise_37_4:
+  en: Banded Calf Raises
+  es: Elevaciones de talones con goma elástica
+exercise_37_5:
+  en: Banded Chest Press
+  es: Press de pecho con goma elástica
+exercise_37_6:
+  en: Banded Clam Shells
+  es: Almeja con goma elástica
+exercise_37_7:
+  en: Banded Curl
+  es: Curl con goma elástica
+exercise_37_8:
+  en: Banded Deadbug
+  es: Bicho muerto con goma elástica
+exercise_37_9:
+  en: Banded Deadlift
+  es: Peso muerto con goma elástica
+exercise_37_10:
+  en: Banded Donkey Kick
+  es: Patada de burro con goma elástica
+exercise_37_11:
+  en: Banded External Rotation
+  es: Rotación externa con goma elástica
+exercise_37_12:
+  en: Banded External Rotation at 90-Degree Abduction
+  es: Rotación externa con goma elástica en abducción de 90 grados
+exercise_37_13:
+  en: Banded Face Pull
+  es: Jalón a la cara con goma elástica
+exercise_37_14:
+  en: Banded Fire Hydrant
+  es: Patada boca de incendio con goma elástica
+exercise_37_15:
+  en: Banded Fly
+  es: Apertura con goma elástica
+exercise_37_16:
+  en: Banded Front Raise
+  es: Levantamiento frontal con goma elástica
+exercise_37_17:
+  en: Banded Glute Bridge
+  es: Puente de glúteos con goma elástica
+exercise_37_18:
+  en: Banded Hamstring Curls
+  es: Curl de isquiotibiales con goma elástica
+exercise_37_19:
+  en: Banded High Plank Leg Lifts
+  es: Plancha alta con goma elástica y elevaciones de pierna
+exercise_37_20:
+  en: Banded Hip Extension
+  es: Extensión de cadera con goma elástica
+exercise_37_21:
+  en: Banded Internal Rotation
+  es: Rotación interna con goma elástica
+exercise_37_22:
+  en: Banded Jumping Jack
+  es: Salto de estrella con goma elástica
+exercise_37_23:
+  en: Banded Kneeling Crunch
+  es: Encogimiento abdominal de rodillas con goma elástica
+exercise_37_24:
+  en: Banded Lateral Band Walks
+  es: Paso lateral con goma elástica en las piernas
+exercise_37_25:
+  en: Banded Lateral Raise
+  es: Elevación lateral con goma elástica
+exercise_37_26:
+  en: Banded Latpull
+  es: Jalón lateral con goma elástica
+exercise_37_27:
+  en: Banded Leg Abduction
+  es: Abducción de pierna con goma elástica
+exercise_37_28:
+  en: Banded Leg Adduction
+  es: Aducción de pierna con goma elástica
+exercise_37_29:
+  en: Banded Leg Extension
+  es: Extensión de pierna con goma elástica
+exercise_37_30:
+  en: Banded Lunge
+  es: Zancada con goma elástica
+exercise_37_31:
+  en: Banded Plank
+  es: Plancha con goma elástica
+exercise_37_32:
+  en: Banded Pull Apart
+  es: Pull Apart con goma elástica
+exercise_37_33:
+  en: Banded Push-ups
+  es: Flexiones con goma elástica
+exercise_37_34:
+  en: Banded Reverse Crunch
+  es: Encogimiento abdominal inverso con goma elástica
+exercise_37_35:
+  en: Banded Row
+  es: Remo con goma elástica
+exercise_37_36:
+  en: Banded Shoulder Abduction
+  es: Abducción de hombros con goma elástica
+exercise_37_37:
+  en: Banded Shoulder Extension
+  es: Extensión de hombros con goma elástica
+exercise_37_38:
+  en: Banded Shoulder External Rotation
+  es: Rotación externa de hombros con goma elástica
+exercise_37_39:
+  en: Banded Shoulder Flexion to 90-Degrees
+  es: Flexión de hombros a 90 grados con goma elástica
+exercise_37_40:
+  en: Banded Side Plank Leg Lifts
+  es: Plancha lateral con goma elástica y elevaciones de pierna
+exercise_37_41:
+  en: Banded Side Raise
+  es: Elevación lateral con goma elástica
+exercise_37_42:
+  en: Banded Squat
+  es: Sentadilla con goma elástica
+exercise_37_43:
+  en: Banded Squat to Press
+  es: Sentadilla y press de hombros con goma elástica
+exercise_37_44:
+  en: Banded Tricep Extension
+  es: Extensión de tríceps con goma elástica
+exercise_37_45:
+  en: Banded Tricep Kick-back
+  es: Extensión posterior de tríceps con goma elástica
+exercise_37_46:
+  en: Banded Upright Row
+  es: Remo vertical con goma elástica
+exercise_37_47:
+  en: Banded Wall Crawl with External Rotation
+  es: Gateo de pared con rotación externa y goma elástica
+exercise_37_49:
+  en: Banded Lateral Raise
+  es: Elevación lateral con goma elástica
+exercise_37_50:
+  en: Banded Triceps Extension
+  es: Extensión de tríceps con goma elástica
+exercise_37_51:
+  en: Banded Incline Chest Fly
+  es: Apertura de pecho inclinada con goma elástica
+exercise_37_52:
+  en: Banded Decline Chest Fly
+  es: Apertura de pecho declinada con goma elástica
+exercise_37_53:
+  en: Banded Pull-down
+  es: Pull Down con goma elástica
+exercise_37_54:
+  en: Banded Straight-arm Pull-down
+  es: Pull Down con brazo recto con goma elástica
+exercise_37_55:
+  en: Banded Bicep Curl
+  es: Curl de bíceps con goma elástica
+exercise_37_56:
+  en: Banded Overhead Curl
+  es: Curl por encima de la cabeza con goma elástica
+exercise_37_57:
+  en: Banded Face Pull
+  es: Jalón a la cara con goma elástica
+exercise_37_58:
+  en: Banded Around The World
+  es: Vuelta al mundo con gomas elásticas
+exercise_37_59:
+  en: Banded Pull Apart
+  es: Pull Apart con goma elástica
+exercise_37_60:
+  en: Banded Side Curl
+  es: Curl lateral con goma elástica
+exercise_37_61:
+  en: Overhead Banded Press
+  es: Press sobre la cabeza con goma elástica
+exercise_38_0:
+  en: Battle Rope Alternating Figure Eight
+  es: Número ocho alterno con cuerda de batalla
+exercise_38_1:
+  en: Battle Rope Alternating Jump Wave
+  es: Batida de cuerda de batalla alterna con salto
+exercise_38_2:
+  en: Battle Rope Alternating Kneeling to Standing Wave
+  es: Batida de cuerda de batalla alterna de rodillas a de pie
+exercise_38_3:
+  en: Battle Rope Alternating Lunge Wave
+  es: Batida de cuerda de batalla alterna con zancada
+exercise_38_4:
+  en: Battle Rope Alternating Squat Wave
+  es: Batida de cuerda de batalla alterna con sentadilla
+exercise_38_5:
+  en: Battle Rope Alternating Wave
+  es: Batida de cuerda de batalla alterna
+exercise_38_6:
+  en: Battle Rope Alternating Wave with Lateral Shuffle
+  es: Batida de cuerda de batalla alterna con desplazamiento lateral
+exercise_38_7:
+  en: Battle Rope Clap Wave
+  es: Batida de cuerda de batalla con cierre de brazos
+exercise_38_8:
+  en: Battle Rope Double-arm Figure Eight
+  es: Número ocho con cuerda de batalla a dos manos
+exercise_38_9:
+  en: Battle Rope Double Arm Side-to-Side Snake
+  es: Serpenteo lateral con cuerda de batalla a dos manos
+exercise_38_10:
+  en: Battle Rope Double-arm Side Wave
+  es: Batida lateral de cuerda de batalla a dos manos
+exercise_38_11:
+  en: Battle Rope Double-arm Slam
+  es: Sacudida de cuerda de batalla a dos manos
+exercise_38_12:
+  en: Battle Rope Double-arm Wave
+  es: Batida de cuerda de batalla a dos manos
+exercise_38_13:
+  en: Battle Rope Grappler Toss
+  es: Grappler Toss con cuerda de batalla
+exercise_38_14:
+  en: Battle Rope Hip Toss
+  es: Toss de cadera con cuerda de batalla
+exercise_38_15:
+  en: Battle Rope In and Out Wave
+  es: Batida de cuerda de batalla hacia dentro y hacia fuera
+exercise_38_16:
+  en: Battle Rope Inside Circle
+  es: Círculo interior con cuerda de batalla
+exercise_38_17:
+  en: Battle Rope Jumping Jacks
+  es: Saltos de estrella con cuerda de batalla
+exercise_38_18:
+  en: Battle Rope Outside Circle
+  es: Círculo exterior con cuerda de batalla
+exercise_38_19:
+  en: Battle Rope Rainbow
+  es: Arcoíris con cuerda de batalla
+exercise_38_20:
+  en: Battle Rope Side Plank Wave
+  es: Batida de cuerda de batalla con plancha lateral
+exercise_38_21:
+  en: Battle Rope Sidewinder
+  es: Ondas laterales con cuerda de batalla
+exercise_38_22:
+  en: Battle Rope Sitting Russian Twist
+  es: Giro ruso sentado con cuerda de batalla
+exercise_38_23:
+  en: Battle Rope Snake Wave
+  es: Batida serpenteante de cuerda de batalla
+exercise_38_24:
+  en: Battle Rope Split Jack
+  es: Salto dividido con cuerda de batalla
+exercise_38_25:
+  en: Battle Rope Stage Coach
+  es: Stage Coach con cuerda de batalla
+exercise_38_26:
+  en: Battle Rope Ultimate Warrior
+  es: Ultimate Warrior con cuerda de batalla
+exercise_38_27:
+  en: Battle Rope Upper Cuts
+  es: Ganchos con cuerda de batalla
+exercise_39_0:
+  en: Elliptical
+  es: Elíptica
+exercise_40_0:
+  en: Floor Climb
+  es: Subida de pisos
+exercise_41_0:
+  en: Air Bike
+  es: Bicicleta de aire
+exercise_41_1:
+  en: Assault Bike
+  es: Bicicleta de asalto
+exercise_41_3:
+  en: Stationary Bike
+  es: Bicicleta estática
+exercise_42_0:
+  en: Rowing Machine
+  es: Máquina de remo
+exercise_43_0:
+  en: Agility Ladder
+  es: Escalera de agilidad
+exercise_43_1:
+  en: Speed Ladder
+  es: Escalera de velocidad
+exercise_44_0:
+  en: Sandbag Around the World
+  es: Alrededor del mundo con saco de arena
+exercise_44_1:
+  en: Sandbag Back Squat
+  es: Sentadilla con saco de arena a la espalda
+exercise_44_2:
+  en: Sandbag Bear Crawl Pull-through
+  es: Gateo de oso con arrastre de saco de arena
+exercise_44_3:
+  en: Sandbag Bear Hug Squat
+  es: Sentadilla con saco de arena contra el pecho
+exercise_44_4:
+  en: Sandbag Clean
+  es: Cargada con saco de arena
+exercise_44_5:
+  en: Sandbag Clean and Press
+  es: Cargada y press con saco de arena
+exercise_44_6:
+  en: Sandbag Curl
+  es: Curl con saco de arena
+exercise_44_7:
+  en: Sandbag Front Carry
+  es: Caminata con saco de arena delante
+exercise_44_8:
+  en: Sandbag Front Squat
+  es: Sentadilla frontal con saco de arena
+exercise_44_9:
+  en: Sandbag Lunge
+  es: Zancada con saco de arena
+exercise_44_10:
+  en: Sandbag Overhead Press
+  es: Press por encima de la cabeza con saco de arena
+exercise_44_11:
+  en: Sandbag Plank Pull-through
+  es: Plancha con arrastre de saco de arena
+exercise_44_12:
+  en: Sandbag Rotational Lunge
+  es: Zancada con giro con saco de arena
+exercise_44_13:
+  en: Sandbag Row
+  es: Remo con saco de arena
+exercise_44_14:
+  en: Sandbag Russian Twist
+  es: Giro ruso con saco de arena
+exercise_44_15:
+  en: Sandbag Shouldering
+  es: Carga de saco de arena al hombro
+exercise_44_16:
+  en: Sandbag Shoveling
+  es: Saco de arena de lado a lado
+exercise_44_17:
+  en: Sandbag Side Lunge
+  es: Zancada lateral con saco de arena
+exercise_44_18:
+  en: Sandbag Sprint
+  es: Sprint con saco de arena
+exercise_44_19:
+  en: Sandbag Zercher Squat
+  es: Sentadilla Zercher con saco de arena
+exercise_45_0:
+  en: Sled Backward Drag
+  es: Arrastre de trineo hacia atrás
+exercise_45_1:
+  en: Sled Chest Press
+  es: Press de pecho con trineo
+exercise_45_2:
+  en: Sled Forward Drag
+  es: Arrastre de trineo hacia delante
+exercise_45_3:
+  en: Sled Low Push
+  es: Empuje bajo de trineo
+exercise_45_4:
+  en: Sled Push
+  es: Empuje de trineo
+exercise_45_5:
+  en: Sled Row
+  es: Remo con trineo
+exercise_46_0:
+  en: Sledge Hammer Lateral Swing
+  es: Giro lateral con mazo
+exercise_46_1:
+  en: Sledge Hammer Slam
+  es: Golpeo con mazo
+exercise_47_0:
+  en: Stair Stepper
+  es: Escaladora
+exercise_49_0:
+  en: Suspension Chest Fly
+  es: Apertura de pecho en suspensión
+exercise_49_1:
+  en: Suspension Chest Press
+  es: Press de pecho en suspensión
+exercise_49_2:
+  en: Suspension Crunch
+  es: Encogimiento abdominal en suspensión
+exercise_49_3:
+  en: Suspension Curl
+  es: Curl en suspensión
+exercise_49_4:
+  en: Suspension Dip
+  es: Fondo en suspensión
+exercise_49_5:
+  en: Suspension Face Pull
+  es: Jalón a la cara en suspensión
+exercise_49_6:
+  en: Suspension Glute Bridge
+  es: Puente de glúteos en suspensión
+exercise_49_7:
+  en: Suspension Hamstring Curl
+  es: Curl de isquiotibiales en suspensión
+exercise_49_8:
+  en: Suspension Hip Drop
+  es: Flexión lateral de tronco en suspensión
+exercise_49_9:
+  en: Inverted Row
+  es: Remo invertido
+exercise_49_10:
+  en: Suspension Knee Drive Jump
+  es: Levantamiento de rodilla con salto en suspensión
+exercise_49_11:
+  en: Suspension Knee-to-Chest
+  es: Rodillas al pecho en suspensión
+exercise_49_12:
+  en: Suspension Lat Pull-over
+  es: Extensión lateral en suspensión
+exercise_49_13:
+  en: Suspension Lunge
+  es: Zancada en suspensión
+exercise_49_14:
+  en: Suspension Mountain Climber
+  es: Escalador en suspensión
+exercise_49_15:
+  en: Suspension Pendulum
+  es: Péndulo en suspensión
+exercise_49_16:
+  en: Suspension Pike
+  es: Pica en suspensión
+exercise_49_17:
+  en: Suspension Plank
+  es: Plancha en suspensión
+exercise_49_18:
+  en: Suspension Power Pull
+  es: Flexión a una mano con extensión en suspensión
+exercise_49_19:
+  en: Suspension Pull-up
+  es: Dominada en suspensión
+exercise_49_20:
+  en: Suspension Push-up
+  es: Flexión en suspensión
+exercise_49_21:
+  en: Suspension Reverse Mountain Climber
+  es: Escalador inverso en suspensión
+exercise_49_22:
+  en: Suspension Reverse Plank
+  es: Plancha inversa en suspensión
+exercise_49_23:
+  en: Suspension Roll-out
+  es: Rodar en suspensión
+exercise_49_24:
+  en: Suspension Row
+  es: Remo en suspensión
+exercise_49_25:
+  en: Suspension Side Lunge
+  es: Zancada lateral en suspensión
+exercise_49_26:
+  en: Suspension Side Plank
+  es: Plancha lateral en suspensión
+exercise_49_27:
+  en: Suspension Single-leg Deadlift
+  es: Peso muerto a una pierna en suspensión
+exercise_49_28:
+  en: Suspension Single-leg Squat
+  es: Sentadilla a una pierna en suspensión
+exercise_49_29:
+  en: Suspension Sit-up
+  es: Abdominal en suspensión
+exercise_49_30:
+  en: Split Squat
+  es: Sentadilla búlgara en suspensión
+exercise_49_31:
+  en: Suspension Squat
+  es: Sentadilla en suspensión
+exercise_49_32:
+  en: Suspension Squat Jump
+  es: Sentadilla con salto en suspensión
+exercise_49_33:
+  en: Suspension Tricep Press
+  es: Press de tríceps en suspensión
+exercise_49_34:
+  en: Suspension Y Fly
+  es: Extensión en Y en suspensión
+exercise_50_0:
+  en: Tire Flip
+  es: Volteo de neumático
+exercise_52_0:
+  en: Indoor Track Run
+  es: Carrera en pista en interiores
+exercise_52_1:
+  en: Treadmill
+  es: Cinta
+exercise_53_0:
+  en: Bike
+  es: Bicicleta
+sport_0:
+  en: Generic
+  es: Genérico
+sport_1:
+  en: Running
+  es: Correr
+sport_2:
+  en: Cycling
+  es: Ciclismo
+sport_3:
+  en: Transition
+  es: Transición
+sport_4:
+  en: Fitness Equipment
+  es: Equipo de fitness
+sport_5:
+  en: Swimming
+  es: Natación
+sport_6:
+  en: Basketball
+  es: Baloncesto
+sport_7:
+  en: Soccer
+  es: Fútbol
+sport_8:
+  en: Tennis
+  es: Tenis
+sport_9:
+  en: American Football
+  es: Fútbol americano
+sport_10:
+  en: Training
+  es: Entrenamiento
+sport_11:
+  en: Walking
+  es: Caminar
+sport_12:
+  en: Cross Country Skiing
+  es: Esquí de fondo
+sport_13:
+  en: Alpine Skiing
+  es: Esquí alpino
+sport_14:
+  en: Snowboarding
+  es: Snowboard
+sport_15:
+  en: Rowing
+  es: Remo
+sport_16:
+  en: Mountaineering
+  es: Montañismo
+sport_17:
+  en: Hiking
+  es: Senderismo
+sport_18:
+  en: Multisport
+  es: Multideporte
+sport_19:
+  en: Paddling
+  es: Piragüismo
+sport_20:
+  en: Flying
+  es: Vuelo
+sport_21:
+  en: E-Biking
+  es: Bicicleta eléctrica
+sport_22:
+  en: Motorcycling
+  es: Motociclismo
+sport_23:
+  en: Boating
+  es: Navegación
+sport_24:
+  en: Driving
+  es: Conducción
+sport_25:
+  en: Golf
+  es: Golf
+sport_26:
+  en: Hang Gliding
+  es: Ala delta
+sport_27:
+  en: Horseback Riding
+  es: Equitación
+sport_28:
+  en: Hunting
+  es: Caza
+sport_29:
+  en: Fishing
+  es: Pesca
+sport_30:
+  en: Inline Skating
+  es: Patinaje en línea
+sport_31:
+  en: Rock Climbing
+  es: Escalada
+sport_32:
+  en: Sailing
+  es: Vela
+sport_33:
+  en: Ice Skating
+  es: Patinaje sobre hielo
+sport_34:
+  en: Sky Diving
+  es: Paracaidismo
+sport_35:
+  en: Snowshoeing
+  es: Raquetas de nieve
+sport_36:
+  en: Snowmobiling
+  es: Moto de nieve
+sport_37:
+  en: Stand Up Paddleboarding
+  es: Paddle surf
+sport_38:
+  en: Surfing
+  es: Surf
+sport_39:
+  en: Wakeboarding
+  es: Wakeboard
+sport_40:
+  en: Water Skiing
+  es: Esquí acuático
+sport_41:
+  en: Kayaking
+  es: Kayak
+sport_42:
+  en: Rafting
+  es: Rafting
+sport_43:
+  en: Windsurfing
+  es: Windsurf
+sport_44:
+  en: Kitesurfing
+  es: Kitesurf
+sport_45:
+  en: Tactical
+  es: Táctico
+sport_46:
+  en: Jumpmaster
+  es: Jefe de salto
+sport_47:
+  en: Boxing
+  es: Boxeo
+sport_48:
+  en: Floor Climbing
+  es: Escalada en suelo
+sport_49:
+  en: Baseball
+  es: Béisbol
+sport_53:
+  en: Diving
+  es: Buceo
+sport_56:
+  en: Shooting
+  es: Tiro
+sport_58:
+  en: Winter Sport
+  es: Deporte de invierno
+sport_59:
+  en: Grinding
+  es: Grinding
+sport_62:
+  en: HIIT
+  es: HIIT
+sport_63:
+  en: Video Gaming
+  es: Videojuegos
+sport_64:
+  en: Racket
+  es: Raqueta
+sport_65:
+  en: Wheelchair Push Walk
+  es: Silla de ruedas (marcha)
+sport_66:
+  en: Wheelchair Push Run
+  es: Silla de ruedas (carrera)
+sport_67:
+  en: Meditation
+  es: Meditación
+sport_68:
+  en: Para Sport
+  es: Paradeporte
+sport_69:
+  en: Disc Golf
+  es: Disc golf
+sport_70:
+  en: Team Sport
+  es: Deporte de equipo
+sport_71:
+  en: Cricket
+  es: Críquet
+sport_72:
+  en: Rugby
+  es: Rugby
+sport_73:
+  en: Hockey
+  es: Hockey
+sport_74:
+  en: Lacrosse
+  es: Lacrosse
+sport_75:
+  en: Volleyball
+  es: Voleibol
+sport_76:
+  en: Water Tubing
+  es: Tubing acuático
+sport_77:
+  en: Wakesurfing
+  es: Wakesurf
+sport_78:
+  en: Water Sport
+  es: Deporte acuático
+sport_79:
+  en: Archery
+  es: Tiro con arco
+sport_80:
+  en: Mixed Martial Arts
+  es: Artes marciales mixtas
+sport_81:
+  en: Motor Sports
+  es: Motorsport
+sport_82:
+  en: Snorkeling
+  es: Esnórquel
+sport_83:
+  en: Dance
+  es: Baile
+sport_84:
+  en: Jump Rope
+  es: Comba
+sport_85:
+  en: Pool Apnea
+  es: Apnea en piscina
+sport_86:
+  en: Mobility
+  es: Movilidad
+sport_87:
+  en: Geocaching
+  es: Geocaching
+sport_88:
+  en: Canoeing
+  es: Piragüismo (canoa)
+sport_254:
+  en: All
+  es: Todos
+sport_0_0:
+  en: Generic
+  es: Genérico
+sport_0_24:
+  en: Challenge
+  es: Desafío
+sport_0_50:
+  en: Navigate
+  es: Navegar
+sport_0_51:
+  en: Track Me
+  es: Localizarme
+sport_0_52:
+  en: Map
+  es: Mapa
+sport_0_58:
+  en: Virtual Activity
+  es: Actividad virtual
+sport_0_66:
+  en: Expedition
+  es: Expedición
+sport_0_99:
+  en: Trolling Motor
+  es: Motor eléctrico de pesca
+sport_1_0:
+  en: Generic
+  es: Genérico
+sport_1_1:
+  en: Treadmill
+  es: Cinta
+sport_1_2:
+  en: Street
+  es: Calle
+sport_1_3:
+  en: Trail
+  es: Trail
+sport_1_4:
+  en: Track
+  es: Pista
+sport_1_45:
+  en: Indoor
+  es: Carrera en interior
+sport_1_58:
+  en: Virtual Activity
+  es: Actividad virtual
+sport_1_59:
+  en: Obstacle
+  es: Carrera de obstáculos
+sport_1_67:
+  en: Ultra
+  es: Ultramaratón
+sport_1_82:
+  en: Adventure Race
+  es: Carrera de aventura
+sport_2_0:
+  en: Generic
+  es: Genérico
+sport_2_5:
+  en: Spin
+  es: Spinning
+sport_2_6:
+  en: Indoor
+  es: Indoor
+sport_2_7:
+  en: Road
+  es: Carretera
+sport_2_8:
+  en: Mountain
+  es: Montaña
+sport_2_9:
+  en: Downhill
+  es: Descenso
+sport_2_10:
+  en: Recumbent
+  es: Reclinada
+sport_2_11:
+  en: Cyclocross
+  es: Ciclocross
+sport_2_12:
+  en: Hand
+  es: Handbike
+sport_2_13:
+  en: Track
+  es: Pista
+sport_2_29:
+  en: BMX
+  es: BMX
+sport_2_46:
+  en: Gravel
+  es: Gravel
+sport_2_47:
+  en: E-Bike Mountain
+  es: Bicicleta de montaña eléctrica
+sport_2_48:
+  en: Commuting
+  es: Desplazamiento
+sport_2_49:
+  en: Mixed Surface
+  es: Superficie mixta
+sport_2_58:
+  en: Virtual Activity
+  es: Actividad virtual
+sport_2_77:
+  en: Esport
+  es: Deporte electrónico
+sport_2_88:
+  en: Indoor Hand
+  es: Handbike indoor
+sport_2_123:
+  en: Enduro
+  es: Enduro
+sport_2_127:
+  en: E-Bike Enduro
+  es: Enduro eléctrico
+sport_3_0:
+  en: Generic
+  es: Genérico
+sport_3_32:
+  en: Bike to Run
+  es: Bici-carrera
+sport_3_33:
+  en: Run to Bike
+  es: Carrera-bici
+sport_3_34:
+  en: Swim to Bike
+  es: Natación-bici
+sport_4_0:
+  en: Generic
+  es: Genérico
+sport_4_1:
+  en: Treadmill
+  es: Cinta de correr
+sport_4_6:
+  en: Indoor Cycling
+  es: Ciclismo indoor
+sport_4_14:
+  en: Indoor Rowing
+  es: Remo indoor
+sport_4_15:
+  en: Elliptical
+  es: Elíptica
+sport_4_16:
+  en: Stair Climbing
+  es: Step
+sport_4_25:
+  en: Indoor Skiing
+  es: Esquí indoor
+sport_4_27:
+  en: Indoor Walking
+  es: Caminar en interior
+sport_4_44:
+  en: Pilates
+  es: Pilates
+sport_5_0:
+  en: Generic
+  es: Genérico
+sport_5_17:
+  en: Lap
+  es: Piscina
+sport_5_18:
+  en: Open Water
+  es: Aguas abiertas
+sport_6_0:
+  en: Generic
+  es: Genérico
+sport_7_0:
+  en: Generic
+  es: Genérico
+sport_8_0:
+  en: Generic
+  es: Genérico
+sport_8_21:
+  en: Warm Up
+  es: Calentamiento
+sport_8_22:
+  en: Match
+  es: Partido
+sport_8_23:
+  en: Exercise
+  es: Ejercicio
+sport_9_0:
+  en: Generic
+  es: Genérico
+sport_10_0:
+  en: Generic
+  es: Genérico
+sport_10_19:
+  en: Flexibility
+  es: Flexibilidad
+sport_10_20:
+  en: Strength
+  es: Fuerza
+sport_10_26:
+  en: Cardio
+  es: Cardiovascular
+sport_10_43:
+  en: Yoga
+  es: Yoga
+sport_10_83:
+  en: Trucker Workout
+  es: Camionero
+sport_11_0:
+  en: Generic
+  es: Genérico
+sport_11_27:
+  en: Indoor
+  es: Interior
+sport_11_30:
+  en: Casual
+  es: Paseo
+sport_11_31:
+  en: Speed
+  es: Marcha rápida
+sport_12_0:
+  en: Generic
+  es: Genérico
+sport_12_42:
+  en: Skate Skiing
+  es: Esquí de patinador
+sport_13_0:
+  en: Generic
+  es: Genérico
+sport_13_37:
+  en: Backcountry
+  es: Fuera de pista
+sport_13_38:
+  en: Resort
+  es: Estación
+sport_14_0:
+  en: Generic
+  es: Genérico
+sport_14_37:
+  en: Backcountry
+  es: Fuera de pista
+sport_14_38:
+  en: Resort
+  es: Estación
+sport_15_0:
+  en: Generic
+  es: Genérico
+sport_16_0:
+  en: Generic
+  es: Genérico
+sport_17_0:
+  en: Generic
+  es: Genérico
+sport_17_124:
+  en: Rucking
+  es: Marcha con carga
+sport_18_0:
+  en: Generic
+  es: Genérico
+sport_18_78:
+  en: Triathlon
+  es: Triatlón
+sport_18_79:
+  en: Duathlon
+  es: Duatlón
+sport_18_80:
+  en: Brick
+  es: Brick
+sport_18_81:
+  en: Swim Run
+  es: SwimRun
+sport_18_82:
+  en: Adventure Race
+  es: Carrera de aventura
+sport_18_126:
+  en: Pool Triathlon
+  es: Triatlón en piscina
+sport_19_0:
+  en: Generic
+  es: Genérico
+sport_20_0:
+  en: Generic
+  es: Genérico
+sport_20_39:
+  en: RC Drone
+  es: Dron RC
+sport_20_40:
+  en: Wingsuit
+  es: Traje aéreo
+sport_20_110:
+  en: Fly Canopy
+  es: Dosel
+sport_20_111:
+  en: Fly Paraglide
+  es: Parapente
+sport_20_112:
+  en: Fly Paramotor
+  es: Paramotor
+sport_20_113:
+  en: Fly Pressurized
+  es: Presurizado
+sport_20_114:
+  en: Fly Navigate
+  es: Navegación
+sport_20_115:
+  en: Fly Timer
+  es: Temporizador
+sport_20_116:
+  en: Fly Altimeter
+  es: Altímetro
+sport_20_117:
+  en: Fly Weather
+  es: Meteorología
+sport_20_118:
+  en: Fly VFR
+  es: VFR
+sport_20_119:
+  en: Fly IFR
+  es: IFR
+sport_21_0:
+  en: Generic
+  es: Genérico
+sport_21_28:
+  en: E-Bike Fitness
+  es: Fitness
+sport_22_0:
+  en: Generic
+  es: Genérico
+sport_22_35:
+  en: ATV
+  es: Quad
+sport_22_36:
+  en: Motocross
+  es: Motocross
+sport_23_0:
+  en: Generic
+  es: Genérico
+sport_24_0:
+  en: Generic
+  es: Genérico
+sport_24_98:
+  en: Overland
+  es: Todoterreno
+sport_25_0:
+  en: Generic
+  es: Genérico
+sport_26_0:
+  en: Generic
+  es: Genérico
+sport_27_0:
+  en: Generic
+  es: Genérico
+sport_28_0:
+  en: Generic
+  es: Genérico
+sport_28_72:
+  en: Dogs
+  es: Perros
+sport_29_0:
+  en: Generic
+  es: Genérico
+sport_30_0:
+  en: Generic
+  es: Genérico
+sport_31_0:
+  en: Generic
+  es: Genérico
+sport_31_68:
+  en: Indoor Climbing
+  es: Indoor
+sport_31_69:
+  en: Bouldering
+  es: Búlder
+sport_32_0:
+  en: Generic
+  es: Genérico
+sport_32_65:
+  en: Sail Race
+  es: Regata
+sport_33_0:
+  en: Generic
+  es: Genérico
+sport_34_0:
+  en: Generic
+  es: Genérico
+sport_35_0:
+  en: Generic
+  es: Genérico
+sport_36_0:
+  en: Generic
+  es: Genérico
+sport_37_0:
+  en: Generic
+  es: Genérico
+sport_38_0:
+  en: Generic
+  es: Genérico
+sport_39_0:
+  en: Generic
+  es: Genérico
+sport_40_0:
+  en: Generic
+  es: Genérico
+sport_41_0:
+  en: Generic
+  es: Genérico
+sport_41_41:
+  en: Whitewater
+  es: Aguas bravas
+sport_42_0:
+  en: Generic
+  es: Genérico
+sport_42_41:
+  en: Whitewater
+  es: Aguas bravas
+sport_43_0:
+  en: Generic
+  es: Genérico
+sport_44_0:
+  en: Generic
+  es: Genérico
+sport_45_0:
+  en: Generic
+  es: Genérico
+sport_46_0:
+  en: Generic
+  es: Genérico
+sport_47_0:
+  en: Generic
+  es: Genérico
+sport_48_0:
+  en: Generic
+  es: Genérico
+sport_49_0:
+  en: Generic
+  es: Genérico
+sport_53_0:
+  en: Generic
+  es: Genérico
+sport_53_53:
+  en: Single Gas
+  es: Un solo gas
+sport_53_54:
+  en: Multi Gas
+  es: Varios gases
+sport_53_55:
+  en: Gauge
+  es: Manómetro
+sport_53_56:
+  en: Apnea
+  es: Apnea
+sport_53_57:
+  en: Apnea Hunting
+  es: Caza en apnea
+sport_53_63:
+  en: CCR
+  es: Reciclador
+sport_56_0:
+  en: Generic
+  es: Genérico
+sport_58_0:
+  en: Generic
+  es: Genérico
+sport_59_0:
+  en: Generic
+  es: Genérico
+sport_59_71:
+  en: Indoor
+  es: Indoor
+sport_62_0:
+  en: Generic
+  es: Genérico
+sport_62_70:
+  en: HIIT
+  es: HIIT
+sport_62_73:
+  en: AMRAP
+  es: AMRAP
+sport_62_74:
+  en: EMOM
+  es: EMOM
+sport_62_75:
+  en: Tabata
+  es: Tabata
+sport_63_0:
+  en: Generic
+  es: Genérico
+sport_63_77:
+  en: Esport
+  es: Deporte electrónico
+sport_64_0:
+  en: Generic
+  es: Genérico
+sport_64_84:
+  en: Pickleball
+  es: Pickleball
+sport_64_85:
+  en: Padel
+  es: Pádel
+sport_64_93:
+  en: Platform
+  es: Plataforma
+sport_64_94:
+  en: Squash
+  es: Squash
+sport_64_95:
+  en: Badminton
+  es: Bádminton
+sport_64_96:
+  en: Racquetball
+  es: Ráquetbol
+sport_64_97:
+  en: Table Tennis
+  es: Tenis de mesa
+sport_65_0:
+  en: Generic
+  es: Genérico
+sport_65_86:
+  en: Indoor Wheelchair Walk
+  es: Silla de ruedas en interior (marcha)
+sport_66_0:
+  en: Generic
+  es: Genérico
+sport_66_87:
+  en: Indoor Wheelchair Run
+  es: Silla de ruedas en interior (carrera)
+sport_67_0:
+  en: Generic
+  es: Genérico
+sport_67_62:
+  en: Breathing
+  es: Respiración
+sport_68_0:
+  en: Generic
+  es: Genérico
+sport_69_0:
+  en: Generic
+  es: Genérico
+sport_69_92:
+  en: Ultimate
+  es: Ultimate frisbee
+sport_70_0:
+  en: Generic
+  es: Genérico
+sport_71_0:
+  en: Generic
+  es: Genérico
+sport_72_0:
+  en: Generic
+  es: Genérico
+sport_73_0:
+  en: Generic
+  es: Genérico
+sport_73_90:
+  en: Field
+  es: Hierba
+sport_73_91:
+  en: Ice
+  es: Hielo
+sport_74_0:
+  en: Generic
+  es: Genérico
+sport_75_0:
+  en: Generic
+  es: Genérico
+sport_76_0:
+  en: Generic
+  es: Genérico
+sport_77_0:
+  en: Generic
+  es: Genérico
+sport_78_0:
+  en: Generic
+  es: Genérico
+sport_79_0:
+  en: Generic
+  es: Genérico
+sport_80_0:
+  en: Generic
+  es: Genérico
+sport_81_0:
+  en: Generic
+  es: Genérico
+sport_81_125:
+  en: Rally
+  es: Rally
+sport_82_0:
+  en: Generic
+  es: Genérico
+sport_83_0:
+  en: Generic
+  es: Genérico
+sport_84_0:
+  en: Generic
+  es: Genérico
+sport_85_0:
+  en: Generic
+  es: Genérico
+sport_85_121:
+  en: Dynamic Apnea
+  es: Apnea dinámica
+sport_86_0:
+  en: Generic
+  es: Genérico
+sport_87_0:
+  en: Generic
+  es: Genérico
+sport_88_0:
+  en: Generic
+  es: Genérico
+sport_254_0:
+  en: Generic
+  es: Genérico
+sport_254_254:
+  en: All
+  es: Todos

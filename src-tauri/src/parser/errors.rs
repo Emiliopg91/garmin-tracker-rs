@@ -9,7 +9,7 @@ pub enum ParseFitFileError {
     #[error("Missing {0} field")]
     MissingField(String),
     #[error("Unknown exercise (category={0}, id={1})")]
-    UnknownExercise(String, u16),
+    UnknownExercise(u16, u16),
 }
 
 pub type Result<T> = std::result::Result<T, ParseFitFileError>;

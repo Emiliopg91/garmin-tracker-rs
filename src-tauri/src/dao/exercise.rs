@@ -1,11 +1,15 @@
 use rusqlite_orm_macros::Entity;
 use serde::{Deserialize, Serialize};
 
+use crate::dao::exercise_category::{self, ExerciseCategory};
+
 #[derive(Clone, Entity, Serialize, Deserialize)]
 #[entity(hashable = true, comparable = true)]
 #[primary_key(category, id)]
 pub struct Exercise {
-    pub category: String,
+    pub category: u16,
     pub id: u16,
-    pub name: String,
+
+    #[relationship((category, exercise_category::entity::columns::ID))]
+    pub exercise_category: Option<ExerciseCategory>,
 }

@@ -1,5 +1,0 @@
---- Columns cleanup
-
-ALTER TABLE SESSION DROP COLUMN avg_heart_rate;
-ALTER TABLE SESSION DROP COLUMN max_heart_rate;
-ALTER TABLE SESSION DROP COLUMN volume;

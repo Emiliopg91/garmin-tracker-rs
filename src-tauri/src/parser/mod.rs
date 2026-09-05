@@ -3,14 +3,14 @@ use std::{collections::HashMap, fs::File, io::BufReader, path::Path};
 use embedded_io_adapters::std::FromStd;
 use rustyfit::{
     Decoder, DecoderEvent, StreamDecoder, StreamingIterator,
-    profile::{
-        mesgdef,
-        typedef::{ExerciseCategory, MesgNum},
-    },
+    profile::{mesgdef, typedef::MesgNum},
     proto::Message,
 };
 
-use crate::dao::{additional_data::AdditionalData, exercise::Exercise, serie::Serie, session::Session};
+use crate::dao::{
+    additional_data::AdditionalData, exercise::Exercise, exercise_category, serie::Serie,
+    session::Session, sport::Sport, sub_sport::SubSport, workout::Workout,
+};
 
 use self::errors::ParseFitFileError;
 
@@ -121,8 +121,8 @@ impl<'a> FitParser<'a> {
             .ok_or_else(|| ParseFitFileError::MissingField("session".to_string()))?;
 
         let timestamp = Self::get_timestamp(session_entry)?;
-        let sport = Self::get_sport_profile_name(session_entry)?;
-        let workout = Self::get_workout_name(grouped.workout.as_ref());
+        let sub_sport_obj = Self::get_sub_sport(session_entry);
+        let workout = grouped.workout.clone().map(|w| w.wkt_name);
         let total_elapsed_time = Self::get_total_elapsed_time(session_entry)?;
         let active_time = Self::get_active_time(session_entry);
         let training_load = Self::get_training_load_peak(session_entry)?;
@@ -132,15 +132,21 @@ impl<'a> FitParser<'a> {
         let additional_data = Self::get_additional_data(timestamp, &grouped.records)?;
 
         Ok(Session {
-            workout,
             date: timestamp,
+            name: workout.clone().unwrap_or_default(),
+            workout_obj: workout.as_ref().map(|o| Workout {
+                name: o.to_string(),
+            }),
+            workout,
             total_elapsed_time,
             active_time,
             total_calories,
             metabolic_calories,
             series,
             training_load,
-            sport,
+            sport: sub_sport_obj.as_ref().map(|o| o.sport),
+            sub_sport: sub_sport_obj.as_ref().map(|o| o.id),
+            sub_sport_obj,
             device: None,
             device_obj: None,
             additional_data,
@@ -179,20 +185,6 @@ impl<'a> FitParser<'a> {
         Ok(())
     }
 
-    /// Extracts the workout name from the `workout` FIT message, if present.
-    fn get_workout_name(wkt_entry: Option<&mesgdef::Workout>) -> String {
-        match wkt_entry {
-            None => String::new(),
-            Some(entry) => {
-                if entry.wkt_name.is_empty() {
-                    String::new()
-                } else {
-                    entry.wkt_name.clone()
-                }
-            }
-        }
-    }
-
     /// Builds the list of strength-training sets (`Serie`s) for a session, resolving each set to its exercise via the workout steps.
     fn get_sets(grouped: &GroupedEntries, timestamp: i64) -> errors::Result<Vec<Serie>> {
         let exercises = Self::get_exercises(&grouped.exercise_titles)?;
@@ -216,7 +208,7 @@ impl<'a> FitParser<'a> {
             sets.push(Serie {
                 session: timestamp,
                 idx: idx as u8,
-                ex_cat: exercise.category.clone(),
+                ex_cat: exercise.category,
                 ex_id: exercise.id,
                 reps,
                 weight,
@@ -320,10 +312,8 @@ impl<'a> FitParser<'a> {
         workout_steps: &[mesgdef::WorkoutStep],
         exercises: &[Exercise],
     ) -> errors::Result<Vec<Option<Exercise>>> {
-        let lookup: HashMap<(u16, &str), &Exercise> = exercises
-            .iter()
-            .map(|e| ((e.id, e.category.as_str()), e))
-            .collect();
+        let lookup: HashMap<(u16, u16), &Exercise> =
+            exercises.iter().map(|e| ((e.id, e.category), e)).collect();
 
         workout_steps
             .iter()
@@ -332,13 +322,13 @@ impl<'a> FitParser<'a> {
                     return Ok(None);
                 }
 
-                let ex_cat = reg.exercise_category.to_string();
+                let ex_cat = reg.exercise_category.0;
                 let ex_id = Self::get_exercise_name(reg.exercise_name);
 
                 lookup
-                    .get(&(ex_id, ex_cat.as_str()))
+                    .get(&(ex_id, ex_cat))
                     .map(|e| Some((*e).clone()))
-                    .ok_or_else(|| ParseFitFileError::UnknownExercise(ex_cat.clone(), ex_id))
+                    .ok_or_else(|| ParseFitFileError::UnknownExercise(ex_cat, ex_id))
             })
             .collect()
     }
@@ -350,16 +340,19 @@ impl<'a> FitParser<'a> {
         exercise_titles
             .iter()
             .map(|reg| {
-                let category = Self::get_exercise_category(reg.exercise_category)?;
-                let name =
-                    reg.wkt_step_name.first().cloned().ok_or_else(|| {
-                        ParseFitFileError::MissingField("wkt_step_name".to_string())
-                    })?;
+                let category = if reg.exercise_category.0 == u16::MAX {
+                    Err(ParseFitFileError::MissingField(
+                        "exercise_category".to_string(),
+                    ))
+                } else {
+                    Ok(reg.exercise_category.0)
+                }?;
+                let name = reg.exercise_name;
 
                 Ok(Exercise {
-                    id: Self::get_exercise_name(reg.exercise_name),
                     category,
-                    name,
+                    id: name,
+                    exercise_category: Some(exercise_category::ExerciseCategory { id: category }),
                 })
             })
             .collect()
@@ -370,16 +363,6 @@ impl<'a> FitParser<'a> {
         if v == u16::MAX { 1 } else { v }
     }
 
-    fn get_exercise_category(v: ExerciseCategory) -> errors::Result<String> {
-        if v.0 == u16::MAX {
-            Err(ParseFitFileError::MissingField(
-                "exercise_category".to_string(),
-            ))
-        } else {
-            Ok(v.to_string())
-        }
-    }
-
     fn get_timestamp(session: &mesgdef::Session) -> errors::Result<i64> {
         session
             .timestamp
@@ -387,29 +370,38 @@ impl<'a> FitParser<'a> {
             .ok_or_else(|| ParseFitFileError::MissingField("timestamp".to_string()))
     }
 
-    fn get_sport_profile_name(session: &mesgdef::Session) -> errors::Result<String> {
-        if session.sport_profile_name.is_empty() {
-            Err(ParseFitFileError::MissingField(
-                "sport_profile_name".to_string(),
-            ))
+    fn get_sub_sport(session: &mesgdef::Session) -> Option<SubSport> {
+        let sport_val = session.sport;
+        let sub_sport_val = session.sub_sport;
+        if sport_val.0 != u8::MAX && sub_sport_val.0 != u8::MAX {
+            Some(SubSport {
+                id: sub_sport_val.0,
+                sport: sport_val.0,
+                sport_obj: Some(Sport { id: sport_val.0 }),
+            })
         } else {
-            Ok(session.sport_profile_name.clone())
+            None
         }
     }
 
-    fn get_total_elapsed_time(session: &mesgdef::Session) -> errors::Result<f64> {
+    fn get_total_elapsed_time(session: &mesgdef::Session) -> errors::Result<u32> {
         session
             .total_elapsed_time_scaled()
+            .map(|v| v.round() as u32)
             .ok_or_else(|| ParseFitFileError::MissingField("total_elapsed_time".to_string()))
     }
 
-    fn get_active_time(session: &mesgdef::Session) -> f64 {
-        session.active_time_scaled().unwrap_or(0_f64)
+    fn get_active_time(session: &mesgdef::Session) -> u32 {
+        session
+            .active_time_scaled()
+            .map(|v| v.round() as u32)
+            .unwrap_or(0_u32)
     }
 
-    fn get_training_load_peak(session: &mesgdef::Session) -> errors::Result<f64> {
+    fn get_training_load_peak(session: &mesgdef::Session) -> errors::Result<u16> {
         session
             .training_load_peak_scaled()
+            .map(|e| e.round() as u16)
             .ok_or_else(|| ParseFitFileError::MissingField("training_load_peak".to_string()))
     }
 

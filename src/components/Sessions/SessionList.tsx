@@ -198,7 +198,13 @@ export function SessionsList() {
                 style={{ cursor: "pointer" }}
               >
                 <td>{TimeUtils.formatTimeDate(session.timestamp)}</td>
-                <td>{session.sport}</td>
+                <td>
+                  {translate("sport_" + session.sport) +
+                    " - " +
+                    translate(
+                      "sport_" + session.sport + "_" + session.sub_sport,
+                    )}
+                </td>
                 <td>{session.name}</td>
                 <td>{session.active_calories}</td>
                 <td>{session.training_load}</td>

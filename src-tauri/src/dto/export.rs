@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::dao::{
     additional_data::{AdditionalData, AdditionalDataRepository},
-    body_metrics::{BodyMetrics, BodyMetricsRepository},
+    body_metric::{BodyMetric, BodyMetricRepository},
     device::{Device, DeviceRepository},
     exercise::{Exercise, ExerciseRepository},
     serie::{Serie, SerieRepository},
@@ -15,7 +15,7 @@ use crate::dao::{
 
 #[derive(Serialize, Deserialize)]
 pub struct Export {
-    body_metrics: Vec<BodyMetrics>,
+    body_metrics: Vec<BodyMetric>,
     devices: Vec<Device>,
     exercises: Vec<Exercise>,
     sessions: Vec<SessionExport>,
@@ -26,7 +26,7 @@ impl Export {
     /// Loads every table from the database and assembles a full export snapshot.
     pub fn from_database(db: &DatabasePool) -> rusqlite_orm::errors::Result<Self> {
         db.run_in_connection(|conn| {
-            let body_metrics = BodyMetricsRepository::select().fetch_in(conn)?;
+            let body_metrics = BodyMetricRepository::select().fetch_in(conn)?;
             let exercises = ExerciseRepository::select().fetch_in(conn)?;
             let devices = DeviceRepository::select().fetch_in(conn)?;
             let settings = SettingsRepository::select().fetch_in(conn)?;
@@ -79,12 +79,15 @@ impl Export {
 pub struct SessionExport {
     pub date: i64,
     pub workout: String,
-    pub total_elapsed_time: f64,
-    pub active_time: f64,
+    pub total_elapsed_time: u32,
+    pub active_time: u32,
     pub total_calories: u16,
     pub metabolic_calories: u16,
-    pub training_load: f64,
-    pub sport: String,
+    pub training_load: u16,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub sport: Option<u8>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub sub_sport: Option<u8>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub device: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -130,13 +133,14 @@ impl From<(&Session, Option<&AdditionalData>, Option<&Vec<Serie>>)> for SessionE
 
         Self {
             date: values.0.date,
-            workout: values.0.workout.clone(),
+            workout: values.0.name.clone(),
             total_elapsed_time: values.0.total_elapsed_time,
             active_time: values.0.active_time,
             total_calories: values.0.total_calories,
             metabolic_calories: values.0.metabolic_calories,
             training_load: values.0.training_load,
-            sport: values.0.sport.clone(),
+            sport: values.0.sport,
+            sub_sport: values.0.sub_sport,
             device: values.0.device.clone(),
             series,
             heart_rates,

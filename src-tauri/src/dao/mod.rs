@@ -1,7 +1,11 @@
 pub mod additional_data;
-pub mod body_metrics;
+pub mod body_metric;
 pub mod device;
 pub mod exercise;
+pub mod exercise_category;
 pub mod serie;
 pub mod session;
 pub mod settings;
+pub mod sport;
+pub mod sub_sport;
+pub mod workout;

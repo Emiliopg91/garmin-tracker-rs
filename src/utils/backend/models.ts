@@ -28,11 +28,10 @@ export enum DistanceUnit {
 	Miles = "Miles",
 }
 
-// From src-tauri/src/dto/exercises.rs:33
+// From src-tauri/src/dto/exercises.rs:31
 export interface ExerciseDetails {
-  category: string;
+  category: number;
   id: number;
-  name: string;
   pr_date: number;
   reps: number;
   rm: number;
@@ -43,10 +42,9 @@ export interface ExerciseDetails {
 
 // From src-tauri/src/dto/exercises.rs:8
 export interface ExerciseListItem {
-  category: string;
+  category: number;
   date: number;
   id: number;
-  name: string;
   reps: number;
   rm: number;
   weight: number;
@@ -68,7 +66,8 @@ export interface SessionDetails {
   name: string;
   series: SessionSerie[];
   speeds: (number | null)[];
-  sport: string;
+  sport: number | null;
+  sub_sport: number | null;
   timestamp: number;
   total_calories: number;
   total_elapsed_time: number;
@@ -79,28 +78,28 @@ export interface SessionDetails {
 export interface SessionListItem {
   active_calories: number;
   name: string;
-  sport: string;
+  sport: number | null;
+  sub_sport: number | null;
   timestamp: number;
   training_load: number;
 }
 
-// From src-tauri/src/dto/sessions.rs:148
+// From src-tauri/src/dto/sessions.rs:138
 export interface SessionLocation {
   location: string;
   session: number;
 }
 
-// From src-tauri/src/dto/sessions.rs:40
+// From src-tauri/src/dto/sessions.rs:42
 export interface SessionSerie {
-  ex_cat: string;
+  ex_cat: number;
   ex_id: number;
-  exercise: string;
   idx: number;
   reps: number;
   weight: number;
 }
 
-// From src-tauri/src/dto/sessions.rs:142
+// From src-tauri/src/dto/sessions.rs:132
 export interface SessionSeriesUpdate {
   series: SessionSerie[];
   timestamp: number;

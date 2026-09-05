@@ -10,17 +10,19 @@ pub struct SessionListItem {
     pub timestamp: i32,
     pub active_calories: u16,
     pub training_load: u16,
-    pub sport: String,
+    pub sport: Option<u8>,
+    pub sub_sport: Option<u8>,
 }
 
 impl From<&Session> for SessionListItem {
     fn from(value: &Session) -> Self {
         Self {
-            name: value.workout.clone(),
+            name: value.name.clone(),
             timestamp: value.date as i32,
             active_calories: value.total_calories - value.metabolic_calories,
-            training_load: value.training_load.round() as u16,
-            sport: value.sport.clone(),
+            training_load: value.training_load,
+            sport: value.sport,
+            sub_sport: value.sub_sport,
         }
     }
 }
@@ -38,23 +40,21 @@ impl Hash for SessionListItem {
 
 #[derive(Serialize, Deserialize)]
 pub struct SessionSerie {
-    pub ex_cat: String,
+    pub ex_cat: u16,
     pub ex_id: u16,
-    pub exercise: String,
     pub idx: u8,
     pub reps: u16,
     pub weight: f64,
 }
 
-impl From<(&Serie, &str)> for SessionSerie {
-    fn from(value: (&Serie, &str)) -> Self {
+impl From<&Serie> for SessionSerie {
+    fn from(value: &Serie) -> Self {
         Self {
-            ex_cat: value.0.ex_cat.clone(),
-            ex_id: value.0.ex_id,
-            exercise: value.1.to_string(),
-            idx: value.0.idx,
-            reps: value.0.reps,
-            weight: value.0.weight,
+            ex_cat: value.ex_cat,
+            ex_id: value.ex_id,
+            idx: value.idx,
+            reps: value.reps,
+            weight: value.weight,
         }
     }
 }
@@ -65,14 +65,15 @@ pub struct SessionDetails {
 
     pub timestamp: i32,
 
-    pub total_elapsed_time: i32,
-    pub active_time: i32,
+    pub total_elapsed_time: u32,
+    pub active_time: u32,
 
     pub total_calories: u16,
     pub metabolic_calories: u16,
 
     pub training_load: u16,
-    pub sport: String,
+    pub sport: Option<u8>,
+    pub sub_sport: Option<u8>,
 
     pub series: Vec<SessionSerie>,
     pub heart_rates: Vec<Option<u8>>,
@@ -106,29 +107,18 @@ impl From<(&Session, &[Exercise], &[Serie])> for SessionDetails {
             }
         }
 
-        let series = value
-            .2
-            .iter()
-            .map(|s| {
-                let exercise = value
-                    .1
-                    .iter()
-                    .find(|e| e.id == s.ex_id && e.category == s.ex_cat)
-                    .unwrap();
-
-                SessionSerie::from((s, exercise.name.as_str()))
-            })
-            .collect::<Vec<_>>();
+        let series = value.2.iter().map(SessionSerie::from).collect::<Vec<_>>();
 
         Self {
-            name: value.0.workout.clone(),
+            name: value.0.name.clone(),
             timestamp: value.0.date as i32,
-            total_elapsed_time: value.0.total_elapsed_time.round() as i32,
-            active_time: value.0.active_time.round() as i32,
+            total_elapsed_time: value.0.total_elapsed_time,
+            active_time: value.0.active_time,
             metabolic_calories: value.0.metabolic_calories,
             total_calories: value.0.total_calories,
-            training_load: value.0.training_load.round() as u16,
-            sport: value.0.sport.clone(),
+            training_load: value.0.training_load,
+            sport: value.0.sport,
+            sub_sport: value.0.sub_sport,
             series,
             heart_rates,
             device,

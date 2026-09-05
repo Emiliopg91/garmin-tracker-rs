@@ -124,7 +124,11 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
   return (
     <Dialog open={true} onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle>
-        {localSession.sport}
+        {translate("sport_" + localSession.sport) +
+          " - " +
+          translate(
+            "sport_" + localSession.sport + "_" + localSession.sub_sport,
+          )}
         <>
           {localSession.name.length > 0 && (
             <span>
@@ -432,7 +436,9 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                           }}
                           rowSpan={localSession.grouped_series[exercise].length}
                         >
-                          {exercise}
+                          {translate(
+                            "exercise_" + serie.ex_cat + "_" + serie.ex_id,
+                          )}
                         </td>
                       )}
 

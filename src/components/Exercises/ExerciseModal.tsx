@@ -62,7 +62,7 @@ export function ExerciseModal({ exercise, onClose }: Props) {
   return (
     <Dialog open={true} onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle>
-        {exercise.name}
+        {translate("exercise_" + exercise.category + "_" + exercise.id)}
         <IconButton
           onClick={onClose}
           sx={{ position: "absolute", right: 8, top: 8 }}

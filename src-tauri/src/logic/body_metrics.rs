@@ -7,7 +7,7 @@ use tauri_plugin_log::log::info;
 
 use crate::{
     SettingsLock,
-    dao::body_metrics::{self, BodyMetrics, BodyMetricsRepository},
+    dao::body_metric::{self, BodyMetric, BodyMetricRepository},
     dto::{
         body_metrics::BodyMetricListItem,
         notifications::{NotificationDefinition, NotificationKind},
@@ -26,8 +26,8 @@ pub fn get_body_measures(
     info!("Getting body measures list...");
 
     let res = database.run_in_connection(|conn| {
-        let regs = BodyMetricsRepository::select()
-            .order_by(OrderBy::Desc(body_metrics::entity::columns::DATE))
+        let regs = BodyMetricRepository::select()
+            .order_by(OrderBy::Desc(body_metric::entity::columns::DATE))
             .fetch_in(conn)?;
 
         Ok(regs)
@@ -63,9 +63,9 @@ pub fn add_body_measures(
     info!("Adding body measures list...");
 
     let res = database.run_in_transaction(|tx| {
-        let entry = BodyMetrics::try_from(&measures).map_err(DatabaseError::Transaction)?;
+        let entry = BodyMetric::try_from(&measures).map_err(DatabaseError::Transaction)?;
 
-        BodyMetricsRepository::insert().item(entry).execute_in(tx)?;
+        BodyMetricRepository::insert().item(entry).execute_in(tx)?;
 
         Ok(())
     });
@@ -93,7 +93,7 @@ pub fn delete_body_metric(
     date: i32,
 ) -> Result<(), String> {
     let res = database.run_in_transaction(|tx| {
-        if let Some(entry) = BodyMetricsRepository::select_by_id_in(tx, date as i64)? {
+        if let Some(entry) = BodyMetricRepository::select_by_id_in(tx, date as i64)? {
             entry.delete_by_id_in(tx)?;
         }
 

@@ -16,7 +16,7 @@ pub struct Serie {
     pub session: i64,
     pub idx: u8,
     #[column("exercise_category")]
-    pub ex_cat: String,
+    pub ex_cat: u16,
     #[column("exercise_id")]
     pub ex_id: u16,
     pub reps: u16,

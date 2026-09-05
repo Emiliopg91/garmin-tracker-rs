@@ -57,7 +57,7 @@ pub static DATA_LOCAL_DIR: LazyLock<PathBuf> = LazyLock::new(|| {
 });
 
 // Database block
-pub static DB_FILE: LazyLock<PathBuf> = LazyLock::new(|| DATA_LOCAL_DIR.join("database.db"));
+pub static DB_FILE: LazyLock<PathBuf> = LazyLock::new(|| DATA_LOCAL_DIR.join("database_v2.db"));
 
 // Logs block
 pub static LOGS_DIR: LazyLock<PathBuf> = LazyLock::new(|| ensure_dir(DATA_LOCAL_DIR.join("logs")));

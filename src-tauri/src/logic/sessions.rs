@@ -8,6 +8,7 @@ use crate::{
         exercise::{self, ExerciseRepository},
         serie::{self, SerieRepository, entity},
         session::{self, SessionRepository},
+        workout::{Workout, WorkoutRepository},
     },
     dto::{
         notifications::{NotificationDefinition, NotificationKind},
@@ -88,11 +89,8 @@ pub fn get_session_details(
         }
         session.fetch_additional_data_relationship_in_conn(conn)?;
 
-        let condition_set: HashSet<(_, _)> = session
-            .series
-            .iter()
-            .map(|r| (r.ex_cat.clone(), r.ex_id))
-            .collect();
+        let condition_set: HashSet<(_, _)> =
+            session.series.iter().map(|r| (r.ex_cat, r.ex_id)).collect();
 
         let in_conditions = condition_set
             .into_iter()
@@ -118,10 +116,7 @@ pub fn get_session_details(
 
     match res {
         Ok(details) => {
-            info!(
-                "Found details for session {} @ {}",
-                details.sport, details.timestamp
-            );
+            info!("Found details for session {}", details.timestamp);
             Ok(details)
         }
         Err(e) => Err(report_error(
@@ -160,7 +155,7 @@ pub fn save_session_changes(
                     Where::Eq(entity::columns::IDX, serie.idx.into()),
                 ]))
                 .execute_in(tx)?;
-            exercises.insert((serie.ex_cat.clone(), serie.ex_id));
+            exercises.insert((serie.ex_cat, serie.ex_id));
         }
 
         update_prs(tx, exercises, &[details.timestamp as i64], lang)?;
@@ -284,7 +279,12 @@ pub async fn _import_from_device(app: &AppHandle, serial: &str) -> Result<usize,
             }
             Ok(res.len())
         }
-        Err(e) => Err(e.to_string()),
+        Err(e) => Err(report_error(
+            e,
+            lang,
+            "error_import_sessions",
+            "Error importing sessions",
+        )),
     }
 }
 
@@ -320,7 +320,7 @@ where
                     let error_msg = match &e {
                         ParseFitFileError::UnknownExercise(category, id) => translate_and_replace(
                             "error_parser_unknown_exercise",
-                            &[category, &id.to_string()],
+                            &[&category.to_string(), &id.to_string()],
                             lang,
                         ),
                         other => other.to_string(),
@@ -346,16 +346,8 @@ where
             _ => "".to_string(),
         };
 
-        let err_title = format!(
-            "{} | {} | {}",
-            session.sport, session.workout, formatted_time
-        );
-
         let res: Result<bool, String> = {
-            info!(
-                "Importing session {} - {}...",
-                session.workout, formatted_time
-            );
+            info!("Importing session {} - {}...", session.name, formatted_time);
             let added = if SessionRepository::exists_in(tx, session.date)? {
                 let msg = format!("Session with date {} already exists", session.date);
                 warn!("{}", msg);
@@ -365,20 +357,20 @@ where
                 let series = std::mem::take(&mut session.series);
                 let add_data = session.additional_data.take();
 
+                if let Some(workout) = &session.workout {
+                    WorkoutRepository::insert()
+                        .or_ignore()
+                        .item(Workout {
+                            name: workout.to_string(),
+                        })
+                        .execute_in(tx)?;
+                }
+
                 session.device = Some(device.serial.to_string());
                 SessionRepository::insert().item(session).execute_in(tx)?;
 
-                let mut insert = ExerciseRepository::insert().or_ignore();
-                let mut seen = HashSet::new();
                 for serie in &series {
-                    let exercise = serie.exercise.clone().unwrap();
-                    if seen.insert(exercise.clone()) {
-                        insert = insert.item(exercise.clone());
-                    }
-                    handled_exercises.insert((exercise.category, exercise.id));
-                }
-                if !seen.is_empty() {
-                    insert.execute_in(tx)?;
+                    handled_exercises.insert((serie.ex_cat, serie.ex_id));
                 }
 
                 let mut insert = SerieRepository::insert();
@@ -418,7 +410,7 @@ where
             error!("  {}", e);
 
             show_notification(NotificationDefinition {
-                title: err_title,
+                title: formatted_time,
                 body: e,
                 kind: NotificationKind::Persistant,
             });
@@ -440,7 +432,7 @@ where
 /// Recomputes the `pr` flag for each affected exercise and notifies if any of the just-imported/edited sessions set a new record.
 fn update_prs(
     tx: &rusqlite_orm::rusqlite::Transaction,
-    exercises: HashSet<(String, u16)>,
+    exercises: HashSet<(u16, u16)>,
     sessions: &[i64],
     lang: Languages,
 ) -> rusqlite_orm::errors::Result<()> {
@@ -452,10 +444,10 @@ fn update_prs(
     let mut update_true_conditions = vec![];
 
     for exer in &exercises {
-        update_false_conditions.push(vec![exer.0.clone().into(), exer.1.into()]);
+        update_false_conditions.push(vec![exer.0.into(), exer.1.into()]);
         if let Some(pr) = SerieRepository::select()
             .where_(Where::And(vec![
-                Where::Eq(serie::entity::columns::EX_CAT, exer.0.clone().into()),
+                Where::Eq(serie::entity::columns::EX_CAT, exer.0.into()),
                 Where::Eq(serie::entity::columns::EX_ID, exer.1.into()),
             ]))
             .order_by(OrderBy::Desc(entity::columns::WEIGHT))
@@ -512,7 +504,7 @@ pub fn update_pending_geolocation(app: &AppHandle, db: &DatabasePool) {
     info!("Looking for pending geocode workouts...");
     match db.run_in_connection(|conn| {
         let unnamed_sessions = SessionRepository::select()
-            .where_(Where::Eq(session::entity::columns::WORKOUT, "".into()))
+            .where_(Where::Eq(session::entity::columns::NAME, "".into()))
             .fetch_in(conn)?;
 
         let sessions_ids = unnamed_sessions
@@ -563,7 +555,7 @@ pub fn update_pending_geolocation(app: &AppHandle, db: &DatabasePool) {
 
                                                 match SessionRepository::update()
                                                     .set(
-                                                        session::entity::columns::WORKOUT,
+                                                        session::entity::columns::NAME,
                                                         location.clone().into(),
                                                     )
                                                     .where_(Where::Eq(
