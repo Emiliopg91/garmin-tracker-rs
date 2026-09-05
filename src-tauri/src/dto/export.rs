@@ -7,17 +7,17 @@ use crate::dao::{
     additional_data::{AdditionalData, AdditionalDataRepository},
     body_metric::{BodyMetric, BodyMetricRepository},
     device::{Device, DeviceRepository},
-    exercise::{Exercise, ExerciseRepository},
     serie::{Serie, SerieRepository},
     session::{Session, SessionRepository},
     settings::{Settings, SettingsRepository},
+    workout::{Workout, WorkoutRepository},
 };
 
 #[derive(Serialize, Deserialize)]
 pub struct Export {
     body_metrics: Vec<BodyMetric>,
     devices: Vec<Device>,
-    exercises: Vec<Exercise>,
+    workouts: Vec<Workout>,
     sessions: Vec<SessionExport>,
     settings: Vec<Settings>,
 }
@@ -27,7 +27,7 @@ impl Export {
     pub fn from_database(db: &DatabasePool) -> rusqlite_orm::errors::Result<Self> {
         db.run_in_connection(|conn| {
             let body_metrics = BodyMetricRepository::select().fetch_in(conn)?;
-            let exercises = ExerciseRepository::select().fetch_in(conn)?;
+            let workouts = WorkoutRepository::select().fetch_in(conn)?;
             let devices = DeviceRepository::select().fetch_in(conn)?;
             let settings = SettingsRepository::select().fetch_in(conn)?;
             let sessions = SessionRepository::select().fetch_in(conn)?;
@@ -62,7 +62,7 @@ impl Export {
             Ok(Self {
                 body_metrics,
                 devices,
-                exercises,
+                workouts,
                 sessions,
                 settings,
             })

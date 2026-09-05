@@ -210,25 +210,21 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
               <td>{TimeUtils.formatTimeDate(localSession.timestamp)}</td>
             </tr>
             <tr>
-              <td>{translate("total_time")}:</td>
+              <td>{translate("time")}:</td>
               <td>
-                {TimeUtils.formatDuration(localSession.total_elapsed_time)}
+                {(localSession.active_time > 0
+                  ? TimeUtils.formatDuration(localSession.active_time) + " / "
+                  : "") +
+                  TimeUtils.formatDuration(localSession.total_elapsed_time)}
               </td>
             </tr>
-            {localSession.active_time > 0 && (
-              <tr>
-                <td>{translate("active_time")}:</td>
-                <td>{TimeUtils.formatDuration(localSession.active_time)}</td>
-              </tr>
-            )}
             <tr>
-              <td>{translate("total_calories")}:</td>
-              <td>{localSession.total_calories} Kcal</td>
-            </tr>
-            <tr>
-              <td>{translate("active_calories")}:</td>
+              <td>{translate("calories")}:</td>
               <td>
-                {localSession.total_calories - localSession.metabolic_calories}{" "}
+                {localSession.total_calories -
+                  localSession.metabolic_calories +
+                  " / " +
+                  localSession.total_calories}{" "}
                 Kcal
               </td>
             </tr>
