@@ -10,8 +10,8 @@ pub struct SessionListItem {
     pub timestamp: i32,
     pub active_calories: u16,
     pub training_load: u16,
-    pub sport: Option<u8>,
-    pub sub_sport: Option<u8>,
+    pub sport: u8,
+    pub sub_sport: u8,
 }
 
 impl From<&Session> for SessionListItem {
@@ -72,8 +72,8 @@ pub struct SessionDetails {
     pub metabolic_calories: u16,
 
     pub training_load: u16,
-    pub sport: Option<u8>,
-    pub sub_sport: Option<u8>,
+    pub sport: u8,
+    pub sub_sport: u8,
 
     pub series: Vec<SessionSerie>,
     pub heart_rates: Vec<Option<u8>>,

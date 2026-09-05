@@ -74,13 +74,13 @@ export class BackendClient {
 	}
 	
 
-	// From src-tauri/src/logic/workouts.rs:78
+	// From src-tauri/src/logic/workouts.rs:77
 	public static getWorkoutDetails(name: string): Promise<WorkoutDetails> {
 	  return BackendClient.inner_invoke("get_workout_details", { name }); 
 	}
 	
 
-	// From src-tauri/src/logic/workouts.rs:26
+	// From src-tauri/src/logic/workouts.rs:25
 	public static getWorkoutList(): Promise<WorkoutListItem[]> {
 	  return BackendClient.inner_invoke("get_workout_list"); 
 	}

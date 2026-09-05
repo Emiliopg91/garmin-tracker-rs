@@ -19,15 +19,32 @@ fn generate_translations_file() {
         .parent()
         .unwrap()
         .join("resources")
+        .join("translations")
         .join("translations.yaml");
     println!("cargo:rerun-if-changed={}", translations_file.display());
 
-    let yaml_str = fs::read_to_string(&translations_file)
+    let catalog_file = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap())
+        .parent()
+        .unwrap()
+        .join("resources")
+        .join("translations")
+        .join("catalog.yaml");
+    println!("cargo:rerun-if-changed={}", catalog_file.display());
+
+    let mut yaml_str = fs::read_to_string(&translations_file)
         .unwrap_or_else(|e| panic!("Could not read {}: {}", translations_file.display(), e));
 
-    let translation_map =
+    let mut translation_map =
         serde_yaml::from_str::<HashMap<String, HashMap<String, String>>>(&yaml_str)
             .unwrap_or_else(|e| panic!("Error parsing translations file: {}", e));
+
+    yaml_str = fs::read_to_string(&catalog_file)
+        .unwrap_or_else(|e| panic!("Could not read {}: {}", catalog_file.display(), e));
+
+    let catalog_map = serde_yaml::from_str::<HashMap<String, HashMap<String, String>>>(&yaml_str)
+        .unwrap_or_else(|e| panic!("Error parsing translations file: {}", e));
+
+    translation_map.extend(catalog_map);
 
     let mut inner_codes: Vec<(String, String)> = Vec::new();
     for (key, translations) in &translation_map {

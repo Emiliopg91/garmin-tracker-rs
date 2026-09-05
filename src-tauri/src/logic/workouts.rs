@@ -14,7 +14,6 @@ use crate::{
     dao::{
         serie::{self, SerieRepository},
         session::{self, SessionRepository, entity},
-        workout::WorkoutRepository,
     },
     dto::workouts::{WorkoutDetails, WorkoutListItem, WorkoutSession},
     logic::report_error,

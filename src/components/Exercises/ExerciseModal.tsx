@@ -80,6 +80,10 @@ export function ExerciseModal({ exercise, onClose }: Props) {
           </colgroup>
           <tbody>
             <tr>
+              <td>{translate("category")}:</td>
+              <td>{translate("exercise_" + exercise.category)}</td>
+            </tr>
+            <tr>
               <td>{translate("personal_record")}:</td>
               <td>
                 {exercise.reps +

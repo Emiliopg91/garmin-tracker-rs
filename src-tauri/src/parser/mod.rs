@@ -7,6 +7,8 @@ use rustyfit::{
     proto::Message,
 };
 
+use tauri_plugin_log::log::warn;
+
 use crate::dao::{
     additional_data::AdditionalData, exercise::Exercise, exercise_category, serie::Serie,
     session::Session, sport::Sport, sub_sport::SubSport, workout::Workout,
@@ -121,7 +123,7 @@ impl<'a> FitParser<'a> {
             .ok_or_else(|| ParseFitFileError::MissingField("session".to_string()))?;
 
         let timestamp = Self::get_timestamp(session_entry)?;
-        let sub_sport_obj = Self::get_sub_sport(session_entry);
+        let sub_sport_obj = Self::get_sub_sport(session_entry)?;
         let workout = grouped.workout.clone().map(|w| w.wkt_name);
         let total_elapsed_time = Self::get_total_elapsed_time(session_entry)?;
         let active_time = Self::get_active_time(session_entry);
@@ -144,9 +146,9 @@ impl<'a> FitParser<'a> {
             metabolic_calories,
             series,
             training_load,
-            sport: sub_sport_obj.as_ref().map(|o| o.sport),
-            sub_sport: sub_sport_obj.as_ref().map(|o| o.id),
-            sub_sport_obj,
+            sport: sub_sport_obj.sport,
+            sub_sport: sub_sport_obj.id,
+            sub_sport_obj: Some(sub_sport_obj),
             device: None,
             device_obj: None,
             additional_data,
@@ -188,7 +190,7 @@ impl<'a> FitParser<'a> {
     /// Builds the list of strength-training sets (`Serie`s) for a session, resolving each set to its exercise via the workout steps.
     fn get_sets(grouped: &GroupedEntries, timestamp: i64) -> errors::Result<Vec<Serie>> {
         let exercises = Self::get_exercises(&grouped.exercise_titles)?;
-        let steps = Self::get_steps(&grouped.workout_steps, &exercises)?;
+        let steps = Self::get_steps(&grouped.workout_steps, &exercises);
 
         let mut sets = Vec::new();
 
@@ -308,10 +310,12 @@ impl<'a> FitParser<'a> {
     }
 
     /// Resolves each workout step to its `Exercise`, by looking it up in the exercise titles parsed from the same file.
+    /// A step whose exercise can't be resolved is skipped (logged) rather than failing the whole session's series,
+    /// so one unresolved step doesn't wipe out every other set in the session.
     fn get_steps(
         workout_steps: &[mesgdef::WorkoutStep],
         exercises: &[Exercise],
-    ) -> errors::Result<Vec<Option<Exercise>>> {
+    ) -> Vec<Option<Exercise>> {
         let lookup: HashMap<(u16, u16), &Exercise> =
             exercises.iter().map(|e| ((e.id, e.category), e)).collect();
 
@@ -319,16 +323,17 @@ impl<'a> FitParser<'a> {
             .iter()
             .map(|reg| {
                 if reg.exercise_category.0 == u16::MAX {
-                    return Ok(None);
+                    return None;
                 }
 
                 let ex_cat = reg.exercise_category.0;
                 let ex_id = Self::get_exercise_name(reg.exercise_name);
 
-                lookup
-                    .get(&(ex_id, ex_cat))
-                    .map(|e| Some((*e).clone()))
-                    .ok_or_else(|| ParseFitFileError::UnknownExercise(ex_cat, ex_id))
+                let exercise = lookup.get(&(ex_id, ex_cat)).map(|e| (*e).clone());
+                if exercise.is_none() {
+                    warn!("{}", ParseFitFileError::UnknownExercise(ex_cat, ex_id));
+                }
+                exercise
             })
             .collect()
     }
@@ -370,17 +375,21 @@ impl<'a> FitParser<'a> {
             .ok_or_else(|| ParseFitFileError::MissingField("timestamp".to_string()))
     }
 
-    fn get_sub_sport(session: &mesgdef::Session) -> Option<SubSport> {
+    fn get_sub_sport(session: &mesgdef::Session) -> errors::Result<SubSport> {
         let sport_val = session.sport;
         let sub_sport_val = session.sub_sport;
-        if sport_val.0 != u8::MAX && sub_sport_val.0 != u8::MAX {
-            Some(SubSport {
-                id: sub_sport_val.0,
-                sport: sport_val.0,
-                sport_obj: Some(Sport { id: sport_val.0 }),
-            })
+        if sport_val.0 != u8::MAX {
+            if sub_sport_val.0 != u8::MAX {
+                Ok(SubSport {
+                    id: sub_sport_val.0,
+                    sport: sport_val.0,
+                    sport_obj: Some(Sport { id: sport_val.0 }),
+                })
+            } else {
+                Err(ParseFitFileError::MissingField("sub_sport".to_string()))
+            }
         } else {
-            None
+            Err(ParseFitFileError::MissingField("sport".to_string()))
         }
     }
 

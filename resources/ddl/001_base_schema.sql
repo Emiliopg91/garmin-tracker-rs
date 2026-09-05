@@ -40,14 +40,14 @@ CREATE TABLE SESSION (
     date                INTEGER NOT NULL PRIMARY KEY,
     name                TEXT NOT NULL,
     total_elapsed_time  INTEGER NOT NULL,
-    active_time         INTEGER NOT NULL,
+    active_time         INTEGER NOT NULL DEFAULT 0,
     total_calories      INTEGER NOT NULL,
     metabolic_calories  INTEGER NOT NULL,
     training_load       INTEGER NOT NULL DEFAULT 0,
+    workout             TEXT,
+    sport               INTEGER,
+    sub_sport           INTEGER,
     device              TEXT DEFAULT NULL,
-    workout             TEXT DEFAULT NULL,
-    sport               INTEGER DEFAULT NULL,
-    sub_sport           INTEGER DEFAULT NULL,
     FOREIGN KEY (sport, sub_sport) REFERENCES SUB_SPORT(sport, id) ON DELETE CASCADE
 );
 CREATE INDEX SESSION_NAME ON SESSION(name);

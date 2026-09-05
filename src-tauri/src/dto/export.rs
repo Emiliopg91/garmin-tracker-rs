@@ -84,10 +84,8 @@ pub struct SessionExport {
     pub total_calories: u16,
     pub metabolic_calories: u16,
     pub training_load: u16,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub sport: Option<u8>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub sub_sport: Option<u8>,
+    pub sport: u8,
+    pub sub_sport: u8,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub device: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]

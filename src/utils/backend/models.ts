@@ -66,8 +66,8 @@ export interface SessionDetails {
   name: string;
   series: SessionSerie[];
   speeds: (number | null)[];
-  sport: number | null;
-  sub_sport: number | null;
+  sport: number;
+  sub_sport: number;
   timestamp: number;
   total_calories: number;
   total_elapsed_time: number;
@@ -78,8 +78,8 @@ export interface SessionDetails {
 export interface SessionListItem {
   active_calories: number;
   name: string;
-  sport: number | null;
-  sub_sport: number | null;
+  sport: number;
+  sub_sport: number;
   timestamp: number;
   training_load: number;
 }

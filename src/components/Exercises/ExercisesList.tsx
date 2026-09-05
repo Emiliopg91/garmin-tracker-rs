@@ -18,7 +18,12 @@ export function ExercisesList() {
     startLoading();
     BackendClient.getExercises()
       .then((data) => {
-        setExercises(data);
+        const sortedData = [...data].sort((a, b) => {
+          return translate("exercise_" + a.category + "_" + a.id).localeCompare(
+            translate("exercise_" + b.category + "_" + b.id),
+          );
+        });
+        setExercises(sortedData);
       })
       .finally(() => {
         finishLoading();

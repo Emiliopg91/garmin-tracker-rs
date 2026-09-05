@@ -1,0 +1,346 @@
+new_update_title:
+  en: New update available
+  es: Actualización disponible
+new_update_body:
+  en: v{} available, update the application to get latests features and improvements
+  es: v{} disponible, actualiza la aplicacion para obtener las ultimas novedades y mejoras
+device_connected:
+  en: Device connected
+  es: Dispositivo conectado
+device_disconnected:
+  en: Device disconnected
+  es: Dispositivo desconectado
+error_exercise_details:
+  en: Error getting exercise details
+  es: Error obteniendo detalles del ejercicio
+error_exercise_list:
+  en: Error getting exercises list
+  es: Error obteniendo lista de ejercicios
+error_session_details:
+  en: Error getting session details
+  es: Error obteniendo detalles de la sesion
+error_session_list:
+  en: Error getting sessions list
+  es: Error obteniendo lista de sesiones
+error_import_sessions:
+  en: Error importing sessions
+  es: Error importando sesiones
+ok_update_session:
+  en: Session updated succesfully
+  es: Sesión actualizada correctamente
+error_update_session:
+  en: Error updating session
+  es: Error actualizando sesión
+error_body_measures_list:
+  en: Error getting measures list
+  es: Error obteniendo lista de mediciones
+error_adding_body_measures:
+  en: Error adding measures
+  es: Error añadiendo mediciones
+error_deleting_body_measures:
+  en: Error deleting measures
+  es: Error borrando mediciones
+error_workout_details:
+  en: Error getting workout details
+  es: Error obteniendo detalles del entrenamiento
+error_workout_list:
+  en: Error getting workouts list
+  es: Error obteniendo lista de entrenamientos
+sessions:
+  en: Sessions
+  es: Sesiones
+workouts:
+  en: Workouts
+  es: Entrenamientos
+body_metrics:
+  en: Body
+  es: Físico
+workload:
+  en: Workload
+  es: Carga
+reference:
+  en: Reference
+  es: Referencia
+workout:
+  en: Workout
+  es: Entrenamiento
+date:
+  en: Date
+  es: Fecha
+exercises:
+  en: Exercises
+  es: Ejercicios
+series:
+  en: Series
+  es: Series
+volume:
+  en: Volume
+  es: Volumen
+import_sessions:
+  en: Import sessions
+  es: Importar sesiones
+import_from_device:
+  en: From {}
+  es: Desde {}
+import_sessions_from_device:
+  en: Import sessions from {}
+  es: Importar sesiones desde {}
+imported_session:
+  en: Session imported succesfully
+  es: Sesión importada con éxito
+no_device_found:
+  en: No device found
+  es: No se detectó dispositivo
+loading:
+  en: Loading...
+  es: Cargando...
+total_time:
+  en: Total time
+  es: Tiempo total
+active_time:
+  en: Active time
+  es: Tiempo activo
+total_calories:
+  en: Total calories
+  es: Calorias totales
+active_calories:
+  en: Active calories
+  es: Calorias activas
+avg_heart_rate:
+  en: Average heart rate
+  es: Frecuencia cardiaca media
+max_heart_rate:
+  en: Max heart rate
+  es: Frecuencia cardiaca máxima
+min_heart_rate:
+  en: Min heart rate
+  es: Frecuencia cardiaca mínima
+exercise:
+  en: Exercise
+  es: Ejercicio
+update_sets:
+  en: Update sets
+  es: Actualizar series
+latest_session:
+  en: Latest session
+  es: Última sesión
+session_count:
+  en: Session count
+  es: Número de sesiones
+average_duration:
+  en: Average duration
+  es: Duración media
+average_time:
+  en: Average time
+  es: Tiempo medio
+average_volume:
+  en: Average volume
+  es: Volumen medio
+time:
+  en: Time
+  es: Tiempo
+rm:
+  en: 1 RM
+  es: 1 RM
+pr:
+  en: PR
+  es: PR
+personal_record:
+  en: Personal record
+  es: Record personal
+record_date:
+  en: Record date
+  es: Fecha del record
+repetitions:
+  en: Repetitions
+  es: Repeticiones
+fat_ratio:
+  en: Fat %
+  es: "% grasa"
+body_weight:
+  en: Body weight
+  es: Masa coporal
+lean_mass:
+  en: Lean mass
+  es: Masa magra
+weight:
+  en: Weight
+  es: Peso
+water_ratio:
+  en: Water %
+  es: "% agua"
+fat_mass:
+  en: Fat mass
+  es: Masa grasa
+water_mass:
+  en: Water mass
+  es: Masa de agua
+add_entry:
+  en: Add entry
+  es: Añadir entrada
+save:
+  en: Save
+  es: Guardar
+workout_load:
+  en: Load
+  es: Carga
+other:
+  en: Other
+  es: Otro
+heart_rate:
+  en: Heart rate
+  es: Frecuencia cardíaca
+syncing_device:
+  en: Syncing {} {}
+  es: Sincronizando {} {}
+error_persisting_session:
+  en: "Error persisting session: {}"
+  es: "Error guardando sesión: {}"
+error_parsing_session:
+  en: "Error parsing session file: {}"
+  es: "Error leyendo archivo de sesión: {}"
+imported_from:
+  en: Imported from
+  es: Importado desde
+hr_zone_1:
+  en: Warm up
+  es: Calentamiento
+hr_zone_2:
+  en: Easy
+  es: Suave
+hr_zone_3:
+  en: Aerobic
+  es: Aeróbico
+hr_zone_4:
+  en: Threshold
+  es: Umbral
+hr_zone_5:
+  en: Maximum
+  es: Máximo
+sport:
+  en: Sport
+  es: Deporte
+distance:
+  en: Distance
+  es: Distancia
+delete_entry:
+  en: Delete entry
+  es: Borrar entrada
+ok_delete_body_entry:
+  en: Entry deleted succesfully
+  es: Entrada eliminada con éxito
+speed:
+  en: Speed
+  es: Velocidad
+settings:
+  en: Settings
+  es: Configuración
+weight_unit:
+  en: Weight unit
+  es: Unidad de peso
+weight_unit_kilograms:
+  en: Kilograms
+  es: Kilogramos
+weight_unit_pounds:
+  en: Pounds
+  es: Libras
+distance_unit:
+  en: Distance unit
+  es: Unidad de distancia
+distance_unit_kilometers:
+  en: Kilometers
+  es: Kilómetros
+distance_unit_miles:
+  en: Miles
+  es: Millas
+auto_sync:
+  en: Sync devices
+  es: Sincronizar dispositivos
+auto_sync_true:
+  en: Automatically
+  es: Automaticamente
+auto_sync_false:
+  en: Manually
+  es: Manualmente
+pace:
+  en: Pace
+  es: Ritmo
+name:
+  en: Name
+  es: Nombre
+start_on_boot:
+  en: Startup mode
+  es: Modo de inicio
+start_on_boot_true:
+  en: On boot
+  es: Al arrancar
+start_on_boot_false:
+  en: Manually
+  es: Manualmente
+select_output_folder:
+  en: Select output folder
+  es: Selecciona directorio de salida
+select_file_import:
+  en: Select file to import
+  en: Selecciona archivo a importar
+database_operations:
+  en: Database management
+  es: Gestión de base de datos
+backup_database:
+  en: Backup
+  es: Exportar
+restore_database:
+  en: Restore
+  es: Restaurar
+ok_on_export:
+  en: Database exported succesfully
+  es: Base de datos exportada correctamente
+ok_on_export:
+  en: Database exported succesfully
+  es: Base de datos exportada correctamente
+error_on_export:
+  en: Error exporting database
+  es: Error exportando base de datos
+export_file_path:
+  en: File exported to {}
+  es: Archivo exportado en {}
+satellite_map:
+  en: Satellite
+  es: Satélite
+street_map:
+  en: Streets
+  es: Callejero
+language:
+  en: Language
+  es: Idioma
+lang_en:
+  en: English
+lang_es:
+  en: Español
+application:
+  en: Application
+  es: Aplicación
+interface:
+  en: Interface
+  es: Interfaz
+ok_import_sessions:
+  en: Sessions imported succesfully
+  es: Sesiones importadas con éxito
+imported_n_sessions:
+  en: "{} new sessions added"
+  es: "{} nuevas sesiones añadidas"
+new_record:
+  en: New personal record!
+  es: ¡Nuevo record personal!
+contratulations_pr:
+  en: Congratulations and keep it up!
+  es: ¡Felicidades y continua así!
+ok_update_settings:
+  en: Settings updated succesfully
+  es: Configuración actualizada
+error_update_settings:
+  en: Error updating settings
+  es: Error actualizando configuración
+category:
+  en: Category
+  es: Categoría

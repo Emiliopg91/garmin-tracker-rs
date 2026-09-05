@@ -83,6 +83,20 @@ pub fn run() {
                     path: constants::LOGS_DIR.clone(),
                     file_name: None,
                 }))
+                .target(
+                    Target::new(TargetKind::Stdout).format(|out, message, _record| {
+                        let message = message.to_string();
+                        let char_count = message.chars().count();
+                        let message = if char_count > 1000 {
+                            let truncated: String = message.chars().take(1000).collect();
+                            format!("{}... and {} more", truncated, char_count - 1000)
+                        } else {
+                            message
+                        };
+
+                        out.finish(format_args!("{}", message))
+                    }),
+                )
                 .max_file_size(constants::LOG_FILE_MAX_SIZE)
                 .rotation_strategy(constants::LOG_FILE_ROTATION_STRATEGY)
                 .format(|out, message, record| {
