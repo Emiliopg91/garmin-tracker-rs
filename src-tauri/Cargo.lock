@@ -1342,7 +1342,7 @@ dependencies = [
 
 [[package]]
 name = "garmin-tracker-rs"
-version = "1.14.0"
+version = "2.0.0"
 dependencies = [
  "chrono",
  "curl-rest",
