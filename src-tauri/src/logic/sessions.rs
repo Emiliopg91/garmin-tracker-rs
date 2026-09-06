@@ -29,7 +29,6 @@ use rusqlite_orm::{
     errors::DatabaseError,
     types::{order_by::OrderBy, value::Value, where_clause::Where},
 };
-use rustyfit::Decoder;
 use tauri::{AppHandle, Emitter, Manager, State};
 use tauri_plugin_log::log::{error, info, warn};
 
@@ -305,7 +304,7 @@ where
         .par_iter()
         .filter_map(|file| {
             info!("Parsing file {}", file.as_ref().display());
-            let res = match FitParser::from_file(file, &mut Decoder::new()) {
+            let res = match FitParser::from_file(file) {
                 Ok(parser) => match parser.parse_session() {
                     Ok(session) => Ok((session, file)),
                     Err(e) => Err(e),

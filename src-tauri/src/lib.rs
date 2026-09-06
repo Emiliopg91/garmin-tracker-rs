@@ -37,8 +37,6 @@ use crate::{
 
 #[cfg(debug_assertions)]
 use crate::parser::FitParser;
-#[cfg(debug_assertions)]
-use rustyfit::Decoder;
 
 dlls!("../resources/ddl");
 
@@ -48,14 +46,13 @@ where
     P: AsRef<Path>,
 {
     for path in paths {
-        let res: Result<(), Box<dyn std::error::Error>> =
-            match FitParser::from_file(path, &mut Decoder::new()) {
-                Ok(parser) => match parser.debug_dump() {
-                    Ok(_) => Ok(()),
-                    Err(e) => Err(e),
-                },
-                Err(e) => Err(Box::new(e)),
-            };
+        let res: Result<(), Box<dyn std::error::Error>> = match FitParser::from_file(path) {
+            Ok(parser) => match parser.debug_dump() {
+                Ok(_) => Ok(()),
+                Err(e) => Err(e),
+            },
+            Err(e) => Err(Box::new(e)),
+        };
         if let Err(e) = res {
             eprintln!(
                 "Error handling '{}': \n  {}",

@@ -2,7 +2,7 @@ use std::{fs::File, io::BufReader, path::Path};
 
 use embedded_io_adapters::std::FromStd;
 use rustyfit::{
-    Decoder, DecoderEvent, StreamDecoder, StreamingIterator,
+    Decoder, DecoderEvent, StreamingIterator,
     profile::{mesgdef, typedef::MesgNum},
     proto::Message,
 };
@@ -69,12 +69,12 @@ impl GroupedEntries {
 }
 
 pub struct FitParser<'a> {
+    messages: Vec<Message>,
     path: &'a Path,
-    stream: StreamDecoder<'a, FromStd<BufReader<File>>>,
 }
 
 impl<'a> FitParser<'a> {
-    pub fn from_file<P>(path: &'a P, decoder: &'a mut Decoder) -> errors::Result<Self>
+    pub fn from_file<P>(path: &'a P) -> errors::Result<Self>
     where
         P: AsRef<Path>,
     {
@@ -84,22 +84,33 @@ impl<'a> FitParser<'a> {
             .map_err(|e| ParseFitFileError::FileOpening(path_ref.display().to_string(), e))?;
         let reader = FromStd::new(BufReader::new(file));
 
-        Ok(Self {
-            path: path_ref,
-            stream: decoder.stream(reader),
-        })
+        let mut decoder = Decoder::new();
+        let mut stream = decoder.stream(reader);
+
+        let mut instance = Self {
+            path: path.as_ref(),
+            messages: vec![],
+        };
+
+        while let Some(event) = stream.next() {
+            let event = event.map_err(|e| {
+                ParseFitFileError::FileReading(path.as_ref().display().to_string(), Box::new(e))
+            })?;
+            if let DecoderEvent::Message(mesg) = event {
+                instance.messages.push(mesg.clone());
+            }
+        }
+
+        Ok(instance)
     }
 
     /// Parses a `.FIT` activity file into a `Session` (with nested series, heart rate, GPS, and speed data). Falls back to reverse-geocoding the start GPS point for the workout name if the file has none.
-    pub(crate) fn parse_session(mut self) -> errors::Result<Session> {
-        let mut entries = Vec::new();
-        while let Some(event) = self.stream.next() {
-            let event = event.map_err(|e| {
-                ParseFitFileError::FileReading(self.path.display().to_string(), Box::new(e))
-            })?;
-
-            if let DecoderEvent::Message(mesg) = event
-                && matches!(
+    pub(crate) fn parse_session(self) -> errors::Result<Session> {
+        let entries = self
+            .messages
+            .into_iter()
+            .filter(|mesg| {
+                matches!(
                     mesg.num,
                     MesgNum::SESSION
                         | MesgNum::WORKOUT
@@ -108,10 +119,8 @@ impl<'a> FitParser<'a> {
                         | MesgNum::SET
                         | MesgNum::RECORD
                 )
-            {
-                entries.push(mesg.clone());
-            }
-        }
+            })
+            .collect::<Vec<_>>();
 
         let grouped = GroupedEntries::from_entries(&entries);
 
@@ -155,31 +164,10 @@ impl<'a> FitParser<'a> {
 
     /// Debug-only helper: writes the raw parsed messages to `<file>.json` for inspection.
     #[cfg(debug_assertions)]
-    pub fn debug_dump(mut self) -> Result<(), Box<dyn std::error::Error>> {
+    pub fn debug_dump(&self) -> Result<(), Box<dyn std::error::Error>> {
         let dump_path = format!("{}.json", self.path.display());
-        let mut entries = Vec::new();
 
-        while let Some(event) = self.stream.next() {
-            let event = event.map_err(|e| {
-                ParseFitFileError::FileReading(self.path.display().to_string(), Box::new(e))
-            })?;
-
-            if let DecoderEvent::Message(mesg) = event
-                && matches!(
-                    mesg.num,
-                    MesgNum::SESSION
-                        | MesgNum::WORKOUT
-                        | MesgNum::EXERCISE_TITLE
-                        | MesgNum::WORKOUT_STEP
-                        | MesgNum::SET
-                        | MesgNum::RECORD
-                )
-            {
-                entries.push(mesg.clone());
-            }
-        }
-
-        let json = serde_json::to_string_pretty(&entries)?;
+        let json = serde_json::to_string_pretty(&self.messages)?;
         std::fs::write(&dump_path, json)?;
 
         Ok(())
