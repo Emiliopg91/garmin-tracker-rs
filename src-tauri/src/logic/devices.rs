@@ -1,4 +1,3 @@
-
 use nusb::hotplug::HotplugEvent;
 use rusqlite_orm::{dao::Repository, database::DatabasePool};
 use tokio_stream::StreamExt;

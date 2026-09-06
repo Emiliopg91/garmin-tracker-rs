@@ -110,8 +110,11 @@ impl MtpClient {
 
             info!("Pending {} files", objs.len());
             let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
-            let tmp_dir = std::env::temp_dir()
-                .join(format!("{}-{}", constants::MTP_TMP_DIR_PREFIX, now.as_millis()));
+            let tmp_dir = std::env::temp_dir().join(format!(
+                "{}-{}",
+                constants::MTP_TMP_DIR_PREFIX,
+                now.as_millis()
+            ));
 
             fs::create_dir_all(&tmp_dir).await.map_err(|e| {
                 MtpError::ErrorCreatingDownloadFolder(tmp_dir.display().to_string(), e)
