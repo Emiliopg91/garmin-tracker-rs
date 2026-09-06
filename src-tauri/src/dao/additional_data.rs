@@ -131,7 +131,7 @@ impl AdditionalData {
 
     /// Unpacks the powers Blob into Vec
     pub fn get_powers(&self) -> Option<Vec<Option<u16>>> {
-        self.speeds.as_ref().map(|records| {
+        self.powers.as_ref().map(|records| {
             records
                 .as_chunks::<2>()
                 .0
