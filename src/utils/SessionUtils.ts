@@ -1,4 +1,5 @@
 import {
+  DistanceUnit,
   SessionDetails,
   SessionListItem,
   SessionSerie,
@@ -24,9 +25,8 @@ export interface SessionFrontDetails extends SessionDetails {
   valid_points: [number, number][];
   start_point: [number, number];
   finish_point: [number, number];
+  laps: [number, [number, number]][];
   distance: number;
-  speed: number;
-  pace: number;
   hrRanges: [number, number, number];
   hrBreathData: {
     idx: number;
@@ -43,6 +43,7 @@ export class SessionUtils {
   public static detailsFromBackend(
     backDetails: SessionDetails,
     weightUnit: WeightUnit,
+    distanceUnit: DistanceUnit,
   ): SessionFrontDetails {
     const details: SessionFrontDetails = {
       ...backDetails,
@@ -51,9 +52,8 @@ export class SessionUtils {
       valid_points: [],
       start_point: [0, 0],
       finish_point: [0, 0],
+      laps: [],
       distance: 0,
-      speed: 0,
-      pace: 0,
       hrBreathData: [],
       hrRanges: [0, 0, 0],
       volume: 0,
@@ -62,7 +62,7 @@ export class SessionUtils {
     };
 
     SessionUtils.handleSeries(details, weightUnit);
-    SessionUtils.handleGpsCoordiates(details);
+    SessionUtils.handleGpsCoordiates(details, distanceUnit);
     SessionUtils.handleHeartRate(details);
 
     return details;
@@ -94,8 +94,25 @@ export class SessionUtils {
     }
   }
 
-  private static handleGpsCoordiates(details: SessionFrontDetails) {
+  private static handleGpsCoordiates(
+    details: SessionFrontDetails,
+    distanceUnit: DistanceUnit,
+  ) {
     if (details.coordinates) {
+      for (let i = 0; i < details.coordinates.length; i++) {
+        if (details.coordinates[i]) {
+          details.start_point = details.coordinates[i]!;
+          break;
+        }
+      }
+
+      for (let i = details.coordinates.length - 1; i >= 0; i--) {
+        if (details.coordinates[i]) {
+          details.finish_point = details.coordinates[i]!;
+          break;
+        }
+      }
+
       for (let i = 0; i < details.coordinates.length; i++) {
         if (details.coordinates[i]) {
           details.coordinates[i]![0] =
@@ -114,23 +131,20 @@ export class SessionUtils {
             details.coordinates[i + 1]!,
           );
           diffs.push(diff);
+
+          if (
+            Math.round(UnitUtils.fromKm(details.distance, distanceUnit)) !=
+            Math.round(UnitUtils.fromKm(details.distance + diff, distanceUnit))
+          ) {
+            details.laps.push([
+              Math.round(
+                UnitUtils.fromKm(details.distance + diff, distanceUnit),
+              ),
+              details.coordinates[i]!,
+            ]);
+          }
+
           details.distance += diff;
-        }
-      }
-      details.speed = details.distance / (details.total_elapsed_time / 3600);
-      details.pace = details.total_elapsed_time / 60 / details.distance;
-
-      for (let i = 0; i < details.coordinates.length; i++) {
-        if (details.coordinates[i]) {
-          details.start_point = details.coordinates[i]!;
-          break;
-        }
-      }
-
-      for (let i = details.coordinates.length - 1; i >= 0; i--) {
-        if (details.coordinates[i]) {
-          details.finish_point = details.coordinates[i]!;
-          break;
         }
       }
 

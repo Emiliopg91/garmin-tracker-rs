@@ -56,6 +56,32 @@ const urls = [
   "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
 ];
 
+function lapMarker(lap: [number, [number, number]]): React.JSX.Element {
+  const style = `
+    background-color:#2A81CB;
+    color:white;
+    border-radius:50%;
+    width:30px;
+    height:30px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:bold;
+    font-size:14px;
+    border:2px solid white;
+    box-shadow:0 1px 3px rgba(0,0,0,0.4);
+  `.replace(/\s+/g, " ");
+
+  const icon = L.divIcon({
+    className: "",
+    html: `<div style="${style}">${lap[0]}</div>`,
+    iconSize: [30, 30],
+    iconAnchor: [15, 15],
+  });
+
+  return <Marker key={lap[0]} position={lap[1]} icon={icon} />;
+}
+
 export function SessionModal({ session, onClose, onUpdate }: Props) {
   const { startLoading, finishLoading, translate, settings } =
     useContext(AppContext);
@@ -171,6 +197,8 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                 position={localSession.finish_point}
                 icon={endIcon}
               ></Marker>
+
+              {localSession.laps.map((lap) => lapMarker(lap))}
             </MapContainer>
             <FormControl
               style={{ width: "100%", display: "flex", alignItems: "center" }}
@@ -242,13 +270,14 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                   <td>{translate("speed")}:</td>
                   <td>
                     {UnitUtils.fromKm(
-                      localSession.speed,
+                      localSession.distance /
+                        (localSession.total_elapsed_time / 3600),
                       settings.distance_unit,
                     ).toFixed(2)}{" "}
                     {UnitUtils.getUnit(settings.distance_unit)}/h (
                     {TimeUtils.formatDuration(
-                      UnitUtils.fromKm(
-                        localSession.pace * 60,
+                      UnitUtils.toKm(
+                        localSession.total_elapsed_time / localSession.distance,
                         settings.distance_unit,
                       ),
                     )}{" "}
