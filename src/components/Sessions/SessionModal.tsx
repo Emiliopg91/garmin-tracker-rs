@@ -331,84 +331,96 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                             justifyContent: "center",
                           }}
                         >
-                          <span style={{ color: "gray", paddingRight: "10px" }}>
-                            {TimeUtils.formatDuration(
-                              localSession.zones_times[0],
-                            ) +
-                              " (" +
-                              Math.round(
-                                100 *
-                                  (localSession.zones_times[0] /
-                                    localSession.total_elapsed_time),
+                          {localSession.zones_times[1] > 0 && (
+                            <span
+                              style={{ color: "gray", paddingRight: "10px" }}
+                            >
+                              {TimeUtils.formatDuration(
+                                localSession.zones_times[0],
                               ) +
-                              "%)"}
-                          </span>
-                          <span
-                            style={{
-                              color: "cyan",
-                              paddingRight: "10px",
-                              paddingLeft: "10px",
-                            }}
-                          >
-                            {TimeUtils.formatDuration(
-                              localSession.zones_times[1],
-                            ) +
-                              " (" +
-                              Math.round(
-                                100 *
-                                  (localSession.zones_times[1] /
-                                    localSession.total_elapsed_time),
+                                " (" +
+                                Math.round(
+                                  100 *
+                                    (localSession.zones_times[0] /
+                                      localSession.total_elapsed_time),
+                                ) +
+                                "%)"}
+                            </span>
+                          )}
+                          {localSession.zones_times[1] > 0 && (
+                            <span
+                              style={{
+                                color: "cyan",
+                                paddingRight: "10px",
+                                paddingLeft: "10px",
+                              }}
+                            >
+                              {TimeUtils.formatDuration(
+                                localSession.zones_times[1],
                               ) +
-                              "%)"}
-                          </span>
-                          <span
-                            style={{
-                              color: "green",
-                              paddingRight: "10px",
-                              paddingLeft: "10px",
-                            }}
-                          >
-                            {TimeUtils.formatDuration(
-                              localSession.zones_times[2],
-                            ) +
-                              " (" +
-                              Math.round(
-                                100 *
-                                  (localSession.zones_times[2] /
-                                    localSession.total_elapsed_time),
+                                " (" +
+                                Math.round(
+                                  100 *
+                                    (localSession.zones_times[1] /
+                                      localSession.total_elapsed_time),
+                                ) +
+                                "%)"}
+                            </span>
+                          )}
+                          {localSession.zones_times[2] > 0 && (
+                            <span
+                              style={{
+                                color: "green",
+                                paddingRight: "10px",
+                                paddingLeft: "10px",
+                              }}
+                            >
+                              {TimeUtils.formatDuration(
+                                localSession.zones_times[2],
                               ) +
-                              "%)"}
-                          </span>
-                          <span
-                            style={{
-                              color: "orange",
-                              paddingRight: "10px",
-                              paddingLeft: "10px",
-                            }}
-                          >
-                            {TimeUtils.formatDuration(
-                              localSession.zones_times[3],
-                            ) +
-                              " (" +
-                              Math.round(
-                                100 *
-                                  (localSession.zones_times[3] /
-                                    localSession.total_elapsed_time),
+                                " (" +
+                                Math.round(
+                                  100 *
+                                    (localSession.zones_times[2] /
+                                      localSession.total_elapsed_time),
+                                ) +
+                                "%)"}
+                            </span>
+                          )}
+                          {localSession.zones_times[3] > 0 && (
+                            <span
+                              style={{
+                                color: "orange",
+                                paddingRight: "10px",
+                                paddingLeft: "10px",
+                              }}
+                            >
+                              {TimeUtils.formatDuration(
+                                localSession.zones_times[3],
                               ) +
-                              "%)"}
-                          </span>
-                          <span style={{ color: "red", paddingLeft: "10px" }}>
-                            {TimeUtils.formatDuration(
-                              localSession.zones_times[4],
-                            ) +
-                              " (" +
-                              Math.round(
-                                100 *
-                                  (localSession.zones_times[4] /
-                                    localSession.total_elapsed_time),
+                                " (" +
+                                Math.round(
+                                  100 *
+                                    (localSession.zones_times[3] /
+                                      localSession.total_elapsed_time),
+                                ) +
+                                "%)"}
+                            </span>
+                          )}
+                          {localSession.zones_times[4] > 0 && (
+                            <span style={{ color: "red", paddingLeft: "10px" }}>
+                              {TimeUtils.formatDuration(
+                                localSession.zones_times[4],
                               ) +
-                              "%)"}
-                          </span>
+                                " (" +
+                                Math.round(
+                                  100 *
+                                    (localSession.zones_times[4] /
+                                      localSession.total_elapsed_time),
+                                ) +
+                                "%)"}
+                            </span>
+                          )}
                         </div>
                       </div>
                     )}
