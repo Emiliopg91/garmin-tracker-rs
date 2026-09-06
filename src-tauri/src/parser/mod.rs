@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fs::File, io::BufReader, path::Path};
+use std::{fs::File, io::BufReader, path::Path};
 
 use embedded_io_adapters::std::FromStd;
 use rustyfit::{
@@ -7,11 +7,9 @@ use rustyfit::{
     proto::Message,
 };
 
-use tauri_plugin_log::log::warn;
-
 use crate::dao::{
-    additional_data::AdditionalData, exercise::Exercise, exercise_category, serie::Serie,
-    session::Session, sport::Sport, sub_sport::SubSport, workout::Workout,
+    additional_data::AdditionalData, exercise::Exercise, serie::Serie, session::Session,
+    sport::Sport, sub_sport::SubSport, workout::Workout,
 };
 
 use self::errors::ParseFitFileError;
@@ -189,8 +187,7 @@ impl<'a> FitParser<'a> {
 
     /// Builds the list of strength-training sets (`Serie`s) for a session, resolving each set to its exercise via the workout steps.
     fn get_sets(grouped: &GroupedEntries, timestamp: i64) -> errors::Result<Vec<Serie>> {
-        let exercises = Self::get_exercises(&grouped.exercise_titles)?;
-        let steps = Self::get_steps(&grouped.workout_steps, &exercises);
+        let steps = Self::get_steps(&grouped.workout_steps);
 
         let mut sets = Vec::new();
 
@@ -312,13 +309,7 @@ impl<'a> FitParser<'a> {
     /// Resolves each workout step to its `Exercise`, by looking it up in the exercise titles parsed from the same file.
     /// A step whose exercise can't be resolved is skipped (logged) rather than failing the whole session's series,
     /// so one unresolved step doesn't wipe out every other set in the session.
-    fn get_steps(
-        workout_steps: &[mesgdef::WorkoutStep],
-        exercises: &[Exercise],
-    ) -> Vec<Option<Exercise>> {
-        let lookup: HashMap<(u16, u16), &Exercise> =
-            exercises.iter().map(|e| ((e.id, e.category), e)).collect();
-
+    fn get_steps(workout_steps: &[mesgdef::WorkoutStep]) -> Vec<Option<Exercise>> {
         workout_steps
             .iter()
             .map(|reg| {
@@ -329,35 +320,10 @@ impl<'a> FitParser<'a> {
                 let ex_cat = reg.exercise_category.0;
                 let ex_id = Self::get_exercise_name(reg.exercise_name);
 
-                let exercise = lookup.get(&(ex_id, ex_cat)).map(|e| (*e).clone());
-                if exercise.is_none() {
-                    warn!("{}", ParseFitFileError::UnknownExercise(ex_cat, ex_id));
-                }
-                exercise
-            })
-            .collect()
-    }
-
-    /// Parses the file's `exercise_title` messages into `Exercise` entities.
-    pub fn get_exercises(
-        exercise_titles: &[mesgdef::ExerciseTitle],
-    ) -> errors::Result<Vec<Exercise>> {
-        exercise_titles
-            .iter()
-            .map(|reg| {
-                let category = if reg.exercise_category.0 == u16::MAX {
-                    Err(ParseFitFileError::MissingField(
-                        "exercise_category".to_string(),
-                    ))
-                } else {
-                    Ok(reg.exercise_category.0)
-                }?;
-                let name = reg.exercise_name;
-
-                Ok(Exercise {
-                    category,
-                    id: name,
-                    exercise_category: Some(exercise_category::ExerciseCategory { id: category }),
+                Some(Exercise {
+                    category: ex_cat,
+                    id: ex_id,
+                    exercise_category: None,
                 })
             })
             .collect()

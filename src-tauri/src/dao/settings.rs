@@ -1,5 +1,6 @@
 use rusqlite_orm::{dao::Repository, database::DatabasePool};
 use rusqlite_orm_macros::Entity;
+use semver::Version;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
@@ -11,6 +12,7 @@ pub mod settings_keys {
     pub const LANGUAGE: &str = "language";
     pub const START_ON_BOOT: &str = "start_boot";
     pub const WEIGHT_UNIT: &str = "weight_unit";
+    pub const VERSION: &str = "version";
 }
 
 #[derive(Entity, Serialize, Deserialize)]
@@ -121,6 +123,26 @@ impl Settings {
             .or_replace()
             .item(Settings {
                 name: settings_keys::START_ON_BOOT.to_string(),
+                value: value.to_string(),
+            })
+            .execute(db)
+            .map(|_| ())
+    }
+
+    /// Reads latest version.
+    pub fn get_version(db: &DatabasePool) -> Version {
+        SettingsRepository::select_by_id(db, settings_keys::VERSION)
+            .ok()
+            .flatten()
+            .and_then(|r| Version::parse(&r.value).ok())
+            .unwrap_or(Version::new(0, 1, 0))
+    }
+    /// Persists the version.
+    pub fn set_version(db: &DatabasePool, value: &Version) -> rusqlite_orm::errors::Result<()> {
+        SettingsRepository::insert()
+            .or_replace()
+            .item(Settings {
+                name: settings_keys::VERSION.to_string(),
                 value: value.to_string(),
             })
             .execute(db)

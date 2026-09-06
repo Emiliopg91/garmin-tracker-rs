@@ -16,7 +16,7 @@ use crate::{
     },
     logic::{notifications::show_notification, report_error},
     mtp::MTP_CLIENT_INST,
-    parser::{FitParser, errors::ParseFitFileError},
+    parser::FitParser,
     utils::translations::{Languages, translate, translate_and_replace},
 };
 use chrono::{Datelike, Local, TimeZone, Timelike, offset::LocalResult};
@@ -315,20 +315,19 @@ where
             match res {
                 Ok(result) => Some(result),
                 Err(e) => {
-                    error!("Error parsing session: {}", e);
-
-                    let error_msg = match &e {
-                        ParseFitFileError::UnknownExercise(category, id) => translate_and_replace(
-                            "error_parser_unknown_exercise",
-                            &[&category.to_string(), &id.to_string()],
-                            lang,
-                        ),
-                        other => other.to_string(),
-                    };
+                    error!(
+                        "Error parsing session file {}: {}",
+                        file.as_ref().display(),
+                        e
+                    );
 
                     show_notification(NotificationDefinition {
                         title: format!("{}", file.as_ref().file_name().unwrap().display()),
-                        body: translate_and_replace("error_parsing_session", &[&error_msg], lang),
+                        body: translate_and_replace(
+                            "error_parsing_session",
+                            &[&e.to_string()],
+                            lang,
+                        ),
                         kind: NotificationKind::Persistant,
                     });
 

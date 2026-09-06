@@ -8,8 +8,6 @@ pub enum ParseFitFileError {
     FileReading(String, #[source] Box<dyn std::error::Error + Send + Sync>),
     #[error("Missing {0} field")]
     MissingField(String),
-    #[error("Unknown exercise (category={0}, id={1})")]
-    UnknownExercise(u16, u16),
 }
 
 pub type Result<T> = std::result::Result<T, ParseFitFileError>;

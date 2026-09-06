@@ -129,13 +129,11 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
           translate(
             "sport_" + localSession.sport + "_" + localSession.sub_sport,
           )}
-        <>
-          {localSession.name.length > 0 && (
-            <span>
-              : <span style={{ marginLeft: "10px" }}>{localSession.name}</span>
-            </span>
-          )}
-        </>
+        {localSession.name.length > 0 && (
+          <span>
+            : <span style={{ marginLeft: "10px" }}>{localSession.name}</span>
+          </span>
+        )}
         <IconButton
           onClick={onClose}
           sx={{ position: "absolute", right: 8, top: 8 }}
@@ -201,7 +199,7 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
         <table id="session-details-table">
           <colgroup>
             <col style={{ width: "200px" }} />
-            <col style={{ width: "150px" }} />
+            <col style={{ width: "250px" }} />
             <col />
           </colgroup>
           <tbody>
@@ -228,10 +226,6 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                 Kcal
               </td>
             </tr>
-            <tr>
-              <td>{translate("workout_load")}:</td>
-              <td>{localSession.training_load}</td>
-            </tr>
             {localSession.distance > 0 && (
               <>
                 <tr>
@@ -251,17 +245,14 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                       localSession.speed,
                       settings.distance_unit,
                     ).toFixed(2)}{" "}
-                    {UnitUtils.getUnit(settings.distance_unit)}/h
-                  </td>
-                </tr>
-                <tr>
-                  <td>{translate("pace")}:</td>
-                  <td>
-                    {UnitUtils.fromKm(
-                      localSession.pace,
-                      settings.distance_unit,
-                    ).toFixed(2)}{" "}
-                    min/{UnitUtils.getUnit(settings.distance_unit)}
+                    {UnitUtils.getUnit(settings.distance_unit)}/h (
+                    {TimeUtils.formatDuration(
+                      UnitUtils.fromKm(
+                        localSession.pace * 60,
+                        settings.distance_unit,
+                      ),
+                    )}{" "}
+                    min/{UnitUtils.getUnit(settings.distance_unit)}){" "}
                   </td>
                 </tr>
               </>
@@ -278,6 +269,10 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                 </td>
               </tr>
             )}
+            <tr>
+              <td>{translate("workout_load")}:</td>
+              <td>{localSession.training_load}</td>
+            </tr>
             {localSession.device && (
               <tr>
                 <td>{translate("imported_from")}:</td>
@@ -289,7 +284,13 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
         {localSession.hrBreathData.length > 0 && (
           <>
             <hr />
-            <div style={{ width: "100%", height: 200 }}>
+            <div
+              style={{
+                width: "100%",
+                height: 230,
+                borderBottom: "1px solid white",
+              }}
+            >
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart
                   data={localSession.hrBreathData}
@@ -320,8 +321,95 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                   <Legend
                     position={"top"}
                     content={() => (
-                      <div style={{ textAlign: "center", fontWeight: "bold" }}>
-                        {translate("heart_rate")}
+                      <div style={{ textAlign: "center" }}>
+                        <div style={{ fontWeight: "bold" }}>
+                          {translate("heart_rate")}
+                        </div>
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "center",
+                          }}
+                        >
+                          <span style={{ color: "gray", paddingRight: "10px" }}>
+                            {TimeUtils.formatDuration(
+                              localSession.zones_times[0],
+                            ) +
+                              " (" +
+                              Math.round(
+                                100 *
+                                  (localSession.zones_times[0] /
+                                    localSession.total_elapsed_time),
+                              ) +
+                              "%)"}
+                          </span>
+                          <span
+                            style={{
+                              color: "cyan",
+                              paddingRight: "10px",
+                              paddingLeft: "10px",
+                            }}
+                          >
+                            {TimeUtils.formatDuration(
+                              localSession.zones_times[1],
+                            ) +
+                              " (" +
+                              Math.round(
+                                100 *
+                                  (localSession.zones_times[1] /
+                                    localSession.total_elapsed_time),
+                              ) +
+                              "%)"}
+                          </span>
+                          <span
+                            style={{
+                              color: "green",
+                              paddingRight: "10px",
+                              paddingLeft: "10px",
+                            }}
+                          >
+                            {TimeUtils.formatDuration(
+                              localSession.zones_times[2],
+                            ) +
+                              " (" +
+                              Math.round(
+                                100 *
+                                  (localSession.zones_times[2] /
+                                    localSession.total_elapsed_time),
+                              ) +
+                              "%)"}
+                          </span>
+                          <span
+                            style={{
+                              color: "orange",
+                              paddingRight: "10px",
+                              paddingLeft: "10px",
+                            }}
+                          >
+                            {TimeUtils.formatDuration(
+                              localSession.zones_times[3],
+                            ) +
+                              " (" +
+                              Math.round(
+                                100 *
+                                  (localSession.zones_times[3] /
+                                    localSession.total_elapsed_time),
+                              ) +
+                              "%)"}
+                          </span>
+                          <span style={{ color: "red", paddingLeft: "10px" }}>
+                            {TimeUtils.formatDuration(
+                              localSession.zones_times[4],
+                            ) +
+                              " (" +
+                              Math.round(
+                                100 *
+                                  (localSession.zones_times[4] /
+                                    localSession.total_elapsed_time),
+                              ) +
+                              "%)"}
+                          </span>
+                        </div>
                       </div>
                     )}
                   />
@@ -357,52 +445,6 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                 </AreaChart>
               </ResponsiveContainer>
             </div>
-            <table style={{ position: "relative", top: "-20px" }}>
-              <colgroup>
-                <col style={{ width: "250px" }} />
-                <col style={{ width: "250px" }} />
-              </colgroup>
-              <tr>
-                <td>
-                  <table>
-                    <tr>
-                      <td>
-                        {translate("hr_zone_1")}:{" "}
-                        {TimeUtils.formatDuration(localSession.zones_times[0])}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>
-                        {translate("hr_zone_2")}:{" "}
-                        {TimeUtils.formatDuration(localSession.zones_times[1])}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>
-                        {translate("hr_zone_3")}:{" "}
-                        {TimeUtils.formatDuration(localSession.zones_times[2])}
-                      </td>
-                    </tr>
-                  </table>
-                </td>
-                <td>
-                  <table>
-                    <tr>
-                      <td>
-                        {translate("hr_zone_4")}:{" "}
-                        {TimeUtils.formatDuration(localSession.zones_times[3])}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>
-                        {translate("hr_zone_5")}:{" "}
-                        {TimeUtils.formatDuration(localSession.zones_times[4])}
-                      </td>
-                    </tr>
-                  </table>
-                </td>
-              </tr>
-            </table>
             <br />
           </>
         )}

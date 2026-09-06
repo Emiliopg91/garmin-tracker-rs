@@ -84,6 +84,16 @@ export function ExerciseModal({ exercise, onClose }: Props) {
               <td>{translate("exercise_" + exercise.category)}</td>
             </tr>
             <tr>
+              <td>{translate("rm")}:</td>
+              <td>
+                {UnitUtils.fromKg(exercise.rm, settings.weight_unit).toFixed(
+                  1,
+                ) +
+                  " " +
+                  UnitUtils.getUnit(settings.weight_unit)}
+              </td>
+            </tr>
+            <tr>
               <td>{translate("personal_record")}:</td>
               <td>
                 {exercise.reps +
@@ -99,16 +109,6 @@ export function ExerciseModal({ exercise, onClose }: Props) {
             <tr>
               <td>{translate("record_date")}:</td>
               <td>{TimeUtils.formatTimeDate(exercise.pr_date)}</td>
-            </tr>
-            <tr>
-              <td>{translate("rm")}:</td>
-              <td>
-                {UnitUtils.fromKg(exercise.rm, settings.weight_unit).toFixed(
-                  1,
-                ) +
-                  " " +
-                  UnitUtils.getUnit(settings.weight_unit)}
-              </td>
             </tr>
           </tbody>
         </table>
