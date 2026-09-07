@@ -3,7 +3,7 @@ import { useContext, useEffect, useState } from "react";
 import { AppContext } from "@/context/AppContext";
 import { BodyMetricListItem } from "@/utils/backend/models";
 import { BodyMetricsDetailsModal } from "./BodyMetricsDetailsModal";
-import { Button } from "@mui/material";
+import { Button, Checkbox } from "@mui/material";
 import { BodyMetricsAddModal } from "./BodyMetricsAddModal";
 import {
   CartesianGrid,
@@ -16,6 +16,7 @@ import {
 } from "recharts";
 import { TimeUtils } from "@/utils/TimeUtils";
 import { UnitUtils } from "@/utils/UnitUtils";
+import { BodyMetricsCompareModal } from "./BodyMetricsCompareModal";
 
 type ChartDataType = {
   date: number;
@@ -47,6 +48,20 @@ export function BodyMetricList() {
 
   const [minDate, setMinDate] = useState(99999);
   const [maxDate, setMaxDate] = useState(0);
+
+  const [toCompare, setToCompare] = useState<number[]>([]);
+  const [comparingSessions, setComparingSessions] = useState<
+    BodyMetricListItem[]
+  >([]);
+
+  const goToCompare = () => {
+    const sorted = toCompare.sort();
+    const sessions = [];
+    for (let i = 0; i < sorted.length; i++) {
+      sessions.push(bodyMetrics.find((entry) => entry.date == sorted[i])!);
+    }
+    setComparingSessions(sessions);
+  };
 
   const refreshList = () => {
     startLoading();
@@ -107,6 +122,18 @@ export function BodyMetricList() {
       });
   };
 
+  const toggleSelect = (
+    event: React.MouseEvent<HTMLButtonElement>,
+    metric: BodyMetricListItem,
+  ) => {
+    event.stopPropagation();
+    if (toCompare.includes(metric.date)) {
+      setToCompare([...toCompare].filter((date) => date != metric.date));
+    } else {
+      setToCompare([...toCompare, metric.date]);
+    }
+  };
+
   useEffect(() => {
     refreshList();
   }, []);
@@ -118,9 +145,9 @@ export function BodyMetricList() {
   return (
     <>
       <div id="list-layer">
-        {bodyMetrics.length > 0 && (
+        {bodyMetrics.length > 1 && (
           <>
-            <div style={{ width: "100%", height: 200, marginRight: "20px" }}>
+            <div style={{ width: "100%", height: 200 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart
                   data={chartData}
@@ -196,6 +223,7 @@ export function BodyMetricList() {
         <table>
           <thead>
             <tr>
+              <th style={{ textAlign: "center" }}>{}</th>
               <th style={{ textAlign: "center" }}>{translate("date")}</th>
               <th style={{ textAlign: "center" }}>{translate("weight")}</th>
               <th style={{ textAlign: "center" }}>{translate("fat_ratio")}</th>
@@ -212,6 +240,17 @@ export function BodyMetricList() {
                 style={{ cursor: "pointer" }}
                 onClick={() => openModal(measure)}
               >
+                <td>
+                  {bodyMetrics.length > 1 && (
+                    <Checkbox
+                      onClick={(event) => toggleSelect(event, measure)}
+                      disabled={
+                        toCompare.length >= 3 &&
+                        !toCompare.includes(measure.date)
+                      }
+                    />
+                  )}
+                </td>
                 <td>{TimeUtils.formatDate(measure.date)}</td>
                 <td>
                   {UnitUtils.fromKg(
@@ -254,8 +293,31 @@ export function BodyMetricList() {
             latest={bodyMetrics.length > 0 ? bodyMetrics[0] : undefined}
           />
         )}
+        {comparingSessions.length >= 2 && (
+          <BodyMetricsCompareModal
+            measures={comparingSessions}
+            onClose={() => setComparingSessions([])}
+          />
+        )}
       </div>
-      <div style={{ padding: "5px", width: "100%", marginTop: "auto" }}>
+      <div
+        style={{
+          padding: "5px",
+          width: "100%",
+          marginTop: "auto",
+          display: "flex",
+          flexDirection: "row",
+        }}
+      >
+        {toCompare.length >= 2 && (
+          <Button
+            variant="contained"
+            style={{ width: "100%", marginRight: "5px" }}
+            onClick={goToCompare}
+          >
+            {translate("compare")}
+          </Button>
+        )}
         <Button
           id="add-measure-button"
           variant="contained"

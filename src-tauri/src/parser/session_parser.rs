@@ -15,19 +15,8 @@ use rustyfit::{
 
 impl<'a> FitParser<'a, Session> {
     /// Parses a `.FIT` activity file into a `Session` (with nested series, heart rate, GPS, and speed data). Falls back to reverse-geocoding the start GPS point for the workout name if the file has none.
-    pub(crate) fn parse(mut self) -> errors::Result<Session> {
-        let mut workout = None;
-        let mut timestamp = 0_i64;
-        let mut sub_sport_obj = SubSport {
-            id: 0,
-            sport: 0,
-            sport_obj: None,
-        };
-        let mut total_elapsed_time = 0_u32;
-        let mut active_time = 0_u32;
-        let mut training_load = 0_u16;
-        let mut total_calories = 0_u16;
-        let mut metabolic_calories = 0_u16;
+    pub fn parse(mut self) -> errors::Result<Session> {
+        let mut session_data = SessionAccumulator::new();
         let mut records = RecordAccumulator::new();
         let mut exercises = Vec::new();
         let mut series_data = Vec::new();
@@ -40,31 +29,23 @@ impl<'a> FitParser<'a, Session> {
                 match msg.num {
                     MesgNum::WORKOUT => {
                         let workout_obj = mesgdef::Workout::from(msg);
-                        workout = Some(Self::handle_workout_message(workout_obj));
+                        session_data.set_workout(workout_obj);
                     }
                     MesgNum::SESSION => {
                         let session_obj = mesgdef::Session::from(msg);
-                        (
-                            timestamp,
-                            sub_sport_obj,
-                            total_elapsed_time,
-                            active_time,
-                            training_load,
-                            total_calories,
-                            metabolic_calories,
-                        ) = Self::handle_session_message(session_obj)?
+                        session_data.set_session(&session_obj)?;
                     }
                     MesgNum::WORKOUT_STEP => {
                         let record_obj = mesgdef::WorkoutStep::from(msg);
-                        Self::handle_step_message(record_obj, &mut exercises)
+                        Self::handle_step_message(&record_obj, &mut exercises)
                     }
                     MesgNum::RECORD => {
                         let record_obj = mesgdef::Record::from(msg);
-                        records.push(record_obj);
+                        records.push(&record_obj);
                     }
                     MesgNum::SET => {
                         let set_obj = mesgdef::Set::from(msg);
-                        Self::handle_set_message(set_obj, &mut series_data);
+                        Self::handle_set_message(&set_obj, &mut series_data);
                     }
                     _ => {}
                 }
@@ -79,7 +60,7 @@ impl<'a> FitParser<'a, Session> {
                     && let Some(exercise) = exercise
                 {
                     let res = Some(Serie {
-                        session: timestamp,
+                        session: session_data.timestamp,
                         idx: serie_idx,
                         ex_cat: exercise.category,
                         ex_id: exercise.id,
@@ -98,32 +79,30 @@ impl<'a> FitParser<'a, Session> {
             })
             .collect::<Vec<_>>();
 
-        records.timestamp = timestamp;
+        records.timestamp = session_data.timestamp;
         let additional_data = records.into();
 
         Ok(Session {
-            date: timestamp,
-            name: workout.clone().unwrap_or_default(),
-            workout_obj: workout.as_ref().map(|o| Workout {
-                name: o.to_string(),
-            }),
-            workout,
-            total_elapsed_time,
-            active_time,
-            total_calories,
-            metabolic_calories,
+            date: session_data.timestamp,
+            name: session_data.workout.clone().unwrap_or_default(),
+            workout_obj: session_data.workout.as_ref().map(|o| Workout { name: o.clone() }),
+            workout: session_data.workout,
+            total_elapsed_time: session_data.total_elapsed_time,
+            active_time: session_data.active_time,
+            total_calories: session_data.total_calories,
+            metabolic_calories: session_data.metabolic_calories,
             series,
-            training_load,
-            sport: sub_sport_obj.sport,
-            sub_sport: sub_sport_obj.id,
-            sub_sport_obj: Some(sub_sport_obj),
+            training_load: session_data.training_load,
+            sport: session_data.sub_sport_obj.sport,
+            sub_sport: session_data.sub_sport_obj.id,
+            sub_sport_obj: Some(session_data.sub_sport_obj),
             device: None,
             device_obj: None,
             additional_data,
         })
     }
 
-    fn handle_set_message(msg: mesgdef::Set, series_data: &mut Vec<(usize, u16, f64)>) {
+    fn handle_set_message(msg: &mesgdef::Set, series_data: &mut Vec<(usize, u16, f64)>) {
         if msg.repetitions != u16::MAX
             && msg.wkt_step_index.0 != u16::MAX
             && let Some(weight) = msg.weight_scaled()
@@ -133,7 +112,7 @@ impl<'a> FitParser<'a, Session> {
         }
     }
 
-    fn handle_step_message(msg: mesgdef::WorkoutStep, exercises: &mut Vec<Option<Exercise>>) {
+    fn handle_step_message(msg: &mesgdef::WorkoutStep, exercises: &mut Vec<Option<Exercise>>) {
         if msg.exercise_category.0 != u16::MAX {
             let ex_cat = msg.exercise_category.0;
             let ex_id = if msg.exercise_name == u16::MAX {
@@ -152,15 +131,51 @@ impl<'a> FitParser<'a, Session> {
         }
     }
 
-    fn handle_session_message(
-        msg: mesgdef::Session,
-    ) -> errors::Result<(i64, SubSport, u32, u32, u16, u16, u16)> {
-        let timestamp = msg
+}
+
+/// Accumulates the session-level scalar fields (from the `session`/`workout` FIT messages) in
+/// place as they stream in, instead of threading them through a tuple return + destructuring
+/// assignment back in `parse`.
+struct SessionAccumulator {
+    workout: Option<String>,
+    timestamp: i64,
+    sub_sport_obj: SubSport,
+    total_elapsed_time: u32,
+    active_time: u32,
+    training_load: u16,
+    total_calories: u16,
+    metabolic_calories: u16,
+}
+
+impl SessionAccumulator {
+    fn new() -> Self {
+        Self {
+            workout: None,
+            timestamp: 0,
+            sub_sport_obj: SubSport {
+                id: 0,
+                sport: 0,
+                sport_obj: None,
+            },
+            total_elapsed_time: 0,
+            active_time: 0,
+            training_load: 0,
+            total_calories: 0,
+            metabolic_calories: 0,
+        }
+    }
+
+    fn set_workout(&mut self, msg: mesgdef::Workout) {
+        self.workout = Some(msg.wkt_name);
+    }
+
+    fn set_session(&mut self, msg: &mesgdef::Session) -> errors::Result<()> {
+        self.timestamp = msg
             .timestamp
             .unix_timestamp()
             .ok_or_else(|| ParseFitFileError::MissingField("timestamp".to_string()))?;
 
-        let sub_sport_obj = {
+        self.sub_sport_obj = {
             let sport_val = msg.sport;
             let sub_sport_val = msg.sub_sport;
             if sport_val.0 != u8::MAX {
@@ -178,22 +193,19 @@ impl<'a> FitParser<'a, Session> {
             }
         }?;
 
-        let total_elapsed_time = msg
+        self.total_elapsed_time = msg
             .total_elapsed_time_scaled()
             .map(|v| v.round() as u32)
             .ok_or_else(|| ParseFitFileError::MissingField("total_elapsed_time".to_string()))?;
 
-        let active_time = msg
-            .active_time_scaled()
-            .map(|v| v.round() as u32)
-            .unwrap_or(0_u32);
+        self.active_time = msg.active_time_scaled().map_or(0_u32, |v| v.round() as u32);
 
-        let training_load = msg
+        self.training_load = msg
             .training_load_peak_scaled()
             .map(|e| e.round() as u16)
             .ok_or_else(|| ParseFitFileError::MissingField("training_load_peak".to_string()))?;
 
-        let total_calories = if msg.total_calories == u16::MAX {
+        self.total_calories = if msg.total_calories == u16::MAX {
             Err(ParseFitFileError::MissingField(
                 "total_calories".to_string(),
             ))
@@ -201,7 +213,7 @@ impl<'a> FitParser<'a, Session> {
             Ok(msg.total_calories)
         }?;
 
-        let metabolic_calories = if msg.metabolic_calories == u16::MAX {
+        self.metabolic_calories = if msg.metabolic_calories == u16::MAX {
             Err(ParseFitFileError::MissingField(
                 "metabolic_calories".to_string(),
             ))
@@ -209,25 +221,13 @@ impl<'a> FitParser<'a, Session> {
             Ok(msg.metabolic_calories)
         }?;
 
-        Ok((
-            timestamp,
-            sub_sport_obj,
-            total_elapsed_time,
-            active_time,
-            training_load,
-            total_calories,
-            metabolic_calories,
-        ))
-    }
-
-    fn handle_workout_message(msg: mesgdef::Workout) -> String {
-        msg.wkt_name
+        Ok(())
     }
 }
 
 /// Accumulates per-record time series (HR, cadence, GPS, power, speed, respiration) across a
 /// single streaming pass, resolving each field to its final scalar (with sentinel fallback, or
-/// forward-filled for GPS) as records arrive rather than in a second post-processing pass.
+/// forward-filled for GPS).
 #[derive(Default)]
 struct RecordAccumulator {
     timestamp: i64,
@@ -257,7 +257,7 @@ impl RecordAccumulator {
         }
     }
 
-    fn push(&mut self, msg: mesgdef::Record) {
+    fn push(&mut self, msg: &mesgdef::Record) {
         self.any_hr |= msg.heart_rate != AdditionalData::INVALID_HEAR_RATE;
         self.hrs.push(msg.heart_rate);
 
