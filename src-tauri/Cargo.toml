@@ -61,7 +61,7 @@ opt-level = 3
 
 [profile.dev]
 opt-level = 0
-debug = 0
+debug = true
 debug-assertions = true
 overflow-checks = false
 lto = false

@@ -36,7 +36,9 @@ use crate::{
 };
 
 #[cfg(debug_assertions)]
-use crate::parser::FitParser;
+use crate::parser::FitStream;
+#[cfg(debug_assertions)]
+use rustyfit::Decoder;
 
 dlls!("../resources/ddl");
 
@@ -46,13 +48,14 @@ where
     P: AsRef<Path>,
 {
     for path in paths {
-        let res: Result<(), Box<dyn std::error::Error>> = match FitParser::from_file(path) {
-            Ok(parser) => match parser.debug_dump() {
-                Ok(_) => Ok(()),
-                Err(e) => Err(e),
-            },
-            Err(e) => Err(Box::new(e)),
-        };
+        let res: Result<(), Box<dyn std::error::Error>> =
+            match FitStream::open(path, &mut Decoder::new()) {
+                Ok(stream) => match stream.debug_dump() {
+                    Ok(_) => Ok(()),
+                    Err(e) => Err(e),
+                },
+                Err(e) => Err(Box::new(e)),
+            };
         if let Err(e) = res {
             eprintln!(
                 "Error handling '{}': \n  {}",
@@ -133,8 +136,8 @@ pub fn run() {
                     .location(constants::DB_FILE.clone())
                     .busy_timeout(Duration::from_secs(8))
                     .connection_timeout(Duration::from_secs(5))
-                    .pool_size(10)
-                    .min_idle(10)
+                    .pool_size(2)
+                    .min_idle(2)
                     .enable_foreign_keys()
                     .journal_mode(JournalMode::Delete);
                 match builder.build("gtrs") {
