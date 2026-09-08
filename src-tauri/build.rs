@@ -35,13 +35,13 @@ fn generate_translations_file() {
         .unwrap_or_else(|e| panic!("Could not read {}: {}", translations_file.display(), e));
 
     let mut translation_map =
-        serde_yaml::from_str::<HashMap<String, HashMap<String, String>>>(&yaml_str)
+        noyalib::from_str::<HashMap<String, HashMap<String, String>>>(&yaml_str)
             .unwrap_or_else(|e| panic!("Error parsing translations file: {}", e));
 
     yaml_str = fs::read_to_string(&catalog_file)
         .unwrap_or_else(|e| panic!("Could not read {}: {}", catalog_file.display(), e));
 
-    let catalog_map = serde_yaml::from_str::<HashMap<String, HashMap<String, String>>>(&yaml_str)
+    let catalog_map = noyalib::from_str::<HashMap<String, HashMap<String, String>>>(&yaml_str)
         .unwrap_or_else(|e| panic!("Error parsing translations file: {}", e));
 
     translation_map.extend(catalog_map);
