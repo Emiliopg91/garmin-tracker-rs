@@ -112,7 +112,7 @@ export function ExerciseModal({ exercise, onClose }: Props) {
             </tr>
           </tbody>
         </table>
-        {Object.keys(exercise.workouts).length > 0 && (
+        {Object.keys(exercise.workouts).length > 1 && (
           <>
             <hr />
             <div style={{ width: "100%", height: 200 }}>
@@ -163,61 +163,59 @@ export function ExerciseModal({ exercise, onClose }: Props) {
               </ResponsiveContainer>
             </div>
             <br />
-            <hr />
-            <table>
-              <colgroup>
-                <col style={{ width: "350px" }} />
-                <col style={{ width: "150px" }} />
-              </colgroup>
-
-              <thead>
-                <tr>
-                  <th>{translate("workout")}</th>
-                  <th>{translate("series")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {exercise.workouts.map((workout) =>
-                  exercise.series[workout].map((serie, idx) => (
-                    <tr key={`${workout}-${idx}`}>
-                      {idx === 0 && (
-                        <td
-                          style={{
-                            borderBottom:
-                              idx === 0 ? "1px solid #e4e4e430" : "",
-                          }}
-                          rowSpan={exercise.series[workout].length}
-                        >
-                          {workout.split("\n")[0]}
-                          <br />
-                          {TimeUtils.formatTimeDate(
-                            parseInt(workout.split("\n")[1]),
-                          )}
-                        </td>
-                      )}
-
-                      <td
-                        style={{
-                          borderBottom:
-                            idx === exercise.series[workout].length - 1
-                              ? "1px solid #e4e4e430"
-                              : "",
-                        }}
-                      >
-                        {serie.reps}x
-                        {UnitUtils.fromKg(
-                          serie.weight,
-                          settings.weight_unit,
-                        ).toFixed(1)}{" "}
-                        {UnitUtils.getUnit(settings.weight_unit)}
-                      </td>
-                    </tr>
-                  )),
-                )}
-              </tbody>
-            </table>
           </>
         )}
+        <hr />
+        <table>
+          <colgroup>
+            <col style={{ width: "350px" }} />
+            <col style={{ width: "150px" }} />
+          </colgroup>
+          <thead>
+            <tr>
+              <th>{translate("workout")}</th>
+              <th>{translate("series")}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {exercise.workouts.map((workout) =>
+              exercise.series[workout].map((serie, idx) => (
+                <tr key={`${workout}-${idx}`}>
+                  {idx === 0 && (
+                    <td
+                      style={{
+                        borderBottom: idx === 0 ? "1px solid #e4e4e430" : "",
+                      }}
+                      rowSpan={exercise.series[workout].length}
+                    >
+                      {workout.split("\n")[0]}
+                      <br />
+                      {TimeUtils.formatTimeDate(
+                        parseInt(workout.split("\n")[1]),
+                      )}
+                    </td>
+                  )}
+
+                  <td
+                    style={{
+                      borderBottom:
+                        idx === exercise.series[workout].length - 1
+                          ? "1px solid #e4e4e430"
+                          : "",
+                    }}
+                  >
+                    {serie.reps}x
+                    {UnitUtils.fromKg(
+                      serie.weight,
+                      settings.weight_unit,
+                    ).toFixed(1)}{" "}
+                    {UnitUtils.getUnit(settings.weight_unit)}
+                  </td>
+                </tr>
+              )),
+            )}
+          </tbody>
+        </table>
       </DialogContent>
     </Dialog>
   );

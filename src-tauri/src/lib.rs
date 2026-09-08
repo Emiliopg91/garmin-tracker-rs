@@ -36,7 +36,7 @@ use crate::{
 };
 
 #[cfg(debug_assertions)]
-use crate::parser::FitStream;
+use crate::parser::FitParser;
 #[cfg(debug_assertions)]
 use rustyfit::Decoder;
 
@@ -49,7 +49,7 @@ where
 {
     for path in paths {
         let res: Result<(), Box<dyn std::error::Error>> =
-            match FitStream::open(path, &mut Decoder::new()) {
+            match FitParser::from_file(path, &mut Decoder::new()) {
                 Ok(stream) => match stream.debug_dump() {
                     Ok(_) => Ok(()),
                     Err(e) => Err(e),

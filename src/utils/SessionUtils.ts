@@ -25,7 +25,6 @@ export interface SessionFrontDetails extends SessionDetails {
   valid_points: [number, number][];
   start_point: [number, number];
   finish_point: [number, number];
-  laps: [number, [number, number]][];
   distance: number;
   hrRanges: [number, number, number];
   hrBreathData: {
@@ -43,7 +42,6 @@ export class SessionUtils {
   public static detailsFromBackend(
     backDetails: SessionDetails,
     weightUnit: WeightUnit,
-    distanceUnit: DistanceUnit,
   ): SessionFrontDetails {
     const details: SessionFrontDetails = {
       ...backDetails,
@@ -52,7 +50,6 @@ export class SessionUtils {
       valid_points: [],
       start_point: [0, 0],
       finish_point: [0, 0],
-      laps: [],
       distance: 0,
       hrBreathData: [],
       hrRanges: [0, 0, 0],
@@ -62,7 +59,7 @@ export class SessionUtils {
     };
 
     SessionUtils.handleSeries(details, weightUnit);
-    SessionUtils.handleGpsCoordiates(details, distanceUnit);
+    SessionUtils.handleGpsCoordiates(details);
     SessionUtils.handleHeartRate(details);
 
     return details;
@@ -94,10 +91,7 @@ export class SessionUtils {
     }
   }
 
-  private static handleGpsCoordiates(
-    details: SessionFrontDetails,
-    distanceUnit: DistanceUnit,
-  ) {
+  private static handleGpsCoordiates(details: SessionFrontDetails) {
     if (details.coordinates) {
       for (let i = 0; i < details.coordinates.length; i++) {
         if (details.coordinates[i]) {
@@ -123,26 +117,12 @@ export class SessionUtils {
         }
       }
 
-      const diffs: number[] = [];
       for (let i = 0; i < details.coordinates.length - 1; i++) {
         if (details.coordinates[i]) {
           const diff = SessionUtils.haversine(
             details.coordinates[i]!,
             details.coordinates[i + 1]!,
           );
-          diffs.push(diff);
-
-          if (
-            Math.round(UnitUtils.fromKm(details.distance, distanceUnit)) !=
-            Math.round(UnitUtils.fromKm(details.distance + diff, distanceUnit))
-          ) {
-            details.laps.push([
-              Math.round(
-                UnitUtils.fromKm(details.distance + diff, distanceUnit),
-              ),
-              details.coordinates[i]!,
-            ]);
-          }
 
           details.distance += diff;
         }
@@ -175,6 +155,18 @@ export class SessionUtils {
             coordinates: [details.coordinates[i]!, details.coordinates[i + 1]!],
             color: `hsl(${colors[i]}, 100%, 50%)`,
           });
+        }
+      }
+    }
+
+    if (details.laps.length > 0) {
+      for (let i = 0; i < details.laps.length; i++) {
+        if (details.laps[i]) {
+          details.laps[i]![0] =
+            details.laps[i]![0] * UnitUtils.SEMICIRCLE_TO_DEGREES;
+          details.laps[i]![1] =
+            details.laps[i]![1] * UnitUtils.SEMICIRCLE_TO_DEGREES;
+          details.valid_points.push(details.laps[i]!);
         }
       }
     }

@@ -30,6 +30,7 @@ import {
 } from "recharts";
 import { UnitUtils } from "@/utils/UnitUtils";
 import { SessionFrontDetails } from "@/utils/SessionUtils";
+import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 
 type Props = {
   session: SessionFrontDetails;
@@ -51,20 +52,20 @@ const makeMarkerIcon = (color: string) =>
 
 const startIcon = makeMarkerIcon("#2ecc71");
 const endIcon = makeMarkerIcon("#e74c3c");
-const lapColor = "#2A81CB";
 const urls = [
   "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
   "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
 ];
 
-function lapMarker(lap: [number, [number, number]]): React.JSX.Element {
+function lapMarker(idx: number, lap: [number, number]): React.JSX.Element {
+  const lapColor = "#2A81CB";
   const icon = L.divIcon({
     className: "",
     html: `<div style="transform: rotate(180deg);">
       <svg width="25" height="41" viewBox="0 0 25 41" xmlns="http://www.w3.org/2000/svg">
         <path d="M12.5 0C5.6 0 0 5.6 0 12.5c0 9.4 12.5 28.5 12.5 28.5S25 21.9 25 12.5C25 5.6 19.4 0 12.5 0z" fill="${lapColor}" stroke="white" stroke-width="1.5"/>
         <circle cx="12.5" cy="12.5" r="6" fill="white"/>
-        <text x="12.5" y="12.5" transform="rotate(180 12.5 12.5)" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="bold" fill="${lapColor}">${lap[0]}</text>
+        <text x="12.5" y="12.5" transform="rotate(180 12.5 12.5)" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="bold" fill="${lapColor}">${idx}</text>
       </svg>
     </div>`,
     iconSize: [25, 41],
@@ -72,7 +73,7 @@ function lapMarker(lap: [number, [number, number]]): React.JSX.Element {
     popupAnchor: [1, 34],
   });
 
-  return <Marker key={lap[0]} position={lap[1]} icon={icon} />;
+  return <Marker key={idx} position={lap} icon={icon} />;
 }
 
 export function SessionModal({ session, onClose, onUpdate }: Props) {
@@ -191,7 +192,7 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                 icon={endIcon}
               ></Marker>
 
-              {localSession.laps.map((lap) => lapMarker(lap))}
+              {localSession.laps.map((lap, idx) => lapMarker(idx + 1, lap))}
             </MapContainer>
             <FormControl
               style={{ width: "100%", display: "flex", alignItems: "center" }}
@@ -487,7 +488,7 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
             <table>
               <colgroup>
                 <col style={{ width: "350px" }} />
-                <col style={{ width: "150px" }} />
+                <col style={{ width: "200px" }} />
               </colgroup>
 
               <thead>
@@ -560,7 +561,10 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                             updateSerieWeight(exercise, idx, e.target.value);
                           }}
                         />
-                        {" " + UnitUtils.getUnit(settings.weight_unit)}
+                        {" " + UnitUtils.getUnit(settings.weight_unit) + " "}
+                        {serie.pr && (
+                          <EmojiEventsIcon style={{ color: "gold" }} />
+                        )}
                       </td>
                     </tr>
                   )),

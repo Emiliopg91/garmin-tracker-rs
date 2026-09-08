@@ -13,17 +13,18 @@ use rustyfit::{
     profile::{mesgdef, typedef::MesgNum},
 };
 
-impl<'a> FitParser<'a, Session> {
-    /// Parses a `.FIT` activity file into a `Session` (with nested series, heart rate, GPS, and speed data). Falls back to reverse-geocoding the start GPS point for the workout name if the file has none.
-    pub fn parse(mut self) -> errors::Result<Session> {
+impl TryFrom<FitParser<'_>> for Session {
+    type Error = errors::ParseFitFileError;
+    fn try_from(mut value: FitParser<'_>) -> Result<Self, Self::Error> {
         let mut session_data = SessionAccumulator::new();
         let mut records = RecordAccumulator::new();
         let mut exercises = Vec::new();
         let mut series_data = Vec::new();
+        let mut laps = Vec::new();
 
-        while let Some(event) = self.inner.stream.next() {
+        while let Some(event) = value.stream.next() {
             let event = event.map_err(|e| {
-                ParseFitFileError::FileReading(self.inner.path.display().to_string(), Box::new(e))
+                ParseFitFileError::FileReading(value.path.display().to_string(), Box::new(e))
             })?;
             if let DecoderEvent::Message(msg) = event {
                 match msg.num {
@@ -37,7 +38,7 @@ impl<'a> FitParser<'a, Session> {
                     }
                     MesgNum::WORKOUT_STEP => {
                         let record_obj = mesgdef::WorkoutStep::from(msg);
-                        Self::handle_step_message(&record_obj, &mut exercises)
+                        handle_step_message(&record_obj, &mut exercises)
                     }
                     MesgNum::RECORD => {
                         let record_obj = mesgdef::Record::from(msg);
@@ -45,7 +46,17 @@ impl<'a> FitParser<'a, Session> {
                     }
                     MesgNum::SET => {
                         let set_obj = mesgdef::Set::from(msg);
-                        Self::handle_set_message(&set_obj, &mut series_data);
+                        handle_set_message(&set_obj, &mut series_data);
+                    }
+                    MesgNum::LAP => {
+                        let lap_obj = mesgdef::Lap::from(msg);
+                        let lat = lap_obj.start_position_lat;
+                        let lon = lap_obj.start_position_long;
+                        if lat != AdditionalData::INVALID_POSITION
+                            && lon != AdditionalData::INVALID_POSITION
+                        {
+                            laps.push((lat, lon));
+                        }
                     }
                     _ => {}
                 }
@@ -80,12 +91,23 @@ impl<'a> FitParser<'a, Session> {
             .collect::<Vec<_>>();
 
         records.timestamp = session_data.timestamp;
-        let additional_data = records.into();
+        let mut additional_data: Option<AdditionalData> = records.into();
+        additional_data = if laps.is_empty() {
+            additional_data
+        } else {
+            additional_data.map(|mut a| {
+                a.laps = Some(AdditionalData::build_coordinates_blob(&laps[1..laps.len()]));
+                a
+            })
+        };
 
         Ok(Session {
             date: session_data.timestamp,
             name: session_data.workout.clone().unwrap_or_default(),
-            workout_obj: session_data.workout.as_ref().map(|o| Workout { name: o.clone() }),
+            workout_obj: session_data
+                .workout
+                .as_ref()
+                .map(|o| Workout { name: o.clone() }),
             workout: session_data.workout,
             total_elapsed_time: session_data.total_elapsed_time,
             active_time: session_data.active_time,
@@ -101,36 +123,35 @@ impl<'a> FitParser<'a, Session> {
             additional_data,
         })
     }
+}
 
-    fn handle_set_message(msg: &mesgdef::Set, series_data: &mut Vec<(usize, u16, f64)>) {
-        if msg.repetitions != u16::MAX
-            && msg.wkt_step_index.0 != u16::MAX
-            && let Some(weight) = msg.weight_scaled()
-        {
-            let ex_idx = msg.wkt_step_index.0 as usize;
-            series_data.push((ex_idx, msg.repetitions, weight));
-        }
+fn handle_set_message(msg: &mesgdef::Set, series_data: &mut Vec<(usize, u16, f64)>) {
+    if msg.repetitions != u16::MAX
+        && msg.wkt_step_index.0 != u16::MAX
+        && let Some(weight) = msg.weight_scaled()
+    {
+        let ex_idx = msg.wkt_step_index.0 as usize;
+        series_data.push((ex_idx, msg.repetitions, weight));
     }
+}
 
-    fn handle_step_message(msg: &mesgdef::WorkoutStep, exercises: &mut Vec<Option<Exercise>>) {
-        if msg.exercise_category.0 != u16::MAX {
-            let ex_cat = msg.exercise_category.0;
-            let ex_id = if msg.exercise_name == u16::MAX {
-                1
-            } else {
-                msg.exercise_name
-            };
-
-            exercises.push(Some(Exercise {
-                category: ex_cat,
-                id: ex_id,
-                exercise_category: None,
-            }))
+fn handle_step_message(msg: &mesgdef::WorkoutStep, exercises: &mut Vec<Option<Exercise>>) {
+    if msg.exercise_category.0 != u16::MAX {
+        let ex_cat = msg.exercise_category.0;
+        let ex_id = if msg.exercise_name == u16::MAX {
+            1
         } else {
-            exercises.push(None)
-        }
-    }
+            msg.exercise_name
+        };
 
+        exercises.push(Some(Exercise {
+            category: ex_cat,
+            id: ex_id,
+            exercise_category: None,
+        }))
+    } else {
+        exercises.push(None)
+    }
 }
 
 /// Accumulates the session-level scalar fields (from the `session`/`workout` FIT messages) in
@@ -319,6 +340,7 @@ impl From<RecordAccumulator> for Option<AdditionalData> {
                 powers: powers.map(|powers| AdditionalData::build_powers_blob(&powers)),
                 respirations: respirations
                     .map(|respirations| AdditionalData::build_respirations_blob(&respirations)),
+                laps: None,
             })
         } else {
             None

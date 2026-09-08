@@ -12,6 +12,7 @@ pub struct SessionListItem {
     pub training_load: u16,
     pub sport: u8,
     pub sub_sport: u8,
+    pub has_record: bool,
 }
 
 impl From<&Session> for SessionListItem {
@@ -23,6 +24,7 @@ impl From<&Session> for SessionListItem {
             training_load: value.training_load,
             sport: value.sport,
             sub_sport: value.sub_sport,
+            has_record: false,
         }
     }
 }
@@ -45,6 +47,7 @@ pub struct SessionSerie {
     pub idx: u8,
     pub reps: u16,
     pub weight: f64,
+    pub pr: bool,
 }
 
 impl From<&Serie> for SessionSerie {
@@ -55,6 +58,7 @@ impl From<&Serie> for SessionSerie {
             idx: value.idx,
             reps: value.reps,
             weight: value.weight,
+            pr: value.pr,
         }
     }
 }
@@ -78,6 +82,7 @@ pub struct SessionDetails {
     pub series: Vec<SessionSerie>,
     pub heart_rates: Vec<Option<u8>>,
     pub coordinates: Vec<Option<(i32, i32)>>,
+    pub laps: Vec<(i32, i32)>,
     pub speeds: Vec<Option<f64>>,
 
     pub device: Option<String>,
@@ -93,6 +98,7 @@ impl From<(&Session, &[Exercise], &[Serie])> for SessionDetails {
 
         let mut heart_rates = Vec::new();
         let mut gps_coordinates: Vec<Option<(i32, i32)>> = Vec::new();
+        let mut laps: Vec<(i32, i32)> = Vec::new();
         let mut speeds: Vec<Option<f64>> = Vec::new();
 
         if let Some(add_data) = &value.0.additional_data {
@@ -104,6 +110,9 @@ impl From<(&Session, &[Exercise], &[Serie])> for SessionDetails {
             }
             if let Some(spds) = add_data.get_speeds() {
                 speeds = spds;
+            }
+            if let Some(lps) = add_data.get_laps() {
+                laps = lps;
             }
         }
 
@@ -122,6 +131,7 @@ impl From<(&Session, &[Exercise], &[Serie])> for SessionDetails {
             series,
             heart_rates,
             device,
+            laps,
             coordinates: gps_coordinates,
             speeds,
         }

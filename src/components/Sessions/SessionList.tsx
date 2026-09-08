@@ -4,6 +4,7 @@ import { SessionListItem } from "@/utils/backend/models";
 import { useContext, useEffect, useState } from "react";
 import { Button, Menu, MenuItem } from "@mui/material";
 import { SessionModal } from "./SessionModal";
+import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import {
   Area,
   CartesianGrid,
@@ -182,6 +183,7 @@ export function SessionsList() {
         <table>
           <thead>
             <tr>
+              <th></th>
               <th style={{ textAlign: "center" }}>{translate("date")}</th>
               <th style={{ textAlign: "center" }}>{translate("sport")}</th>
               <th style={{ textAlign: "center" }}>{translate("name")}</th>
@@ -201,6 +203,11 @@ export function SessionsList() {
                 onClick={() => getSessionDetails(session.timestamp)}
                 style={{ cursor: "pointer" }}
               >
+                <td>
+                  {session.has_record && (
+                    <EmojiEventsIcon style={{ color: "gold" }} />
+                  )}
+                </td>
                 <td>{TimeUtils.formatTimeDate(session.timestamp)}</td>
                 <td>
                   {translate("sport_" + session.sport) +

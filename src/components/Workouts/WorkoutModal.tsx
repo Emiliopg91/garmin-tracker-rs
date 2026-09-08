@@ -103,7 +103,7 @@ export function WorkoutModal({ workout, onClose }: Props) {
             )}
           </tbody>
         </table>
-        {workout.sessions.length > 0 && (
+        {workout.sessions.length > 1 && (
           <>
             <hr />
             {workout.avg_volume > 0 && (

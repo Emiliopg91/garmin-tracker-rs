@@ -1,23 +1,21 @@
 pub mod session_parser;
 
-use std::{fs::File, io::BufReader, marker::PhantomData, path::Path};
+use std::{fs::File, io::BufReader, path::Path};
 
 use embedded_io_adapters::std::FromStd;
 use rustyfit::{Decoder, StreamDecoder};
-
-use crate::dao::session::Session;
 
 use self::errors::ParseFitFileError;
 
 pub mod errors;
 
-pub struct FitStream<'a> {
+pub struct FitParser<'a> {
     path: &'a Path,
     stream: StreamDecoder<'a, FromStd<BufReader<File>>>,
 }
 
-impl<'a> FitStream<'a> {
-    pub fn open<P>(path: &'a P, decoder: &'a mut Decoder) -> errors::Result<Self>
+impl<'a> FitParser<'a> {
+    pub fn from_file<P>(path: &'a P, decoder: &'a mut Decoder) -> errors::Result<Self>
     where
         P: AsRef<Path>,
     {
@@ -56,22 +54,3 @@ impl<'a> FitStream<'a> {
         Ok(())
     }
 }
-
-pub struct FitParser<'a, T> {
-    inner: FitStream<'a>,
-    _marker: PhantomData<T>,
-}
-
-impl<'a, T> FitParser<'a, T> {
-    pub fn from_file<P>(path: &'a P, decoder: &'a mut Decoder) -> errors::Result<Self>
-    where
-        P: AsRef<Path>,
-    {
-        Ok(Self {
-            inner: FitStream::open(path, decoder)?,
-            _marker: PhantomData,
-        })
-    }
-}
-
-pub type SessionParser<'a> = FitParser<'a, Session>;

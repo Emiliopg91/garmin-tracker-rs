@@ -7,7 +7,7 @@ use crate::{
         device::{Device, DeviceRepository},
         exercise::{self, ExerciseRepository},
         serie::{self, SerieRepository, entity},
-        session::{self, SessionRepository},
+        session::{self, Session, SessionRepository},
         workout::{Workout, WorkoutRepository},
     },
     dto::{
@@ -16,7 +16,7 @@ use crate::{
     },
     logic::{notifications::show_notification, report_error},
     mtp::MTP_CLIENT_INST,
-    parser::SessionParser,
+    parser::FitParser,
     utils::translations::{Languages, translate, translate_and_replace},
 };
 use chrono::{Datelike, Local, TimeZone, Timelike, offset::LocalResult};
@@ -46,9 +46,19 @@ pub fn get_sessions(
             .order_by(OrderBy::Desc(session::entity::columns::DATE))
             .fetch_in(conn)?;
 
+        let record_sessions =
+            SerieRepository::select_by_personal_records_in_conn(conn, true, None)?
+                .into_iter()
+                .map(|s| s.session)
+                .collect::<HashSet<_>>();
+
         Ok(sessions
-            .iter()
-            .map(SessionListItem::from)
+            .into_iter()
+            .map(|s| {
+                let mut r = SessionListItem::from(&s);
+                r.has_record = record_sessions.contains(&s.date);
+                r
+            })
             .collect::<Vec<_>>())
     });
 
@@ -305,8 +315,8 @@ where
         .par_iter()
         .filter_map(|file| {
             info!("Parsing file {}", file.as_ref().display());
-            let res = match SessionParser::from_file(file, &mut Decoder::new()) {
-                Ok(parser) => match parser.parse() {
+            let res = match FitParser::from_file(file, &mut Decoder::new()) {
+                Ok(parser) => match Session::try_from(parser) {
                     Ok(session) => Ok((session, file)),
                     Err(e) => Err(e),
                 },
