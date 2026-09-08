@@ -94,11 +94,7 @@ export function SessionsList() {
     BackendClient.getSessionDetails(timestamp)
       .then((details) => {
         setSessionDetails(
-          SessionUtils.detailsFromBackend(
-            details,
-            settings.weight_unit,
-            settings.distance_unit,
-          ),
+          SessionUtils.detailsFromBackend(details, settings.weight_unit),
         );
       })
       .finally(() => {
