@@ -1,5 +1,4 @@
 import {
-  DistanceUnit,
   SessionDetails,
   SessionListItem,
   SessionSerie,
