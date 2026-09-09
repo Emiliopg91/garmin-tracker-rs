@@ -28,13 +28,12 @@ export enum DistanceUnit {
 	Miles = "Miles",
 }
 
-// From src-tauri/src/dto/exercises.rs:31
+// From src-tauri/src/dto/exercises.rs:29
 export interface ExerciseDetails {
   category: number;
   id: number;
   pr_date: number;
   reps: number;
-  rm: number;
   series: Record<string, SessionSet[]>;
   weight: number;
   workouts: string[];
@@ -46,7 +45,6 @@ export interface ExerciseListItem {
   date: number;
   id: number;
   reps: number;
-  rm: number;
   weight: number;
 }
 

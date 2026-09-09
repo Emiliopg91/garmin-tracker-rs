@@ -160,7 +160,7 @@ pub fn export_database(
     ));
     info!("Exporting database to {}...", path.display());
 
-    let res = Export::from_database(&database)
+    let res = Export::from_database(&database, settings.read().unwrap().language)
         .map_err(|e| Box::new(e) as Box<dyn std::error::Error>)
         .and_then(|export| {
             export

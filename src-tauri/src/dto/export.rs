@@ -1,19 +1,22 @@
 use std::collections::HashMap;
 
 use rusqlite_orm::{dao::Repository, database::DatabasePool};
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
-use crate::dao::{
-    additional_data::{AdditionalData, AdditionalDataRepository},
-    body_metric::{BodyMetric, BodyMetricRepository},
-    device::{Device, DeviceRepository},
-    serie::{Set, SetRepository},
-    session::{Session, SessionRepository},
-    settings::{Settings, SettingsRepository},
-    workout::{Workout, WorkoutRepository},
+use crate::{
+    dao::{
+        additional_data::{AdditionalData, AdditionalDataRepository},
+        body_metric::{BodyMetric, BodyMetricRepository},
+        device::{Device, DeviceRepository},
+        serie::{Set, SetRepository},
+        session::{Session, SessionRepository},
+        settings::{Settings, SettingsRepository},
+        workout::{Workout, WorkoutRepository},
+    },
+    utils::translations::{Languages, translate},
 };
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize)]
 pub struct Export {
     body_metrics: Vec<BodyMetric>,
     devices: Vec<Device>,
@@ -24,7 +27,7 @@ pub struct Export {
 
 impl Export {
     /// Loads every table from the database and assembles a full export snapshot.
-    pub fn from_database(db: &DatabasePool) -> rusqlite_orm::errors::Result<Self> {
+    pub fn from_database(db: &DatabasePool, lang: Languages) -> rusqlite_orm::errors::Result<Self> {
         db.run_in_connection(|conn| {
             let body_metrics = BodyMetricRepository::select().fetch_in(conn)?;
             let workouts = WorkoutRepository::select().fetch_in(conn)?;
@@ -55,7 +58,7 @@ impl Export {
                     let serie = series.get(&session.date);
                     let add_data = additional_datas.get(&session.date);
 
-                    SessionExport::from((&session, add_data, serie))
+                    SessionExport::from((&session, add_data, serie, lang))
                 })
                 .collect::<Vec<_>>();
 
@@ -75,7 +78,7 @@ impl Export {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize)]
 pub struct SessionExport {
     pub date: i64,
     pub workout: String,
@@ -95,7 +98,7 @@ pub struct SessionExport {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub heart_rates: Option<Vec<Option<u8>>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub series: Option<Vec<Set>>,
+    pub series: Option<Vec<SetExport>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub cadences: Option<Vec<Option<u8>>>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -104,17 +107,30 @@ pub struct SessionExport {
     pub respirations: Option<Vec<Option<f64>>>,
 }
 
-impl From<(&Session, Option<&AdditionalData>, Option<&Vec<Set>>)> for SessionExport {
-    fn from(values: (&Session, Option<&AdditionalData>, Option<&Vec<Set>>)) -> Self {
+impl
+    From<(
+        &Session,
+        Option<&AdditionalData>,
+        Option<&Vec<Set>>,
+        Languages,
+    )> for SessionExport
+{
+    fn from(
+        (session, additiona_data, sets, lang): (
+            &Session,
+            Option<&AdditionalData>,
+            Option<&Vec<Set>>,
+            Languages,
+        ),
+    ) -> Self {
         let mut heart_rates = None;
         let mut coordinates: Option<Vec<Option<(f64, f64)>>> = None;
         let mut speeds: Option<Vec<Option<f64>>> = None;
-        let mut series = None;
         let mut cadences = None;
         let mut powers = None;
         let mut respirations = None;
 
-        if let Some(add_data) = values.1 {
+        if let Some(add_data) = additiona_data {
             heart_rates = add_data.get_heart_rates();
             coordinates = add_data.get_coordinates_degrees();
             speeds = add_data.get_speeds();
@@ -123,23 +139,34 @@ impl From<(&Session, Option<&AdditionalData>, Option<&Vec<Set>>)> for SessionExp
             respirations = add_data.get_respirations();
         }
 
-        if let Some(srs) = values.2
+        let series = if let Some(srs) = sets
             && !srs.is_empty()
         {
-            series = Some(srs.clone());
-        }
+            Some(
+                srs.into_iter()
+                    .map(|s| {
+                        let mut se = SetExport::from(s);
+                        se.ex_name =
+                            translate(&format!("exercise_{}_{}", se.ex_cat, se.ex_id), lang);
+                        se
+                    })
+                    .collect(),
+            )
+        } else {
+            None
+        };
 
         Self {
-            date: values.0.date,
-            workout: values.0.name.clone(),
-            total_elapsed_time: values.0.total_elapsed_time,
-            active_time: values.0.active_time,
-            total_calories: values.0.total_calories,
-            metabolic_calories: values.0.metabolic_calories,
-            training_load: values.0.training_load,
-            sport: values.0.sport,
-            sub_sport: values.0.sub_sport,
-            device: values.0.device.clone(),
+            date: session.date,
+            workout: session.name.clone(),
+            total_elapsed_time: session.total_elapsed_time,
+            active_time: session.active_time,
+            total_calories: session.total_calories,
+            metabolic_calories: session.metabolic_calories,
+            training_load: session.training_load,
+            sport: session.sport,
+            sub_sport: session.sub_sport,
+            device: session.device.clone(),
             series,
             heart_rates,
             coordinates,
@@ -147,6 +174,31 @@ impl From<(&Session, Option<&AdditionalData>, Option<&Vec<Set>>)> for SessionExp
             cadences,
             powers,
             respirations,
+        }
+    }
+}
+
+#[derive(Serialize)]
+pub struct SetExport {
+    pub idx: u8,
+    pub ex_name: String,
+    pub ex_cat: u16,
+    pub ex_id: u16,
+    pub reps: u16,
+    pub weight: f64,
+    pub pr: bool,
+}
+
+impl From<&Set> for SetExport {
+    fn from(value: &Set) -> Self {
+        Self {
+            idx: value.idx,
+            ex_cat: value.ex_cat,
+            ex_id: value.ex_id,
+            ex_name: String::new(),
+            reps: value.reps,
+            weight: value.weight,
+            pr: value.pr,
         }
     }
 }

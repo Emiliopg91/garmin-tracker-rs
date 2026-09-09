@@ -48,7 +48,6 @@ pub fn get_exercises(
                     id: exercise.id,
                     reps: pr.reps,
                     weight: pr.weight,
-                    rm: get_1rm_estimation(pr.weight, pr.reps as f64),
                     date: pr.session as i32,
                 });
             }
@@ -101,7 +100,6 @@ pub fn get_exercise_details(
         let pr = series.iter().find(|s| s.pr).unwrap();
         res.reps = pr.reps;
         res.weight = pr.weight;
-        res.rm = get_1rm_estimation(pr.weight, pr.reps as f64);
         res.pr_date = pr.session as i32;
 
         let mut timestamps = HashSet::new();
@@ -154,9 +152,4 @@ pub fn get_exercise_details(
             "Error getting exercise details",
         )),
     }
-}
-
-/// Estimates a 1-rep max from a weight/reps pair.
-pub fn get_1rm_estimation(weight: f64, reps: f64) -> f64 {
-    weight * reps.powf(0.1)
 }

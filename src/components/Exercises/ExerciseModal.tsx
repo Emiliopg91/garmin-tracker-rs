@@ -14,6 +14,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { calc1RMEstimation } from "./ExercisesList";
 
 type Props = {
   exercise: ExerciseDetails;
@@ -86,9 +87,10 @@ export function ExerciseModal({ exercise, onClose }: Props) {
             <tr>
               <td>{translate("rm")}:</td>
               <td>
-                {UnitUtils.fromKg(exercise.rm, settings.weight_unit).toFixed(
-                  1,
-                ) +
+                {UnitUtils.fromKg(
+                  calc1RMEstimation(exercise.reps, exercise.weight),
+                  settings.weight_unit,
+                ).toFixed(1) +
                   " " +
                   UnitUtils.getUnit(settings.weight_unit)}
               </td>

@@ -10,7 +10,6 @@ pub struct ExerciseListItem {
     pub id: u16,
     pub reps: u16,
     pub weight: f64,
-    pub rm: f64,
     pub date: i32,
 }
 
@@ -21,7 +20,6 @@ impl From<&Exercise> for ExerciseListItem {
             id: value.id,
             reps: 0,
             weight: 0_f64,
-            rm: 0_f64,
             date: 0,
         }
     }
@@ -33,7 +31,6 @@ pub struct ExerciseDetails {
     pub id: u16,
     pub reps: u16,
     pub weight: f64,
-    pub rm: f64,
     pub workouts: Vec<String>,
     pub series: HashMap<String, Vec<SessionSet>>,
     pub pr_date: i32,
@@ -46,7 +43,6 @@ impl From<&Exercise> for ExerciseDetails {
             id: value.id,
             reps: 0,
             weight: 0_f64,
-            rm: 0_f64,
             workouts: Vec::new(),
             series: HashMap::new(),
             pr_date: 0,
