@@ -9,17 +9,12 @@ pub struct AdditionalData {
     pub heart_rates: Option<Vec<u8>>,
     pub coordinates: Option<Vec<u8>>,
     pub speeds: Option<Vec<u8>>,
-    pub cadences: Option<Vec<u8>>,
-    pub powers: Option<Vec<u8>>,
-    pub respirations: Option<Vec<u8>>,
 }
 
 impl AdditionalData {
     pub const INVALID_CADENCE: u8 = u8::MAX;
     pub const INVALID_HEAR_RATE: u8 = u8::MAX;
     pub const INVALID_POSITION: i32 = i32::MAX;
-    pub const INVALID_POWER: u16 = u16::MAX;
-    pub const INVALID_RESPIRATIONS: f64 = -1_f64;
     pub const INVALID_SPEED: f64 = -1_f64;
 
     pub const SEMICIRCLE_TO_DEGREES: f64 = 180.0 / (2_i64.pow(31) as f64);
@@ -100,64 +95,6 @@ impl AdditionalData {
         records
     }
 
-    /// Unpacks the respirations Blob into Vec
-    pub fn get_respirations(&self) -> Option<Vec<Option<f64>>> {
-        self.respirations.as_ref().map(|records| {
-            records
-                .as_chunks::<8>()
-                .0
-                .iter()
-                .map(|chunk| {
-                    let val = f64::from_be_bytes(*chunk);
-                    if val != Self::INVALID_RESPIRATIONS {
-                        Some(val)
-                    } else {
-                        None
-                    }
-                })
-                .collect()
-        })
-    }
-    /// Build blob from speeds Vec
-    pub fn build_respirations_blob(value: &[f64]) -> Vec<u8> {
-        let mut records = Vec::new();
-
-        value.iter().for_each(|speed| {
-            records.extend_from_slice(&(*speed).to_be_bytes());
-        });
-
-        records
-    }
-
-    /// Unpacks the powers Blob into Vec
-    pub fn get_powers(&self) -> Option<Vec<Option<u16>>> {
-        self.powers.as_ref().map(|records| {
-            records
-                .as_chunks::<2>()
-                .0
-                .iter()
-                .map(|chunk| {
-                    let val = u16::from_be_bytes(*chunk);
-                    if val != Self::INVALID_POWER {
-                        Some(val)
-                    } else {
-                        None
-                    }
-                })
-                .collect()
-        })
-    }
-    /// Build blob from powers Vec
-    pub fn build_powers_blob(value: &[u16]) -> Vec<u8> {
-        let mut records = Vec::new();
-
-        value.iter().for_each(|speed| {
-            records.extend_from_slice(&(*speed).to_be_bytes());
-        });
-
-        records
-    }
-
     /// Unpacks the heart rate Blob into Vec
     pub fn get_heart_rates(&self) -> Option<Vec<Option<u8>>> {
         self.heart_rates.as_ref().map(|records| {
@@ -166,23 +103,6 @@ impl AdditionalData {
                 .copied()
                 .map(|val| {
                     if val < Self::INVALID_HEAR_RATE {
-                        Some(val)
-                    } else {
-                        None
-                    }
-                })
-                .collect()
-        })
-    }
-
-    /// Unpacks the cadences Blob into Vec
-    pub fn get_cadences(&self) -> Option<Vec<Option<u8>>> {
-        self.cadences.as_ref().map(|records| {
-            records
-                .iter()
-                .copied()
-                .map(|val| {
-                    if val < Self::INVALID_CADENCE {
                         Some(val)
                     } else {
                         None

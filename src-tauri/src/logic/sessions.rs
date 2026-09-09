@@ -7,8 +7,8 @@ use crate::{
         device::{Device, DeviceRepository},
         exercise::{self, ExerciseRepository},
         lap::LapRepository,
-        serie::{self, SetRepository, entity},
         session::{self, Session, SessionRepository},
+        set::{self, SetRepository, entity},
         workout::{Workout, WorkoutRepository},
     },
     dto::{
@@ -117,6 +117,7 @@ pub fn get_session_details(
                 in_conditions,
             ))
             .fetch_in(conn)?;
+        session.laps.sort_by_key(|l| l.idx);
 
         Ok(SessionDetails::from((
             &session,
@@ -467,8 +468,8 @@ fn update_prs(
         update_false_conditions.push(vec![exer.0.into(), exer.1.into()]);
         if let Some(pr) = SetRepository::select()
             .where_(Where::And(vec![
-                Where::Eq(serie::entity::columns::EX_CAT, exer.0.into()),
-                Where::Eq(serie::entity::columns::EX_ID, exer.1.into()),
+                Where::Eq(set::entity::columns::EX_CAT, exer.0.into()),
+                Where::Eq(set::entity::columns::EX_ID, exer.1.into()),
             ]))
             .order_by(OrderBy::Desc(entity::columns::WEIGHT))
             .order_by(OrderBy::Desc(entity::columns::REPS))
@@ -484,22 +485,19 @@ fn update_prs(
 
     if !update_true_conditions.is_empty() {
         SetRepository::update()
-            .set(serie::entity::columns::PR, false.into())
+            .set(set::entity::columns::PR, false.into())
             .where_(Where::And(vec![
                 Where::InMultiple(
-                    vec![
-                        serie::entity::columns::EX_CAT,
-                        serie::entity::columns::EX_ID,
-                    ],
+                    vec![set::entity::columns::EX_CAT, set::entity::columns::EX_ID],
                     update_false_conditions,
                 ),
-                Where::Eq(serie::entity::columns::PR, true.into()),
+                Where::Eq(set::entity::columns::PR, true.into()),
             ]))
             .execute_in(tx)?;
         SetRepository::update()
-            .set(serie::entity::columns::PR, true.into())
+            .set(set::entity::columns::PR, true.into())
             .where_(Where::InMultiple(
-                vec![serie::entity::columns::SESSION, serie::entity::columns::IDX],
+                vec![set::entity::columns::SESSION, set::entity::columns::IDX],
                 update_true_conditions,
             ))
             .execute_in(tx)?;

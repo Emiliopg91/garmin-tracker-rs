@@ -12,6 +12,7 @@ use super::exercise::Exercise;
 #[index("exercise", (ex_cat, ex_id))]
 #[unique("exercise_personal_record", (ex_cat, ex_id), (pr=true))]
 pub struct Set {
+    #[serde(skip)]
     pub session: i64,
     pub idx: u8,
     #[column("exercise_category")]

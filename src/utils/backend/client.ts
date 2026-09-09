@@ -86,7 +86,7 @@ export class BackendClient {
 	}
 	
 
-	// From src-tauri/src/logic/sessions.rs:200
+	// From src-tauri/src/logic/sessions.rs:201
 	public static importFromDevice(serial: string): Promise<number> {
 	  return BackendClient.inner_invoke("import_from_device", { serial }); 
 	}
@@ -98,7 +98,7 @@ export class BackendClient {
 	}
 	
 
-	// From src-tauri/src/logic/sessions.rs:146
+	// From src-tauri/src/logic/sessions.rs:147
 	public static saveSessionChanges(details: SessionSetsUpdate): Promise<void> {
 	  return BackendClient.inner_invoke("save_session_changes", { details }); 
 	}

@@ -2,7 +2,7 @@ use std::hash::Hash;
 
 use serde::{Deserialize, Serialize};
 
-use crate::dao::{exercise::Exercise, lap::Lap, serie::Set, session::Session};
+use crate::dao::{exercise::Exercise, lap::Lap, session::Session, set::Set};
 
 #[derive(Serialize, Default)]
 pub struct SessionListItem {

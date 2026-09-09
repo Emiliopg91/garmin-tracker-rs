@@ -12,8 +12,8 @@ use tauri_plugin_log::log::info;
 use crate::{
     SettingsLock,
     dao::{
-        serie::{self, SetRepository},
         session::{self, SessionRepository, entity},
+        set::{self, SetRepository},
     },
     dto::workouts::{WorkoutDetails, WorkoutListItem, WorkoutSession},
     logic::report_error,
@@ -95,7 +95,7 @@ pub fn get_workout_details(
 
         let series = SetRepository::select()
             .where_(Where::In(
-                serie::entity::columns::SESSION,
+                set::entity::columns::SESSION,
                 sessions.iter().map(|s| Value::from(s.date)).collect(),
             ))
             .fetch_in(conn)?;

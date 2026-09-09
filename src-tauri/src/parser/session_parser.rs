@@ -1,6 +1,6 @@
 use crate::{
     dao::{
-        additional_data::AdditionalData, exercise::Exercise, serie::Set, session::Session,
+        additional_data::AdditionalData, exercise::Exercise, session::Session, set::Set,
         sport::Sport, sub_sport::SubSport, workout::Workout,
     },
     parser::{
@@ -278,17 +278,11 @@ struct RecordAccumulator {
     timestamp: i64,
     hrs: Vec<u8>,
     any_hr: bool,
-    cadences: Vec<u8>,
-    any_cadence: bool,
     coords: Vec<(i32, i32)>,
     any_coord: bool,
     last_coord: (i32, i32),
-    powers: Vec<u16>,
-    any_power: bool,
     speeds: Vec<f64>,
     any_speed: bool,
-    respirations: Vec<f64>,
-    any_respiration: bool,
 }
 
 impl RecordAccumulator {
@@ -306,9 +300,6 @@ impl RecordAccumulator {
         self.any_hr |= msg.heart_rate != AdditionalData::INVALID_HEAR_RATE;
         self.hrs.push(msg.heart_rate);
 
-        self.any_cadence |= msg.cadence != AdditionalData::INVALID_CADENCE;
-        self.cadences.push(msg.cadence);
-
         if msg.position_lat != AdditionalData::INVALID_POSITION
             && msg.position_long != AdditionalData::INVALID_POSITION
         {
@@ -317,9 +308,6 @@ impl RecordAccumulator {
         }
         self.coords.push(self.last_coord);
 
-        self.any_power |= msg.power != AdditionalData::INVALID_POWER;
-        self.powers.push(msg.power);
-
         self.speeds.push(match msg.enhanced_speed_scaled() {
             Some(v) => {
                 self.any_speed = true;
@@ -327,15 +315,6 @@ impl RecordAccumulator {
             }
             None => AdditionalData::INVALID_SPEED,
         });
-
-        self.respirations
-            .push(match msg.enhanced_respiration_rate_scaled() {
-                Some(v) => {
-                    self.any_respiration = true;
-                    v
-                }
-                None => AdditionalData::INVALID_RESPIRATIONS,
-            });
     }
 }
 
@@ -343,27 +322,14 @@ impl From<RecordAccumulator> for Option<AdditionalData> {
     fn from(value: RecordAccumulator) -> Self {
         let coords = value.any_coord.then_some(value.coords);
         let hrs = value.any_hr.then_some(value.hrs);
-        let cadences = value.any_cadence.then_some(value.cadences);
-        let powers = value.any_power.then_some(value.powers);
         let speeds = value.any_speed.then_some(value.speeds);
-        let respirations = value.any_respiration.then_some(value.respirations);
 
-        if hrs.is_some()
-            || coords.is_some()
-            || speeds.is_some()
-            || cadences.is_some()
-            || powers.is_some()
-            || respirations.is_some()
-        {
+        if hrs.is_some() || coords.is_some() || speeds.is_some() {
             Some(AdditionalData {
                 session: value.timestamp,
                 heart_rates: hrs,
-                cadences,
                 coordinates: coords.map(|coords| AdditionalData::build_coordinates_blob(&coords)),
                 speeds: speeds.map(|speeds| AdditionalData::build_speeds_blob(&speeds)),
-                powers: powers.map(|powers| AdditionalData::build_powers_blob(&powers)),
-                respirations: respirations
-                    .map(|respirations| AdditionalData::build_respirations_blob(&respirations)),
             })
         } else {
             None

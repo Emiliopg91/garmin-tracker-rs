@@ -13,8 +13,8 @@ use crate::{
     SettingsLock,
     dao::{
         exercise::ExerciseRepository,
-        serie::{self, Set, SetRepository},
         session::{self, SessionRepository},
+        set::{self, Set, SetRepository},
     },
     dto::{
         exercises::{ExerciseDetails, ExerciseListItem},
@@ -92,8 +92,8 @@ pub fn get_exercise_details(
             category,
             id,
             Some(&[
-                OrderBy::Desc(serie::entity::columns::SESSION),
-                OrderBy::Asc(serie::entity::columns::IDX),
+                OrderBy::Desc(set::entity::columns::SESSION),
+                OrderBy::Asc(set::entity::columns::IDX),
             ]),
         )?;
 
