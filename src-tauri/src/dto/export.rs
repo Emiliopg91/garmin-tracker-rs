@@ -7,7 +7,7 @@ use crate::dao::{
     additional_data::{AdditionalData, AdditionalDataRepository},
     body_metric::{BodyMetric, BodyMetricRepository},
     device::{Device, DeviceRepository},
-    serie::{Serie, SerieRepository},
+    serie::{Set, SetRepository},
     session::{Session, SessionRepository},
     settings::{Settings, SettingsRepository},
     workout::{Workout, WorkoutRepository},
@@ -40,8 +40,8 @@ impl Export {
                     additional_datas.insert(ad.session, ad);
                 });
 
-            let mut series: HashMap<i64, Vec<Serie>> = HashMap::new();
-            SerieRepository::select()
+            let mut series: HashMap<i64, Vec<Set>> = HashMap::new();
+            SetRepository::select()
                 .fetch_in(conn)?
                 .into_iter()
                 .for_each(|s| {
@@ -95,7 +95,7 @@ pub struct SessionExport {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub heart_rates: Option<Vec<Option<u8>>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub series: Option<Vec<Serie>>,
+    pub series: Option<Vec<Set>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub cadences: Option<Vec<Option<u8>>>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -104,8 +104,8 @@ pub struct SessionExport {
     pub respirations: Option<Vec<Option<f64>>>,
 }
 
-impl From<(&Session, Option<&AdditionalData>, Option<&Vec<Serie>>)> for SessionExport {
-    fn from(values: (&Session, Option<&AdditionalData>, Option<&Vec<Serie>>)) -> Self {
+impl From<(&Session, Option<&AdditionalData>, Option<&Vec<Set>>)> for SessionExport {
+    fn from(values: (&Session, Option<&AdditionalData>, Option<&Vec<Set>>)) -> Self {
         let mut heart_rates = None;
         let mut coordinates: Option<Vec<Option<(f64, f64)>>> = None;
         let mut speeds: Option<Vec<Option<f64>>> = None;

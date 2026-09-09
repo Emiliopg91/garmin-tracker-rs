@@ -35,7 +35,7 @@ export interface ExerciseDetails {
   pr_date: number;
   reps: number;
   rm: number;
-  series: Record<string, SessionSerie[]>;
+  series: Record<string, SessionSet[]>;
   weight: number;
   workouts: string[];
 }
@@ -65,7 +65,7 @@ export interface SessionDetails {
   laps: SessionLap[];
   metabolic_calories: number;
   name: string;
-  series: SessionSerie[];
+  sets: SessionSet[];
   speeds: (number | null)[];
   sport: number;
   sub_sport: number;
@@ -100,7 +100,7 @@ export interface SessionLocation {
 }
 
 // From src-tauri/src/dto/sessions.rs:44
-export interface SessionSerie {
+export interface SessionSet {
   ex_cat: number;
   ex_id: number;
   idx: number;
@@ -110,8 +110,8 @@ export interface SessionSerie {
 }
 
 // From src-tauri/src/dto/sessions.rs:156
-export interface SessionSeriesUpdate {
-  series: SessionSerie[];
+export interface SessionSetsUpdate {
+  sets: SessionSet[];
   timestamp: number;
 }
 

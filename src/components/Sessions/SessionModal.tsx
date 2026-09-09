@@ -1,7 +1,7 @@
 import { AppContext } from "@/context/AppContext";
 import { BackendClient } from "@/utils/backend/client";
 import { TimeUtils } from "@/utils/TimeUtils";
-import { SessionSeriesUpdate } from "@/utils/backend/models";
+import { SessionSetsUpdate } from "@/utils/backend/models";
 import { useContext, useState } from "react";
 import {
   Button,
@@ -62,7 +62,7 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
     const newObj = structuredClone(localSession);
     const serieIdx = newObj.grouped_series[exercise][idx].idx;
     newObj.grouped_series[exercise][idx].reps = reps;
-    newObj.series[serieIdx].reps = reps;
+    newObj.sets[serieIdx].reps = reps;
     setLocalSession(newObj);
     setChanged(JSON.stringify(newObj) != JSON.stringify(session));
   };
@@ -75,23 +75,23 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
     const newObj = structuredClone(localSession);
     const serieIdx = newObj.grouped_series[exercise][idx].idx;
     newObj.grouped_series[exercise][idx].weight = weight;
-    newObj.series[serieIdx].weight = weight;
+    newObj.sets[serieIdx].weight = weight;
     setLocalSession(newObj);
     setChanged(JSON.stringify(newObj) != JSON.stringify(session));
   };
 
   const saveChanges = () => {
     startLoading();
-    const update: SessionSeriesUpdate = {
+    const update: SessionSetsUpdate = {
       timestamp: localSession.timestamp,
-      series: [],
+      sets: [],
     };
-    localSession.series.forEach((serie, serIdx) => {
+    localSession.sets.forEach((serie, serIdx) => {
       if (
-        originalSession.series[serIdx].reps != serie.reps ||
-        originalSession.series[serIdx].weight != serie.weight
+        originalSession.sets[serIdx].reps != serie.reps ||
+        originalSession.sets[serIdx].weight != serie.weight
       ) {
-        update.series.push({
+        update.sets.push({
           ...serie,
           weight: UnitUtils.toKg(serie.weight, settings.weight_unit),
         });
@@ -456,7 +456,7 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
             <br />
           </>
         )}
-        {localSession.series && Object.keys(localSession.series).length > 0 && (
+        {localSession.sets && Object.keys(localSession.sets).length > 0 && (
           <div style={{ position: "relative", top: "-20px" }}>
             <table>
               <colgroup>

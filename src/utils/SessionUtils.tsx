@@ -2,7 +2,7 @@ import { Marker } from "react-leaflet";
 import {
   SessionDetails,
   SessionListItem,
-  SessionSerie,
+  SessionSet,
   WeightUnit,
 } from "./backend/models";
 import { TimeUtils } from "./TimeUtils";
@@ -36,7 +36,7 @@ export interface SessionFrontDetails extends SessionDetails {
   }[];
   volume: number;
   exercises: string[];
-  grouped_series: Record<string, SessionSerie[]>;
+  grouped_series: Record<string, SessionSet[]>;
 }
 
 export class SessionUtils {
@@ -71,24 +71,23 @@ export class SessionUtils {
     details: SessionFrontDetails,
     weightUnit: WeightUnit,
   ) {
-    if (details.series) {
-      details.series.forEach((_, idx) => {
-        const copy = { ...details.series[idx] };
+    if (details.sets) {
+      details.sets.forEach((_, idx) => {
+        const copy = { ...details.sets[idx] };
         copy.weight = Number(
           UnitUtils.fromKg(copy.weight, weightUnit).toFixed(1),
         );
-        details.series[idx] = copy;
+        details.sets[idx] = copy;
         details.volume += copy.reps * copy.weight;
 
-        const name =
-          details.series[idx].ex_cat + "-" + details.series[idx].ex_id;
+        const name = details.sets[idx].ex_cat + "-" + details.sets[idx].ex_id;
         if (!details.exercises.includes(name)) {
           details.exercises.push(name);
         }
         if (!details.grouped_series[name]) {
           details.grouped_series[name] = [];
         }
-        details.grouped_series[name].push(details.series[idx]);
+        details.grouped_series[name].push(details.sets[idx]);
       });
     }
   }

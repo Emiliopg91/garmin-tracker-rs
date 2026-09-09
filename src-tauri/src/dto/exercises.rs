@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use serde::Serialize;
 
-use crate::{dao::exercise::Exercise, dto::sessions::SessionSerie};
+use crate::{dao::exercise::Exercise, dto::sessions::SessionSet};
 
 #[derive(Serialize)]
 pub struct ExerciseListItem {
@@ -35,7 +35,7 @@ pub struct ExerciseDetails {
     pub weight: f64,
     pub rm: f64,
     pub workouts: Vec<String>,
-    pub series: HashMap<String, Vec<SessionSerie>>,
+    pub series: HashMap<String, Vec<SessionSet>>,
     pub pr_date: i32,
 }
 

@@ -1,6 +1,6 @@
 use crate::{
     dao::{
-        additional_data::AdditionalData, exercise::Exercise, serie::Serie, session::Session,
+        additional_data::AdditionalData, exercise::Exercise, serie::Set, session::Session,
         sport::Sport, sub_sport::SubSport, workout::Workout,
     },
     parser::{
@@ -64,7 +64,7 @@ impl TryFrom<FitParser<'_>> for Session {
                 if let Some(exercise) = exercises.get(idx)
                     && let Some(exercise) = exercise
                 {
-                    let res = Some(Serie {
+                    let res = Some(Set {
                         session: session_data.timestamp,
                         idx: serie_idx,
                         ex_cat: exercise.category,
@@ -111,7 +111,7 @@ impl TryFrom<FitParser<'_>> for Session {
             active_time: session_data.active_time,
             total_calories: session_data.total_calories,
             metabolic_calories: session_data.metabolic_calories,
-            series,
+            sets: series,
             training_load: session_data.training_load,
             sport: session_data.sub_sport_obj.sport,
             sub_sport: session_data.sub_sport_obj.id,

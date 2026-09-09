@@ -2,7 +2,7 @@
 
 import { invoke, InvokeArgs } from "@tauri-apps/api/core";
 
-import { AppEnvironment, BodyMetricListItem, ExerciseDetails, ExerciseListItem, SessionDetails, SessionListItem, SessionSeriesUpdate, Settings, WorkoutDetails, WorkoutListItem } from "./models";
+import { AppEnvironment, BodyMetricListItem, ExerciseDetails, ExerciseListItem, SessionDetails, SessionListItem, SessionSetsUpdate, Settings, WorkoutDetails, WorkoutListItem } from "./models";
 
 export class BackendClient {
 
@@ -50,7 +50,7 @@ export class BackendClient {
 	}
 	
 
-	// From src-tauri/src/logic/sessions.rs:83
+	// From src-tauri/src/logic/sessions.rs:82
 	public static getSessionDetails(timestamp: number): Promise<SessionDetails> {
 	  return BackendClient.inner_invoke("get_session_details", { timestamp }); 
 	}
@@ -86,7 +86,7 @@ export class BackendClient {
 	}
 	
 
-	// From src-tauri/src/logic/sessions.rs:201
+	// From src-tauri/src/logic/sessions.rs:200
 	public static importFromDevice(serial: string): Promise<number> {
 	  return BackendClient.inner_invoke("import_from_device", { serial }); 
 	}
@@ -98,8 +98,8 @@ export class BackendClient {
 	}
 	
 
-	// From src-tauri/src/logic/sessions.rs:147
-	public static saveSessionChanges(details: SessionSeriesUpdate): Promise<void> {
+	// From src-tauri/src/logic/sessions.rs:146
+	public static saveSessionChanges(details: SessionSetsUpdate): Promise<void> {
 	  return BackendClient.inner_invoke("save_session_changes", { details }); 
 	}
 	

@@ -10,7 +10,7 @@ use crate::dao::{
     workout::{self, Workout},
 };
 
-use super::serie::Serie;
+use super::serie::Set;
 
 #[derive(Entity, Clone, Serialize, Deserialize)]
 #[primary_key(date)]
@@ -29,7 +29,7 @@ pub struct Session {
     pub sub_sport: u8,
 
     #[relationship((date, serie::entity::columns::SESSION))]
-    pub series: Vec<Serie>,
+    pub sets: Vec<Set>,
 
     #[relationship((date, lap::entity::columns::SESSION))]
     pub laps: Vec<Lap>,

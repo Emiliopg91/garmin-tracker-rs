@@ -13,12 +13,12 @@ use crate::{
     SettingsLock,
     dao::{
         exercise::ExerciseRepository,
-        serie::{self, Serie, SerieRepository},
+        serie::{self, Set, SetRepository},
         session::{self, SessionRepository},
     },
     dto::{
         exercises::{ExerciseDetails, ExerciseListItem},
-        sessions::SessionSerie,
+        sessions::SessionSet,
     },
     logic::report_error,
 };
@@ -36,8 +36,8 @@ pub fn get_exercises(
 
         let exercises = ExerciseRepository::select().fetch_in(conn)?;
 
-        let prs = SerieRepository::select_by_personal_records_in_conn(conn, true, None)?;
-        let pr_by_exercise: HashMap<(u16, u16), &Serie> =
+        let prs = SetRepository::select_by_personal_records_in_conn(conn, true, None)?;
+        let pr_by_exercise: HashMap<(u16, u16), &Set> =
             prs.iter().map(|pr| ((pr.ex_cat, pr.ex_id), pr)).collect();
 
         for exercise in exercises {
@@ -88,7 +88,7 @@ pub fn get_exercise_details(
         let exercise = ExerciseRepository::select_by_id_in(conn, category, id)?.unwrap();
         let mut res = ExerciseDetails::from(&exercise);
 
-        let series = SerieRepository::select_by_exercise_in_conn(
+        let series = SetRepository::select_by_exercise_in_conn(
             conn,
             category,
             id,
@@ -136,7 +136,7 @@ pub fn get_exercise_details(
             }
 
             let entry = res.series.entry(ex_str).or_default();
-            entry.push(SessionSerie::from(&serie));
+            entry.push(SessionSet::from(&serie));
         }
 
         Ok(res)

@@ -12,7 +12,7 @@ use tauri_plugin_log::log::info;
 use crate::{
     SettingsLock,
     dao::{
-        serie::{self, SerieRepository},
+        serie::{self, SetRepository},
         session::{self, SessionRepository, entity},
     },
     dto::workouts::{WorkoutDetails, WorkoutListItem, WorkoutSession},
@@ -93,7 +93,7 @@ pub fn get_workout_details(
         let mut time = 0_u32;
         let mut volume = 0_f64;
 
-        let series = SerieRepository::select()
+        let series = SetRepository::select()
             .where_(Where::In(
                 serie::entity::columns::SESSION,
                 sessions.iter().map(|s| Value::from(s.date)).collect(),

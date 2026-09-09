@@ -7,13 +7,13 @@ use crate::{
         device::{Device, DeviceRepository},
         exercise::{self, ExerciseRepository},
         lap::LapRepository,
-        serie::{self, SerieRepository, entity},
+        serie::{self, SetRepository, entity},
         session::{self, Session, SessionRepository},
         workout::{Workout, WorkoutRepository},
     },
     dto::{
         notifications::{NotificationDefinition, NotificationKind},
-        sessions::{SessionDetails, SessionListItem, SessionLocation, SessionSeriesUpdate},
+        sessions::{SessionDetails, SessionListItem, SessionLocation, SessionSetsUpdate},
     },
     logic::{notifications::show_notification, report_error},
     mtp::MTP_CLIENT_INST,
@@ -47,11 +47,10 @@ pub fn get_sessions(
             .order_by(OrderBy::Desc(session::entity::columns::DATE))
             .fetch_in(conn)?;
 
-        let record_sessions =
-            SerieRepository::select_by_personal_records_in_conn(conn, true, None)?
-                .into_iter()
-                .map(|s| s.session)
-                .collect::<HashSet<_>>();
+        let record_sessions = SetRepository::select_by_personal_records_in_conn(conn, true, None)?
+            .into_iter()
+            .map(|s| s.session)
+            .collect::<HashSet<_>>();
 
         Ok(sessions
             .into_iter()
@@ -94,7 +93,7 @@ pub fn get_session_details(
     let res = database.run_in_connection(|conn| {
         let mut session = SessionRepository::select_by_id_in(conn, timestamp)?.unwrap();
 
-        session.fetch_series_relationship_in_conn(conn)?;
+        session.fetch_sets_relationship_in_conn(conn)?;
         if session.device.is_some() {
             session.fetch_device_obj_relationship_in_conn(conn)?;
         }
@@ -102,7 +101,7 @@ pub fn get_session_details(
         session.fetch_laps_relationship_in_conn(conn)?;
 
         let condition_set: HashSet<(_, _)> =
-            session.series.iter().map(|r| (r.ex_cat, r.ex_id)).collect();
+            session.sets.iter().map(|r| (r.ex_cat, r.ex_id)).collect();
 
         let in_conditions = condition_set
             .into_iter()
@@ -122,7 +121,7 @@ pub fn get_session_details(
         Ok(SessionDetails::from((
             &session,
             exercises.as_slice(),
-            session.series.as_slice(),
+            session.sets.as_slice(),
             session.laps.as_slice(),
         )))
     });
@@ -147,7 +146,7 @@ pub fn get_session_details(
 pub fn save_session_changes(
     database: State<'_, DatabasePool>,
     settings: State<'_, SettingsLock>,
-    details: SessionSeriesUpdate,
+    details: SessionSetsUpdate,
 ) -> Result<(), String> {
     info!(
         "Saving changes on session {}...",
@@ -159,8 +158,8 @@ pub fn save_session_changes(
     let lang = settings.read().unwrap().language;
     let res = database.run_in_transaction(|tx| {
         let mut exercises = HashSet::new();
-        for serie in &details.series {
-            SerieRepository::update()
+        for serie in &details.sets {
+            SetRepository::update()
                 .set(entity::columns::REPS, serie.reps.into())
                 .set(entity::columns::WEIGHT, serie.weight.into())
                 .where_(Where::And(vec![
@@ -366,7 +365,7 @@ where
                 false
             } else {
                 let date = session.date;
-                let series = std::mem::take(&mut session.series);
+                let series = std::mem::take(&mut session.sets);
                 let laps = std::mem::take(&mut session.laps);
                 let add_data = session.additional_data.take();
 
@@ -386,7 +385,7 @@ where
                     handled_exercises.insert((serie.ex_cat, serie.ex_id));
                 }
 
-                let mut insert = SerieRepository::insert();
+                let mut insert = SetRepository::insert();
                 let mut count = 0;
                 for serie in series {
                     insert = insert.item(serie);
@@ -466,7 +465,7 @@ fn update_prs(
 
     for exer in &exercises {
         update_false_conditions.push(vec![exer.0.into(), exer.1.into()]);
-        if let Some(pr) = SerieRepository::select()
+        if let Some(pr) = SetRepository::select()
             .where_(Where::And(vec![
                 Where::Eq(serie::entity::columns::EX_CAT, exer.0.into()),
                 Where::Eq(serie::entity::columns::EX_ID, exer.1.into()),
@@ -484,7 +483,7 @@ fn update_prs(
     }
 
     if !update_true_conditions.is_empty() {
-        SerieRepository::update()
+        SetRepository::update()
             .set(serie::entity::columns::PR, false.into())
             .where_(Where::And(vec![
                 Where::InMultiple(
@@ -497,7 +496,7 @@ fn update_prs(
                 Where::Eq(serie::entity::columns::PR, true.into()),
             ]))
             .execute_in(tx)?;
-        SerieRepository::update()
+        SetRepository::update()
             .set(serie::entity::columns::PR, true.into())
             .where_(Where::InMultiple(
                 vec![serie::entity::columns::SESSION, serie::entity::columns::IDX],

@@ -2,7 +2,7 @@ use std::hash::Hash;
 
 use serde::{Deserialize, Serialize};
 
-use crate::dao::{exercise::Exercise, lap::Lap, serie::Serie, session::Session};
+use crate::dao::{exercise::Exercise, lap::Lap, serie::Set, session::Session};
 
 #[derive(Serialize, Default)]
 pub struct SessionListItem {
@@ -41,7 +41,7 @@ impl Hash for SessionListItem {
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct SessionSerie {
+pub struct SessionSet {
     pub ex_cat: u16,
     pub ex_id: u16,
     pub idx: u8,
@@ -50,8 +50,8 @@ pub struct SessionSerie {
     pub pr: bool,
 }
 
-impl From<&Serie> for SessionSerie {
-    fn from(value: &Serie) -> Self {
+impl From<&Set> for SessionSet {
+    fn from(value: &Set) -> Self {
         Self {
             ex_cat: value.ex_cat,
             ex_id: value.ex_id,
@@ -96,7 +96,7 @@ pub struct SessionDetails {
     pub sport: u8,
     pub sub_sport: u8,
 
-    pub series: Vec<SessionSerie>,
+    pub sets: Vec<SessionSet>,
     pub heart_rates: Vec<Option<u8>>,
     pub coordinates: Vec<Option<(i32, i32)>>,
     pub laps: Vec<SessionLap>,
@@ -105,8 +105,8 @@ pub struct SessionDetails {
     pub device: Option<String>,
 }
 
-impl From<(&Session, &[Exercise], &[Serie], &[Lap])> for SessionDetails {
-    fn from(value: (&Session, &[Exercise], &[Serie], &[Lap])) -> Self {
+impl From<(&Session, &[Exercise], &[Set], &[Lap])> for SessionDetails {
+    fn from(value: (&Session, &[Exercise], &[Set], &[Lap])) -> Self {
         let device = value
             .0
             .device_obj
@@ -129,7 +129,7 @@ impl From<(&Session, &[Exercise], &[Serie], &[Lap])> for SessionDetails {
             }
         }
 
-        let series = value.2.iter().map(SessionSerie::from).collect();
+        let sets = value.2.iter().map(SessionSet::from).collect();
         let laps = value.3.iter().map(SessionLap::from).collect();
 
         Self {
@@ -142,7 +142,7 @@ impl From<(&Session, &[Exercise], &[Serie], &[Lap])> for SessionDetails {
             training_load: value.0.training_load,
             sport: value.0.sport,
             sub_sport: value.0.sub_sport,
-            series,
+            sets,
             heart_rates,
             device,
             laps,
@@ -153,9 +153,9 @@ impl From<(&Session, &[Exercise], &[Serie], &[Lap])> for SessionDetails {
 }
 
 #[derive(Deserialize, Serialize)]
-pub struct SessionSeriesUpdate {
+pub struct SessionSetsUpdate {
     pub timestamp: i32,
-    pub series: Vec<SessionSerie>,
+    pub sets: Vec<SessionSet>,
 }
 
 #[derive(Serialize, Clone)]
