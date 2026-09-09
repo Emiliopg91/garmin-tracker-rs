@@ -152,55 +152,58 @@ export function WorkoutModal({ workout, onClose }: Props) {
                 <hr />
               </>
             )}
-            <h5 style={{ textAlign: "center" }}>{translate("sessions")}</h5>
-            <table>
-              <colgroup>
-                <col
-                  style={{
-                    width: workout.avg_volume > 0 ? "230px" : "370px",
-                  }}
-                />
-                <col
-                  style={{
-                    width: workout.avg_volume > 0 ? "120px" : "260px",
-                  }}
-                />
-                {workout.avg_volume > 0 && <col style={{ width: "280px" }} />}
-              </colgroup>
-              <thead>
-                <tr>
-                  <th>{translate("date")}</th>
-                  <th>{translate("time")}</th>
-                  {workout.avg_volume > 0 && <th>{translate("volume")}</th>}
-                </tr>
-              </thead>
-              <tbody>
-                {workout.sessions.map((session, idx) => (
-                  <tr
-                    key={idx}
-                    style={{
-                      borderBottom: "1px solid #e4e4e430",
-                    }}
-                  >
-                    <td>{TimeUtils.formatTimeDate(session.date)}</td>
-                    <td>{TimeUtils.formatDuration(session.time)}</td>
-                    {workout.avg_volume > 0 && (
-                      <td>
-                        {UnitUtils.fromKg(
-                          session.volume,
-                          settings.weight_unit,
-                        ).toFixed(1)}{" "}
-                        {UnitUtils.getUnit(settings.weight_unit)}{" "}
-                        {session.vol_diff != "-" &&
-                          "(" + session.vol_diff + ")"}
-                      </td>
-                    )}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
           </>
         )}
+        <hr />
+        <table>
+          <colgroup>
+            <col
+              style={{
+                width: workout.avg_volume > 0 ? "230px" : "370px",
+              }}
+            />
+            <col
+              style={{
+                width: workout.avg_volume > 0 ? "120px" : "260px",
+              }}
+            />
+            {workout.avg_volume > 0 && <col style={{ width: "280px" }} />}
+          </colgroup>
+          <thead>
+            <tr>
+              <th>{translate("date")}</th>
+              <th>{translate("time")}</th>
+              {workout.avg_volume > 0 && <th>{translate("volume")}</th>}
+            </tr>
+          </thead>
+          <tbody>
+            {workout.sessions.map((session, idx) => (
+              <tr
+                key={idx}
+                style={{
+                  borderBottom: "1px solid #e4e4e430",
+                }}
+              >
+                <td style={{ textAlign: "center" }}>
+                  {TimeUtils.formatTimeDate(session.date)}
+                </td>
+                <td style={{ textAlign: "center" }}>
+                  {TimeUtils.formatDuration(session.time)}
+                </td>
+                {workout.avg_volume > 0 && (
+                  <td style={{ textAlign: "center" }}>
+                    {UnitUtils.fromKg(
+                      session.volume,
+                      settings.weight_unit,
+                    ).toFixed(1)}{" "}
+                    {UnitUtils.getUnit(settings.weight_unit)}{" "}
+                    {session.vol_diff != "-" && "(" + session.vol_diff + ")"}
+                  </td>
+                )}
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </DialogContent>
     </Dialog>
   );

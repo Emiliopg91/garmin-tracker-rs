@@ -168,7 +168,7 @@ export function ExerciseModal({ exercise, onClose }: Props) {
           </>
         )}
         <hr />
-        <table>
+        <table style={{ width: "100%" }}>
           <colgroup>
             <col style={{ width: "350px" }} />
             <col style={{ width: "150px" }} />
@@ -190,11 +190,11 @@ export function ExerciseModal({ exercise, onClose }: Props) {
                       }}
                       rowSpan={exercise.series[workout].length}
                     >
-                      {workout.split("\n")[0]}
-                      <br />
-                      {TimeUtils.formatTimeDate(
-                        parseInt(workout.split("\n")[1]),
-                      )}
+                      {workout.split("\n")[0] +
+                        " @ " +
+                        TimeUtils.formatTimeDate(
+                          parseInt(workout.split("\n")[1]),
+                        )}
                     </td>
                   )}
 
@@ -204,6 +204,7 @@ export function ExerciseModal({ exercise, onClose }: Props) {
                         idx === exercise.series[workout].length - 1
                           ? "1px solid #e4e4e430"
                           : "",
+                      textAlign: "center",
                     }}
                   >
                     {serie.reps}x
