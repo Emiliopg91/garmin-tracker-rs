@@ -3,6 +3,7 @@ pub mod body_metric;
 pub mod device;
 pub mod exercise;
 pub mod exercise_category;
+pub mod lap;
 pub mod serie;
 pub mod session;
 pub mod settings;

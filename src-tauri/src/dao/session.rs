@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 use crate::dao::{
     additional_data::{self, AdditionalData},
     device::{self, Device},
+    lap::{self, Lap},
     serie,
     sub_sport::{self, SubSport},
     workout::{self, Workout},
@@ -29,6 +30,9 @@ pub struct Session {
 
     #[relationship((date, serie::entity::columns::SESSION))]
     pub series: Vec<Serie>,
+
+    #[relationship((date, lap::entity::columns::SESSION))]
+    pub laps: Vec<Lap>,
 
     #[relationship((device, device::entity::columns::SERIAL))]
     pub device_obj: Option<Device>,

@@ -12,7 +12,6 @@ pub struct AdditionalData {
     pub cadences: Option<Vec<u8>>,
     pub powers: Option<Vec<u8>>,
     pub respirations: Option<Vec<u8>>,
-    pub laps: Option<Vec<u8>>,
 }
 
 impl AdditionalData {
@@ -157,23 +156,6 @@ impl AdditionalData {
         });
 
         records
-    }
-
-    /// Unpacks the laps Blob into Vec
-    pub fn get_laps(&self) -> Option<Vec<(i32, i32)>> {
-        self.laps.as_ref().map(|records| {
-            records
-                .as_chunks::<8>()
-                .0
-                .iter()
-                .map(|chunk| {
-                    (
-                        i32::from_be_bytes(chunk[0..4].try_into().unwrap()),
-                        i32::from_be_bytes(chunk[4..8].try_into().unwrap()),
-                    )
-                })
-                .collect()
-        })
     }
 
     /// Unpacks the heart rate Blob into Vec

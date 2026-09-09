@@ -2,7 +2,7 @@ use std::hash::Hash;
 
 use serde::{Deserialize, Serialize};
 
-use crate::dao::{exercise::Exercise, serie::Serie, session::Session};
+use crate::dao::{exercise::Exercise, lap::Lap, serie::Serie, session::Session};
 
 #[derive(Serialize, Default)]
 pub struct SessionListItem {
@@ -64,6 +64,23 @@ impl From<&Serie> for SessionSerie {
 }
 
 #[derive(Serialize)]
+pub struct SessionLap {
+    idx: i32,
+    start_latitude: Option<i32>,
+    start_longitude: Option<i32>,
+}
+
+impl From<&Lap> for SessionLap {
+    fn from(value: &Lap) -> Self {
+        Self {
+            idx: value.idx,
+            start_latitude: value.start_latitude,
+            start_longitude: value.start_longitude,
+        }
+    }
+}
+
+#[derive(Serialize)]
 pub struct SessionDetails {
     pub name: String,
 
@@ -82,14 +99,14 @@ pub struct SessionDetails {
     pub series: Vec<SessionSerie>,
     pub heart_rates: Vec<Option<u8>>,
     pub coordinates: Vec<Option<(i32, i32)>>,
-    pub laps: Vec<(i32, i32)>,
+    pub laps: Vec<SessionLap>,
     pub speeds: Vec<Option<f64>>,
 
     pub device: Option<String>,
 }
 
-impl From<(&Session, &[Exercise], &[Serie])> for SessionDetails {
-    fn from(value: (&Session, &[Exercise], &[Serie])) -> Self {
+impl From<(&Session, &[Exercise], &[Serie], &[Lap])> for SessionDetails {
+    fn from(value: (&Session, &[Exercise], &[Serie], &[Lap])) -> Self {
         let device = value
             .0
             .device_obj
@@ -97,9 +114,8 @@ impl From<(&Session, &[Exercise], &[Serie])> for SessionDetails {
             .map(|dev| format!("Garmin {}", dev.model));
 
         let mut heart_rates = Vec::new();
-        let mut gps_coordinates: Vec<Option<(i32, i32)>> = Vec::new();
-        let mut laps: Vec<(i32, i32)> = Vec::new();
-        let mut speeds: Vec<Option<f64>> = Vec::new();
+        let mut gps_coordinates = Vec::new();
+        let mut speeds = Vec::new();
 
         if let Some(add_data) = &value.0.additional_data {
             if let Some(hr_data) = add_data.get_heart_rates() {
@@ -111,12 +127,10 @@ impl From<(&Session, &[Exercise], &[Serie])> for SessionDetails {
             if let Some(spds) = add_data.get_speeds() {
                 speeds = spds;
             }
-            if let Some(lps) = add_data.get_laps() {
-                laps = lps;
-            }
         }
 
-        let series = value.2.iter().map(SessionSerie::from).collect::<Vec<_>>();
+        let series = value.2.iter().map(SessionSerie::from).collect();
+        let laps = value.3.iter().map(SessionLap::from).collect();
 
         Self {
             name: value.0.name.clone(),

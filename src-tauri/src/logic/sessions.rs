@@ -6,6 +6,7 @@ use crate::{
         additional_data::{self, AdditionalDataRepository},
         device::{Device, DeviceRepository},
         exercise::{self, ExerciseRepository},
+        lap::LapRepository,
         serie::{self, SerieRepository, entity},
         session::{self, Session, SessionRepository},
         workout::{Workout, WorkoutRepository},
@@ -98,6 +99,7 @@ pub fn get_session_details(
             session.fetch_device_obj_relationship_in_conn(conn)?;
         }
         session.fetch_additional_data_relationship_in_conn(conn)?;
+        session.fetch_laps_relationship_in_conn(conn)?;
 
         let condition_set: HashSet<(_, _)> =
             session.series.iter().map(|r| (r.ex_cat, r.ex_id)).collect();
@@ -121,6 +123,7 @@ pub fn get_session_details(
             &session,
             exercises.as_slice(),
             session.series.as_slice(),
+            session.laps.as_slice(),
         )))
     });
 
@@ -364,6 +367,7 @@ where
             } else {
                 let date = session.date;
                 let series = std::mem::take(&mut session.series);
+                let laps = std::mem::take(&mut session.laps);
                 let add_data = session.additional_data.take();
 
                 if let Some(workout) = &session.workout {
@@ -396,6 +400,14 @@ where
                     AdditionalDataRepository::insert()
                         .item(additional_data)
                         .execute_in(tx)?;
+                }
+
+                if !laps.is_empty() {
+                    let mut insert = LapRepository::insert();
+                    for lap in laps {
+                        insert = insert.item(lap)
+                    }
+                    insert.execute_in(tx)?;
                 }
 
                 success.push(date);

@@ -2,7 +2,6 @@ import { AppContext } from "@/context/AppContext";
 import { BackendClient } from "@/utils/backend/client";
 import { TimeUtils } from "@/utils/TimeUtils";
 import { SessionSeriesUpdate } from "@/utils/backend/models";
-import L from "leaflet";
 import { useContext, useState } from "react";
 import {
   Button,
@@ -29,7 +28,7 @@ import {
   Legend,
 } from "recharts";
 import { UnitUtils } from "@/utils/UnitUtils";
-import { SessionFrontDetails } from "@/utils/SessionUtils";
+import { SessionFrontDetails, SessionUtils } from "@/utils/SessionUtils";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 
 type Props = {
@@ -38,43 +37,10 @@ type Props = {
   onUpdate: () => void;
 };
 
-const makeMarkerIcon = (color: string) =>
-  L.divIcon({
-    className: "",
-    html: `<svg width="25" height="41" viewBox="0 0 25 41" xmlns="http://www.w3.org/2000/svg">
-      <path d="M12.5 0C5.6 0 0 5.6 0 12.5c0 9.4 12.5 28.5 12.5 28.5S25 21.9 25 12.5C25 5.6 19.4 0 12.5 0z" fill="${color}" stroke="white" stroke-width="1.5"/>
-      <circle cx="12.5" cy="12.5" r="4.5" fill="white"/>
-    </svg>`,
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-  });
-
-const startIcon = makeMarkerIcon("#2ecc71");
-const endIcon = makeMarkerIcon("#e74c3c");
 const urls = [
   "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
   "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
 ];
-
-function lapMarker(idx: number, lap: [number, number]): React.JSX.Element {
-  const lapColor = "#2A81CB";
-  const icon = L.divIcon({
-    className: "",
-    html: `<div style="transform: rotate(180deg);">
-      <svg width="25" height="41" viewBox="0 0 25 41" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12.5 0C5.6 0 0 5.6 0 12.5c0 9.4 12.5 28.5 12.5 28.5S25 21.9 25 12.5C25 5.6 19.4 0 12.5 0z" fill="${lapColor}" stroke="white" stroke-width="1.5"/>
-        <circle cx="12.5" cy="12.5" r="6" fill="white"/>
-        <text x="12.5" y="12.5" transform="rotate(180 12.5 12.5)" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="bold" fill="${lapColor}">${idx}</text>
-      </svg>
-    </div>`,
-    iconSize: [25, 41],
-    iconAnchor: [12, 0],
-    popupAnchor: [1, 34],
-  });
-
-  return <Marker key={idx} position={lap} icon={icon} />;
-}
 
 export function SessionModal({ session, onClose, onUpdate }: Props) {
   const { startLoading, finishLoading, translate, settings } =
@@ -82,7 +48,7 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
   const [originalSession] = useState(session);
   const [localSession, setLocalSession] = useState({ ...session });
   const [changed, setChanged] = useState(false);
-  const [url, setUrl] = useState(0);
+  const [url, setUrl] = useState(1);
 
   const handleMapTypeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setUrl(event.target.value === "street" ? 0 : 1);
@@ -184,15 +150,22 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
 
               <Marker
                 position={localSession.start_point}
-                icon={startIcon}
+                icon={SessionUtils.START_ICON}
               ></Marker>
 
               <Marker
                 position={localSession.finish_point}
-                icon={endIcon}
+                icon={SessionUtils.END_ICON}
               ></Marker>
 
-              {localSession.laps.map((lap, idx) => lapMarker(idx + 1, lap))}
+              {localSession.laps
+                .filter((lap) => lap.start_latitude && lap.start_longitude)
+                .map((lap) =>
+                  SessionUtils.makeLapMarker(lap.idx + 1, [
+                    lap.start_latitude!,
+                    lap.start_longitude!,
+                  ]),
+                )}
             </MapContainer>
             <FormControl
               style={{ width: "100%", display: "flex", alignItems: "center" }}
@@ -204,14 +177,14 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                 onChange={handleMapTypeChange}
               >
                 <FormControlLabel
-                  value="street"
-                  control={<Radio />}
-                  label={translate("street_map")}
-                />
-                <FormControlLabel
                   value="satellite"
                   control={<Radio />}
                   label={translate("satellite_map")}
+                />
+                <FormControlLabel
+                  value="street"
+                  control={<Radio />}
+                  label={translate("street_map")}
                 />
               </RadioGroup>
             </FormControl>

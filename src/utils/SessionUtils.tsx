@@ -1,3 +1,4 @@
+import { Marker } from "react-leaflet";
 import {
   SessionDetails,
   SessionListItem,
@@ -6,6 +7,7 @@ import {
 } from "./backend/models";
 import { TimeUtils } from "./TimeUtils";
 import { UnitUtils } from "./UnitUtils";
+import L from "leaflet";
 
 export interface WorkoutLoad {
   date: number;
@@ -58,6 +60,7 @@ export class SessionUtils {
     };
 
     SessionUtils.handleSeries(details, weightUnit);
+    SessionUtils.handleLaps(details);
     SessionUtils.handleGpsCoordiates(details);
     SessionUtils.handleHeartRate(details);
 
@@ -157,15 +160,22 @@ export class SessionUtils {
         }
       }
     }
+  }
 
+  private static handleLaps(details: SessionFrontDetails) {
     if (details.laps.length > 0) {
-      for (let i = 0; i < details.laps.length; i++) {
-        if (details.laps[i]) {
-          details.laps[i]![0] =
-            details.laps[i]![0] * UnitUtils.SEMICIRCLE_TO_DEGREES;
-          details.laps[i]![1] =
-            details.laps[i]![1] * UnitUtils.SEMICIRCLE_TO_DEGREES;
-          details.valid_points.push(details.laps[i]!);
+      if (details.laps.length > 0) {
+        for (let i = 0; i < details.laps.length; i++) {
+          if (
+            details.laps[i].start_latitude &&
+            details.laps[i].start_longitude
+          ) {
+            details.laps[i].start_latitude =
+              details.laps[i].start_latitude! * UnitUtils.SEMICIRCLE_TO_DEGREES;
+            details.laps[i].start_longitude =
+              details.laps[i].start_longitude! *
+              UnitUtils.SEMICIRCLE_TO_DEGREES;
+          }
         }
       }
     }
@@ -378,5 +388,49 @@ export class SessionUtils {
         }
       }
     }
+  }
+
+  private static makeMarkerIcon(
+    color: string,
+    symbol: "play" | "stop",
+  ): L.DivIcon {
+    return L.divIcon({
+      className: "",
+      html: `<svg width="25" height="41" viewBox="0 0 25 41" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12.5 0C5.6 0 0 5.6 0 12.5c0 9.4 12.5 28.5 12.5 28.5S25 21.9 25 12.5C25 5.6 19.4 0 12.5 0z" fill="${color}" stroke="white" stroke-width="1.5"/>
+        <circle cx="12.5" cy="12.5" r="8" fill="white"/>
+        ${
+          symbol === "play"
+            ? `<path d="M10.5 8.5L17.17 12.5L10.5 16.5Z" fill="${color}"/>`
+            : `<rect x="8.5" y="8.5" width="8" height="8" fill="${color}"/>`
+        }
+      </svg>`,
+      iconSize: [25, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+    });
+  }
+
+  public static START_ICON = SessionUtils.makeMarkerIcon("#249d56", "play");
+  public static END_ICON = SessionUtils.makeMarkerIcon("#e74c3c", "stop");
+
+  public static makeLapMarker(
+    idx: number,
+    lap: [number, number],
+  ): React.JSX.Element {
+    const lapColor = "#2A81CB";
+    const icon = L.divIcon({
+      className: "",
+      html: `<svg width="25" height="41" viewBox="0 0 25 41" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12.5 0C5.6 0 0 5.6 0 12.5c0 9.4 12.5 28.5 12.5 28.5S25 21.9 25 12.5C25 5.6 19.4 0 12.5 0z" fill="${lapColor}" stroke="white" stroke-width="1.5"/>
+          <circle cx="12.5" cy="12.5" r="8" fill="white"/>
+          <text x="12.5" y="12.5" text-anchor="middle" dominant-baseline="central" font-size="10" font-weight="bold" fill="${lapColor}">${idx}</text>
+        </svg>`,
+      iconSize: [25, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+    });
+
+    return <Marker key={idx} position={lap} icon={icon} />;
   }
 }
