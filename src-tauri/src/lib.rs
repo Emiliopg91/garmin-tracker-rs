@@ -21,7 +21,6 @@ use tauri_plugin_log::{
 };
 
 use crate::{
-    dao::validate_schemas,
     dto::app::Settings,
     logic::{
         app::{
@@ -156,12 +155,6 @@ pub fn run() {
                             let _ = fs::remove_file(constants::DB_FILE.clone());
                             initialize()
                         } else {
-                            debug!("Checking database schema...");
-                            if let Err(e) = validate_schemas(&database) {
-                                error!("Database schema check failed: {}", e);
-                                exit(constants::ExitCodes::DbError.into())
-                            }
-
                             debug!("Loading settings...");
                             let settings = Settings::from(&database);
 
