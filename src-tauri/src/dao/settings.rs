@@ -38,7 +38,7 @@ impl Settings {
     ) -> rusqlite_orm::errors::Result<()> {
         SettingsRepository::insert()
             .or_replace()
-            .item(Settings {
+            .item(&mut Settings {
                 name: settings_keys::WEIGHT_UNIT.to_string(),
                 value: value.to_string(),
             })
@@ -61,7 +61,7 @@ impl Settings {
     ) -> rusqlite_orm::errors::Result<()> {
         SettingsRepository::insert()
             .or_replace()
-            .item(Settings {
+            .item(&mut Settings {
                 name: settings_keys::DISTANCE_UNIT.to_string(),
                 value: value.to_string(),
             })
@@ -81,7 +81,7 @@ impl Settings {
     pub fn set_language(db: &DatabasePool, value: &Languages) -> rusqlite_orm::errors::Result<()> {
         SettingsRepository::insert()
             .or_replace()
-            .item(Settings {
+            .item(&mut Settings {
                 name: settings_keys::LANGUAGE.to_string(),
                 value: value.to_string(),
             })
@@ -101,7 +101,7 @@ impl Settings {
     pub fn set_auto_sync(db: &DatabasePool, value: bool) -> rusqlite_orm::errors::Result<()> {
         SettingsRepository::insert()
             .or_replace()
-            .item(Settings {
+            .item(&mut Settings {
                 name: settings_keys::AUTO_SYNC.to_string(),
                 value: value.to_string(),
             })
@@ -121,7 +121,7 @@ impl Settings {
     pub fn set_start_on_boot(db: &DatabasePool, value: bool) -> rusqlite_orm::errors::Result<()> {
         SettingsRepository::insert()
             .or_replace()
-            .item(Settings {
+            .item(&mut Settings {
                 name: settings_keys::START_ON_BOOT.to_string(),
                 value: value.to_string(),
             })
@@ -141,7 +141,7 @@ impl Settings {
     pub fn set_version(db: &DatabasePool, value: &Version) -> rusqlite_orm::errors::Result<()> {
         SettingsRepository::insert()
             .or_replace()
-            .item(Settings {
+            .item(&mut Settings {
                 name: settings_keys::VERSION.to_string(),
                 value: value.to_string(),
             })

@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 #[primary_key(session, idx)]
 #[index("session", (session))]
 pub struct Lap {
+    #[autoincrement]
     pub session: i64,
     pub idx: i32,
     pub start_latitude: Option<i32>,

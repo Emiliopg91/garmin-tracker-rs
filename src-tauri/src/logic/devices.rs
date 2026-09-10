@@ -71,7 +71,7 @@ async fn mtp_dev_check_and_sync(app: AppHandle, devices: &mut Vec<DeviceListItem
                                     &device.serial_number,
                                 ) {
                                     Ok(None) => DeviceRepository::insert()
-                                        .item(Device::from(device))
+                                        .item(&mut Device::from(device))
                                         .execute_in(tx)
                                         .err(),
                                     Ok(Some(_)) => None,

@@ -63,9 +63,9 @@ pub fn add_body_measures(
     info!("Adding body measures list...");
 
     let res = database.run_in_transaction(|tx| {
-        let entry = BodyMetric::try_from(&measures).map_err(DatabaseError::Transaction)?;
-
-        BodyMetricRepository::insert().item(entry).execute_in(tx)?;
+        BodyMetricRepository::insert()
+            .item(&mut BodyMetric::try_from(&measures).map_err(DatabaseError::Transaction)?)
+            .execute_in(tx)?;
 
         Ok(())
     });

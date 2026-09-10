@@ -3385,9 +3385,9 @@ dependencies = [
 
 [[package]]
 name = "rusqlite_orm"
-version = "0.4.15"
+version = "0.4.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "403819ae1cc9fe52aa821d96ff67576f7248dc22241892caccd1d95d12290af1"
+checksum = "f7a776ed6f49f7fb5309932ed9247d486f8fc1d0b473b4d7578c9e7040a48116"
 dependencies = [
  "log",
  "r2d2",
@@ -3397,9 +3397,9 @@ dependencies = [
 
 [[package]]
 name = "rusqlite_orm_macros"
-version = "0.4.11"
+version = "0.4.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b5686d60fde3a430460c3ed4718d16730a8b98a4c763a55b1d0b3290db389957"
+checksum = "73c10e5eeeeaf24ba4934f1391090ecef0bf332695aaff09800cc9309832cf76"
 dependencies = [
  "proc-macro2",
  "quote",

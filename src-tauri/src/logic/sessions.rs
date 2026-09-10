@@ -352,7 +352,7 @@ where
 
     sessions.sort_by_key(|s| s.0.date);
 
-    for (mut session, file) in sessions {
+    for (session, file) in &mut sessions {
         let formatted_time = match Local.timestamp_opt(session.date, 0) {
             LocalResult::Single(fecha) => fecha.format("%H:%M:%S %d/%m/%Y").to_string(),
             _ => "".to_string(),
@@ -366,14 +366,14 @@ where
                 false
             } else {
                 let date = session.date;
-                let series = std::mem::take(&mut session.sets);
-                let laps = std::mem::take(&mut session.laps);
+                let mut series = std::mem::take(&mut session.sets);
+                let mut laps = std::mem::take(&mut session.laps);
                 let add_data = session.additional_data.take();
 
                 if let Some(workout) = &session.workout {
                     WorkoutRepository::insert()
                         .or_ignore()
-                        .item(Workout {
+                        .item(&mut Workout {
                             name: workout.to_string(),
                         })
                         .execute_in(tx)?;
@@ -388,7 +388,7 @@ where
 
                 let mut insert = SetRepository::insert();
                 let mut count = 0;
-                for serie in series {
+                for serie in &mut series {
                     insert = insert.item(serie);
                     count += 1;
                 }
@@ -396,15 +396,15 @@ where
                     insert.execute_in(tx)?;
                 }
 
-                if let Some(additional_data) = add_data {
+                if let Some(mut additional_data) = add_data {
                     AdditionalDataRepository::insert()
-                        .item(additional_data)
+                        .item(&mut additional_data)
                         .execute_in(tx)?;
                 }
 
                 if !laps.is_empty() {
                     let mut insert = LapRepository::insert();
-                    for lap in laps {
+                    for lap in &mut laps {
                         insert = insert.item(lap)
                     }
                     insert.execute_in(tx)?;
@@ -412,7 +412,7 @@ where
 
                 success.push(date);
 
-                let _ = fs::remove_file(file);
+                let _ = fs::remove_file(&file);
                 #[cfg(debug_assertions)]
                 {
                     use std::path::PathBuf;
