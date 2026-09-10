@@ -1,9 +1,45 @@
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::{FnArg, ItemFn, Pat, ReturnType, Type, parse_macro_input};
+use syn::{FnArg, ItemFn, LitBool, Pat, ReturnType, Type, parse::Parser, parse_macro_input};
+
+/// Parsed `#[traced_command(...)]` attribute options.
+struct Args {
+    log_payload: bool,
+}
+
+impl Default for Args {
+    fn default() -> Self {
+        Self { log_payload: true }
+    }
+}
+
+fn parse_traced_command_attrs(attrs: TokenStream) -> syn::Result<Args> {
+    let mut args = Args::default();
+
+    let parser = syn::meta::parser(|meta| {
+        if meta.path.is_ident("log_payload") {
+            let lit = meta.value()?.parse::<LitBool>()?;
+            args.log_payload = lit.value();
+        } 
+        Ok(())
+    });
+    parser.parse(attrs)?;
+
+    Ok(args)
+}
 
 /// Generates the traced wrapper body for the annotated command function.
-pub fn traced_command(_attrs: TokenStream, item: TokenStream) -> TokenStream {
+pub fn traced_command(attrs: TokenStream, item: TokenStream) -> TokenStream {
+    macro_rules! bail_on_err {
+        ($expr:expr) => {
+            match $expr {
+                Ok(value) => value,
+                Err(err) => return err.to_compile_error().into(),
+            }
+        };
+    }
+
+    let args = bail_on_err!(parse_traced_command_attrs(attrs));
     let input_fn = parse_macro_input!(item as ItemFn);
 
     let vis = &input_fn.vis;
@@ -66,13 +102,9 @@ pub fn traced_command(_attrs: TokenStream, item: TokenStream) -> TokenStream {
         }
     };
 
-    let expanded = quote! {
-        #(#attrs)*
-        #vis #sig {
-            let __debug_enabled = tauri_plugin_log::log::log_enabled!(tauri_plugin_log::log::Level::Debug);
-            let t0 = std::time::Instant::now();
-
-            if __debug_enabled {
+    let (invoke_log_code, finish_log_code) = if args.log_payload {
+        (
+            quote! {
                 let __params_json = serde_json::json!({
                     #( #param_keys: #param_names ),*
                 });
@@ -82,11 +114,8 @@ pub fn traced_command(_attrs: TokenStream, item: TokenStream) -> TokenStream {
                     #name,
                     __params_json.to_string()
                 );
-            }
-
-            let result: #output_ty = #call;
-
-            if __debug_enabled {
+            },
+            quote! {
                 #result_json_code
                 let json_str = __result_json.to_string();
 
@@ -96,6 +125,49 @@ pub fn traced_command(_attrs: TokenStream, item: TokenStream) -> TokenStream {
                     t0.elapsed().as_secs_f64(),
                     json_str
                 );
+            },
+        )
+    } else {
+        (
+            quote! {
+                let __params_json = serde_json::json!({
+                    #( #param_keys: #param_names ),*
+                });
+
+                tauri_plugin_log::log::debug!(
+                    "Invoking command '{}' with payload of {} bytes",
+                    #name,
+                    __params_json.to_string().len()
+                );
+            },
+            quote! {
+                #result_json_code
+                let __response_size = __result_json.to_string().len();
+
+                tauri_plugin_log::log::debug!(
+                    "Finished command '{}' after {:.3} with response of {} bytes",
+                    #name,
+                    t0.elapsed().as_secs_f64(),
+                    __response_size
+                );
+            },
+        )
+    };
+
+    let expanded = quote! {
+        #(#attrs)*
+        #vis #sig {
+            let __debug_enabled = tauri_plugin_log::log::log_enabled!(tauri_plugin_log::log::Level::Debug);
+            let t0 = std::time::Instant::now();
+
+            if __debug_enabled {
+                #invoke_log_code
+            }
+
+            let result: #output_ty = #call;
+
+            if __debug_enabled {
+                #finish_log_code
             }
 
             result

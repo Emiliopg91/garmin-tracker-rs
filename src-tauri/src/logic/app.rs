@@ -195,7 +195,7 @@ pub fn export_database(
 }
 
 /// Returns every translation key resolved to the current UI language, for the frontend's i18n bootstrap.
-#[traced_command]
+#[traced_command(log_payload=false)]
 #[tauri::command]
 pub fn get_translations(
     settings: State<'_, SettingsLock>,

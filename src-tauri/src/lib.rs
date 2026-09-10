@@ -21,6 +21,7 @@ use tauri_plugin_log::{
 };
 
 use crate::{
+    dao::validate_schemas,
     dto::app::Settings,
     logic::{
         app::{
@@ -150,25 +151,19 @@ pub fn run() {
                         if already_exists
                             && crate::dao::settings::Settings::get_version(&database).major == 0
                         {
-                            warn!("Detected pre-v2 database, cleaning up...");
+                            warn!("Detected incompatible database schema version, cleaning up...");
                             drop(database);
                             let _ = fs::remove_file(constants::DB_FILE.clone());
                             initialize()
                         } else {
+                            debug!("Checking database schema...");
+                            if let Err(e) = validate_schemas(&database) {
+                                error!("Database schema check failed: {}", e);
+                                exit(constants::ExitCodes::DbError.into())
+                            }
+
                             debug!("Loading settings...");
-                            let settings = Settings {
-                                auto_sync: crate::dao::settings::Settings::get_auto_sync(&database),
-                                distance_unit: crate::dao::settings::Settings::get_distance_unit(
-                                    &database,
-                                ),
-                                language: crate::dao::settings::Settings::get_language(&database),
-                                start_boot: crate::dao::settings::Settings::get_start_on_boot(
-                                    &database,
-                                ),
-                                weight_unit: crate::dao::settings::Settings::get_weight_unit(
-                                    &database,
-                                ),
-                            };
+                            let settings = Settings::from(&database);
 
                             crate::dao::settings::Settings::set_version(
                                 &database,
