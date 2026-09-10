@@ -24,11 +24,11 @@ pub struct Settings {
 impl From<&DatabasePool> for Settings {
     fn from(database: &DatabasePool) -> Self {
         Self {
-            auto_sync: crate::dao::settings::Settings::get_auto_sync(&database),
-            distance_unit: crate::dao::settings::Settings::get_distance_unit(&database),
-            language: crate::dao::settings::Settings::get_language(&database),
-            start_boot: crate::dao::settings::Settings::get_start_on_boot(&database),
-            weight_unit: crate::dao::settings::Settings::get_weight_unit(&database),
+            auto_sync: crate::dao::settings::Settings::get_auto_sync(database),
+            distance_unit: crate::dao::settings::Settings::get_distance_unit(database),
+            language: crate::dao::settings::Settings::get_language(database),
+            start_boot: crate::dao::settings::Settings::get_start_on_boot(database),
+            weight_unit: crate::dao::settings::Settings::get_weight_unit(database),
         }
     }
 }
