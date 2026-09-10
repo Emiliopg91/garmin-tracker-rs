@@ -23,6 +23,7 @@ pub struct Set {
     pub weight: f64,
     pub pr: bool,
 
+    #[serde(skip)]
     #[relationship((ex_cat, exercise::entity::columns::CATEGORY),(ex_id, exercise::entity::columns::ID))]
     #[allow(dead_code)]
     pub exercise: Option<Exercise>,
