@@ -30,6 +30,7 @@ import {
 import { UnitUtils } from "@/utils/UnitUtils";
 import { SessionFrontDetails, SessionUtils } from "@/utils/SessionUtils";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
+import "@/styles/Sessions/SessionModal.css";
 
 type Props = {
   session: SessionFrontDetails;
@@ -117,13 +118,10 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
           )}
         {localSession.name.length > 0 && (
           <span>
-            : <span style={{ marginLeft: "10px" }}>{localSession.name}</span>
+            : <span className="session-modal-name">{localSession.name}</span>
           </span>
         )}
-        <IconButton
-          onClick={onClose}
-          sx={{ position: "absolute", right: 8, top: 8 }}
-        >
+        <IconButton onClick={onClose} className="modal-close-button">
           <CloseIcon />
         </IconButton>
       </DialogTitle>
@@ -135,7 +133,7 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
               bounds={localSession.valid_points}
               boundsOptions={{ padding: [20, 20] }}
               attributionControl={false}
-              style={{ height: "200px", width: "100%" }}
+              className="session-map"
             >
               <TileLayer url={urls[url]} attribution={""} />
 
@@ -167,9 +165,7 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                   ]),
                 )}
             </MapContainer>
-            <FormControl
-              style={{ width: "100%", display: "flex", alignItems: "center" }}
-            >
+            <FormControl className="session-map-type-control">
               <RadioGroup
                 row
                 name="row-radio-buttons-group"
@@ -193,8 +189,8 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
         )}
         <table id="session-details-table">
           <colgroup>
-            <col style={{ width: "200px" }} />
-            <col style={{ width: "250px" }} />
+            <col className="col-200" />
+            <col className="col-250" />
             <col />
           </colgroup>
           <tbody>
@@ -280,13 +276,7 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
         {localSession.hrBreathData.length > 0 && (
           <>
             <hr />
-            <div
-              style={{
-                width: "100%",
-                height: 230,
-                borderBottom: "1px solid white",
-              }}
-            >
+            <div className="session-hr-chart">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart
                   data={localSession.hrBreathData}
@@ -317,20 +307,13 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                   <Legend
                     position={"top"}
                     content={() => (
-                      <div style={{ textAlign: "center" }}>
-                        <div style={{ fontWeight: "bold" }}>
+                      <div className="text-center">
+                        <div className="session-hr-legend-heading">
                           {translate("heart_rate")}
                         </div>
-                        <div
-                          style={{
-                            display: "flex",
-                            justifyContent: "center",
-                          }}
-                        >
+                        <div className="session-hr-legend-zones">
                           {localSession.zones_times[1] > 0 && (
-                            <span
-                              style={{ color: "gray", paddingRight: "10px" }}
-                            >
+                            <span className="session-hr-zone session-hr-zone-1">
                               {TimeUtils.formatDuration(
                                 localSession.zones_times[0],
                               ) +
@@ -344,13 +327,7 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                             </span>
                           )}
                           {localSession.zones_times[1] > 0 && (
-                            <span
-                              style={{
-                                color: "cyan",
-                                paddingRight: "10px",
-                                paddingLeft: "10px",
-                              }}
-                            >
+                            <span className="session-hr-zone session-hr-zone-2">
                               {TimeUtils.formatDuration(
                                 localSession.zones_times[1],
                               ) +
@@ -364,13 +341,7 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                             </span>
                           )}
                           {localSession.zones_times[2] > 0 && (
-                            <span
-                              style={{
-                                color: "green",
-                                paddingRight: "10px",
-                                paddingLeft: "10px",
-                              }}
-                            >
+                            <span className="session-hr-zone session-hr-zone-3">
                               {TimeUtils.formatDuration(
                                 localSession.zones_times[2],
                               ) +
@@ -384,13 +355,7 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                             </span>
                           )}
                           {localSession.zones_times[3] > 0 && (
-                            <span
-                              style={{
-                                color: "orange",
-                                paddingRight: "10px",
-                                paddingLeft: "10px",
-                              }}
-                            >
+                            <span className="session-hr-zone session-hr-zone-4">
                               {TimeUtils.formatDuration(
                                 localSession.zones_times[3],
                               ) +
@@ -404,7 +369,7 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                             </span>
                           )}
                           {localSession.zones_times[4] > 0 && (
-                            <span style={{ color: "red", paddingLeft: "10px" }}>
+                            <span className="session-hr-zone session-hr-zone-5">
                               {TimeUtils.formatDuration(
                                 localSession.zones_times[4],
                               ) +
@@ -457,15 +422,15 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
           </>
         )}
         {localSession.sets && Object.keys(localSession.sets).length > 0 && (
-          <div style={{ position: "relative", top: "-20px" }}>
+          <div className="session-sets-container">
             <table>
               <colgroup>
-                <col style={{ width: "350px" }} />
-                <col style={{ width: "200px" }} />
+                <col className="col-350" />
+                <col className="col-200" />
               </colgroup>
 
               <thead>
-                <tr style={{ borderBottom: "1px solid #e4e4e430" }}>
+                <tr className="divider-bottom">
                   <th>{translate("exercise")}:</th>
                   <th>{translate("series")}:</th>
                 </tr>
@@ -476,10 +441,7 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                     <tr key={`${exercise}-${idx}`}>
                       {idx === 0 && (
                         <td
-                          style={{
-                            borderBottom:
-                              idx === 0 ? "1px solid #e4e4e430" : "",
-                          }}
+                          className="divider-bottom"
                           rowSpan={localSession.grouped_series[exercise].length}
                         >
                           {translate(
@@ -489,19 +451,15 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                       )}
 
                       <td
-                        style={{
-                          borderBottom:
-                            idx ===
-                            localSession.grouped_series[exercise].length - 1
-                              ? "1px solid #e4e4e430"
-                              : "",
-                          paddingBottom:
-                            idx ===
-                            localSession.grouped_series[exercise].length - 1
-                              ? "5px"
-                              : "",
-                          paddingTop: idx === 0 ? "5px" : "",
-                        }}
+                        className={[
+                          idx ===
+                          localSession.grouped_series[exercise].length - 1
+                            ? "divider-bottom group-cell-last"
+                            : undefined,
+                          idx === 0 ? "group-cell-first" : undefined,
+                        ]
+                          .filter(Boolean)
+                          .join(" ")}
                       >
                         <TextField
                           variant="standard"
@@ -509,9 +467,8 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                           value={serie.reps}
                           slotProps={{
                             htmlInput: {
-                              className: "no-spinner",
+                              className: "no-spinner session-sets-reps-input",
                               min: 0,
-                              style: { width: "2em", textAlign: "center" },
                             },
                           }}
                           onChange={(e) => {
@@ -525,9 +482,8 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                           value={serie.weight?.toString()}
                           slotProps={{
                             htmlInput: {
-                              className: "no-spinner",
+                              className: "no-spinner session-sets-weight-input",
                               min: 0,
-                              style: { width: "3.5em", textAlign: "center" },
                             },
                           }}
                           onChange={(e) => {
@@ -536,7 +492,7 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                         />
                         {" " + UnitUtils.getUnit(settings.weight_unit) + " "}
                         {serie.pr && (
-                          <EmojiEventsIcon style={{ color: "gold" }} />
+                          <EmojiEventsIcon className="trophy-icon" />
                         )}
                       </td>
                     </tr>
@@ -544,12 +500,12 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                 )}
               </tbody>
             </table>
-            <div style={{ padding: "5px" }}>
+            <div className="session-sets-actions">
               <Button
                 id="import-button"
                 variant="contained"
                 disabled={!changed}
-                style={{ width: "100%" }}
+                className="full-width-button"
                 onClick={saveChanges}
               >
                 {translate("update_sets")}

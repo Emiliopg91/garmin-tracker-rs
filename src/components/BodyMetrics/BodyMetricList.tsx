@@ -17,6 +17,7 @@ import {
 import { TimeUtils } from "@/utils/TimeUtils";
 import { UnitUtils } from "@/utils/UnitUtils";
 import { BodyMetricsCompareModal } from "./BodyMetricsCompareModal";
+import "@/styles/BodyMetrics/BodyMetrics.css";
 
 type ChartDataType = {
   date: number;
@@ -147,7 +148,7 @@ export function BodyMetricList() {
       <div id="list-layer">
         {bodyMetrics.length > 1 && (
           <>
-            <div style={{ width: "100%", height: 200 }}>
+            <div className="chart-container">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart
                   data={chartData}
@@ -223,35 +224,33 @@ export function BodyMetricList() {
         <table>
           <thead>
             <tr>
-              <th style={{ textAlign: "center" }}>{}</th>
-              <th style={{ textAlign: "center" }}>{translate("date")}</th>
-              <th style={{ textAlign: "center" }}>{translate("weight")}</th>
-              <th style={{ textAlign: "center" }}>{translate("fat_ratio")}</th>
-              <th style={{ textAlign: "center" }}>{translate("lean_mass")}</th>
-              <th style={{ textAlign: "center" }}>
-                {translate("water_ratio")}
-              </th>
+              <th className="text-center">{translate("date")}</th>
+              <th className="text-center">{translate("weight")}</th>
+              <th className="text-center">{translate("fat_ratio")}</th>
+              <th className="text-center">{translate("lean_mass")}</th>
+              <th className="text-center">{translate("water_ratio")}</th>
             </tr>
           </thead>
           <tbody>
             {bodyMetrics.map((measure, idx) => (
               <tr
                 key={idx}
-                style={{ cursor: "pointer" }}
+                className="clickable-row"
                 onClick={() => openModal(measure)}
               >
                 <td>
                   {bodyMetrics.length > 1 && (
                     <Checkbox
                       onClick={(event) => toggleSelect(event, measure)}
+                      className="compare-checkbox"
                       disabled={
                         toCompare.length >= 3 &&
                         !toCompare.includes(measure.date)
                       }
                     />
                   )}
+                  {TimeUtils.formatDate(measure.date)}
                 </td>
-                <td>{TimeUtils.formatDate(measure.date)}</td>
                 <td>
                   {UnitUtils.fromKg(
                     measure.weight,
@@ -300,19 +299,11 @@ export function BodyMetricList() {
           />
         )}
       </div>
-      <div
-        style={{
-          padding: "5px",
-          width: "100%",
-          marginTop: "auto",
-          display: "flex",
-          flexDirection: "row",
-        }}
-      >
+      <div className="list-action-bar list-action-bar-row">
         {toCompare.length >= 2 && (
           <Button
             variant="contained"
-            style={{ width: "100%", marginRight: "5px" }}
+            className="full-width-button mr-5"
             onClick={goToCompare}
           >
             {translate("compare")}
@@ -321,7 +312,7 @@ export function BodyMetricList() {
         <Button
           id="add-measure-button"
           variant="contained"
-          style={{ width: "100%" }}
+          className="full-width-button"
           onClick={() => {
             setAddingNew(true);
           }}

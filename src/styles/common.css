@@ -1,0 +1,116 @@
+/* Generic, cross-component utility classes */
+
+.modal-close-button {
+  /* !important needed: MUI's IconButton sets its own position:relative at
+     runtime (for the ripple), injected after this file, same specificity */
+  position: absolute !important;
+  right: 8px;
+  top: 8px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.full-width-button {
+  width: 100%;
+}
+
+/* !important needed: MUI's ButtonBase resets margin:0 at runtime,
+   injected after this file, same specificity */
+.mr-5 {
+  margin-right: 5px !important;
+}
+
+.align-right {
+  align-content: right;
+}
+
+.chart-container {
+  width: 100%;
+  height: 200px;
+}
+
+.clickable-row {
+  cursor: pointer;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.divider-bottom {
+  border-bottom: 1px solid #e4e4e430;
+}
+
+.divider-bottom-white {
+  border-bottom: 1px solid white;
+}
+
+.trophy-icon {
+  color: gold;
+}
+
+.list-action-bar {
+  padding: 5px;
+  width: 100%;
+  margin-top: auto;
+}
+
+.list-action-bar-row {
+  display: flex;
+  flex-direction: row;
+}
+
+/* Fixed-width table column helpers */
+.col-60 {
+  width: 60px;
+}
+
+.col-100 {
+  width: 100px;
+}
+
+.col-120 {
+  width: 120px;
+}
+
+.col-150 {
+  width: 150px;
+}
+
+.col-200 {
+  width: 200px;
+}
+
+.col-230 {
+  width: 230px;
+}
+
+.col-250 {
+  width: 250px;
+}
+
+.col-260 {
+  width: 260px;
+}
+
+.col-280 {
+  width: 280px;
+}
+
+.col-350 {
+  width: 350px;
+}
+
+.col-370 {
+  width: 370px;
+}
+
+.col-400 {
+  width: 400px;
+}

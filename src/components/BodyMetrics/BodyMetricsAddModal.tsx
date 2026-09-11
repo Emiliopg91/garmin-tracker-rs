@@ -90,10 +90,7 @@ export function BodyMetricsAddModal({ latest, onClose }: Props) {
     <Dialog open={true} onClose={onClose}>
       <DialogTitle>
         {translate("add_entry")}
-        <IconButton
-          onClick={onClose}
-          sx={{ position: "absolute", right: 8, top: 8 }}
-        >
+        <IconButton onClick={onClose} className="modal-close-button">
           <CloseIcon />
         </IconButton>
       </DialogTitle>
@@ -101,7 +98,7 @@ export function BodyMetricsAddModal({ latest, onClose }: Props) {
       <DialogContent dividers>
         <table id="workout-details-table">
           <colgroup>
-            <col style={{ alignContent: "right", width: "150px" }} />
+            <col className="col-150 align-right" />
             <col />
           </colgroup>
           <tbody>
@@ -180,7 +177,7 @@ export function BodyMetricsAddModal({ latest, onClose }: Props) {
           <Button
             id="save-measure-button"
             variant="contained"
-            style={{ width: "100%" }}
+            className="full-width-button"
             onClick={onSave}
           >
             {translate("save")}

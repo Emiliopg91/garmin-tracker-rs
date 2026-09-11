@@ -62,27 +62,27 @@ export function ExercisesList() {
     <>
       <table>
         <colgroup>
-          <col style={{ width: "400px" }} />
-          <col style={{ width: "100px" }} />
-          <col style={{ width: "60px" }} />
-          <col style={{ width: "100px" }} />
+          <col className="col-400" />
+          <col className="col-100" />
+          <col className="col-60" />
+          <col className="col-100" />
         </colgroup>
         <thead>
           <tr>
-            <th style={{ textAlign: "center" }}>{translate("exercise")}</th>
-            <th style={{ textAlign: "center" }}>{translate("pr")}</th>
-            <th style={{ textAlign: "center" }}>{translate("rm")}</th>
-            <th style={{ textAlign: "center" }}>{translate("date")}</th>
+            <th className="text-center">{translate("exercise")}</th>
+            <th className="text-center">{translate("pr")}</th>
+            <th className="text-center">{translate("rm")}</th>
+            <th className="text-center">{translate("date")}</th>
           </tr>
         </thead>
         <tbody>
           {exercises.map((exercise, idx) => (
             <tr
               key={idx}
-              style={{ cursor: "pointer" }}
+              className="clickable-row"
               onClick={() => getExerciseDetails(exercise.category, exercise.id)}
             >
-              <td style={{ textAlign: "left" }}>
+              <td className="text-left">
                 {translate("exercise_" + exercise.category + "_" + exercise.id)}
               </td>
               <td>

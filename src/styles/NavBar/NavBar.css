@@ -1,0 +1,19 @@
+.navbar {
+  display: flex;
+  flex-direction: row;
+  border-bottom: 1px solid var(--primary-color);
+}
+
+.navbar-item {
+  padding: 10px;
+  cursor: pointer;
+  background-color: transparent;
+
+  &.navbar-item-selected {
+    background-color: var(--primary-color);
+  }
+}
+
+.navbar-separator {
+  flex: 1;
+}

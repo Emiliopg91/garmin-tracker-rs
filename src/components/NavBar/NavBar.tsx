@@ -1,5 +1,6 @@
 import { JSX } from "react";
 import { Box } from "@mui/material";
+import "@/styles/NavBar/NavBar.css";
 
 export type NavBarItem = {
   label: JSX.Element;
@@ -18,28 +19,17 @@ export function NavBar({
     <Box
       key={"navbar-" + idx}
       onClick={item.onSelected}
-      sx={{
-        padding: "10px",
-        cursor: "pointer",
-        bgcolor: item.selected ? "primary.main" : "transparent",
-      }}
+      className={`navbar-item${item.selected ? " navbar-item-selected" : ""}`}
     >
       {item.label}
     </Box>
   );
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "row",
-        borderBottom: 1,
-        borderColor: "primary.main",
-      }}
-    >
+    <Box className="navbar">
       {leftItems.map(renderItem)}
       {leftItems.length > 0 && rightItems.length > 0 && (
-        <Box key="separator" sx={{ flex: 1 }} />
+        <Box key="separator" className="navbar-separator" />
       )}
       {rightItems.map(renderItem)}
     </Box>

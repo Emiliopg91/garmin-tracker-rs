@@ -1,0 +1,7 @@
+.loading-backdrop {
+  /* !important needed: MUI's Backdrop sets its own background-color at
+     runtime, injected after this file, same specificity */
+  background-color: #000000d0 !important;
+  /* MUI theme.zIndex.drawer (1200) + 1 */
+  z-index: 1201;
+}

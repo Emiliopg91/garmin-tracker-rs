@@ -13,6 +13,7 @@ import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
 
 import "@/styles/main.css";
+import "@/styles/common.css";
 import { AppProvider } from "./context/AppProvider";
 
 delete (L.Icon.Default.prototype as unknown as { _getIconUrl?: unknown })

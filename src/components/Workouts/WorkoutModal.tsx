@@ -61,10 +61,7 @@ export function WorkoutModal({ workout, onClose }: Props) {
       <DialogTitle>
         {workout.name.length > 0 && <span>{workout.name}</span>}
         {workout.name.length == 0 && <span>{translate("other")}</span>}
-        <IconButton
-          onClick={onClose}
-          sx={{ position: "absolute", right: 8, top: 8 }}
-        >
+        <IconButton onClick={onClose} className="modal-close-button">
           <CloseIcon />
         </IconButton>
       </DialogTitle>
@@ -72,8 +69,8 @@ export function WorkoutModal({ workout, onClose }: Props) {
       <DialogContent dividers>
         <table id="workout-details-table">
           <colgroup>
-            <col style={{ width: "200px" }} />
-            <col style={{ width: "150px" }} />
+            <col className="col-200" />
+            <col className="col-150" />
             <col />
           </colgroup>
           <tbody>
@@ -108,7 +105,7 @@ export function WorkoutModal({ workout, onClose }: Props) {
             <hr />
             {workout.avg_volume > 0 && (
               <>
-                <div style={{ width: "100%", height: 200 }}>
+                <div className="chart-container">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart
                       data={chartData}
@@ -155,17 +152,9 @@ export function WorkoutModal({ workout, onClose }: Props) {
         <hr />
         <table>
           <colgroup>
-            <col
-              style={{
-                width: workout.avg_volume > 0 ? "230px" : "370px",
-              }}
-            />
-            <col
-              style={{
-                width: workout.avg_volume > 0 ? "120px" : "260px",
-              }}
-            />
-            {workout.avg_volume > 0 && <col style={{ width: "280px" }} />}
+            <col className={workout.avg_volume > 0 ? "col-230" : "col-370"} />
+            <col className={workout.avg_volume > 0 ? "col-120" : "col-260"} />
+            {workout.avg_volume > 0 && <col className="col-280" />}
           </colgroup>
           <thead>
             <tr>
@@ -176,20 +165,15 @@ export function WorkoutModal({ workout, onClose }: Props) {
           </thead>
           <tbody>
             {workout.sessions.map((session, idx) => (
-              <tr
-                key={idx}
-                style={{
-                  borderBottom: "1px solid #e4e4e430",
-                }}
-              >
-                <td style={{ textAlign: "center" }}>
+              <tr key={idx} className="divider-bottom">
+                <td className="text-center">
                   {TimeUtils.formatTimeDate(session.date)}
                 </td>
-                <td style={{ textAlign: "center" }}>
+                <td className="text-center">
                   {TimeUtils.formatDuration(session.time)}
                 </td>
                 {workout.avg_volume > 0 && (
-                  <td style={{ textAlign: "center" }}>
+                  <td className="text-center">
                     {UnitUtils.fromKg(
                       session.volume,
                       settings.weight_unit,

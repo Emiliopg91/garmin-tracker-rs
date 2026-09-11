@@ -43,10 +43,7 @@ export function BodyMetricsDetailsModal({
     <Dialog open={true} onClose={onClose}>
       <DialogTitle>
         {TimeUtils.formatDate(measures.date)}
-        <IconButton
-          onClick={onClose}
-          sx={{ position: "absolute", right: 8, top: 8 }}
-        >
+        <IconButton onClick={onClose} className="modal-close-button">
           <CloseIcon />
         </IconButton>
       </DialogTitle>
@@ -54,8 +51,8 @@ export function BodyMetricsDetailsModal({
       <DialogContent dividers>
         <table id="workout-details-table">
           <colgroup>
-            <col style={{ width: "200px" }} />
-            <col style={{ width: "150px" }} />
+            <col className="col-200" />
+            <col className="col-150" />
             <col />
           </colgroup>
           <tbody>
@@ -113,7 +110,7 @@ export function BodyMetricsDetailsModal({
           <hr />
           <Button
             id="import-button"
-            style={{ width: "100%" }}
+            className="full-width-button"
             variant="contained"
             color="error"
             onClick={deleteEntry}

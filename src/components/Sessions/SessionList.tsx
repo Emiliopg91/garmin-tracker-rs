@@ -106,7 +106,7 @@ export function SessionsList() {
     <>
       <div id="list-layer">
         {workload.length > 0 && (
-          <div style={{ width: "100%", height: 200 }}>
+          <div className="chart-container">
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart
                 data={workload}
@@ -180,15 +180,11 @@ export function SessionsList() {
           <thead>
             <tr>
               <th></th>
-              <th style={{ textAlign: "center" }}>{translate("date")}</th>
-              <th style={{ textAlign: "center" }}>{translate("sport")}</th>
-              <th style={{ textAlign: "center" }}>{translate("name")}</th>
-              <th style={{ textAlign: "center" }}>
-                {translate("active_calories")}
-              </th>
-              <th style={{ textAlign: "center" }}>
-                {translate("workout_load")}
-              </th>
+              <th className="text-center">{translate("date")}</th>
+              <th className="text-center">{translate("sport")}</th>
+              <th className="text-center">{translate("name")}</th>
+              <th className="text-center">{translate("active_calories")}</th>
+              <th className="text-center">{translate("workout_load")}</th>
             </tr>
           </thead>
 
@@ -197,11 +193,11 @@ export function SessionsList() {
               <tr
                 key={idx}
                 onClick={() => getSessionDetails(session.timestamp)}
-                style={{ cursor: "pointer" }}
+                className="clickable-row"
               >
                 <td>
                   {session.has_record && (
-                    <EmojiEventsIcon style={{ color: "gold" }} />
+                    <EmojiEventsIcon className="trophy-icon" />
                   )}
                 </td>
                 <td>{TimeUtils.formatTimeDate(session.timestamp)}</td>
@@ -231,12 +227,12 @@ export function SessionsList() {
         )}
       </div>
       {availableDevices.length > 0 && (
-        <div style={{ padding: "5px", width: "100%", marginTop: "auto" }}>
+        <div className="list-action-bar">
           {availableDevices.length == 1 && (
             <Button
               id="import-file-button"
               variant="contained"
-              style={{ width: "100%" }}
+              className="full-width-button"
               onClick={() => {
                 importDevice(availableDevices[0].serial_number);
               }}
@@ -253,7 +249,7 @@ export function SessionsList() {
               <Button
                 id="import-file-toggle"
                 variant="contained"
-                style={{ width: "100%" }}
+                className="full-width-button"
                 onClick={(e) => setImportMenuAnchor(e.currentTarget)}
               >
                 {translate("import_sessions")}

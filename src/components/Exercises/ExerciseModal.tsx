@@ -64,10 +64,7 @@ export function ExerciseModal({ exercise, onClose }: Props) {
     <Dialog open={true} onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle>
         {translate("exercise_" + exercise.category + "_" + exercise.id)}
-        <IconButton
-          onClick={onClose}
-          sx={{ position: "absolute", right: 8, top: 8 }}
-        >
+        <IconButton onClick={onClose} className="modal-close-button">
           <CloseIcon />
         </IconButton>
       </DialogTitle>
@@ -75,8 +72,8 @@ export function ExerciseModal({ exercise, onClose }: Props) {
       <DialogContent dividers>
         <table id="workout-details-table">
           <colgroup>
-            <col style={{ width: "200px" }} />
-            <col style={{ width: "150px" }} />
+            <col className="col-200" />
+            <col className="col-150" />
             <col />
           </colgroup>
           <tbody>
@@ -117,7 +114,7 @@ export function ExerciseModal({ exercise, onClose }: Props) {
         {Object.keys(exercise.workouts).length > 1 && (
           <>
             <hr />
-            <div style={{ width: "100%", height: 200 }}>
+            <div className="chart-container">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart
                   data={chartData}
@@ -168,10 +165,10 @@ export function ExerciseModal({ exercise, onClose }: Props) {
           </>
         )}
         <hr />
-        <table style={{ width: "100%" }}>
+        <table className="full-width">
           <colgroup>
-            <col style={{ width: "350px" }} />
-            <col style={{ width: "150px" }} />
+            <col className="col-350" />
+            <col className="col-150" />
           </colgroup>
           <thead>
             <tr>
@@ -185,9 +182,7 @@ export function ExerciseModal({ exercise, onClose }: Props) {
                 <tr key={`${workout}-${idx}`}>
                   {idx === 0 && (
                     <td
-                      style={{
-                        borderBottom: idx === 0 ? "1px solid #e4e4e430" : "",
-                      }}
+                      className="divider-bottom"
                       rowSpan={exercise.series[workout].length}
                     >
                       {workout.split("\n")[0] +
@@ -199,13 +194,11 @@ export function ExerciseModal({ exercise, onClose }: Props) {
                   )}
 
                   <td
-                    style={{
-                      borderBottom:
-                        idx === exercise.series[workout].length - 1
-                          ? "1px solid #e4e4e430"
-                          : "",
-                      textAlign: "center",
-                    }}
+                    className={`text-center${
+                      idx === exercise.series[workout].length - 1
+                        ? " divider-bottom"
+                        : ""
+                    }`}
                   >
                     {serie.reps}x
                     {UnitUtils.fromKg(

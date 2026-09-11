@@ -112,10 +112,7 @@ export function Settings({ onClose }: Props) {
       <Dialog open={true} onClose={onClose}>
         <DialogTitle>
           {translate("settings")}
-          <IconButton
-            onClick={onClose}
-            sx={{ position: "absolute", right: 8, top: 8 }}
-          >
+          <IconButton onClick={onClose} className="modal-close-button">
             <CloseIcon />
           </IconButton>
         </DialogTitle>
@@ -125,8 +122,8 @@ export function Settings({ onClose }: Props) {
             <legend>{translate("interface")}</legend>
             <table>
               <colgroup>
-                <col style={{ width: "250px" }}></col>
-                <col style={{ width: "200px" }}></col>
+                <col className="col-250"></col>
+                <col className="col-200"></col>
               </colgroup>
               <tr>
                 <td>{translate("language")}</td>
@@ -195,8 +192,8 @@ export function Settings({ onClose }: Props) {
             <legend>{translate("application")}</legend>
             <table>
               <colgroup>
-                <col style={{ width: "250px" }}></col>
-                <col style={{ width: "200px" }}></col>
+                <col className="col-250"></col>
+                <col className="col-200"></col>
               </colgroup>
               <tr>
                 <td>{translate("start_on_boot")}</td>
@@ -243,7 +240,7 @@ export function Settings({ onClose }: Props) {
                   <Button
                     id="add-measure-button"
                     variant="contained"
-                    style={{ width: "100%" }}
+                    className="full-width-button"
                     onClick={exportDatabase}
                   >
                     {translate("backup_database")}

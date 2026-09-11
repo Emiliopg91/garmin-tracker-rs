@@ -49,26 +49,20 @@ export function WorkoutsList() {
       <table>
         <thead>
           <tr>
-            <th style={{ textAlign: "center" }}>{translate("workout")}</th>
-            <th style={{ textAlign: "center" }}>
-              {translate("latest_session")}
-            </th>
-            <th style={{ textAlign: "center" }}>
-              {translate("session_count")}
-            </th>
-            <th style={{ textAlign: "center" }}>
-              {translate("average_duration")}
-            </th>
+            <th className="text-center">{translate("workout")}</th>
+            <th className="text-center">{translate("latest_session")}</th>
+            <th className="text-center">{translate("session_count")}</th>
+            <th className="text-center">{translate("average_duration")}</th>
           </tr>
         </thead>
         <tbody>
           {workouts.map((workout, idx) => (
             <tr
               key={idx}
-              style={{ cursor: "pointer" }}
+              className="clickable-row"
               onClick={() => getWorkoutDetails(workout.name)}
             >
-              <td style={{ textAlign: "left" }}>
+              <td className="text-left">
                 {workout.name.length > 0 && <span>{workout.name}</span>}
                 {workout.name.length == 0 && <span>{translate("other")}</span>}
               </td>

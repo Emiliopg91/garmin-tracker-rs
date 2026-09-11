@@ -1,0 +1,93 @@
+.session-modal-name {
+  margin-left: 10px;
+}
+
+.session-map {
+  height: 200px;
+  width: 100%;
+}
+
+/* !important on display: MUI's FormControl sets display:inline-flex at
+   runtime, injected after this file, same specificity */
+.session-map-type-control {
+  width: 100%;
+  display: flex !important;
+  align-items: center;
+}
+
+.session-hr-chart {
+  width: 100%;
+  height: 230px;
+  border-bottom: 1px solid white;
+}
+
+.session-hr-legend-heading {
+  font-weight: bold;
+}
+
+.session-hr-legend-zones {
+  display: flex;
+  justify-content: center;
+}
+
+.session-hr-zone {
+  padding-left: 10px;
+  padding-right: 10px;
+
+  &:first-child {
+    padding-left: 0;
+  }
+
+  &:last-child {
+    padding-right: 0;
+  }
+}
+
+.session-hr-zone-1 {
+  color: gray;
+}
+
+.session-hr-zone-2 {
+  color: cyan;
+}
+
+.session-hr-zone-3 {
+  color: green;
+}
+
+.session-hr-zone-4 {
+  color: orange;
+}
+
+.session-hr-zone-5 {
+  color: red;
+}
+
+.session-sets-container {
+  position: relative;
+  top: -20px;
+}
+
+/* !important needed: MUI's InputBase sets width:100% at runtime,
+   injected after this file, same specificity */
+.session-sets-reps-input {
+  width: 2em !important;
+  text-align: center;
+}
+
+.session-sets-weight-input {
+  width: 3.5em !important;
+  text-align: center;
+}
+
+.session-sets-actions {
+  padding: 5px;
+}
+
+.group-cell-first {
+  padding-top: 5px;
+}
+
+.group-cell-last {
+  padding-bottom: 5px;
+}

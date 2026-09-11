@@ -18,10 +18,7 @@ export function BodyMetricsCompareModal({ measures, onClose }: Props) {
     <Dialog open={true} onClose={onClose}>
       <DialogTitle>
         {translate("metrics_comparaison")}
-        <IconButton
-          onClick={onClose}
-          sx={{ position: "absolute", right: 8, top: 8 }}
-        >
+        <IconButton onClick={onClose} className="modal-close-button">
           <CloseIcon />
         </IconButton>
       </DialogTitle>
@@ -29,19 +26,16 @@ export function BodyMetricsCompareModal({ measures, onClose }: Props) {
       <DialogContent dividers>
         <table id="workout-details-table">
           <colgroup>
-            <col style={{ width: "200px" }} />
-            <col style={{ width: "150px" }} />
-            <col style={{ width: "150px" }} />
+            <col className="col-200" />
+            <col className="col-150" />
+            <col className="col-150" />
             <col />
           </colgroup>
           <thead>
             <tr>
-              <td style={{ borderBottom: "1px solid white" }}></td>
+              <td className="divider-bottom-white"></td>
               {measures.map((entry, idx) => (
-                <td
-                  key={"entry-" + idx}
-                  style={{ borderBottom: "1px solid white" }}
-                >
+                <td key={"entry-" + idx} className="divider-bottom-white">
                   <b>{TimeUtils.formatDate(entry.date)}</b>
                 </td>
               ))}
