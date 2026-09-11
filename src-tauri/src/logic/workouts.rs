@@ -121,7 +121,7 @@ pub fn get_workout_details(
             session_list.push(wk_sess);
         }
 
-        let mut details = WorkoutDetails {
+        let details = WorkoutDetails {
             name: name.to_string(),
             avg_time: time / (sessions.len() as u32),
             latest_session: latest.date as i32,
@@ -129,18 +129,6 @@ pub fn get_workout_details(
             session_count: count,
             sessions: session_list,
         };
-
-        for i in 0..details.sessions.len().saturating_sub(1) {
-            let (left, right) = details.sessions.split_at_mut(i + 1);
-
-            let current = &mut left[i];
-            let previous = &right[0];
-
-            current.vol_diff = format!(
-                "{:+.2}%",
-                (current.volume - previous.volume) / previous.volume * 100.0
-            );
-        }
 
         Ok(details)
     });

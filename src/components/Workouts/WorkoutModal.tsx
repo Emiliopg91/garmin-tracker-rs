@@ -196,8 +196,20 @@ export function WorkoutModal({ workout, onClose }: Props) {
                       session.volume,
                       settings.weight_unit,
                     ).toFixed(1)}{" "}
-                    {UnitUtils.getUnit(settings.weight_unit)}{" "}
-                    {session.vol_diff != "-" && "(" + session.vol_diff + ")"}
+                    {UnitUtils.getUnit(settings.weight_unit)}
+                    {idx < workout.sessions.length - 1 &&
+                      " (" +
+                        new Intl.NumberFormat("es-ES", {
+                          style: "percent",
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                          signDisplay: "always",
+                        }).format(
+                          (workout.sessions[idx].volume -
+                            workout.sessions[idx + 1].volume) /
+                            workout.sessions[idx + 1].volume,
+                        ) +
+                        ")"}
                   </td>
                 )}
               </tr>

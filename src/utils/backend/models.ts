@@ -128,7 +128,7 @@ export enum WeightUnit {
 	Pounds = "Pounds",
 }
 
-// From src-tauri/src/dto/workouts.rs:33
+// From src-tauri/src/dto/workouts.rs:31
 export interface WorkoutDetails {
   avg_time: number;
   avg_volume: number;
@@ -150,7 +150,6 @@ export interface WorkoutListItem {
 export interface WorkoutSession {
   date: number;
   time: number;
-  vol_diff: string;
   volume: number;
 }
 

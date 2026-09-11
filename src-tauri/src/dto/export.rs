@@ -13,6 +13,7 @@ use crate::{
         settings::{Settings, SettingsRepository},
         workout::{Workout, WorkoutRepository},
     },
+    dto::sessions::SessionSet,
     utils::translations::{Languages, translate},
 };
 
@@ -112,7 +113,7 @@ pub struct SessionExport {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub heart_rates: Option<Vec<Option<u8>>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub sets: Option<Vec<Set>>,
+    pub sets: Option<Vec<SessionSet>>,
 }
 
 impl From<(&Session, Option<&AdditionalData>, Option<&Vec<Set>>)> for SessionExport {
@@ -131,7 +132,9 @@ impl From<(&Session, Option<&AdditionalData>, Option<&Vec<Set>>)> for SessionExp
         if let Some(srs) = values.2
             && !srs.is_empty()
         {
-            series = Some(srs.clone());
+            let sers = srs.iter().map(SessionSet::from).collect();
+
+            series = Some(sers);
         }
 
         Self {

@@ -12,7 +12,6 @@ use super::exercise::Exercise;
 #[index("exercise", (ex_cat, ex_id))]
 #[unique("exercise_personal_record", (ex_cat, ex_id), (pr=true))]
 pub struct Set {
-    #[serde(skip)]
     pub session: i64,
     pub idx: u8,
     #[column("exercise_category")]
@@ -23,7 +22,6 @@ pub struct Set {
     pub weight: f64,
     pub pr: bool,
 
-    #[serde(skip)]
     #[relationship((ex_cat, exercise::entity::columns::CATEGORY),(ex_id, exercise::entity::columns::ID))]
     #[allow(dead_code)]
     pub exercise: Option<Exercise>,

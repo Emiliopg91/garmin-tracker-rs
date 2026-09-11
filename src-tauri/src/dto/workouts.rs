@@ -15,7 +15,6 @@ pub struct WorkoutSession {
     pub date: i32,
     pub volume: f64,
     pub time: u32,
-    pub vol_diff: String,
 }
 
 impl From<&Session> for WorkoutSession {
@@ -24,7 +23,6 @@ impl From<&Session> for WorkoutSession {
             date: value.date as i32,
             volume: 0_f64,
             time: value.total_elapsed_time,
-            vol_diff: "-".to_string(),
         }
     }
 }
