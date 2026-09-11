@@ -148,8 +148,6 @@ export function WorkoutModal({ workout, onClose }: Props) {
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
-                <br />
-                <hr />
               </>
             )}
           </>

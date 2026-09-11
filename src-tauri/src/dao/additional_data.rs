@@ -12,7 +12,6 @@ pub struct AdditionalData {
 }
 
 impl AdditionalData {
-    pub const INVALID_CADENCE: u8 = u8::MAX;
     pub const INVALID_HEAR_RATE: u8 = u8::MAX;
     pub const INVALID_POSITION: i32 = i32::MAX;
     pub const INVALID_SPEED: f64 = -1_f64;
