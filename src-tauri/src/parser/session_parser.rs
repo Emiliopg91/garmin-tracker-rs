@@ -13,49 +13,54 @@ use rustyfit::{
     profile::{mesgdef, typedef::MesgNum},
 };
 
-impl TryFrom<FitParser<'_>> for Session {
+impl TryFrom<FitParser> for Session {
     type Error = errors::ParseFitFileError;
-    fn try_from(mut value: FitParser<'_>) -> Result<Self, Self::Error> {
+    fn try_from(mut value: FitParser) -> Result<Self, Self::Error> {
         let mut session_data = SessionAccumulator::new();
         let mut records = RecordAccumulator::new();
         let mut exercises = Vec::new();
         let mut series_data = Vec::new();
         let mut laps = Vec::new();
 
-        while let Some(event) = value.stream.next() {
-            let event = event.map_err(|e| {
-                ParseFitFileError::FileReading(value.path.display().to_string(), Box::new(e))
-            })?;
-            if let DecoderEvent::Message(msg) = event {
-                match msg.num {
-                    MesgNum::WORKOUT => {
-                        let workout_obj = mesgdef::Workout::from(msg);
-                        session_data.set_workout(workout_obj);
+        let path_string = value.borrow_path().display().to_string();
+
+        value.with_stream_mut(|stream| -> errors::Result<()> {
+            while let Some(event) = stream.next() {
+                let event = event.map_err(|e| {
+                    ParseFitFileError::FileReading(path_string.clone(), Box::new(e))
+                })?;
+                if let DecoderEvent::Message(msg) = event {
+                    match msg.num {
+                        MesgNum::WORKOUT => {
+                            let workout_obj = mesgdef::Workout::from(msg);
+                            session_data.set_workout(workout_obj);
+                        }
+                        MesgNum::SESSION => {
+                            let session_obj = mesgdef::Session::from(msg);
+                            session_data.set_session(session_obj)?;
+                        }
+                        MesgNum::WORKOUT_STEP => {
+                            let record_obj = mesgdef::WorkoutStep::from(msg);
+                            handle_step_message(record_obj, &mut exercises)
+                        }
+                        MesgNum::RECORD => {
+                            let record_obj = mesgdef::Record::from(msg);
+                            records.push(record_obj);
+                        }
+                        MesgNum::SET => {
+                            let set_obj = mesgdef::Set::from(msg);
+                            handle_set_message(set_obj, &mut series_data);
+                        }
+                        MesgNum::LAP => {
+                            let lap_obj = mesgdef::Lap::from(msg);
+                            handle_lap_message(lap_obj, &mut laps)?;
+                        }
+                        _ => {}
                     }
-                    MesgNum::SESSION => {
-                        let session_obj = mesgdef::Session::from(msg);
-                        session_data.set_session(session_obj)?;
-                    }
-                    MesgNum::WORKOUT_STEP => {
-                        let record_obj = mesgdef::WorkoutStep::from(msg);
-                        handle_step_message(record_obj, &mut exercises)
-                    }
-                    MesgNum::RECORD => {
-                        let record_obj = mesgdef::Record::from(msg);
-                        records.push(record_obj);
-                    }
-                    MesgNum::SET => {
-                        let set_obj = mesgdef::Set::from(msg);
-                        handle_set_message(set_obj, &mut series_data);
-                    }
-                    MesgNum::LAP => {
-                        let lap_obj = mesgdef::Lap::from(msg);
-                        handle_lap_message(lap_obj, &mut laps)?;
-                    }
-                    _ => {}
                 }
             }
-        }
+            Ok(())
+        })?;
 
         let mut serie_idx = 0;
         let series = series_data
