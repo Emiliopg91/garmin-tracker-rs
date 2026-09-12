@@ -16,7 +16,7 @@ use rusqlite_orm::database::{
 use rusqlite_orm_macros::dlls;
 use tauri::Manager;
 use tauri_plugin_log::{
-    Target, TargetKind,
+    LogLevel, Target, TargetKind,
     log::{LevelFilter, debug, error, info, warn},
 };
 
@@ -46,14 +46,13 @@ where
     P: AsRef<Path>,
 {
     for path in paths {
-        let res: Result<(), Box<dyn std::error::Error>> =
-            match FitParser::from_file(path) {
-                Ok(stream) => match stream.debug_dump() {
-                    Ok(_) => Ok(()),
-                    Err(e) => Err(e),
-                },
-                Err(e) => Err(Box::new(e)),
-            };
+        let res: Result<(), Box<dyn std::error::Error>> = match FitParser::from_file(path) {
+            Ok(stream) => match stream.debug_dump() {
+                Ok(_) => Ok(()),
+                Err(e) => Err(e),
+            },
+            Err(e) => Err(Box::new(e)),
+        };
         if let Err(e) = res {
             eprintln!(
                 "Error handling '{}': \n  {}",
@@ -68,7 +67,7 @@ pub type SettingsLock = RwLock<Settings>;
 
 /// Boots the Tauri app: acquires the single-instance lock, opens/migrates the DB, loads settings, and registers commands.
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
-pub fn run() {
+pub fn run(log_level: LevelFilter) {
     SingleInstance::acquire();
 
     if let Err(e) = tauri::Builder::default()
@@ -76,9 +75,9 @@ pub fn run() {
         .plugin(
             tauri_plugin_log::Builder::new()
                 .level(LevelFilter::Warn)
-                .level_for(constants::LIB_NAME.clone(), *constants::LOG_LEVEL)
-                .level_for("command", *constants::LOG_LEVEL)
-                .level_for("rusqlite_orm", *constants::LOG_LEVEL)
+                .level_for(constants::LIB_NAME.clone(), log_level)
+                .level_for("command", log_level)
+                .level_for("rusqlite_orm", log_level)
                 .clear_targets()
                 .target(Target::new(TargetKind::Folder {
                     path: constants::LOGS_DIR.clone(),

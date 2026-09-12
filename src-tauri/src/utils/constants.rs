@@ -61,14 +61,6 @@ pub static DB_FILE: LazyLock<PathBuf> = LazyLock::new(|| DATA_LOCAL_DIR.join("da
 
 // Logs block
 pub static LOGS_DIR: LazyLock<PathBuf> = LazyLock::new(|| ensure_dir(DATA_LOCAL_DIR.join("logs")));
-
-pub static LOG_LEVEL: LazyLock<LevelFilter> = LazyLock::new(|| {
-    std::env::var("LOGGER_LEVEL")
-        .ok()
-        .and_then(|v| LevelFilter::from_str(v.trim()).ok())
-        .unwrap_or(LevelFilter::Info)
-});
-
 pub const LOG_FILE_MAX_SIZE: u128 = 50 * 1_024 * 1_024;
 pub const LOG_FILE_ROTATION_STRATEGY: RotationStrategy = RotationStrategy::KeepSome(3);
 
