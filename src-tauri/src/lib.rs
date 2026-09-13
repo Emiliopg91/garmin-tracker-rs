@@ -16,7 +16,7 @@ use rusqlite_orm::database::{
 use rusqlite_orm_macros::dlls;
 use tauri::Manager;
 use tauri_plugin_log::{
-    LogLevel, Target, TargetKind,
+    Target, TargetKind,
     log::{LevelFilter, debug, error, info, warn},
 };
 
@@ -38,10 +38,8 @@ use crate::{
 #[cfg(debug_assertions)]
 use crate::parser::FitParser;
 
-dlls!("../resources/ddl");
-
 #[cfg(debug_assertions)]
-pub fn unwrap_path<P>(paths: &[P])
+pub fn decode_files<P>(paths: &[P])
 where
     P: AsRef<Path>,
 {
@@ -62,6 +60,12 @@ where
         }
     }
 }
+
+pub fn check_running() -> bool {
+    SingleInstance::is_app_running().0
+}
+
+dlls!("../resources/ddl");
 
 pub type SettingsLock = RwLock<Settings>;
 

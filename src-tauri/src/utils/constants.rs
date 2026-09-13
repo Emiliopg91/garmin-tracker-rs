@@ -1,7 +1,7 @@
-use std::{fs, path::PathBuf, str::FromStr, sync::LazyLock};
+use std::{fs, path::PathBuf, sync::LazyLock};
 
 use semver::Version;
-use tauri_plugin_log::{RotationStrategy, log::LevelFilter};
+use tauri_plugin_log::RotationStrategy;
 
 use crate::utils::translations::Languages;
 

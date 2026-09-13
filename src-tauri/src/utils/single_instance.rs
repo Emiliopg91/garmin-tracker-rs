@@ -17,8 +17,7 @@ static LOCK_FILE_HANDLE: OnceLock<File> = OnceLock::new();
 pub struct SingleInstance {}
 
 impl SingleInstance {
-    /// Ensures only one app instance runs: takes an flock on the PID lock file, killing (`SIGTERM` then `SIGKILL`) any previous holder if needed.
-    pub fn acquire() {
+    pub fn is_app_running() -> (bool, File) {
         let file = OpenOptions::new()
             .create(true)
             .write(true)
@@ -26,7 +25,20 @@ impl SingleInstance {
             .open(&*constants::LOCK_FILE)
             .expect("Could not open lock file");
 
-        if !Self::try_lock(&file) {
+        (
+            !Self::try_lock(&file),
+            OpenOptions::new()
+                .create(true)
+                .write(true)
+                .truncate(false)
+                .open(&*constants::LOCK_FILE)
+                .expect("Could not open lock file"),
+        )
+    }
+
+    pub fn acquire() {
+        let (running, file) = SingleInstance::is_app_running();
+        if running {
             let previous_pid = fs::read_to_string(&*constants::LOCK_FILE)
                 .ok()
                 .and_then(|content| content.trim().parse::<u32>().ok());

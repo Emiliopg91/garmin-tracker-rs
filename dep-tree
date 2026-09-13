@@ -1,4 +1,4 @@
-garmin-tracker-rs v2.1.1 (/var/mnt/Datos/Desarrollo/Workspace/VSCode/taurfit/src-tauri)
+garmin-tracker-rs v2.1.2 (/var/mnt/Datos/Desarrollo/Workspace/VSCode/taurfit/src-tauri)
 ├── chrono v0.4.45
 │   ├── iana-time-zone v0.1.65
 │   └── num-traits v0.2.19
@@ -105,7 +105,7 @@ garmin-tracker-rs v2.1.1 (/var/mnt/Datos/Desarrollo/Workspace/VSCode/taurfit/src
 │       │   │   │   │   │   ├── yoke v0.8.3 (*)
 │       │   │   │   │   │   └── zerofrom v0.1.8 (*)
 │       │   │   │   │   └── zerovec v0.11.8 (*)
-│       │   │   │   ├── smallvec v1.16.0
+│       │   │   │   ├── smallvec v1.16.1
 │       │   │   │   └── zerovec v0.11.8 (*)
 │       │   │   └── icu_properties v2.3.0
 │       │   │       ├── displaydoc v0.2.7 (proc-macro) (*)
@@ -115,7 +115,7 @@ garmin-tracker-rs v2.1.1 (/var/mnt/Datos/Desarrollo/Workspace/VSCode/taurfit/src
 │       │   │       ├── icu_provider v2.3.1 (*)
 │       │   │       ├── zerotrie v0.2.5 (*)
 │       │   │       └── zerovec v0.11.8 (*)
-│       │   ├── smallvec v1.16.0
+│       │   ├── smallvec v1.16.1
 │       │   └── utf8_iter v1.0.4
 │       ├── percent-encoding v2.3.2
 │       ├── serde v1.0.229
@@ -130,16 +130,6 @@ garmin-tracker-rs v2.1.1 (/var/mnt/Datos/Desarrollo/Workspace/VSCode/taurfit/src
 ├── garmin-tracker-rs-macros v0.1.0 (proc-macro) (/var/mnt/Datos/Desarrollo/Workspace/VSCode/taurfit/src-tauri-macros)
 │   ├── proc-macro2 v1.0.107 (*)
 │   ├── quote v1.0.47 (*)
-│   ├── serde_yaml v0.9.34+deprecated
-│   │   ├── indexmap v2.14.2
-│   │   │   ├── equivalent v1.0.2
-│   │   │   └── hashbrown v0.17.1
-│   │   ├── itoa v1.0.18
-│   │   ├── ryu v1.0.23
-│   │   ├── serde v1.0.229
-│   │   │   ├── serde_core v1.0.229
-│   │   │   └── serde_derive v1.0.229 (proc-macro) (*)
-│   │   └── unsafe-libyaml v0.2.11
 │   └── syn v2.0.119 (*)
 ├── libc v0.2.189
 ├── mtp-rs v0.32.0
@@ -177,8 +167,11 @@ garmin-tracker-rs v2.1.1 (/var/mnt/Datos/Desarrollo/Workspace/VSCode/taurfit/src
 │   ├── num_enum v0.7.6
 │   │   ├── num_enum_derive v0.7.6 (proc-macro)
 │   │   │   ├── proc-macro-crate v3.5.0
-│   │   │   │   └── toml_edit v0.25.13+spec-1.1.0
-│   │   │   │       ├── indexmap v2.14.2 (*)
+│   │   │   │   └── toml_edit v0.25.15+spec-1.1.0
+│   │   │   │       ├── indexmap v2.14.2
+│   │   │   │       │   ├── equivalent v1.0.2
+│   │   │   │       │   ├── hashbrown v0.17.1
+│   │   │   │       │   └── serde_core v1.0.229
 │   │   │   │       ├── toml_datetime v1.1.1+spec-1.1.0
 │   │   │   │       │   └── serde_core v1.0.229
 │   │   │   │       ├── toml_parser v1.1.3+spec-1.1.0
@@ -194,12 +187,27 @@ garmin-tracker-rs v2.1.1 (/var/mnt/Datos/Desarrollo/Workspace/VSCode/taurfit/src
 │   │   ├── log v0.4.34
 │   │   ├── once_cell v1.21.4
 │   │   ├── rustix v1.1.4
-│   │   │   ├── bitflags v2.13.1
+│   │   │   ├── bitflags v2.13.2
 │   │   │   │   └── serde_core v1.0.229
 │   │   │   └── linux-raw-sys v0.12.1
 │   │   └── slab v0.4.12
 │   └── thiserror v2.0.20 (*)
 ├── nusb v0.2.7 (*)
+├── ouroboros v0.18.5
+│   ├── aliasable v0.1.3
+│   ├── ouroboros_macro v0.18.5 (proc-macro)
+│   │   ├── heck v0.4.1
+│   │   ├── proc-macro2 v1.0.107 (*)
+│   │   ├── proc-macro2-diagnostics v0.10.1
+│   │   │   ├── proc-macro2 v1.0.107 (*)
+│   │   │   ├── quote v1.0.47 (*)
+│   │   │   ├── syn v2.0.119 (*)
+│   │   │   └── yansi v1.0.1
+│   │   │   [build-dependencies]
+│   │   │   └── version_check v0.9.5
+│   │   ├── quote v1.0.47 (*)
+│   │   └── syn v2.0.119 (*)
+│   └── static_assertions v1.1.0
 ├── phf v0.11.3
 │   ├── phf_macros v0.11.3 (proc-macro)
 │   │   ├── phf_generator v0.11.3
@@ -221,7 +229,7 @@ garmin-tracker-rs v2.1.1 (/var/mnt/Datos/Desarrollo/Workspace/VSCode/taurfit/src
 │       │   │   └── crossbeam-utils v0.8.23
 │       │   └── crossbeam-utils v0.8.23
 │       └── crossbeam-utils v0.8.23
-├── rusqlite_orm v0.4.14
+├── rusqlite_orm v0.5.0
 │   ├── log v0.4.34
 │   ├── r2d2 v0.8.10
 │   │   ├── log v0.4.34
@@ -231,13 +239,13 @@ garmin-tracker-rs v2.1.1 (/var/mnt/Datos/Desarrollo/Workspace/VSCode/taurfit/src
 │   │   │   └── parking_lot_core v0.9.12
 │   │   │       ├── cfg-if v1.0.4
 │   │   │       ├── libc v0.2.189
-│   │   │       └── smallvec v1.16.0
+│   │   │       └── smallvec v1.16.1
 │   │   └── scheduled-thread-pool v0.2.7
 │   │       └── parking_lot v0.12.5 (*)
 │   ├── r2d2_sqlite v0.35.0
 │   │   ├── r2d2 v0.8.10 (*)
 │   │   ├── rusqlite v0.40.2
-│   │   │   ├── bitflags v2.13.1 (*)
+│   │   │   ├── bitflags v2.13.2 (*)
 │   │   │   ├── fallible-iterator v0.3.0
 │   │   │   ├── fallible-streaming-iterator v0.1.9
 │   │   │   ├── hashlink v0.12.2
@@ -248,8 +256,8 @@ garmin-tracker-rs v2.1.1 (/var/mnt/Datos/Desarrollo/Workspace/VSCode/taurfit/src
 │   │   │   │   ├── cc v1.4.5 (*)
 │   │   │   │   ├── pkg-config v0.3.34
 │   │   │   │   └── vcpkg v0.2.15
-│   │   │   └── smallvec v1.16.0
-│   │   └── uuid v1.26.0
+│   │   │   └── smallvec v1.16.1
+│   │   └── uuid v1.26.1
 │   │       ├── getrandom v0.4.3
 │   │       │   ├── cfg-if v1.0.4
 │   │       │   ├── libc v0.2.189
@@ -263,11 +271,11 @@ garmin-tracker-rs v2.1.1 (/var/mnt/Datos/Desarrollo/Workspace/VSCode/taurfit/src
 │   │       │   └── rand_core v0.10.1
 │   │       └── serde_core v1.0.229
 │   └── thiserror v2.0.20 (*)
-├── rusqlite_orm_macros v0.4.11 (proc-macro)
+├── rusqlite_orm_macros v0.4.16 (proc-macro)
 │   ├── proc-macro2 v1.0.107 (*)
 │   ├── quote v1.0.47 (*)
 │   └── syn v2.0.119 (*)
-├── rustyfit v0.10.2
+├── rustyfit v0.10.3
 │   ├── embedded-io v0.7.1
 │   └── serde v1.0.229 (*)
 ├── semver v1.0.28
@@ -309,12 +317,14 @@ garmin-tracker-rs v2.1.1 (/var/mnt/Datos/Desarrollo/Workspace/VSCode/taurfit/src
 │   │   │   │   │   [build-dependencies]
 │   │   │   │   │   └── system-deps v6.2.2
 │   │   │   │   │       ├── cfg-expr v0.15.8
-│   │   │   │   │       │   ├── smallvec v1.16.0
+│   │   │   │   │       │   ├── smallvec v1.16.1
 │   │   │   │   │       │   └── target-lexicon v0.12.16
 │   │   │   │   │       ├── heck v0.5.0
 │   │   │   │   │       ├── pkg-config v0.3.34
 │   │   │   │   │       ├── toml v0.8.2
-│   │   │   │   │       │   ├── serde v1.0.229 (*)
+│   │   │   │   │       │   ├── serde v1.0.229
+│   │   │   │   │       │   │   ├── serde_core v1.0.229
+│   │   │   │   │       │   │   └── serde_derive v1.0.229 (proc-macro) (*)
 │   │   │   │   │       │   ├── serde_spanned v0.6.9
 │   │   │   │   │       │   │   └── serde v1.0.229 (*)
 │   │   │   │   │       │   ├── toml_datetime v0.6.3
@@ -335,7 +345,7 @@ garmin-tracker-rs v2.1.1 (/var/mnt/Datos/Desarrollo/Workspace/VSCode/taurfit/src
 │   │   │   │   [build-dependencies]
 │   │   │   │   └── system-deps v6.2.2 (*)
 │   │   │   ├── glib v0.18.5
-│   │   │   │   ├── bitflags v2.13.1 (*)
+│   │   │   │   ├── bitflags v2.13.2 (*)
 │   │   │   │   ├── futures-channel v0.3.34 (*)
 │   │   │   │   ├── futures-core v0.3.34
 │   │   │   │   ├── futures-executor v0.3.34 (*)
@@ -373,7 +383,7 @@ garmin-tracker-rs v2.1.1 (/var/mnt/Datos/Desarrollo/Workspace/VSCode/taurfit/src
 │   │   │   │   ├── libc v0.2.189
 │   │   │   │   ├── memchr v2.8.3
 │   │   │   │   ├── once_cell v1.21.4
-│   │   │   │   ├── smallvec v1.16.0
+│   │   │   │   ├── smallvec v1.16.1
 │   │   │   │   └── thiserror v1.0.69
 │   │   │   │       └── thiserror-impl v1.0.69 (proc-macro)
 │   │   │   │           ├── proc-macro2 v1.0.107 (*)
@@ -381,7 +391,7 @@ garmin-tracker-rs v2.1.1 (/var/mnt/Datos/Desarrollo/Workspace/VSCode/taurfit/src
 │   │   │   │           └── syn v2.0.119 (*)
 │   │   │   └── libc v0.2.189
 │   │   ├── cairo-rs v0.18.5
-│   │   │   ├── bitflags v2.13.1 (*)
+│   │   │   ├── bitflags v2.13.2 (*)
 │   │   │   ├── cairo-sys-rs v0.18.2
 │   │   │   │   ├── glib-sys v0.18.1 (*)
 │   │   │   │   └── libc v0.2.189
@@ -420,7 +430,7 @@ garmin-tracker-rs v2.1.1 (/var/mnt/Datos/Desarrollo/Workspace/VSCode/taurfit/src
 │   │   │   │   │   ├── libc v0.2.189
 │   │   │   │   │   ├── once_cell v1.21.4
 │   │   │   │   │   ├── pin-project-lite v0.2.17
-│   │   │   │   │   ├── smallvec v1.16.0
+│   │   │   │   │   ├── smallvec v1.16.1
 │   │   │   │   │   └── thiserror v1.0.69 (*)
 │   │   │   │   ├── glib v0.18.5 (*)
 │   │   │   │   ├── libc v0.2.189
@@ -493,7 +503,7 @@ garmin-tracker-rs v2.1.1 (/var/mnt/Datos/Desarrollo/Workspace/VSCode/taurfit/src
 │   │   │   └── serde v1.0.229 (*)
 │   │   ├── gtk v0.18.2 (*)
 │   │   ├── keyboard-types v0.7.0
-│   │   │   ├── bitflags v2.13.1 (*)
+│   │   │   ├── bitflags v2.13.2 (*)
 │   │   │   ├── serde v1.0.229 (*)
 │   │   │   └── unicode-segmentation v1.13.3
 │   │   ├── once_cell v1.21.4
@@ -608,7 +618,7 @@ garmin-tracker-rs v2.1.1 (/var/mnt/Datos/Desarrollo/Workspace/VSCode/taurfit/src
 │   │   │   │   │   │   │   │   ├── quote v1.0.47 (*)
 │   │   │   │   │   │   │   │   └── syn v2.0.119 (*)
 │   │   │   │   │   │   │   └── phf_shared v0.13.1 (*)
-│   │   │   │   │   │   └── smallvec v1.16.0
+│   │   │   │   │   │   └── smallvec v1.16.1
 │   │   │   │   │   ├── foldhash v0.2.0
 │   │   │   │   │   ├── html5ever v0.38.0
 │   │   │   │   │   │   ├── log v0.4.34
@@ -634,7 +644,7 @@ garmin-tracker-rs v2.1.1 (/var/mnt/Datos/Desarrollo/Workspace/VSCode/taurfit/src
 │   │   │   │   │   │               └── quote v1.0.47 (*)
 │   │   │   │   │   ├── precomputed-hash v0.1.1
 │   │   │   │   │   ├── selectors v0.36.1
-│   │   │   │   │   │   ├── bitflags v2.13.1
+│   │   │   │   │   │   ├── bitflags v2.13.2
 │   │   │   │   │   │   ├── cssparser v0.36.0 (*)
 │   │   │   │   │   │   ├── derive_more v2.1.1
 │   │   │   │   │   │   │   └── derive_more-impl v2.1.1 (proc-macro)
@@ -650,7 +660,7 @@ garmin-tracker-rs v2.1.1 (/var/mnt/Datos/Desarrollo/Workspace/VSCode/taurfit/src
 │   │   │   │   │   │   ├── rustc-hash v2.1.3
 │   │   │   │   │   │   ├── servo_arc v0.4.3
 │   │   │   │   │   │   │   └── stable_deref_trait v1.2.1
-│   │   │   │   │   │   └── smallvec v1.16.0
+│   │   │   │   │   │   └── smallvec v1.16.1
 │   │   │   │   │   │   [build-dependencies]
 │   │   │   │   │   │   └── phf_codegen v0.13.1 (*)
 │   │   │   │   │   └── tendril v0.5.1 (*)
@@ -661,7 +671,7 @@ garmin-tracker-rs v2.1.1 (/var/mnt/Datos/Desarrollo/Workspace/VSCode/taurfit/src
 │   │   │   │   │   └── cfb v0.7.3
 │   │   │   │   │       ├── byteorder v1.5.0
 │   │   │   │   │       ├── fnv v1.0.7
-│   │   │   │   │       └── uuid v1.26.0
+│   │   │   │   │       └── uuid v1.26.1
 │   │   │   │   │           ├── getrandom v0.4.3
 │   │   │   │   │           │   ├── cfg-if v1.0.4
 │   │   │   │   │           │   └── libc v0.2.189
@@ -710,7 +720,7 @@ garmin-tracker-rs v2.1.1 (/var/mnt/Datos/Desarrollo/Workspace/VSCode/taurfit/src
 │   │   │   │   │   ├── serde v1.0.229 (*)
 │   │   │   │   │   ├── serde_json v1.0.151 (*)
 │   │   │   │   │   ├── url v2.5.8 (*)
-│   │   │   │   │   └── uuid v1.26.0 (*)
+│   │   │   │   │   └── uuid v1.26.1 (*)
 │   │   │   │   ├── semver v1.0.28 (*)
 │   │   │   │   ├── serde v1.0.229 (*)
 │   │   │   │   ├── serde-untagged v0.1.9
@@ -738,7 +748,7 @@ garmin-tracker-rs v2.1.1 (/var/mnt/Datos/Desarrollo/Workspace/VSCode/taurfit/src
 │   │   │   │   │       ├── quote v1.0.47 (*)
 │   │   │   │   │       └── syn v3.0.5 (*)
 │   │   │   │   ├── thiserror v2.0.20 (*)
-│   │   │   │   ├── toml v1.1.5+spec-1.1.0
+│   │   │   │   ├── toml v1.1.6+spec-1.1.0
 │   │   │   │   │   ├── serde_core v1.0.229
 │   │   │   │   │   ├── serde_spanned v1.1.1
 │   │   │   │   │   │   └── serde_core v1.0.229
@@ -757,12 +767,12 @@ garmin-tracker-rs v2.1.1 (/var/mnt/Datos/Desarrollo/Workspace/VSCode/taurfit/src
 │   │   │   │   │   │   └── unic-ucd-version v0.9.0
 │   │   │   │   │   │       └── unic-common v0.9.0
 │   │   │   │   │   └── url v2.5.8 (*)
-│   │   │   │   ├── uuid v1.26.0 (*)
+│   │   │   │   ├── uuid v1.26.1 (*)
 │   │   │   │   └── walkdir v2.5.0
 │   │   │   │       └── same-file v1.0.6
 │   │   │   ├── thiserror v2.0.20 (*)
 │   │   │   ├── url v2.5.8 (*)
-│   │   │   ├── uuid v1.26.0 (*)
+│   │   │   ├── uuid v1.26.1 (*)
 │   │   │   └── walkdir v2.5.0 (*)
 │   │   └── tauri-utils v2.9.3 (*)
 │   ├── tauri-runtime v2.11.3
@@ -793,10 +803,10 @@ garmin-tracker-rs v2.1.1 (/var/mnt/Datos/Desarrollo/Workspace/VSCode/taurfit/src
 │   │   │   ├── serde_json v1.0.151 (*)
 │   │   │   ├── serde_with v3.23.0 (*)
 │   │   │   ├── thiserror v2.0.20 (*)
-│   │   │   ├── toml v1.1.5+spec-1.1.0 (*)
+│   │   │   ├── toml v1.1.6+spec-1.1.0 (*)
 │   │   │   ├── url v2.5.8 (*)
 │   │   │   ├── urlpattern v0.3.0 (*)
-│   │   │   ├── uuid v1.26.0 (*)
+│   │   │   ├── uuid v1.26.1 (*)
 │   │   │   └── walkdir v2.5.0 (*)
 │   │   ├── thiserror v2.0.20 (*)
 │   │   ├── url v2.5.8 (*)
@@ -856,7 +866,7 @@ garmin-tracker-rs v2.1.1 (/var/mnt/Datos/Desarrollo/Workspace/VSCode/taurfit/src
 │   │   ├── percent-encoding v2.3.2
 │   │   ├── raw-window-handle v0.6.2
 │   │   ├── tao v0.35.3
-│   │   │   ├── bitflags v2.13.1 (*)
+│   │   │   ├── bitflags v2.13.2 (*)
 │   │   │   ├── crossbeam-channel v0.5.17 (*)
 │   │   │   ├── dbus v0.9.12
 │   │   │   │   ├── libc v0.2.189
@@ -964,8 +974,8 @@ garmin-tracker-rs v2.1.1 (/var/mnt/Datos/Desarrollo/Workspace/VSCode/taurfit/src
 │   │   │   │   ├── cc v1.4.5 (*)
 │   │   │   │   ├── memchr v2.8.3
 │   │   │   │   ├── rustc_version v0.4.1 (*)
-│   │   │   │   └── toml v1.1.5+spec-1.1.0 (*)
-│   │   │   └── toml v1.1.5+spec-1.1.0 (*)
+│   │   │   │   └── toml v1.1.6+spec-1.1.0 (*)
+│   │   │   └── toml v1.1.6+spec-1.1.0 (*)
 │   │   └── walkdir v2.5.0 (*)
 │   └── tauri-utils v2.9.3 (*)
 ├── tauri-plugin-autostart v2.5.1
@@ -1002,7 +1012,7 @@ garmin-tracker-rs v2.1.1 (/var/mnt/Datos/Desarrollo/Workspace/VSCode/taurfit/src
 ├── tauri-plugin-opener v2.5.5
 │   ├── dunce v1.0.5
 │   ├── glob v0.3.4
-│   ├── open v5.4.3
+│   ├── open v5.4.4
 │   │   ├── is-wsl v0.4.0
 │   │   │   ├── is-docker v0.2.0
 │   │   │   │   └── once_cell v1.21.4
@@ -1116,7 +1126,7 @@ garmin-tracker-rs v2.1.1 (/var/mnt/Datos/Desarrollo/Workspace/VSCode/taurfit/src
 │       │   │   └── syn v2.0.119 (*)
 │       │   └── tracing-core v0.1.36
 │       │       └── once_cell v1.21.4
-│       ├── uuid v1.26.0 (*)
+│       ├── uuid v1.26.1 (*)
 │       ├── winnow v1.0.4
 │       ├── zbus_macros v5.19.0 (proc-macro)
 │       │   ├── proc-macro-crate v3.5.0 (*)
@@ -1167,8 +1177,19 @@ garmin-tracker-rs v2.1.1 (/var/mnt/Datos/Desarrollo/Workspace/VSCode/taurfit/src
     ├── pin-project-lite v0.2.17
     └── tokio v1.53.1 (*)
 [build-dependencies]
+├── noyalib v0.0.43
+│   ├── hashbrown v0.17.1
+│   ├── indexmap v2.14.2 (*)
+│   ├── itoa v1.0.18
+│   ├── libm v0.2.16
+│   ├── memchr v2.8.3
+│   ├── rustc-hash v2.1.3
+│   ├── ryu v1.0.23
+│   ├── serde_core v1.0.229
+│   ├── serde_ignored v0.1.14
+│   │   └── serde_core v1.0.229
+│   └── smallvec v1.16.1
 ├── phf_codegen v0.11.3
 │   ├── phf_generator v0.11.3 (*)
 │   └── phf_shared v0.11.3 (*)
-├── serde_yaml v0.9.34+deprecated (*)
 └── tauri-build v2.6.3 (*)
