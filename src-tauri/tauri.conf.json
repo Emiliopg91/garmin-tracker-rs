@@ -16,7 +16,7 @@
         "title": "Garmin Tracker",
         "width": 950,
         "height": 900,
-        "visible": true
+        "visible": false
       }
     ],
     "security": {
