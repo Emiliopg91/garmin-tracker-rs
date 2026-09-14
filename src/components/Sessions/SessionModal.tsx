@@ -137,7 +137,11 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
         const start = (i / localSession.hrBreathData.length) * 100;
         const end = ((i + 1) / localSession.hrBreathData.length) * 100;
         return [
-          <stop key={`${i}-start`} offset={`${start}%`} stopColor={point.color} />,
+          <stop
+            key={`${i}-start`}
+            offset={`${start}%`}
+            stopColor={point.color}
+          />,
           <stop key={`${i}-end`} offset={`${end}%`} stopColor={point.color} />,
         ];
       }),
