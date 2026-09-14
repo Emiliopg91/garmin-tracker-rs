@@ -74,7 +74,7 @@ export class BackendClient {
 	}
 	
 
-	// From src-tauri/src/logic/workouts.rs:77
+	// From src-tauri/src/logic/workouts.rs:79
 	public static getWorkoutDetails(name: string): Promise<WorkoutDetails> {
 	  return BackendClient.inner_invoke("get_workout_details", { name }); 
 	}

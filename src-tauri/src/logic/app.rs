@@ -211,14 +211,10 @@ pub fn export_database(
 pub fn get_translations(
     settings: State<'_, SettingsLock>,
 ) -> Result<HashMap<String, String>, String> {
+    let lang = settings.read().unwrap().language;
     Ok(TRANSLATIONS
         .keys()
-        .map(|k| {
-            (
-                k.to_string(),
-                translate(k, settings.read().unwrap().language),
-            )
-        })
+        .map(|k| (k.to_string(), translate(k, lang)))
         .collect())
 }
 

@@ -37,10 +37,12 @@ pub fn get_workout_list(
         sessions.iter().for_each(|s| {
             let entry = workout_stats
                 .entry(s.name.clone())
-                .or_insert((0_u32, 0_u32, s.date));
+                .or_insert((0_u32, 0_u32, None));
             entry.0 += 1_u32;
             entry.1 += s.total_elapsed_time;
-            entry.2 = if s.date > entry.2 { s.date } else { entry.2 };
+            if entry.2.is_none() {
+                entry.2 = Some(s.date);
+            }
         });
 
         let mut res = workout_stats
@@ -49,7 +51,7 @@ pub fn get_workout_list(
                 name: wd.0,
                 sessions: wd.1.0,
                 avg_time: wd.1.1 / wd.1.0,
-                latest_session: wd.1.2 as i32,
+                latest_session: wd.1.2.unwrap() as i32,
             })
             .collect::<Vec<_>>();
 
