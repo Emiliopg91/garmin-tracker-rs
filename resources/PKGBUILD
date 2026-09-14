@@ -48,6 +48,5 @@ package() {
   cp -a Garmin\ Tracker_${pkgver}_*/data/* "${pkgdir}"
 
   cd "$srcdir/${pkgname}/resources"
-  install -Dm644 99-garmin-tracker-rs.rules "$pkgdir/etc/udev/rules.d/99-garmin-tracker-rs.rules"
   install -Dm555 garmin-tracker-rs-launcher.sh "$pkgdir/usr/share/garmin-tracker-rs/garmin-tracker-rs-launcher.sh"
 }
