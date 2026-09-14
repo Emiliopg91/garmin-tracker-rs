@@ -1,7 +1,1 @@
 #!/bin/bash
-
-post_install() {
-}
-
-post_upgrade() {
-}
