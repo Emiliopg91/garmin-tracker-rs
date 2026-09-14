@@ -1,4 +1,6 @@
 import { AppContext } from "@/context/AppContext";
+import { LoadingContext } from "@/context/LoadingContext";
+import { I18nSettingsContext } from "@/context/I18nSettingsContext";
 import { BackendClient } from "@/utils/backend/client";
 import { SessionListItem } from "@/utils/backend/models";
 import { useContext, useEffect, useState } from "react";
@@ -24,8 +26,9 @@ import {
 } from "@/utils/SessionUtils";
 
 export function SessionsList() {
-  const { startLoading, finishLoading, availableDevices, translate, settings } =
-    useContext(AppContext);
+  const { availableDevices } = useContext(AppContext);
+  const { startLoading, finishLoading } = useContext(LoadingContext);
+  const { translate, settings } = useContext(I18nSettingsContext);
 
   const [minDate, setMinDate] = useState(0);
   const [workload, setWorkload] = useState<WorkoutLoad[]>([]);

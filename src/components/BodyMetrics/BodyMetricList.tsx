@@ -1,6 +1,7 @@
 import { BackendClient } from "@/utils/backend/client";
 import { useContext, useEffect, useState } from "react";
-import { AppContext } from "@/context/AppContext";
+import { LoadingContext } from "@/context/LoadingContext";
+import { I18nSettingsContext } from "@/context/I18nSettingsContext";
 import { BodyMetricListItem } from "@/utils/backend/models";
 import { BodyMetricsDetailsModal } from "./BodyMetricsDetailsModal";
 import { Button, Checkbox } from "@mui/material";
@@ -27,8 +28,8 @@ type ChartDataType = {
 }[];
 
 export function BodyMetricList() {
-  const { startLoading, finishLoading, translate, settings } =
-    useContext(AppContext);
+  const { startLoading, finishLoading } = useContext(LoadingContext);
+  const { translate, settings } = useContext(I18nSettingsContext);
 
   const [bodyMetrics, setBodyMetrics] = useState<BodyMetricListItem[]>([]);
   const [addingNew, setAddingNew] = useState(false);

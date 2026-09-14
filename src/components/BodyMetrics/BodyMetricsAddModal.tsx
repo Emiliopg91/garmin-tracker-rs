@@ -1,4 +1,4 @@
-import { AppContext } from "@/context/AppContext";
+import { I18nSettingsContext } from "@/context/I18nSettingsContext";
 import { BackendClient } from "@/utils/backend/client";
 import { BodyMetricListItem } from "@/utils/backend/models";
 import { UnitUtils } from "@/utils/UnitUtils";
@@ -31,7 +31,7 @@ type BodyMetricsListItemForm = Omit<
 };
 
 export function BodyMetricsAddModal({ latest, onClose }: Props) {
-  const { translate, settings } = useContext(AppContext);
+  const { translate, settings } = useContext(I18nSettingsContext);
   const [data, setData] = useState<BodyMetricsListItemForm>(
     latest
       ? {

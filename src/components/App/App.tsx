@@ -1,5 +1,7 @@
 import { AppContext } from "@/context/AppContext";
-import { JSX, useContext } from "react";
+import { LoadingContext } from "@/context/LoadingContext";
+import { I18nSettingsContext } from "@/context/I18nSettingsContext";
+import { JSX, useContext, useMemo } from "react";
 import { NavBar, NavBarItem } from "../NavBar/NavBar";
 import "@/styles/app.css";
 import { Tabs } from "@/models/tabs";
@@ -12,61 +14,61 @@ import { Settings } from "../Settings/Settings";
 import SettingsIcon from "@mui/icons-material/Settings";
 
 export function App(): JSX.Element {
-  const {
-    tab,
-    setTab,
-    loading,
-    appReady,
-    translate,
-    showSettings,
-    settingsOpened,
-    closeSettings,
-  } = useContext(AppContext);
+  const { tab, setTab, appReady, showSettings, settingsOpened, closeSettings } =
+    useContext(AppContext);
+  const { loading } = useContext(LoadingContext);
+  const { translate } = useContext(I18nSettingsContext);
 
-  const leftNavBarItems: NavBarItem[] = [
-    {
-      label: <span>{translate("sessions")}</span>,
-      onSelected: () => {
-        setTab(Tabs.SESSIONS);
+  const leftNavBarItems: NavBarItem[] = useMemo(
+    () => [
+      {
+        label: <span>{translate("sessions")}</span>,
+        onSelected: () => {
+          setTab(Tabs.SESSIONS);
+        },
+        selected: tab == Tabs.SESSIONS,
       },
-      selected: tab == Tabs.SESSIONS,
-    },
-    {
-      label: <span>{translate("workouts")}</span>,
-      onSelected: () => {
-        setTab(Tabs.WORKOUTS);
+      {
+        label: <span>{translate("workouts")}</span>,
+        onSelected: () => {
+          setTab(Tabs.WORKOUTS);
+        },
+        selected: tab == Tabs.WORKOUTS,
       },
-      selected: tab == Tabs.WORKOUTS,
-    },
-    {
-      label: <span>{translate("exercises")}</span>,
-      onSelected: () => {
-        setTab(Tabs.EXERCISES);
+      {
+        label: <span>{translate("exercises")}</span>,
+        onSelected: () => {
+          setTab(Tabs.EXERCISES);
+        },
+        selected: tab == Tabs.EXERCISES,
       },
-      selected: tab == Tabs.EXERCISES,
-    },
-    {
-      label: <span>{translate("body_metrics")}</span>,
-      onSelected: () => {
-        setTab(Tabs.BODY_METRICS);
+      {
+        label: <span>{translate("body_metrics")}</span>,
+        onSelected: () => {
+          setTab(Tabs.BODY_METRICS);
+        },
+        selected: tab == Tabs.BODY_METRICS,
       },
-      selected: tab == Tabs.BODY_METRICS,
-    },
-  ];
+    ],
+    [tab, translate, setTab],
+  );
 
-  const rightNavBarItems: NavBarItem[] = [
-    {
-      label: (
-        <span>
-          <SettingsIcon />
-        </span>
-      ),
-      onSelected: () => {
-        showSettings();
+  const rightNavBarItems: NavBarItem[] = useMemo(
+    () => [
+      {
+        label: (
+          <span>
+            <SettingsIcon />
+          </span>
+        ),
+        onSelected: () => {
+          showSettings();
+        },
+        selected: false,
       },
-      selected: false,
-    },
-  ];
+    ],
+    [showSettings],
+  );
 
   return (
     <>

@@ -1,4 +1,4 @@
-import { JSX } from "react";
+import { JSX, memo } from "react";
 import { Box } from "@mui/material";
 import "@/styles/NavBar/NavBar.css";
 
@@ -8,7 +8,7 @@ export type NavBarItem = {
   onSelected: () => void;
 };
 
-export function NavBar({
+function NavBarInner({
   leftItems,
   rightItems,
 }: {
@@ -35,3 +35,5 @@ export function NavBar({
     </Box>
   );
 }
+
+export const NavBar = memo(NavBarInner);

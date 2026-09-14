@@ -1,8 +1,9 @@
-import { AppContext } from "@/context/AppContext";
+import { LoadingContext } from "@/context/LoadingContext";
+import { I18nSettingsContext } from "@/context/I18nSettingsContext";
 import { BackendClient } from "@/utils/backend/client";
 import { TimeUtils } from "@/utils/TimeUtils";
 import { SessionSetsUpdate } from "@/utils/backend/models";
-import { useContext, useState } from "react";
+import { useContext, useMemo, useState } from "react";
 import {
   Button,
   Dialog,
@@ -44,8 +45,8 @@ const urls = [
 ];
 
 export function SessionModal({ session, onClose, onUpdate }: Props) {
-  const { startLoading, finishLoading, translate, settings } =
-    useContext(AppContext);
+  const { startLoading, finishLoading } = useContext(LoadingContext);
+  const { translate, settings } = useContext(I18nSettingsContext);
   const [originalSession] = useState(session);
   const [localSession, setLocalSession] = useState({ ...session });
   const [changed, setChanged] = useState(false);
@@ -55,17 +56,44 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
     setUrl(event.target.value === "street" ? 0 : 1);
   };
 
+  const hasChanges = (sets: typeof localSession.sets) =>
+    sets.some(
+      (serie, idx) =>
+        serie.reps != originalSession.sets[idx].reps ||
+        serie.weight != originalSession.sets[idx].weight,
+    );
+
+  const updateSerie = (
+    exercise: string,
+    idx: number,
+    field: "reps" | "weight",
+    value: number,
+  ) => {
+    setLocalSession((prev) => {
+      const serieIdx = prev.grouped_series[exercise][idx].idx;
+
+      const groupedForEx = prev.grouped_series[exercise].slice();
+      groupedForEx[idx] = { ...groupedForEx[idx], [field]: value };
+
+      const sets = prev.sets.slice();
+      sets[serieIdx] = { ...sets[serieIdx], [field]: value };
+
+      setChanged(hasChanges(sets));
+
+      return {
+        ...prev,
+        sets,
+        grouped_series: { ...prev.grouped_series, [exercise]: groupedForEx },
+      };
+    });
+  };
+
   const updateSerieReps = (exercise: string, idx: number, newVal: string) => {
     let reps = parseInt(newVal);
     if (isNaN(reps)) {
       reps = 0;
     }
-    const newObj = structuredClone(localSession);
-    const serieIdx = newObj.grouped_series[exercise][idx].idx;
-    newObj.grouped_series[exercise][idx].reps = reps;
-    newObj.sets[serieIdx].reps = reps;
-    setLocalSession(newObj);
-    setChanged(JSON.stringify(newObj) != JSON.stringify(session));
+    updateSerie(exercise, idx, "reps", reps);
   };
 
   const updateSerieWeight = (exercise: string, idx: number, newVal: string) => {
@@ -73,12 +101,7 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
     if (isNaN(weight)) {
       weight = 0;
     }
-    const newObj = structuredClone(localSession);
-    const serieIdx = newObj.grouped_series[exercise][idx].idx;
-    newObj.grouped_series[exercise][idx].weight = weight;
-    newObj.sets[serieIdx].weight = weight;
-    setLocalSession(newObj);
-    setChanged(JSON.stringify(newObj) != JSON.stringify(session));
+    updateSerie(exercise, idx, "weight", weight);
   };
 
   const saveChanges = () => {
@@ -107,6 +130,19 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
         finishLoading();
       });
   };
+
+  const hrGradientStops = useMemo(
+    () =>
+      localSession.hrBreathData.flatMap((point, i) => {
+        const start = (i / localSession.hrBreathData.length) * 100;
+        const end = ((i + 1) / localSession.hrBreathData.length) * 100;
+        return [
+          <stop key={`${i}-start`} offset={`${start}%`} stopColor={point.color} />,
+          <stop key={`${i}-end`} offset={`${end}%`} stopColor={point.color} />,
+        ];
+      }),
+    [localSession.hrBreathData],
+  );
 
   return (
     <Dialog open={true} onClose={onClose} fullWidth maxWidth="sm">
@@ -284,24 +320,7 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                 >
                   <defs>
                     <linearGradient id="hrColor" x1="0" y1="0" x2="1" y2="0">
-                      {localSession.hrBreathData.flatMap((point, i) => {
-                        const start =
-                          (i / localSession.hrBreathData.length) * 100;
-                        const end =
-                          ((i + 1) / localSession.hrBreathData.length) * 100;
-                        return [
-                          <stop
-                            key={`${i}-start`}
-                            offset={`${start}%`}
-                            stopColor={point.color}
-                          />,
-                          <stop
-                            key={`${i}-end`}
-                            offset={`${end}%`}
-                            stopColor={point.color}
-                          />,
-                        ];
-                      })}
+                      {hrGradientStops}
                     </linearGradient>
                   </defs>
                   <Legend

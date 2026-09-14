@@ -1,4 +1,4 @@
-import { AppContext } from "@/context/AppContext";
+import { I18nSettingsContext } from "@/context/I18nSettingsContext";
 import { BodyMetricListItem } from "@/utils/backend/models";
 import { UnitUtils } from "@/utils/UnitUtils";
 import { useContext } from "react";
@@ -12,7 +12,7 @@ type Props = {
 };
 
 export function BodyMetricsCompareModal({ measures, onClose }: Props) {
-  const { translate, settings } = useContext(AppContext);
+  const { translate, settings } = useContext(I18nSettingsContext);
 
   return (
     <Dialog open={true} onClose={onClose}>

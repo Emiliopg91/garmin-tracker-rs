@@ -1,4 +1,5 @@
-import { AppContext } from "@/context/AppContext";
+import { LoadingContext } from "@/context/LoadingContext";
+import { I18nSettingsContext } from "@/context/I18nSettingsContext";
 import { BackendClient } from "@/utils/backend/client";
 import { BodyMetricListItem } from "@/utils/backend/models";
 import { TimeUtils } from "@/utils/TimeUtils";
@@ -24,8 +25,8 @@ export function BodyMetricsDetailsModal({
   onClose,
   onDelete,
 }: Props) {
-  const { translate, startLoading, finishLoading, settings } =
-    useContext(AppContext);
+  const { startLoading, finishLoading } = useContext(LoadingContext);
+  const { translate, settings } = useContext(I18nSettingsContext);
 
   const deleteEntry = () => {
     startLoading();

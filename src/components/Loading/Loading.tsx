@@ -1,10 +1,10 @@
-import { AppContext } from "@/context/AppContext";
+import { I18nSettingsContext } from "@/context/I18nSettingsContext";
 import { Backdrop, CircularProgress } from "@mui/material";
 import { useContext } from "react";
 import "@/styles/Loading/Loading.css";
 
 export function Loading() {
-  const { translate } = useContext(AppContext);
+  const { translate } = useContext(I18nSettingsContext);
 
   return (
     <Backdrop open={true} className="loading-backdrop">

@@ -1,4 +1,6 @@
 import { AppContext } from "@/context/AppContext";
+import { LoadingContext } from "@/context/LoadingContext";
+import { I18nSettingsContext } from "@/context/I18nSettingsContext";
 import { BackendClient } from "@/utils/backend/client";
 import {
   AppEnvironment,
@@ -23,14 +25,10 @@ type Props = {
 };
 
 export function Settings({ onClose }: Props) {
-  const {
-    environment,
-    settings,
-    translate,
-    startLoading,
-    finishLoading,
-    refreshTranslations,
-  } = useContext(AppContext);
+  const { environment } = useContext(AppContext);
+  const { startLoading, finishLoading } = useContext(LoadingContext);
+  const { settings, translate, refreshTranslations } =
+    useContext(I18nSettingsContext);
   console.log(environment);
 
   const [weightUnit, setWeightUnit] = useState(settings.weight_unit);

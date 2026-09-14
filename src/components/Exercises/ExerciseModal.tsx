@@ -1,4 +1,4 @@
-import { AppContext } from "@/context/AppContext";
+import { I18nSettingsContext } from "@/context/I18nSettingsContext";
 import { ExerciseDetails } from "@/utils/backend/models";
 import { TimeUtils } from "@/utils/TimeUtils";
 import { UnitUtils } from "@/utils/UnitUtils";
@@ -22,7 +22,7 @@ type Props = {
 };
 
 export function ExerciseModal({ exercise, onClose }: Props) {
-  const { translate, settings } = useContext(AppContext);
+  const { translate, settings } = useContext(I18nSettingsContext);
   const [chartData, setChartData] = useState<
     { date: number; volume: number; reps: number }[]
   >([]);

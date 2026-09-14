@@ -26,13 +26,13 @@ impl UdevManager {
                     "../../../resources/99-garmin-tracker-rs-launch.rules"
                 ));
             }
-            std::fs::write(constants::RULE_FILE, content).map_err(UdevError::ErrorWrittingRules)?;
+            std::fs::write(constants::RULE_FILE, content).map_err(UdevError::Write)?;
 
             UdevManager::reload()?;
             UdevManager::trigger()?;
         } else {
             let args = std::env::args().collect::<Vec<String>>();
-            let arg0 = args.get(0).unwrap();
+            let arg0 = args.first().unwrap();
 
             let askpass_file = format!("/tmp/{}-askpass", *constants::APP_NAME);
             if !std::fs::exists(&askpass_file).unwrap() {
@@ -54,7 +54,7 @@ zenity --password --title="Elevated permissions are required to edit device rule
                 .stdout(Stdio::inherit())
                 .stderr(Stdio::inherit())
                 .status()
-                .map_err(UdevError::ErrorReloadingRules)?;
+                .map_err(UdevError::Reload)?;
 
             Self::handle_command_status(&status)?;
         }
@@ -70,7 +70,7 @@ zenity --password --title="Elevated permissions are required to edit device rule
             .stdout(Stdio::inherit())
             .stderr(Stdio::inherit())
             .status()
-            .map_err(UdevError::ErrorReloadingRules)?;
+            .map_err(UdevError::Reload)?;
 
         Self::handle_command_status(&status)
     }
@@ -81,7 +81,7 @@ zenity --password --title="Elevated permissions are required to edit device rule
             .stdout(Stdio::inherit())
             .stderr(Stdio::inherit())
             .status()
-            .map_err(UdevError::ErrorTriggeringRules)?;
+            .map_err(UdevError::Trigger)?;
 
         Self::handle_command_status(&status)
     }
@@ -91,10 +91,10 @@ zenity --password --title="Elevated permissions are required to edit device rule
             Ok(())
         } else {
             let code = status.code();
-            Err(UdevError::ErrorReloadingRules(std::io::Error::new(
-                std::io::ErrorKind::Other,
-                format!("Bad exit status: {:?}", code),
-            )))
+            Err(UdevError::Reload(std::io::Error::other(format!(
+                "Bad exit status: {:?}",
+                code
+            ))))
         }
     }
 }

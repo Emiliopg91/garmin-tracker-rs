@@ -9,9 +9,11 @@ import {
   Settings,
   WeightUnit,
 } from "@/utils/backend/models";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { JSX } from "react/jsx-runtime";
 import { AppContext } from "./AppContext";
+import { LoadingContext } from "./LoadingContext";
+import { I18nSettingsContext } from "./I18nSettingsContext";
 
 export function AppProvider({
   children,
@@ -37,46 +39,49 @@ export function AppProvider({
   });
   const [translations, setTranslations] = useState<Record<string, string>>({});
 
-  const startLoading = () => {
+  const startLoading = useCallback(() => {
     setLoadingCount((previous) => previous + 1);
-  };
+  }, []);
 
-  const finishLoading = () => {
+  const finishLoading = useCallback(() => {
     setLoadingCount((previous) => Math.max(0, previous - 1));
-  };
+  }, []);
 
-  const showSettings = () => {
+  const showSettings = useCallback(() => {
     setSettingsOpened(true);
-  };
+  }, []);
 
-  const closeSettings = () => {
+  const closeSettings = useCallback(() => {
     setSettingsOpened(false);
-  };
+  }, []);
 
   const loading = loadingCount > 0;
 
-  const translate = (key: string, replacements?: string[]) => {
-    if (!translations[key]) {
-      console.warn("Missing translation", key);
-      return key;
-    }
+  const translate = useCallback(
+    (key: string, replacements?: string[]) => {
+      if (!translations[key]) {
+        console.warn("Missing translation", key);
+        return key;
+      }
 
-    let translation = translations[key];
+      let translation = translations[key];
 
-    if (replacements) {
-      replacements.forEach((r) => {
-        translation = translation.replace("{}", r);
-      });
-    }
+      if (replacements) {
+        replacements.forEach((r) => {
+          translation = translation.replace("{}", r);
+        });
+      }
 
-    return translation;
-  };
+      return translation;
+    },
+    [translations],
+  );
 
-  const refreshTranslations = () => {
+  const refreshTranslations = useCallback(() => {
     BackendClient.getTranslations().then((translations) => {
       setTranslations(translations);
     });
-  };
+  }, []);
 
   useEffect(() => {
     const unregisterConnection = BackendListener.onDeviceConnected((device) => {
@@ -141,28 +146,45 @@ export function AppProvider({
       unregisterStartLoading();
       unregisterFinishLoading();
     };
-  }, []);
+  }, [startLoading, finishLoading]);
+
+  const loadingValue = useMemo(
+    () => ({ loading, startLoading, finishLoading }),
+    [loading, startLoading, finishLoading],
+  );
+
+  const appValue = useMemo(
+    () => ({
+      tab,
+      setTab,
+      appReady,
+      environment,
+      availableDevices,
+      settingsOpened,
+      showSettings,
+      closeSettings,
+    }),
+    [
+      tab,
+      appReady,
+      environment,
+      availableDevices,
+      settingsOpened,
+      showSettings,
+      closeSettings,
+    ],
+  );
+
+  const i18nSettingsValue = useMemo(
+    () => ({ settings, translate, refreshTranslations }),
+    [settings, translate, refreshTranslations],
+  );
 
   return (
-    <AppContext.Provider
-      value={{
-        tab,
-        setTab,
-        startLoading,
-        finishLoading,
-        loading,
-        availableDevices,
-        appReady,
-        environment,
-        translate,
-        settings,
-        settingsOpened,
-        closeSettings,
-        showSettings,
-        refreshTranslations,
-      }}
-    >
-      {children}
-    </AppContext.Provider>
+    <LoadingContext.Provider value={loadingValue}>
+      <I18nSettingsContext.Provider value={i18nSettingsValue}>
+        <AppContext.Provider value={appValue}>{children}</AppContext.Provider>
+      </I18nSettingsContext.Provider>
+    </LoadingContext.Provider>
   );
 }

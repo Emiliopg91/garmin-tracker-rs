@@ -2,7 +2,8 @@ import { ExerciseDetails, ExerciseListItem } from "@/utils/backend/models";
 import { ExerciseModal } from "./ExerciseModal";
 import { useContext, useEffect, useState } from "react";
 import { BackendClient } from "@/utils/backend/client";
-import { AppContext } from "@/context/AppContext";
+import { LoadingContext } from "@/context/LoadingContext";
+import { I18nSettingsContext } from "@/context/I18nSettingsContext";
 import { TimeUtils } from "@/utils/TimeUtils";
 import { UnitUtils } from "@/utils/UnitUtils";
 
@@ -25,8 +26,8 @@ export const calc1RMEstimation = (reps: number, weight: number): number => {
 };
 
 export function ExercisesList() {
-  const { startLoading, finishLoading, translate, settings } =
-    useContext(AppContext);
+  const { startLoading, finishLoading } = useContext(LoadingContext);
+  const { translate, settings } = useContext(I18nSettingsContext);
   const [exercises, setExercises] = useState<ExerciseListItem[]>([]);
   const [exerciseDetails, setExerciseDetails] = useState<
     ExerciseDetails | undefined
