@@ -33,6 +33,7 @@ export function AppProvider({
     auto_sync: true,
     start_boot: false,
     language: Languages.English,
+    on_device_connect: false,
   });
   const [translations, setTranslations] = useState<Record<string, string>>({});
 

@@ -15,7 +15,7 @@ sha256sums=(
   'SKIP'
 )
 
-depends=('webkit2gtk-4.1' 'zlib-ng-compat')
+depends=('webkit2gtk-4.1' 'zlib-ng-compat' 'zenity')
 makedepends=(
   'rust'
   'mold'
@@ -49,4 +49,5 @@ package() {
 
   cd "$srcdir/${pkgname}/resources"
   install -Dm644 99-garmin-tracker-rs.rules "$pkgdir/etc/udev/rules.d/99-garmin-tracker-rs.rules"
+  install -Dm555 garmin-tracker-rs-launcher.sh "$pkgdir/usr/share/garmin-tracker-rs/garmin-tracker-rs-launcher.sh"
 }

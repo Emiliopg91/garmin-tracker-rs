@@ -20,6 +20,8 @@ pub static LOCK_FILE: LazyLock<PathBuf> = LazyLock::new(|| {
 });
 pub static URL: &str = "https://api.github.com/repos/Emiliopg91/garmin-tracker-rs/releases/latest";
 
+pub static RULE_FILE: &str = "/etc/udev/rules.d/99-garmin-tracker-rs.rules";
+
 // MTP block
 pub static MTP_GARMIN_MANUFACTURER: &str = "GARMIN";
 pub static MTP_GARMIN_ROOT_FOLDER: &str = "GARMIN";
@@ -66,10 +68,11 @@ pub const LOG_FILE_ROTATION_STRATEGY: RotationStrategy = RotationStrategy::KeepS
 
 #[repr(i32)]
 pub enum ExitCodes {
-    SettingsError = 1,
+    UdevError = 1,
     DbError = 2,
-    NoMainWindow = 3,
-    TauriError = 4,
+    SettingsError = 3,
+    NoMainWindow = 4,
+    TauriError = 5,
 }
 
 impl From<ExitCodes> for i32 {

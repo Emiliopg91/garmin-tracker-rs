@@ -11,7 +11,7 @@ use tauri_plugin_autostart::ManagerExt;
 use crate::{
     SettingsLock, constants,
     dao::settings::settings_keys::{
-        AUTO_SYNC, DISTANCE_UNIT, LANGUAGE, START_ON_BOOT, WEIGHT_UNIT,
+        AUTO_SYNC, DISTANCE_UNIT, LANGUAGE, ON_DEVICE_CONNECT, START_ON_BOOT, WEIGHT_UNIT,
     },
     dto::{
         app::{AppEnvironment, Settings},
@@ -22,6 +22,7 @@ use crate::{
         devices::start_device_watcher, notifications::show_notification, report_error,
         sessions::update_pending_geolocation,
     },
+    udev::UdevManager,
     utils::translations::{Languages, TRANSLATIONS, translate, translate_and_replace},
 };
 use tauri_plugin_log::log::{debug, info};
@@ -118,6 +119,16 @@ pub async fn update_settings_value(app: AppHandle, name: &str, value: &str) -> R
                 crate::dao::settings::Settings::set_language(&database, &value)
                     .map_err(|e| e.to_string())?;
                 settings.write().unwrap().language = value;
+            }
+            ON_DEVICE_CONNECT => {
+                let value = value == "true";
+
+                info!("Installing udev rules...");
+                UdevManager::write_rules_file(value).map_err(|e| e.to_string())?;
+
+                crate::dao::settings::Settings::set_on_device_connect(&database, value)
+                    .map_err(|e| e.to_string())?;
+                settings.write().unwrap().on_device_connect = value;
             }
             _ => unreachable!(),
         }

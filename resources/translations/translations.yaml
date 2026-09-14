@@ -353,3 +353,12 @@ compare:
 metrics_comparaison:
   en: Metrics comparaison
   es: Comparación de métricas
+on_device_connect:
+  en: On device connected
+  es: Al conectar dispositivo
+do_nothing:
+  en: Do nothing
+  es: No hacer nada
+start_automatically:
+  en: Start automatically
+  es: Iniciar automaticamente

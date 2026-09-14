@@ -38,6 +38,9 @@ export function Settings({ onClose }: Props) {
   const [autoSync, setAutoSync] = useState(settings.auto_sync);
   const [startOnBoot, setStartOnBoot] = useState(settings.start_boot);
   const [language, setLanguage] = useState(settings.language);
+  const [onDeviceCOnnect, setOnDeviceConnect] = useState(
+    settings.on_device_connect,
+  );
 
   const updateWeightUnit = (value: WeightUnit) => {
     startLoading();
@@ -94,6 +97,21 @@ export function Settings({ onClose }: Props) {
         setLanguage(value);
         settings.language = value;
         refreshTranslations();
+      })
+      .finally(() => {
+        finishLoading();
+      });
+  };
+
+  const updateOnDeviceConnect = (value: boolean) => {
+    startLoading();
+    BackendClient.updateSettingsValue(
+      "on_device_connect",
+      value ? "true" : "false",
+    )
+      .then(() => {
+        setOnDeviceConnect(value);
+        settings.on_device_connect = value;
       })
       .finally(() => {
         finishLoading();
@@ -212,6 +230,24 @@ export function Settings({ onClose }: Props) {
                     </MenuItem>
                     <MenuItem value="true">
                       {translate("start_on_boot_true")}
+                    </MenuItem>
+                  </Select>
+                </td>
+              </tr>
+              <tr>
+                <td>{translate("on_device_connect")}</td>
+                <td>
+                  <Select
+                    size="small"
+                    fullWidth
+                    value={onDeviceCOnnect ? "true" : "false"}
+                    onChange={(e) =>
+                      updateOnDeviceConnect(e.target.value === "true")
+                    }
+                  >
+                    <MenuItem value="false">{translate("do_nothing")}</MenuItem>
+                    <MenuItem value="true">
+                      {translate("start_automatically")}
                     </MenuItem>
                   </Select>
                 </td>

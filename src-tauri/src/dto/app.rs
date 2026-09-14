@@ -19,6 +19,7 @@ pub struct Settings {
     pub auto_sync: bool,
     pub start_boot: bool,
     pub language: Languages,
+    pub on_device_connect: bool,
 }
 
 impl From<&DatabasePool> for Settings {
@@ -29,6 +30,7 @@ impl From<&DatabasePool> for Settings {
             language: crate::dao::settings::Settings::get_language(database),
             start_boot: crate::dao::settings::Settings::get_start_on_boot(database),
             weight_unit: crate::dao::settings::Settings::get_weight_unit(database),
+            on_device_connect: crate::dao::settings::Settings::get_on_device_connect(database),
         }
     }
 }

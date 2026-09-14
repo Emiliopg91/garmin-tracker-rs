@@ -12,6 +12,7 @@ pub mod settings_keys {
     pub const LANGUAGE: &str = "language";
     pub const START_ON_BOOT: &str = "start_boot";
     pub const WEIGHT_UNIT: &str = "weight_unit";
+    pub const ON_DEVICE_CONNECT: &str = "on_device_connect";
     pub const VERSION: &str = "version";
 }
 
@@ -103,6 +104,29 @@ impl Settings {
             .or_replace()
             .item(&mut Settings {
                 name: settings_keys::AUTO_SYNC.to_string(),
+                value: value.to_string(),
+            })
+            .execute(db)
+            .map(|_| ())
+    }
+
+    /// Reads whether auto-sync on device connect is enabled, defaulting to `true` if unset.
+    pub fn get_on_device_connect(db: &DatabasePool) -> bool {
+        SettingsRepository::select_by_id(db, settings_keys::ON_DEVICE_CONNECT)
+            .ok()
+            .flatten()
+            .and_then(|r| r.value.parse().ok())
+            .unwrap_or(false)
+    }
+    /// Persists the auto-sync setting.
+    pub fn set_on_device_connect(
+        db: &DatabasePool,
+        value: bool,
+    ) -> rusqlite_orm::errors::Result<()> {
+        SettingsRepository::insert()
+            .or_replace()
+            .item(&mut Settings {
+                name: settings_keys::ON_DEVICE_CONNECT.to_string(),
                 value: value.to_string(),
             })
             .execute(db)

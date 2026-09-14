@@ -3,6 +3,7 @@ mod dto;
 mod logic;
 mod mtp;
 mod parser;
+mod udev;
 mod utils;
 
 #[cfg(debug_assertions)]
@@ -32,6 +33,7 @@ use crate::{
         sessions::{get_session_details, get_sessions, import_from_device, save_session_changes},
         workouts::{get_workout_details, get_workout_list},
     },
+    udev::UdevManager,
     utils::{constants, single_instance::SingleInstance},
 };
 
@@ -63,6 +65,21 @@ where
 
 pub fn check_running() -> bool {
     SingleInstance::is_app_running().0
+}
+
+pub fn write_mtp_rules(auto_run: bool) -> crate::udev::errors::Result<()> {
+    if !fs::exists(constants::RULE_FILE).unwrap() {
+        info!("Installing udev rules...");
+        UdevManager::write_rules_file(auto_run)?;
+
+        Ok(())
+    } else {
+        Ok(())
+    }
+}
+
+pub fn force_write_mtp_rules(auto_run: bool) -> crate::udev::errors::Result<()> {
+    UdevManager::write_rules_file(auto_run)
 }
 
 dlls!("../resources/ddl");
@@ -129,6 +146,11 @@ pub fn run(log_level: LevelFilter) {
                 *constants::APP_VERSION,
                 *constants::PID
             );
+
+            if let Err(e) = write_mtp_rules(false) {
+                eprintln!("Error installing udev rules {e}");
+                exit(constants::ExitCodes::UdevError.into())
+            }
 
             fn initialize() -> (DatabasePool, Settings) {
                 debug!("Initializing database...");

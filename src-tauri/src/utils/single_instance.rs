@@ -25,15 +25,9 @@ impl SingleInstance {
             .open(&*constants::LOCK_FILE)
             .expect("Could not open lock file");
 
-        (
-            !Self::try_lock(&file),
-            OpenOptions::new()
-                .create(true)
-                .write(true)
-                .truncate(false)
-                .open(&*constants::LOCK_FILE)
-                .expect("Could not open lock file"),
-        )
+        let locked = Self::try_lock(&file);
+
+        (!locked, file)
     }
 
     pub fn acquire() {
