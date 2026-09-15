@@ -362,3 +362,12 @@ do_nothing:
 start_automatically:
   en: Start automatically
   es: Iniciar automaticamente
+upload_onedrive:
+  en: Upload to OneDrive
+  es: Cargar en OneDrive
+upload_succesful:
+  en: File uploaded succesfully
+  es: Archivo cargado con éxito
+upload_error:
+  en: Error on file upload
+  es: Error en la carga de archivo

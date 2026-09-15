@@ -3,6 +3,7 @@ mod dto;
 mod logic;
 mod mtp;
 mod parser;
+mod rclone;
 mod udev;
 mod utils;
 
@@ -26,7 +27,7 @@ use crate::{
     logic::{
         app::{
             export_database, get_environment, get_settings, get_translations,
-            notify_frontend_ready, update_settings_value,
+            notify_frontend_ready, update_settings_value, upload_to_cloud,
         },
         body_metrics::{add_body_measures, delete_body_metric, get_body_measures},
         exercises::{get_exercise_details, get_exercises},
@@ -119,7 +120,7 @@ pub fn run(log_level: LevelFilter) {
                     }),
                 )
                 .max_file_size(constants::LOG_FILE_MAX_SIZE)
-                .rotation_strategy(constants::LOG_FILE_ROTATION_STRATEGY)
+                .rotation_strategy(constants::LOG_FILE_ROTATION_STRATEGY.clone())
                 .format(|out, message, record| {
                     let mut target = record.target();
                     target = if target.len() > 30 {
@@ -221,7 +222,8 @@ pub fn run(log_level: LevelFilter) {
             get_settings,
             update_settings_value,
             export_database,
-            get_translations
+            get_translations,
+            upload_to_cloud
         ])
         .run(tauri::generate_context!())
     {

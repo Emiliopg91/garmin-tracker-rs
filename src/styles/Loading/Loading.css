@@ -3,5 +3,5 @@
      runtime, injected after this file, same specificity */
   background-color: #000000d0 !important;
   /* MUI theme.zIndex.drawer (1200) + 1 */
-  z-index: 1201;
+  z-index: 1301;
 }

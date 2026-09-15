@@ -63,8 +63,12 @@ pub static DB_FILE: LazyLock<PathBuf> = LazyLock::new(|| DATA_LOCAL_DIR.join("da
 
 // Logs block
 pub static LOGS_DIR: LazyLock<PathBuf> = LazyLock::new(|| ensure_dir(DATA_LOCAL_DIR.join("logs")));
-pub const LOG_FILE_MAX_SIZE: u128 = 50 * 1_024 * 1_024;
-pub const LOG_FILE_ROTATION_STRATEGY: RotationStrategy = RotationStrategy::KeepSome(3);
+pub static LOG_FILE_MAX_SIZE: u128 = 50 * 1_024 * 1_024;
+pub static LOG_FILE_ROTATION_STRATEGY: RotationStrategy = RotationStrategy::KeepSome(3);
+
+pub static RCLONE_CONFIG_NAME: LazyLock<String> = LazyLock::new(|| APP_NAME.to_string());
+pub static RCLONE_CONFIG_FILE: LazyLock<PathBuf> =
+    LazyLock::new(|| HOME_DIR.join(".config").join("rclone").join("rclone.conf"));
 
 #[repr(i32)]
 pub enum ExitCodes {

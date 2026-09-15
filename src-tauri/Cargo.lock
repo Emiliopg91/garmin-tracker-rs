@@ -1354,7 +1354,7 @@ dependencies = [
 
 [[package]]
 name = "garmin-tracker-rs"
-version = "2.1.2"
+version = "2.2.0"
 dependencies = [
  "chrono",
  "curl-rest",
@@ -4496,6 +4496,7 @@ dependencies = [
  "libc",
  "mio",
  "pin-project-lite",
+ "signal-hook-registry",
  "socket2",
  "windows-sys 0.61.2",
 ]

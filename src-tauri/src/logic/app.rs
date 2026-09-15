@@ -22,6 +22,7 @@ use crate::{
         devices::start_device_watcher, notifications::show_notification, report_error,
         sessions::update_pending_geolocation,
     },
+    rclone::RCloneClient,
     udev::UdevManager,
     utils::translations::{Languages, TRANSLATIONS, translate, translate_and_replace},
 };
@@ -277,5 +278,47 @@ fn check_for_update(app: AppHandle) {
             }
         }
         thread::sleep(Duration::from_hours(1));
+    }
+}
+
+#[traced_command]
+#[tauri::command]
+pub async fn upload_to_cloud(settings: State<'_, SettingsLock>) -> Result<(), String> {
+    let lang = settings.read().unwrap().language;
+
+    let res: Result<(), String> = async {
+        let configured = RCloneClient::is_configured()
+            .await
+            .map_err(|e| e.to_string())?;
+
+        if !configured {
+            RCloneClient::configure().await.map_err(|e| e.to_string())?;
+        }
+
+        RCloneClient::upload(constants::DB_FILE.to_path_buf())
+            .await
+            .map_err(|e| e.to_string())?;
+
+        Ok(())
+    }
+    .await;
+
+    match res {
+        Ok(l) => {
+            info!("File uploaded succesfully");
+            show_notification(NotificationDefinition {
+                title: translate("upload_succesful", lang),
+                body: "".to_string(),
+                kind: NotificationKind::Temporal,
+            });
+
+            Ok(l)
+        }
+        Err(e) => Err(report_error(
+            e,
+            lang,
+            "upload_error",
+            "Error uploading file",
+        )),
     }
 }

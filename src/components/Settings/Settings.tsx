@@ -123,6 +123,13 @@ export function Settings({ onClose }: Props) {
     });
   };
 
+  const uploadOnedrive = () => {
+    startLoading();
+    BackendClient.uploadToCloud().finally(() => {
+      finishLoading();
+    });
+  };
+
   return (
     <>
       <Dialog open={true} onClose={onClose}>
@@ -271,14 +278,32 @@ export function Settings({ onClose }: Props) {
               <tr>
                 <td>{translate("database_operations")}</td>
                 <td>
-                  <Button
-                    id="add-measure-button"
-                    variant="contained"
-                    className="full-width-button"
-                    onClick={exportDatabase}
-                  >
-                    {translate("backup_database")}
-                  </Button>
+                  <table style={{ width: "100%" }}>
+                    <tr>
+                      <td>
+                        <Button
+                          id="add-measure-button"
+                          variant="contained"
+                          className="full-width-button"
+                          onClick={exportDatabase}
+                        >
+                          {translate("backup_database")}
+                        </Button>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <Button
+                          id="upload-onedrive-button"
+                          variant="contained"
+                          className="full-width-button"
+                          onClick={uploadOnedrive}
+                        >
+                          {translate("upload_onedrive")}
+                        </Button>
+                      </td>
+                    </tr>
+                  </table>
                 </td>
               </tr>
             </table>
