@@ -15,7 +15,7 @@ impl RCloneClient {
     pub async fn configure() -> errors::Result<()> {
         info!("Getting authorization for OneDrive...");
         let output = Command::new("rclone")
-            .args(&["authorize", "onedrive"])
+            .args(["authorize", "onedrive"])
             .output()
             .await
             .map_err(RCloneError::Authorization)?;
@@ -140,8 +140,8 @@ impl RCloneClient {
             .arg(path.display().to_string())
             .arg(format!(
                 "{}:{}",
-                constants::RCLONE_CONFIG_NAME.to_string(),
-                constants::APP_NAME.to_string(),
+                *constants::RCLONE_CONFIG_NAME,
+                *constants::APP_NAME,
             ))
             .output()
             .await
