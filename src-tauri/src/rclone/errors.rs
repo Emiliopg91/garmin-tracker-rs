@@ -25,6 +25,8 @@ pub enum RCloneError {
     NoDriveFound(),
     #[error("Error reading config file: {0}")]
     ReadConfig(#[source] std::io::Error),
+    #[error("Missing or invalid field '{0}' in JSON response")]
+    MissingJsonField(&'static str),
 }
 
 pub type Result<T> = std::result::Result<T, RCloneError>;
