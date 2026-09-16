@@ -36,9 +36,10 @@ export function SessionsList() {
   const [sessionDetails, setSessionDetails] = useState<
     SessionFrontDetails | undefined
   >(undefined);
-  const [importMenuAnchor, setImportMenuAnchor] = useState<HTMLElement | null>(
-    null,
-  );
+  const [importMenuAnchor, setImportMenuAnchor] = useState<{
+    top: number;
+    left: number;
+  } | null>(null);
 
   const refreshList = () => {
     startLoading();
@@ -82,6 +83,19 @@ export function SessionsList() {
   const importDevice = (serial: string) => {
     startLoading();
     BackendClient.importFromDevice(serial)
+      .then((count) => {
+        if (count > 0) {
+          refreshList();
+        }
+      })
+      .finally(() => {
+        finishLoading();
+      });
+  };
+
+  const importFromDisk = () => {
+    startLoading();
+    BackendClient.importFromFiles()
       .then((count) => {
         if (count > 0) {
           refreshList();
@@ -229,58 +243,63 @@ export function SessionsList() {
           />
         )}
       </div>
-      {availableDevices.length > 0 && (
-        <div className="list-action-bar">
-          {availableDevices.length == 1 && (
+      <div className="list-action-bar">
+        {availableDevices.length == 0 && (
+          <Button
+            id="import-file-toggle"
+            variant="contained"
+            className="full-width-button"
+            onClick={importFromDisk}
+          >
+            {translate("import_from_disk")}
+          </Button>
+        )}
+        {availableDevices.length > 0 && (
+          <>
             <Button
-              id="import-file-button"
+              id="import-file-toggle"
               variant="contained"
               className="full-width-button"
-              onClick={() => {
-                importDevice(availableDevices[0].serial_number);
-              }}
+              onClick={(e) =>
+                setImportMenuAnchor({ top: e.clientY, left: e.clientX })
+              }
             >
-              {translate("import_sessions_from_device", [
-                availableDevices[0].manufacturer +
-                  " " +
-                  availableDevices[0].model,
-              ])}
+              {translate("import_sessions")}
             </Button>
-          )}
-          {availableDevices.length > 1 && (
-            <>
-              <Button
-                id="import-file-toggle"
-                variant="contained"
-                className="full-width-button"
-                onClick={(e) => setImportMenuAnchor(e.currentTarget)}
+            <Menu
+              id="import-file-menu"
+              anchorReference="anchorPosition"
+              anchorPosition={importMenuAnchor ?? undefined}
+              open={Boolean(importMenuAnchor)}
+              onClose={() => setImportMenuAnchor(null)}
+              anchorOrigin={{ vertical: "top", horizontal: "left" }}
+              transformOrigin={{ vertical: "bottom", horizontal: "left" }}
+            >
+              <MenuItem
+                onClick={() => {
+                  setImportMenuAnchor(null);
+                  importFromDisk();
+                }}
               >
-                {translate("import_sessions")}
-              </Button>
-              <Menu
-                id="import-file-menu"
-                anchorEl={importMenuAnchor}
-                open={Boolean(importMenuAnchor)}
-                onClose={() => setImportMenuAnchor(null)}
-              >
-                {availableDevices.map((device, idx) => (
-                  <MenuItem
-                    key={"dev-" + idx}
-                    onClick={() => {
-                      setImportMenuAnchor(null);
-                      importDevice(device.serial_number);
-                    }}
-                  >
-                    {translate("import_from_device", [
-                      device.manufacturer + " " + device.model,
-                    ])}
-                  </MenuItem>
-                ))}
-              </Menu>
-            </>
-          )}
-        </div>
-      )}
+                {translate("import_from_disk")}
+              </MenuItem>
+              {availableDevices.map((device, idx) => (
+                <MenuItem
+                  key={"dev-" + idx}
+                  onClick={() => {
+                    setImportMenuAnchor(null);
+                    importDevice(device.serial_number);
+                  }}
+                >
+                  {translate("import_from_device", [
+                    device.manufacturer + " " + device.model,
+                  ])}
+                </MenuItem>
+              ))}
+            </Menu>
+          </>
+        )}
+      </div>
     </>
   );
 }

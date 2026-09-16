@@ -371,3 +371,6 @@ upload_succesful:
 upload_error:
   en: Error on file upload
   es: Error en la carga de archivo
+import_from_disk:
+  en: Import from disk
+  es: Importar desde disco

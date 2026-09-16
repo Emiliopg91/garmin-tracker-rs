@@ -18,7 +18,10 @@ use crate::{
     logic::{notifications::show_notification, report_error},
     mtp::MTP_CLIENT_INST,
     parser::FitParser,
-    utils::translations::{Languages, translate, translate_and_replace},
+    utils::{
+        constants,
+        translations::{Languages, translate, translate_and_replace},
+    },
 };
 use chrono::{Datelike, Local, TimeZone, Timelike, offset::LocalResult};
 use curl_rest::StatusCode;
@@ -259,7 +262,7 @@ pub async fn _import_from_device(app: &AppHandle, serial: &str) -> Result<usize,
             db.run_in_transaction(|tx| {
                 let res = if !activities_cpy.is_empty() {
                     info!("Fetched {} activity files", activities_cpy.len());
-                    import_file_list(tx, &activities_cpy, &device, lang)
+                    import_file_list(tx, &activities_cpy, Some(device.clone()), lang)
                 } else {
                     Ok(Vec::new())
                 }?;
@@ -300,11 +303,63 @@ pub async fn _import_from_device(app: &AppHandle, serial: &str) -> Result<usize,
     }
 }
 
+/// Tauri command wrapper around `_import_from_device`; returns the number of sessions imported.
+#[traced_command]
+#[tauri::command]
+pub async fn import_from_files(
+    app: AppHandle,
+    database: State<'_, DatabasePool>,
+    settings: State<'_, SettingsLock>,
+) -> Result<usize, String> {
+    let lang = settings.read().unwrap().language;
+    let picked_files = rfd::AsyncFileDialog::new()
+        .add_filter("fit", &["fit"])
+        .set_directory(constants::HOME_DIR.to_path_buf())
+        .pick_files()
+        .await;
+
+    if let Some(picked_files) = picked_files
+        && !picked_files.is_empty()
+    {
+        let files = picked_files
+            .into_iter()
+            .map(|pf| pf.path().to_path_buf())
+            .collect::<Vec<_>>();
+
+        let res = database
+            .run_in_transaction(|tx| Ok(import_file_list(tx, &files, None, lang)?))
+            .map_err(|e| e.to_string());
+
+        match res {
+            Ok(res) => {
+                if !res.is_empty() {
+                    let app = app.clone();
+                    std::thread::spawn(move || {
+                        let db = app.state::<DatabasePool>();
+                        update_pending_geolocation(&app, &db);
+                    });
+                }
+                return Ok(res.len());
+            }
+            Err(e) => {
+                return Err(report_error(
+                    e,
+                    lang,
+                    "error_import_sessions",
+                    "Error importing sessions",
+                ));
+            }
+        }
+    }
+
+    Ok(0)
+}
+
 /// Parses a batch of `.FIT` files in parallel and inserts each new session (plus its exercises/series/heart rate/GPS/speeds) in the given transaction, then refreshes personal records.
 fn import_file_list<F>(
     tx: &mut rusqlite_orm::rusqlite::Transaction,
     files: &[F],
-    device: &Device,
+    device: Option<Device>,
     lang: Languages,
 ) -> Result<Vec<i64>, DatabaseError>
 where
@@ -378,7 +433,9 @@ where
                         .execute_in(tx)?;
                 }
 
-                session.device = Some(device.serial.to_string());
+                if let Some(ref device) = device {
+                    session.device = Some(device.serial.clone());
+                }
                 SessionRepository::insert().item(session).execute_in(tx)?;
 
                 for serie in &series {
