@@ -23,7 +23,7 @@ export function AppProvider({
   const [environment, setEnvironment] = useState(AppEnvironment.Release);
   const [appReady, setAppReady] = useState(false);
   const [settingsOpened, setSettingsOpened] = useState(false);
-  const [tab, setTab] = useState(Tabs.SESSIONS);
+  const [tab, setTab] = useState(Tabs.HOME);
   const [availableDevices, setAvailableDevices] = useState<DeviceListItem[]>(
     [],
   );

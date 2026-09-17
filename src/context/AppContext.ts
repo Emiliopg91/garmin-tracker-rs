@@ -15,7 +15,7 @@ interface AppContexType {
 
 const defaultValue: AppContexType = {
   appReady: false,
-  tab: Tabs.SESSIONS,
+  tab: Tabs.HOME,
   setTab: () => {
     /* empty */
   },

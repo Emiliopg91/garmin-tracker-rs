@@ -12,6 +12,7 @@ import { Loading } from "../Loading/Loading";
 import { WorkoutsList } from "../Workouts/WorkoutList";
 import { Settings } from "../Settings/Settings";
 import SettingsIcon from "@mui/icons-material/Settings";
+import { Home } from "../Home/Home";
 
 export function App(): JSX.Element {
   const { tab, setTab, appReady, showSettings, settingsOpened, closeSettings } =
@@ -21,6 +22,13 @@ export function App(): JSX.Element {
 
   const leftNavBarItems: NavBarItem[] = useMemo(
     () => [
+      {
+        label: <span>{translate("home")}</span>,
+        onSelected: () => {
+          setTab(Tabs.HOME);
+        },
+        selected: tab == Tabs.HOME,
+      },
       {
         label: <span>{translate("sessions")}</span>,
         onSelected: () => {
@@ -80,6 +88,7 @@ export function App(): JSX.Element {
             <NavBar leftItems={leftNavBarItems} rightItems={rightNavBarItems} />
 
             <div id="list-layer">
+              {tab == Tabs.HOME && <Home />}
               {tab == Tabs.SESSIONS && <SessionsList />}
               {tab == Tabs.EXERCISES && <ExercisesList />}
               {tab == Tabs.WORKOUTS && <WorkoutsList />}
