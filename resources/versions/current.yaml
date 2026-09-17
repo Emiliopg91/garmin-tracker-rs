@@ -18,7 +18,7 @@ node:
   eslint: 9.39.5
   eslint-plugin-react: 7.37.5
   leaflet: 1.9.4
-  prettier: 3.9.6
+  prettier: 3.9.7
   react: 19.3.0
   react-dom: 19.3.0
   react-leaflet: 5.0.0
@@ -34,7 +34,7 @@ rust:
   garmin-tracker-rs-macros: 0.1.0
   libc: 0.2.189
   mtp-rs: 0.32.0
-  noyalib: 0.0.43
+  noyalib: 0.0.44
   nusb: 0.2.7
   ouroboros: 0.18.5
   phf: 0.13.1

@@ -16,7 +16,7 @@ use rusqlite_orm::database::{
     builder::{DatabaseConnectionBuilder, JournalMode},
 };
 use rusqlite_orm_macros::dlls;
-use tauri::Manager;
+use tauri::{Manager, WindowEvent};
 use tauri_plugin_log::{
     Target, TargetKind,
     log::{LevelFilter, debug, error, info, warn},
@@ -32,8 +32,8 @@ use crate::{
         body_metrics::{add_body_measures, delete_body_metric, get_body_measures},
         exercises::{get_exercise_details, get_exercises},
         sessions::{
-            get_session_details, get_sessions, import_from_device, import_from_files,
-            save_session_changes,
+            _import_from_files, get_session_details, get_sessions, import_from_device,
+            import_from_files, save_session_changes,
         },
         workouts::{get_workout_details, get_workout_list},
     },
@@ -204,6 +204,31 @@ pub fn run(log_level: LevelFilter) {
             let (database, settings) = initialize();
             app.manage(database);
             app.manage(SettingsLock::new(settings));
+
+            let app_handle = app.handle().clone();
+            let window = app_handle.get_webview_window("main");
+            if let Some(window) = window {
+                window.on_window_event(move |event| {
+                    if let WindowEvent::DragDrop(event) = event {
+                        match event {
+                            tauri::DragDropEvent::Drop { paths, position: _ } => {
+                                let paths = paths
+                                    .into_iter()
+                                    .filter(|p| {
+                                        p.display().to_string().to_lowercase().ends_with(".fit")
+                                    })
+                                    .cloned()
+                                    .collect::<Vec<_>>();
+
+                                info!("Dropped {} .fit files: {:?}", paths.len(), paths);
+
+                                let _ = _import_from_files(app_handle.clone(), paths.as_slice());
+                            }
+                            _ => {}
+                        }
+                    }
+                });
+            }
 
             debug!("Setup finished");
             Ok(())

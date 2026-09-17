@@ -1,4 +1,10 @@
-use std::{collections::HashSet, fs, path::Path, sync::Mutex, time::Duration};
+use std::{
+    collections::HashSet,
+    fs,
+    path::{Path, PathBuf},
+    sync::Mutex,
+    time::Duration,
+};
 
 use crate::{
     SettingsLock,
@@ -262,7 +268,7 @@ pub async fn _import_from_device(app: &AppHandle, serial: &str) -> Result<usize,
             db.run_in_transaction(|tx| {
                 let res = if !activities_cpy.is_empty() {
                     info!("Fetched {} activity files", activities_cpy.len());
-                    import_file_list(tx, &activities_cpy, Some(device.clone()), lang)
+                    import_file_list(tx, &activities_cpy, Some(device.clone()), lang, true)
                 } else {
                     Ok(Vec::new())
                 }?;
@@ -306,12 +312,7 @@ pub async fn _import_from_device(app: &AppHandle, serial: &str) -> Result<usize,
 /// Tauri command wrapper around `_import_from_device`; returns the number of sessions imported.
 #[traced_command]
 #[tauri::command]
-pub async fn import_from_files(
-    app: AppHandle,
-    database: State<'_, DatabasePool>,
-    settings: State<'_, SettingsLock>,
-) -> Result<usize, String> {
-    let lang = settings.read().unwrap().language;
+pub async fn import_from_files(app: AppHandle) -> Result<usize, String> {
     let picked_files = rfd::AsyncFileDialog::new()
         .add_filter("fit", &["fit"])
         .set_directory(constants::HOME_DIR.to_path_buf())
@@ -326,33 +327,42 @@ pub async fn import_from_files(
             .map(|pf| pf.path().to_path_buf())
             .collect::<Vec<_>>();
 
-        let res = database
-            .run_in_transaction(|tx| Ok(import_file_list(tx, &files, None, lang)?))
-            .map_err(|e| e.to_string());
-
-        match res {
-            Ok(res) => {
-                if !res.is_empty() {
-                    let app = app.clone();
-                    std::thread::spawn(move || {
-                        let db = app.state::<DatabasePool>();
-                        update_pending_geolocation(&app, &db);
-                    });
-                }
-                return Ok(res.len());
-            }
-            Err(e) => {
-                return Err(report_error(
-                    e,
-                    lang,
-                    "error_import_sessions",
-                    "Error importing sessions",
-                ));
-            }
-        }
+        let res = tokio::task::spawn_blocking(move || _import_from_files(app, files.as_slice()))
+            .await
+            .map_err(|e| e.to_string())
+            .flatten();
+        return Ok(res?);
     }
 
     Ok(0)
+}
+pub fn _import_from_files(app: AppHandle, files: &[PathBuf]) -> Result<usize, String> {
+    let lang = app.state::<SettingsLock>().read().unwrap().language;
+    let database = app.state::<DatabasePool>();
+    let res = database
+        .run_in_transaction(|tx| Ok(import_file_list(tx, &files, None, lang, false)?))
+        .map_err(|e| e.to_string());
+
+    match res {
+        Ok(res) => {
+            if !res.is_empty() {
+                let app = app.clone();
+                std::thread::spawn(move || {
+                    let db = app.state::<DatabasePool>();
+                    update_pending_geolocation(&app, &db);
+                });
+            }
+            return Ok(res.len());
+        }
+        Err(e) => {
+            return Err(report_error(
+                e,
+                lang,
+                "error_import_sessions",
+                "Error importing sessions",
+            ));
+        }
+    }
 }
 
 /// Parses a batch of `.FIT` files in parallel and inserts each new session (plus its exercises/series/heart rate/GPS/speeds) in the given transaction, then refreshes personal records.
@@ -361,6 +371,7 @@ fn import_file_list<F>(
     files: &[F],
     device: Option<Device>,
     lang: Languages,
+    delete: bool,
 ) -> Result<Vec<i64>, DatabaseError>
 where
     F: AsRef<Path> + Sync,
@@ -468,7 +479,9 @@ where
 
                 success.push(date);
 
-                let _ = fs::remove_file(&file);
+                if delete {
+                    let _ = fs::remove_file(&file);
+                }
                 #[cfg(debug_assertions)]
                 {
                     use std::path::PathBuf;
