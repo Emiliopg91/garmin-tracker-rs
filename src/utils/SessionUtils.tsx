@@ -26,7 +26,6 @@ export interface SessionFrontDetails extends SessionDetails {
   valid_points: [number, number][];
   start_point: [number, number];
   finish_point: [number, number];
-  distance: number;
   hrRanges: [number, number, number];
   hrBreathData: {
     idx: number;
@@ -51,7 +50,6 @@ export class SessionUtils {
       valid_points: [],
       start_point: [0, 0],
       finish_point: [0, 0],
-      distance: 0,
       hrBreathData: [],
       hrRanges: [0, 0, 0],
       volume: 0,
@@ -118,14 +116,17 @@ export class SessionUtils {
         }
       }
 
-      for (let i = 0; i < details.coordinates.length - 1; i++) {
-        if (details.coordinates[i]) {
-          const diff = SessionUtils.haversine(
-            details.coordinates[i]!,
-            details.coordinates[i + 1]!,
-          );
+      if (!details.distance) {
+        details.distance = 0;
+        for (let i = 0; i < details.coordinates.length - 1; i++) {
+          if (details.coordinates[i]) {
+            const diff = SessionUtils.haversine(
+              details.coordinates[i]!,
+              details.coordinates[i + 1]!,
+            );
 
-          details.distance += diff;
+            details.distance += diff;
+          }
         }
       }
 
@@ -140,13 +141,41 @@ export class SessionUtils {
             speeds.push(details.speeds[i]!);
           }
         }
-        const minSpeed = Math.min(...speeds);
-        for (let i = 0; i < speeds.length; i++) {
-          speeds[i] = speeds[i] - minSpeed;
-        }
-        const maxSpeed = Math.max(...speeds);
+        const sortedSpeeds = [...speeds].sort((a, b) => a - b);
+        const total = sortedSpeeds.length;
+
+        const lowerBound = (value: number) => {
+          let lo = 0;
+          let hi = sortedSpeeds.length;
+          while (lo < hi) {
+            const mid = (lo + hi) >>> 1;
+            if (sortedSpeeds[mid] < value) {
+              lo = mid + 1;
+            } else {
+              hi = mid;
+            }
+          }
+          return lo;
+        };
+        const upperBound = (value: number) => {
+          let lo = 0;
+          let hi = sortedSpeeds.length;
+          while (lo < hi) {
+            const mid = (lo + hi) >>> 1;
+            if (sortedSpeeds[mid] <= value) {
+              lo = mid + 1;
+            } else {
+              hi = mid;
+            }
+          }
+          return lo;
+        };
+
         for (let i = 0; i < speeds.length && i < colors.length; i++) {
-          colors[i] = 240 - Math.round(240 * (speeds[i] / maxSpeed));
+          const countLess = lowerBound(speeds[i]);
+          const countEqual = upperBound(speeds[i]) - countLess;
+          const percentile = (countLess + countEqual / 2) / total;
+          colors[i] = 240 - Math.round(240 * percentile);
         }
       }
 

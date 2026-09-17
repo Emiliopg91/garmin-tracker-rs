@@ -37,7 +37,8 @@ impl TryFrom<FitParser> for Session {
                         }
                         MesgNum::SESSION => {
                             let session_obj = mesgdef::Session::from(msg);
-                            session_data.set_session(session_obj)?;
+                            session_data.set_session(session_obj.clone())?;
+                            records.append_session_data(session_obj);
                         }
                         MesgNum::WORKOUT_STEP => {
                             let record_obj = mesgdef::WorkoutStep::from(msg);
@@ -288,6 +289,7 @@ struct RecordAccumulator {
     last_coord: (i32, i32),
     speeds: Vec<f64>,
     any_speed: bool,
+    distance: Option<f64>,
 }
 
 impl RecordAccumulator {
@@ -321,6 +323,10 @@ impl RecordAccumulator {
             None => AdditionalData::INVALID_SPEED,
         });
     }
+
+    fn append_session_data(&mut self, ses: mesgdef::Session) {
+        self.distance = ses.total_distance_scaled()
+    }
 }
 
 impl From<RecordAccumulator> for Option<AdditionalData> {
@@ -329,12 +335,13 @@ impl From<RecordAccumulator> for Option<AdditionalData> {
         let hrs = value.any_hr.then_some(value.hrs);
         let speeds = value.any_speed.then_some(value.speeds);
 
-        if hrs.is_some() || coords.is_some() || speeds.is_some() {
+        if hrs.is_some() || coords.is_some() || speeds.is_some() || value.distance.is_some() {
             Some(AdditionalData {
                 session: value.timestamp,
                 heart_rates: hrs,
                 coordinates: coords.map(|coords| AdditionalData::build_coordinates_blob(&coords)),
                 speeds: speeds.map(|speeds| AdditionalData::build_speeds_blob(&speeds)),
+                distance: value.distance,
             })
         } else {
             None

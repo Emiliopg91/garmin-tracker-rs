@@ -101,6 +101,7 @@ pub struct SessionDetails {
     pub coordinates: Vec<Option<(i32, i32)>>,
     pub laps: Vec<SessionLap>,
     pub speeds: Vec<Option<f64>>,
+    pub distance: Option<f64>,
 
     pub device: Option<String>,
 }
@@ -116,8 +117,10 @@ impl From<(&Session, &[Exercise], &[Set], &[Lap])> for SessionDetails {
         let mut heart_rates = Vec::new();
         let mut gps_coordinates = Vec::new();
         let mut speeds = Vec::new();
+        let mut distance = None;
 
         if let Some(add_data) = &value.0.additional_data {
+            distance = add_data.distance.map(|d| d / 1000_f64);
             if let Some(hr_data) = add_data.get_heart_rates() {
                 heart_rates = hr_data;
             }
@@ -148,6 +151,7 @@ impl From<(&Session, &[Exercise], &[Set], &[Lap])> for SessionDetails {
             laps,
             coordinates: gps_coordinates,
             speeds,
+            distance,
         }
     }
 }

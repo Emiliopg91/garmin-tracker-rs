@@ -257,7 +257,7 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                 Kcal
               </td>
             </tr>
-            {localSession.distance > 0 && (
+            {localSession.distance != null && localSession.distance > 0 && (
               <>
                 <tr>
                   <td>{translate("distance")}:</td>

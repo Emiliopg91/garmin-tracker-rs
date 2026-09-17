@@ -9,6 +9,7 @@ pub struct AdditionalData {
     pub heart_rates: Option<Vec<u8>>,
     pub coordinates: Option<Vec<u8>>,
     pub speeds: Option<Vec<u8>>,
+    pub distance: Option<f64>,
 }
 
 impl AdditionalData {
