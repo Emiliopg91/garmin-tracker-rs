@@ -48,6 +48,7 @@ export function WorkoutsList() {
       setWorkoutDetails(details);
     });
   };
+
   return (
     <>
       <table>

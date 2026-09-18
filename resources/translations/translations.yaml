@@ -387,14 +387,20 @@ summary:
   en: Summary
   es: Resumen
 last_7_days:
-  es: Last 7 days
+  en: Last 7 days
   es: Últimos 7 dias
 last_30_days:
-  es: Last 30 days
+  en: Last 30 days
   es: Últimos 30 dias
 last_session:
-  es: Last session
+  en: Last session
   es: Última sesión
 today:
   en: Today
   es: Hoy
+this_week:
+  en: This week
+  es: Esta semana
+next_workout:
+  en: Next workout
+  es: Siguiente entrenamiento

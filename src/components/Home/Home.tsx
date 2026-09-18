@@ -22,9 +22,14 @@ import {
 import "@/styles/Home/Home.css";
 import "@/styles/Sessions/SessionModal.css";
 import { TimeUtils } from "@/utils/TimeUtils";
-import { SessionListItem } from "@/utils/backend/models";
+import {
+  SessionListItem,
+  WorkoutDetails,
+  WorkoutListItem,
+} from "@/utils/backend/models";
 import { BackendListener } from "@/utils/backend/listener";
 import { SessionModal } from "../Sessions/SessionModal";
+import { WorkoutModal } from "../Workouts/WorkoutModal";
 
 export function Home() {
   const { availableDevices, sessionsVersion } = useContext(AppContext);
@@ -39,13 +44,21 @@ export function Home() {
     left: number;
   } | null>(null);
 
-  const [weekTime, setWeekTime] = useState(0);
-  const [weekKcal, setWeekKCal] = useState(0);
-  const [monthTime, setMonthTime] = useState(0);
-  const [monthKcal, setMonthKCal] = useState(0);
   const [todayTime, setTodayTime] = useState(0);
   const [todayKcal, setTodayKCal] = useState(0);
+  const [weekTime, setWeekTime] = useState(0);
+  const [weekKcal, setWeekKCal] = useState(0);
+  const [thisWeekTime, setThisWeekTime] = useState(0);
+  const [thisWeekKcal, setThisWeekKCal] = useState(0);
+  const [monthTime, setMonthTime] = useState(0);
+  const [monthKcal, setMonthKCal] = useState(0);
 
+  const [workout, setWorkout] = useState<WorkoutListItem | undefined>(
+    undefined,
+  );
+  const [workoutDetails, setWorkoutDetails] = useState<
+    WorkoutDetails | undefined
+  >(undefined);
   const [session, setLastSession] = useState<SessionListItem | undefined>(
     undefined,
   );
@@ -88,47 +101,81 @@ export function Home() {
       .then((data) => {
         setAvailableData(data.length > 0);
 
-        let todayTmp = 0;
-        let todayKcl = 0;
-        let weekTmp = 0;
-        let weekKcl = 0;
-        let monthTmp = 0;
-        let monthKcl = 0;
+        if (data.length > 0) {
+          startLoading();
+          BackendClient.getWorkoutList()
+            .then((data) => {
+              if (data.length > 0) {
+                let oldest = data[0];
+                for (let i = 0; i < data.length; i++) {
+                  if (oldest.latest_session > data[i].latest_session) {
+                    oldest = data[i];
+                  }
+                }
+                setWorkout(oldest);
+              }
+            })
+            .finally(() => {
+              finishLoading();
+            });
 
-        const weekLimit = today - 6 * 24 * 60 * 60;
-        const monthLimit = today - 29 * 24 * 60 * 60;
+          let todayTmp = 0;
+          let todayKcl = 0;
+          let thisWeekTmp = 0;
+          let thisWeekKcl = 0;
+          let weekTmp = 0;
+          let weekKcl = 0;
+          let monthTmp = 0;
+          let monthKcl = 0;
 
-        for (let i = 0; i < data.length; i++) {
-          if (data[i].timestamp < monthLimit) {
-            break;
-          }
-          monthTmp += data[i].total_elapsed_time;
-          monthKcl += data[i].active_calories;
-          if (data[i].timestamp >= weekLimit) {
-            weekTmp += data[i].total_elapsed_time;
-            weekKcl += data[i].active_calories;
+          const startOfWeek = new Date();
+          const day = startOfWeek.getDay();
+          const diff = (day === 0 ? -6 : 1) - day;
+          startOfWeek.setDate(startOfWeek.getDate() + diff);
+          startOfWeek.setHours(0, 0, 0, 0);
 
-            if (data[i].timestamp >= today) {
-              todayTmp += data[i].total_elapsed_time;
-              todayKcl += data[i].active_calories;
+          const thisWeekLimit = startOfWeek.getTime() / 1000;
+          const weekLimit = today - 6 * 24 * 60 * 60;
+          const monthLimit = today - 29 * 24 * 60 * 60;
+
+          for (let i = 0; i < data.length; i++) {
+            if (data[i].timestamp < monthLimit) {
+              break;
+            }
+            monthTmp += data[i].total_elapsed_time;
+            monthKcl += data[i].active_calories;
+            if (data[i].timestamp >= weekLimit) {
+              weekTmp += data[i].total_elapsed_time;
+              weekKcl += data[i].active_calories;
+
+              if (data[i].timestamp >= thisWeekLimit) {
+                thisWeekTmp += data[i].total_elapsed_time;
+                thisWeekKcl += data[i].active_calories;
+                if (data[i].timestamp >= today) {
+                  todayTmp += data[i].total_elapsed_time;
+                  todayKcl += data[i].active_calories;
+                }
+              }
             }
           }
-        }
-        setWeekKCal(weekKcl);
-        setWeekTime(weekTmp);
-        setMonthKCal(monthKcl);
-        setMonthTime(monthTmp);
-        setTodayKCal(todayKcl);
-        setTodayTime(todayTmp);
+          setTodayKCal(todayKcl);
+          setTodayTime(todayTmp);
+          setThisWeekKCal(thisWeekKcl);
+          setThisWeekTime(thisWeekTmp);
+          setWeekKCal(weekKcl);
+          setWeekTime(weekTmp);
+          setMonthKCal(monthKcl);
+          setMonthTime(monthTmp);
 
-        const workout_data = SessionUtils.calculateWorkoutLoad(data);
-        setWorkload(workout_data);
-        console.table(workout_data);
-        if (workout_data.length > 0) {
-          setMinDate(workout_data[0].date);
-        }
+          const workout_data = SessionUtils.calculateWorkoutLoad(data);
+          setWorkload(workout_data);
+          console.table(workout_data);
+          if (workout_data.length > 0) {
+            setMinDate(workout_data[0].date);
+          }
 
-        setLastSession(data[0]);
+          setLastSession(data[0]);
+        }
       })
       .finally(() => {
         finishLoading();
@@ -146,6 +193,11 @@ export function Home() {
       .finally(() => {
         finishLoading();
       });
+  };
+  const getWorkoutDetails = (name: string) => {
+    BackendClient.getWorkoutDetails(name).then((details) => {
+      setWorkoutDetails(details);
+    });
   };
 
   useEffect(() => {
@@ -186,7 +238,7 @@ export function Home() {
                   <XAxis
                     dataKey="date"
                     type="number"
-                    domain={[minDate, new Date().getTime()]}
+                    domain={[minDate, workload[workload.length - 1].date]}
                     stroke="#fff"
                     tick={false}
                     height={0}
@@ -245,7 +297,49 @@ export function Home() {
               </ResponsiveContainer>
             </div>
           )}
-          <div>
+
+          <div
+            className="dashboard-box"
+            style={{ display: "flex", width: "100%" }}
+          >
+            <fieldset style={{ flex: 1 }}>
+              <legend>{translate("summary")}</legend>
+              <table id="last-days">
+                <colgroup>
+                  <col />
+                  <col />
+                  <col />
+                  <col />
+                </colgroup>
+                <thead>
+                  <th></th>
+                  <th>{translate("today")}</th>
+                  <th>{translate("this_week")}</th>
+                  <th>{translate("last_7_days")}</th>
+                  <th>{translate("last_30_days")}</th>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>{translate("active_time")}</td>
+                    <td>{TimeUtils.formatDuration(todayTime)}</td>
+                    <td>{TimeUtils.formatDuration(thisWeekTime)}</td>
+                    <td>{TimeUtils.formatDuration(weekTime)}</td>
+                    <td>{TimeUtils.formatDuration(monthTime)}</td>
+                  </tr>
+                </tbody>
+                <tbody>
+                  <tr>
+                    <td>{translate("active_calories")}</td>
+                    <td>{todayKcal} Kcal</td>
+                    <td>{thisWeekKcal} Kcal</td>
+                    <td>{weekKcal} Kcal</td>
+                    <td>{monthKcal} Kcal</td>
+                  </tr>
+                </tbody>
+              </table>
+            </fieldset>
+          </div>
+          <div className="dashboard-box">
             <fieldset>
               <legend>{translate("last_session")}</legend>
               <div id="list-layer">
@@ -289,41 +383,51 @@ export function Home() {
               </div>{" "}
             </fieldset>
           </div>
-          <div style={{ display: "flex", width: "100%" }}>
-            <fieldset style={{ flex: 1 }}>
-              <legend>{translate("summary")}</legend>
-              <table id="last-days">
-                <colgroup>
-                  <col />
-                  <col />
-                  <col />
-                  <col />
-                </colgroup>
-                <thead>
-                  <th></th>
-                  <th>{translate("today")}</th>
-                  <th>{translate("last_7_days")}</th>
-                  <th>{translate("last_30_days")}</th>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>{translate("active_time")}</td>
-                    <td>{TimeUtils.formatDuration(todayTime)}</td>
-                    <td>{TimeUtils.formatDuration(weekTime)}</td>
-                    <td>{TimeUtils.formatDuration(monthTime)}</td>
-                  </tr>
-                </tbody>
-                <tbody>
-                  <tr>
-                    <td>{translate("active_calories")}</td>
-                    <td>{todayKcal} Kcal</td>
-                    <td>{weekKcal} Kcal</td>
-                    <td>{monthKcal} Kcal</td>
-                  </tr>
-                </tbody>
-              </table>
-            </fieldset>
-          </div>
+          {workout && (
+            <div className="dashboard-box">
+              <fieldset>
+                <legend>{translate("next_workout")}</legend>
+                <div id="list-layer">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th className="text-center">{translate("workout")}</th>
+                        <th className="text-center">
+                          {translate("latest_session")}
+                        </th>
+                        <th className="text-center">
+                          {translate("session_count")}
+                        </th>
+                        <th className="text-center">
+                          {translate("average_duration")}
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr
+                        className="clickable-row"
+                        onClick={() => getWorkoutDetails(workout.name)}
+                      >
+                        <td className="text-left">
+                          {workout.name.length > 0 && (
+                            <span>{workout.name}</span>
+                          )}
+                          {workout.name.length == 0 && (
+                            <span>{translate("other")}</span>
+                          )}
+                        </td>
+                        <td>
+                          {TimeUtils.formatTimeDate(workout.latest_session)}
+                        </td>
+                        <td>{workout.sessions}</td>
+                        <td>{TimeUtils.formatDuration(workout.avg_time)}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>{" "}
+              </fieldset>
+            </div>
+          )}
         </>
       )}
 
@@ -335,6 +439,15 @@ export function Home() {
             onUpdate={() => {
               /**/
             }}
+          />
+        )}
+      </div>
+
+      <div>
+        {workoutDetails && (
+          <WorkoutModal
+            workout={workoutDetails}
+            onClose={() => setWorkoutDetails(undefined)}
           />
         )}
       </div>

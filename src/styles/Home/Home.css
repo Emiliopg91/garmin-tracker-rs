@@ -7,17 +7,52 @@
   margin: 10px auto auto auto;
 }
 
+.dashboard-box {
+  box-sizing: border-box;
+  background-color: #383838;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  padding: 14px 18px;
+
+  > fieldset {
+    border: none;
+    margin: 0;
+    padding: 0;
+    min-width: 0;
+  }
+
+  legend {
+    padding: 0;
+    margin-bottom: 10px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--primary-color);
+  }
+}
+
+.dashboard-box {
+  margin-top: 12px;
+}
+
 #last-days {
-  display: block;
-  margin: 0 auto;
+  width: 100%;
+  table-layout: fixed;
   > colgroup {
     > col {
-      width: 200px;
+      width: 20%;
     }
   }
   > thead {
     > th {
-      border-bottom: 1px solid white;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    }
+  }
+  > tbody {
+    > tr {
+      text-align: center;
     }
   }
 }
