@@ -2,11 +2,13 @@ import { WorkoutDetails, WorkoutListItem } from "@/utils/backend/models";
 import { WorkoutModal } from "./WorkoutModal";
 import { BackendClient } from "@/utils/backend/client";
 import { useContext, useEffect, useState } from "react";
+import { AppContext } from "@/context/AppContext";
 import { LoadingContext } from "@/context/LoadingContext";
 import { I18nSettingsContext } from "@/context/I18nSettingsContext";
 import { TimeUtils } from "@/utils/TimeUtils";
 
 export function WorkoutsList() {
+  const { sessionsVersion } = useContext(AppContext);
   const { startLoading, finishLoading } = useContext(LoadingContext);
   const { translate } = useContext(I18nSettingsContext);
 
@@ -39,7 +41,7 @@ export function WorkoutsList() {
 
   useEffect(() => {
     refreshList();
-  }, []);
+  }, [sessionsVersion]);
 
   const getWorkoutDetails = (name: string) => {
     BackendClient.getWorkoutDetails(name).then((details) => {

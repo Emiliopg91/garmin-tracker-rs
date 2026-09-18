@@ -11,6 +11,7 @@ interface AppContexType {
   showSettings: () => void;
   closeSettings: () => void;
   settingsOpened: boolean;
+  sessionsVersion: number;
 }
 
 const defaultValue: AppContexType = {
@@ -28,6 +29,7 @@ const defaultValue: AppContexType = {
   showSettings: () => {
     /* */
   },
+  sessionsVersion: 0,
 };
 
 export const AppContext = createContext(defaultValue);

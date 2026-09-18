@@ -2,6 +2,7 @@ import { ExerciseDetails, ExerciseListItem } from "@/utils/backend/models";
 import { ExerciseModal } from "./ExerciseModal";
 import { useContext, useEffect, useState } from "react";
 import { BackendClient } from "@/utils/backend/client";
+import { AppContext } from "@/context/AppContext";
 import { LoadingContext } from "@/context/LoadingContext";
 import { I18nSettingsContext } from "@/context/I18nSettingsContext";
 import { TimeUtils } from "@/utils/TimeUtils";
@@ -26,6 +27,7 @@ export const calc1RMEstimation = (reps: number, weight: number): number => {
 };
 
 export function ExercisesList() {
+  const { sessionsVersion } = useContext(AppContext);
   const { startLoading, finishLoading } = useContext(LoadingContext);
   const { translate, settings } = useContext(I18nSettingsContext);
   const [exercises, setExercises] = useState<ExerciseListItem[]>([]);
@@ -51,7 +53,7 @@ export function ExercisesList() {
 
   useEffect(() => {
     refreshList();
-  }, []);
+  }, [sessionsVersion]);
 
   const getExerciseDetails = (category: number, id: number) => {
     BackendClient.getExerciseDetails(category, id).then((details) => {

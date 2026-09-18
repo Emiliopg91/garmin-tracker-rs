@@ -29,6 +29,7 @@ export function AppProvider({
   );
   const availableDevicesRef = useRef<DeviceListItem[]>([]);
   const [loadingCount, setLoadingCount] = useState(0);
+  const [sessionsVersion, setSessionsVersion] = useState(0);
   const [settings, setSettings] = useState<Settings>({
     distance_unit: DistanceUnit.Kilometers,
     weight_unit: WeightUnit.Kilograms,
@@ -112,6 +113,10 @@ export function AppProvider({
       finishLoading();
     });
 
+    const unregisterSessionsAdded = BackendListener.onSessionsAdded(() => {
+      setSessionsVersion((previous) => previous + 1);
+    });
+
     BackendClient.getEnvironment()
       .then((env) => {
         setEnvironment(env);
@@ -145,6 +150,7 @@ export function AppProvider({
       unregisterDisconnection();
       unregisterStartLoading();
       unregisterFinishLoading();
+      unregisterSessionsAdded();
     };
   }, [startLoading, finishLoading]);
 
@@ -163,6 +169,7 @@ export function AppProvider({
       settingsOpened,
       showSettings,
       closeSettings,
+      sessionsVersion,
     }),
     [
       tab,
@@ -172,6 +179,7 @@ export function AppProvider({
       settingsOpened,
       showSettings,
       closeSettings,
+      sessionsVersion,
     ],
   );
 

@@ -48,12 +48,21 @@ use tauri_plugin_log::log::{error, info, warn};
 pub fn get_sessions(
     database: State<'_, DatabasePool>,
     settings: State<'_, SettingsLock>,
+    limit: Option<i32>,
 ) -> Result<Vec<SessionListItem>, String> {
     info!("Getting sessions list...");
     let res = database.run_in_connection(|conn| {
-        let sessions = SessionRepository::select()
-            .order_by(OrderBy::Desc(session::entity::columns::DATE))
-            .fetch_in(conn)?;
+        let mut select_builder =
+            SessionRepository::select().order_by(OrderBy::Desc(session::entity::columns::DATE));
+
+        if let Some(date_limit) = limit {
+            select_builder = select_builder.where_(Where::Gte(
+                session::entity::columns::DATE,
+                date_limit.into(),
+            ))
+        }
+
+        let sessions = select_builder.fetch_in(conn)?;
 
         let record_sessions = SetRepository::select_by_personal_records_in_conn(conn, true, None)?
             .into_iter()

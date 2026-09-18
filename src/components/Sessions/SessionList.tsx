@@ -1,3 +1,4 @@
+import { AppContext } from "@/context/AppContext";
 import { LoadingContext } from "@/context/LoadingContext";
 import { I18nSettingsContext } from "@/context/I18nSettingsContext";
 import { BackendClient } from "@/utils/backend/client";
@@ -10,6 +11,7 @@ import { TimeUtils } from "@/utils/TimeUtils";
 import { SessionFrontDetails, SessionUtils } from "@/utils/SessionUtils";
 
 export function SessionsList() {
+  const { sessionsVersion } = useContext(AppContext);
   const { startLoading, finishLoading } = useContext(LoadingContext);
   const { translate, settings } = useContext(I18nSettingsContext);
   const [sessions, setSessions] = useState<SessionListItem[]>([]);
@@ -19,7 +21,7 @@ export function SessionsList() {
 
   const refreshList = () => {
     startLoading();
-    BackendClient.getSessions()
+    BackendClient.getSessions(null)
       .then((data) => {
         setSessions(data);
       })
@@ -29,8 +31,6 @@ export function SessionsList() {
   };
 
   useEffect(() => {
-    refreshList();
-
     const unregisterSessionLocation = BackendListener.onSessionLocationUpdate(
       (data) => {
         setSessions((prev) => {
@@ -42,10 +42,12 @@ export function SessionsList() {
       },
     );
 
+    refreshList();
+
     return () => {
       unregisterSessionLocation();
     };
-  }, []);
+  }, [sessionsVersion]);
 
   const getSessionDetails = (timestamp: number) => {
     startLoading();

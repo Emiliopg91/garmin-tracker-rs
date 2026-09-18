@@ -307,6 +307,8 @@ export class SessionUtils {
     return 6371 * c;
   }
 
+  public static CHRONIC_DAYS = 28;
+
   public static calculateWorkoutLoad(data: SessionListItem[]): WorkoutLoad[] {
     if (data.length === 0) {
       return [];
@@ -320,14 +322,13 @@ export class SessionUtils {
         return d.getTime();
       };
 
-      const CHRONIC_DAYS = 28;
       const ACUTE_DAYS = 7;
       const ACWR_UPPER_RATIO = 1.4;
       const ACWR_LOWER_RATIO = 0.9;
       const TODAY = startOfDay(new Date());
 
       const LAMBDA_ACUTE = 2 / (ACUTE_DAYS + 1); // ~0.25
-      const LAMBDA_CHRONIC = 2 / (CHRONIC_DAYS + 1); // ~0.069
+      const LAMBDA_CHRONIC = 2 / (SessionUtils.CHRONIC_DAYS + 1); // ~0.069
 
       let working_data = Array.from(
         data
@@ -340,7 +341,9 @@ export class SessionUtils {
             return { date, load: s.training_load };
           })
           .filter(
-            (s) => TODAY - 2 * CHRONIC_DAYS * 24 * 60 * 60 * 1000 <= s.date,
+            (s) =>
+              TODAY - 2 * SessionUtils.CHRONIC_DAYS * 24 * 60 * 60 * 1000 <=
+              s.date,
           )
           .reduce((map, s) => {
             map.set(s.date, (map.get(s.date) ?? 0) + s.load);
@@ -350,7 +353,7 @@ export class SessionUtils {
       );
 
       for (
-        let dat = addDays(TODAY, -2 * CHRONIC_DAYS + 1);
+        let dat = addDays(TODAY, -2 * SessionUtils.CHRONIC_DAYS + 1);
         dat <= TODAY;
         dat = addDays(dat, 1)
       ) {
@@ -392,7 +395,7 @@ export class SessionUtils {
         }
 
         let load_data = ewmaSeries
-          .filter((_, idx) => idx >= CHRONIC_DAYS)
+          .filter((_, idx) => idx >= SessionUtils.CHRONIC_DAYS)
           .map((e) => ({
             date: e.date,
             upper: e.chronic * (ACWR_UPPER_RATIO - ACWR_LOWER_RATIO),

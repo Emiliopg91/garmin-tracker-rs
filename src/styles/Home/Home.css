@@ -1,0 +1,23 @@
+#no-available-data {
+  display: block;
+  margin: auto auto 0px auto;
+}
+#import-sessions {
+  display: block;
+  margin: 10px auto auto auto;
+}
+
+#last-days {
+  display: block;
+  margin: 0 auto;
+  > colgroup {
+    > col {
+      width: 200px;
+    }
+  }
+  > thead {
+    > th {
+      border-bottom: 1px solid white;
+    }
+  }
+}

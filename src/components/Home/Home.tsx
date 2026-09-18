@@ -2,8 +2,11 @@ import { AppContext } from "@/context/AppContext";
 import { I18nSettingsContext } from "@/context/I18nSettingsContext";
 import { LoadingContext } from "@/context/LoadingContext";
 import { BackendClient } from "@/utils/backend/client";
-import { BackendListener } from "@/utils/backend/listener";
-import { SessionUtils, WorkoutLoad } from "@/utils/SessionUtils";
+import {
+  SessionFrontDetails,
+  SessionUtils,
+  WorkoutLoad,
+} from "@/utils/SessionUtils";
 import { Button, Menu, MenuItem } from "@mui/material";
 import { useContext, useEffect, useState } from "react";
 import {
@@ -16,18 +19,39 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import "@/styles/Home/Home.css";
+import "@/styles/Sessions/SessionModal.css";
+import { TimeUtils } from "@/utils/TimeUtils";
+import { SessionListItem } from "@/utils/backend/models";
+import { BackendListener } from "@/utils/backend/listener";
+import { SessionModal } from "../Sessions/SessionModal";
 
 export function Home() {
-  const { availableDevices } = useContext(AppContext);
+  const { availableDevices, sessionsVersion } = useContext(AppContext);
   const { startLoading, finishLoading } = useContext(LoadingContext);
   const { translate, settings } = useContext(I18nSettingsContext);
 
+  const [availableData, setAvailableData] = useState(false);
   const [workload, setWorkload] = useState<WorkoutLoad[]>([]);
   const [minDate, setMinDate] = useState(0);
   const [importMenuAnchor, setImportMenuAnchor] = useState<{
     top: number;
     left: number;
   } | null>(null);
+
+  const [weekTime, setWeekTime] = useState(0);
+  const [weekKcal, setWeekKCal] = useState(0);
+  const [monthTime, setMonthTime] = useState(0);
+  const [monthKcal, setMonthKCal] = useState(0);
+  const [todayTime, setTodayTime] = useState(0);
+  const [todayKcal, setTodayKCal] = useState(0);
+
+  const [session, setLastSession] = useState<SessionListItem | undefined>(
+    undefined,
+  );
+  const [sessionDetails, setSessionDetails] = useState<
+    SessionFrontDetails | undefined
+  >(undefined);
 
   const importDevice = (serial: string) => {
     startLoading();
@@ -57,14 +81,67 @@ export function Home() {
 
   const refresh = () => {
     startLoading();
-    BackendClient.getSessions()
+    const today = new Date(new Date().setHours(0, 0, 0, 0)).getTime() / 1000;
+    BackendClient.getSessions(
+      today - SessionUtils.CHRONIC_DAYS * 2 * 24 * 60 * 60,
+    )
       .then((data) => {
+        setAvailableData(data.length > 0);
+
+        let todayTmp = 0;
+        let todayKcl = 0;
+        let weekTmp = 0;
+        let weekKcl = 0;
+        let monthTmp = 0;
+        let monthKcl = 0;
+
+        const weekLimit = today - 6 * 24 * 60 * 60;
+        const monthLimit = today - 29 * 24 * 60 * 60;
+
+        for (let i = 0; i < data.length; i++) {
+          if (data[i].timestamp < monthLimit) {
+            break;
+          }
+          monthTmp += data[i].total_elapsed_time;
+          monthKcl += data[i].active_calories;
+          if (data[i].timestamp >= weekLimit) {
+            weekTmp += data[i].total_elapsed_time;
+            weekKcl += data[i].active_calories;
+
+            if (data[i].timestamp >= today) {
+              todayTmp += data[i].total_elapsed_time;
+              todayKcl += data[i].active_calories;
+            }
+          }
+        }
+        setWeekKCal(weekKcl);
+        setWeekTime(weekTmp);
+        setMonthKCal(monthKcl);
+        setMonthTime(monthTmp);
+        setTodayKCal(todayKcl);
+        setTodayTime(todayTmp);
+
         const workout_data = SessionUtils.calculateWorkoutLoad(data);
         setWorkload(workout_data);
         console.table(workout_data);
         if (workout_data.length > 0) {
           setMinDate(workout_data[0].date);
         }
+
+        setLastSession(data[0]);
+      })
+      .finally(() => {
+        finishLoading();
+      });
+  };
+
+  const getSessionDetails = (timestamp: number) => {
+    startLoading();
+    BackendClient.getSessionDetails(timestamp)
+      .then((details) => {
+        setSessionDetails(
+          SessionUtils.detailsFromBackend(details, settings.weight_unit),
+        );
       })
       .finally(() => {
         finishLoading();
@@ -72,89 +149,195 @@ export function Home() {
   };
 
   useEffect(() => {
-    const unregisterSessionAdded = BackendListener.onSessionsAdded(() => {
-      refresh();
-    });
+    const unregisterSessionLocation = BackendListener.onSessionLocationUpdate(
+      (data) => {
+        if (data.session == session?.timestamp) {
+          session.name = data.location;
+          setLastSession(session);
+        }
+      },
+    );
 
     refresh();
 
     return () => {
-      unregisterSessionAdded();
+      unregisterSessionLocation();
     };
-  }, []);
+  }, [sessionsVersion]);
 
   return (
     <>
-      {workload.length > 0 && (
-        <div className="chart-container">
-          <ResponsiveContainer width="100%" height="100%">
-            <ComposedChart
-              data={workload}
-              margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
-            >
-              <CartesianGrid stroke="#80808000" strokeDasharray="5 5" />
-              <XAxis
-                dataKey="date"
-                type="number"
-                domain={[minDate, new Date().getTime()]}
-                stroke="#fff"
-                tick={false}
-                height={0}
-              />
-              <YAxis
-                yAxisId="left"
-                stroke="#fff"
-                width={0}
-                domain={[0, 1]}
-                tick={false}
-              />{" "}
-              <Area
-                dataKey="lower"
-                stackId="1"
-                stroke="none"
-                type="monotone"
-                legendType="none"
-                fill="transparent"
-                dot={false}
-                isAnimationActive={false}
-                activeDot={false}
-              />
-              <Area
-                dataKey="upper"
-                stackId="1"
-                stroke="none"
-                type="monotone"
-                fill="lightgreen"
-                legendType="none"
-                fillOpacity={0.1}
-                dot={false}
-                isAnimationActive={false}
-                activeDot={false}
-              />
-              <Line
-                type="monotone"
-                name={translate("workload")}
-                dataKey="current"
-                stroke="green"
-                dot={{ fill: "green" }}
-                isAnimationActive={false}
-                activeDot={false}
-              />
-              <Line
-                type="monotone"
-                name={translate("reference")}
-                legendType="line"
-                dataKey="reference"
-                stroke="#ffffff40"
-                dot={false}
-                isAnimationActive={false}
-                activeDot={false}
-              />
-              <Legend />
-            </ComposedChart>
-          </ResponsiveContainer>
-        </div>
+      {!availableData && (
+        <>
+          <h1 id="no-available-data">{translate("no_available_data")}</h1>
+          <h3 id="import-sessions">{translate("import_session_to_begin")}</h3>
+        </>
       )}
+      {availableData && (
+        <>
+          {workload.length > 0 && (
+            <div className="chart-container">
+              <ResponsiveContainer width="100%" height="100%">
+                <ComposedChart
+                  data={workload}
+                  margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
+                >
+                  <CartesianGrid stroke="#80808000" strokeDasharray="5 5" />
+                  <XAxis
+                    dataKey="date"
+                    type="number"
+                    domain={[minDate, new Date().getTime()]}
+                    stroke="#fff"
+                    tick={false}
+                    height={0}
+                  />
+                  <YAxis
+                    yAxisId="left"
+                    stroke="#fff"
+                    width={0}
+                    domain={[0, 1]}
+                    tick={false}
+                  />{" "}
+                  <Area
+                    dataKey="lower"
+                    stackId="1"
+                    stroke="none"
+                    type="monotone"
+                    legendType="none"
+                    fill="transparent"
+                    dot={false}
+                    isAnimationActive={false}
+                    activeDot={false}
+                  />
+                  <Area
+                    dataKey="upper"
+                    stackId="1"
+                    stroke="none"
+                    type="monotone"
+                    fill="lightgreen"
+                    legendType="none"
+                    fillOpacity={0.1}
+                    dot={false}
+                    isAnimationActive={false}
+                    activeDot={false}
+                  />
+                  <Line
+                    type="monotone"
+                    name={translate("workload")}
+                    dataKey="current"
+                    stroke="green"
+                    dot={{ fill: "green" }}
+                    isAnimationActive={false}
+                    activeDot={false}
+                  />
+                  <Line
+                    type="monotone"
+                    name={translate("reference")}
+                    legendType="line"
+                    dataKey="reference"
+                    stroke="#ffffff40"
+                    dot={false}
+                    isAnimationActive={false}
+                    activeDot={false}
+                  />
+                  <Legend />
+                </ComposedChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+          <div>
+            <fieldset>
+              <legend>{translate("last_session")}</legend>
+              <div id="list-layer">
+                <table>
+                  <thead>
+                    <tr>
+                      <th className="text-center">{translate("date")}</th>
+                      <th className="text-center">{translate("sport")}</th>
+                      <th className="text-center">{translate("name")}</th>
+                      <th className="text-center">
+                        {translate("active_calories")}
+                      </th>
+                      <th className="text-center">
+                        {translate("workout_load")}
+                      </th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    <tr
+                      className="clickable-row"
+                      onClick={() => getSessionDetails(session!.timestamp)}
+                    >
+                      <td>{TimeUtils.formatTimeDate(session!.timestamp)}</td>
+                      <td>
+                        {translate("sport_" + session!.sport) +
+                          " - " +
+                          translate(
+                            "sport_" +
+                              session!.sport +
+                              "_" +
+                              session!.sub_sport,
+                          )}
+                      </td>
+                      <td>{session!.name}</td>
+                      <td>{session!.active_calories}</td>
+                      <td>{session!.training_load}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>{" "}
+            </fieldset>
+          </div>
+          <div style={{ display: "flex", width: "100%" }}>
+            <fieldset style={{ flex: 1 }}>
+              <legend>{translate("summary")}</legend>
+              <table id="last-days">
+                <colgroup>
+                  <col />
+                  <col />
+                  <col />
+                  <col />
+                </colgroup>
+                <thead>
+                  <th></th>
+                  <th>{translate("today")}</th>
+                  <th>{translate("last_7_days")}</th>
+                  <th>{translate("last_30_days")}</th>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>{translate("active_time")}</td>
+                    <td>{TimeUtils.formatDuration(todayTime)}</td>
+                    <td>{TimeUtils.formatDuration(weekTime)}</td>
+                    <td>{TimeUtils.formatDuration(monthTime)}</td>
+                  </tr>
+                </tbody>
+                <tbody>
+                  <tr>
+                    <td>{translate("active_calories")}</td>
+                    <td>{todayKcal} Kcal</td>
+                    <td>{weekKcal} Kcal</td>
+                    <td>{monthKcal} Kcal</td>
+                  </tr>
+                </tbody>
+              </table>
+            </fieldset>
+          </div>
+        </>
+      )}
+
+      <div>
+        {sessionDetails && (
+          <SessionModal
+            session={sessionDetails}
+            onClose={() => setSessionDetails(undefined)}
+            onUpdate={() => {
+              /**/
+            }}
+          />
+        )}
+      </div>
 
       <div className="list-action-bar">
         {availableDevices.length == 0 && (

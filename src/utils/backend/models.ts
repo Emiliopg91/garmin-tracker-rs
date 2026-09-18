@@ -54,7 +54,7 @@ export enum Languages {
 	English = "English",
 }
 
-// From src-tauri/src/dto/sessions.rs:84
+// From src-tauri/src/dto/sessions.rs:86
 export interface SessionDetails {
   active_time: number;
   coordinates: ([number, number] | null)[];
@@ -74,7 +74,7 @@ export interface SessionDetails {
   training_load: number;
 }
 
-// From src-tauri/src/dto/sessions.rs:67
+// From src-tauri/src/dto/sessions.rs:69
 export interface SessionLap {
   idx: number;
   start_latitude: number | null;
@@ -89,16 +89,17 @@ export interface SessionListItem {
   sport: number;
   sub_sport: number;
   timestamp: number;
+  total_elapsed_time: number;
   training_load: number;
 }
 
-// From src-tauri/src/dto/sessions.rs:166
+// From src-tauri/src/dto/sessions.rs:168
 export interface SessionLocation {
   location: string;
   session: number;
 }
 
-// From src-tauri/src/dto/sessions.rs:44
+// From src-tauri/src/dto/sessions.rs:46
 export interface SessionSet {
   ex_cat: number;
   ex_id: number;
@@ -108,7 +109,7 @@ export interface SessionSet {
   weight: number;
 }
 
-// From src-tauri/src/dto/sessions.rs:160
+// From src-tauri/src/dto/sessions.rs:162
 export interface SessionSetsUpdate {
   sets: SessionSet[];
   timestamp: number;
