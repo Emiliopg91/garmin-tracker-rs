@@ -340,7 +340,7 @@ pub async fn import_from_files(app: AppHandle) -> Result<usize, String> {
             .await
             .map_err(|e| e.to_string())
             .flatten();
-        return Ok(res?);
+        return res;
     }
 
     Ok(0)
@@ -349,7 +349,7 @@ pub fn _import_from_files(app: AppHandle, files: &[PathBuf]) -> Result<usize, St
     let lang = app.state::<SettingsLock>().read().unwrap().language;
     let database = app.state::<DatabasePool>();
     let res = database
-        .run_in_transaction(|tx| Ok(import_file_list(tx, &files, None, lang, false)?))
+        .run_in_transaction(|tx| Ok(import_file_list(tx, files, None, lang, false)?))
         .map_err(|e| e.to_string());
 
     match res {
@@ -361,16 +361,14 @@ pub fn _import_from_files(app: AppHandle, files: &[PathBuf]) -> Result<usize, St
                     update_pending_geolocation(&app, &db);
                 });
             }
-            return Ok(res.len());
+            Ok(res.len())
         }
-        Err(e) => {
-            return Err(report_error(
-                e,
-                lang,
-                "error_import_sessions",
-                "Error importing sessions",
-            ));
-        }
+        Err(e) => Err(report_error(
+            e,
+            lang,
+            "error_import_sessions",
+            "Error importing sessions",
+        )),
     }
 }
 

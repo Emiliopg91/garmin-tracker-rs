@@ -209,23 +209,18 @@ pub fn run(log_level: LevelFilter) {
             let window = app_handle.get_webview_window("main");
             if let Some(window) = window {
                 window.on_window_event(move |event| {
-                    if let WindowEvent::DragDrop(event) = event {
-                        match event {
-                            tauri::DragDropEvent::Drop { paths, position: _ } => {
-                                let paths = paths
-                                    .into_iter()
-                                    .filter(|p| {
-                                        p.display().to_string().to_lowercase().ends_with(".fit")
-                                    })
-                                    .cloned()
-                                    .collect::<Vec<_>>();
+                    if let WindowEvent::DragDrop(event) = event
+                        && let tauri::DragDropEvent::Drop { paths, position: _ } = event
+                    {
+                        let paths = paths
+                            .iter()
+                            .filter(|p| p.display().to_string().to_lowercase().ends_with(".fit"))
+                            .cloned()
+                            .collect::<Vec<_>>();
 
-                                info!("Dropped {} .fit files: {:?}", paths.len(), paths);
+                        info!("Dropped {} .fit files: {:?}", paths.len(), paths);
 
-                                let _ = _import_from_files(app_handle.clone(), paths.as_slice());
-                            }
-                            _ => {}
-                        }
+                        let _ = _import_from_files(app_handle.clone(), paths.as_slice());
                     }
                 });
             }
