@@ -31,6 +31,11 @@
   height: 175px;
 }
 
+.chart-responsive {
+  flex: 1;
+  min-height: 0;
+}
+
 .clickable-row {
   cursor: pointer;
 }
