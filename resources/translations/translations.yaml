@@ -404,3 +404,6 @@ this_week:
 next_workout:
   en: Next workout
   es: Siguiente entrenamiento
+training_status:
+  en: Training status
+  es: Estado de entrenamiento

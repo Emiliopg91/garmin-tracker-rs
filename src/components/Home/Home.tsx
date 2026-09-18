@@ -227,91 +227,80 @@ export function Home() {
       )}
       {availableData && (
         <>
-          {workload.length > 0 && (
-            <div className="chart-container dashboard-box">
-              <fieldset>
-                <legend>{translate("workout_load")}</legend>
-
-                <ResponsiveContainer
-                  className="chart-responsive"
-                  width="100%"
-                  height="100%"
-                >
-                  <ComposedChart
-                    data={workload}
-                    margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
+          <div className="dashboard-box">
+            <fieldset>
+              <legend>{translate("training_status")}</legend>
+              {workload.length > 0 && (
+                <div className="chart-container ">
+                  <ResponsiveContainer
+                    className="chart-responsive"
+                    width="100%"
+                    height="100%"
                   >
-                    <CartesianGrid stroke="#80808000" strokeDasharray="5 5" />
-                    <XAxis
-                      dataKey="date"
-                      type="number"
-                      domain={[minDate, workload[workload.length - 1].date]}
-                      stroke="#fff"
-                      tick={false}
-                      height={0}
-                    />
-                    <YAxis
-                      yAxisId="left"
-                      stroke="#fff"
-                      width={0}
-                      domain={[0, 1]}
-                      tick={false}
-                    />{" "}
-                    <Area
-                      dataKey="lower"
-                      stackId="1"
-                      stroke="none"
-                      type="monotone"
-                      legendType="none"
-                      fill="transparent"
-                      dot={false}
-                      isAnimationActive={false}
-                      activeDot={false}
-                    />
-                    <Area
-                      dataKey="upper"
-                      stackId="1"
-                      stroke="none"
-                      type="monotone"
-                      fill="lightgreen"
-                      legendType="none"
-                      fillOpacity={0.1}
-                      dot={false}
-                      isAnimationActive={false}
-                      activeDot={false}
-                    />
-                    <Line
-                      type="monotone"
-                      name={translate("workload")}
-                      dataKey="current"
-                      stroke="green"
-                      dot={{ fill: "green" }}
-                      isAnimationActive={false}
-                      activeDot={false}
-                    />
-                    <Line
-                      type="monotone"
-                      name={translate("reference")}
-                      legendType="line"
-                      dataKey="reference"
-                      stroke="#ffffff40"
-                      dot={false}
-                      isAnimationActive={false}
-                      activeDot={false}
-                    />
-                    <Legend />
-                  </ComposedChart>
-                </ResponsiveContainer>
-              </fieldset>
-            </div>
-          )}
-
-          <div
-            className="dashboard-box"
-            style={{ display: "flex", width: "100%" }}
-          >
-            <fieldset style={{ flex: 1 }}>
-              <legend>{translate("summary")}</legend>
+                    <ComposedChart data={workload}>
+                      <CartesianGrid stroke="#80808000" strokeDasharray="5 5" />
+                      <XAxis
+                        dataKey="date"
+                        type="number"
+                        domain={[minDate, workload[workload.length - 1].date]}
+                        stroke="#fff"
+                        tick={false}
+                        height={0}
+                      />
+                      <YAxis
+                        yAxisId="left"
+                        stroke="#fff"
+                        width={0}
+                        domain={[0, 1]}
+                        tick={false}
+                      />{" "}
+                      <Area
+                        dataKey="lower"
+                        stackId="1"
+                        stroke="none"
+                        type="monotone"
+                        legendType="none"
+                        fill="transparent"
+                        dot={false}
+                        isAnimationActive={false}
+                        activeDot={false}
+                      />
+                      <Area
+                        dataKey="upper"
+                        stackId="1"
+                        stroke="none"
+                        type="monotone"
+                        fill="lightgreen"
+                        legendType="none"
+                        fillOpacity={0.1}
+                        dot={false}
+                        isAnimationActive={false}
+                        activeDot={false}
+                      />
+                      <Line
+                        type="monotone"
+                        name={translate("workload")}
+                        dataKey="current"
+                        stroke="green"
+                        dot={{ fill: "green" }}
+                        isAnimationActive={false}
+                        activeDot={false}
+                      />
+                      <Line
+                        type="monotone"
+                        name={translate("reference")}
+                        legendType="line"
+                        dataKey="reference"
+                        stroke="#ffffff40"
+                        dot={false}
+                        isAnimationActive={false}
+                        activeDot={false}
+                      />
+                      <Legend />
+                    </ComposedChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
               <table id="last-days">
                 <colgroup>
                   <col />
