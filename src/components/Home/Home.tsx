@@ -203,10 +203,11 @@ export function Home() {
   useEffect(() => {
     const unregisterSessionLocation = BackendListener.onSessionLocationUpdate(
       (data) => {
-        if (data.session == session?.timestamp) {
-          session.name = data.location;
-          setLastSession(session);
-        }
+        setLastSession((prev) =>
+          prev && prev.timestamp == data.session
+            ? { ...prev, name: data.location }
+            : prev,
+        );
       },
     );
 

@@ -84,7 +84,7 @@ pub fn get_workout_details(
     let res = database.run_in_connection(|conn| {
         info!("Getting details for workout {}", name);
 
-        let sessions = SessionRepository::select_by_name_in_conn(
+        let sessions = SessionRepository::select_by_name_in(
             conn,
             name,
             Some(&[OrderBy::Desc(entity::columns::DATE)]),

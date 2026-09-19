@@ -64,7 +64,7 @@ pub fn get_sessions(
 
         let sessions = select_builder.fetch_in(conn)?;
 
-        let record_sessions = SetRepository::select_by_personal_records_in_conn(conn, true, None)?
+        let record_sessions = SetRepository::select_by_personal_records_in(conn, true, None)?
             .into_iter()
             .map(|s| s.session)
             .collect::<HashSet<_>>();
@@ -110,12 +110,12 @@ pub fn get_session_details(
     let res = database.run_in_connection(|conn| {
         let mut session = SessionRepository::select_by_id_in(conn, timestamp)?.unwrap();
 
-        session.fetch_sets_relationship_in_conn(conn)?;
+        session.fetch_sets_relationship_in(conn)?;
         if session.device.is_some() {
-            session.fetch_device_obj_relationship_in_conn(conn)?;
+            session.fetch_device_obj_relationship_in(conn)?;
         }
-        session.fetch_additional_data_relationship_in_conn(conn)?;
-        session.fetch_laps_relationship_in_conn(conn)?;
+        session.fetch_additional_data_relationship_in(conn)?;
+        session.fetch_laps_relationship_in(conn)?;
 
         let condition_set: HashSet<(_, _)> =
             session.sets.iter().map(|r| (r.ex_cat, r.ex_id)).collect();

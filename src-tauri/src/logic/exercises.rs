@@ -36,7 +36,7 @@ pub fn get_exercises(
 
         let exercises = ExerciseRepository::select().fetch_in(conn)?;
 
-        let prs = SetRepository::select_by_personal_records_in_conn(conn, true, None)?;
+        let prs = SetRepository::select_by_personal_records_in(conn, true, None)?;
         let pr_by_exercise: HashMap<(u16, u16), &Set> =
             prs.iter().map(|pr| ((pr.ex_cat, pr.ex_id), pr)).collect();
 
@@ -87,7 +87,7 @@ pub fn get_exercise_details(
         let exercise = ExerciseRepository::select_by_id_in(conn, category, id)?.unwrap();
         let mut res = ExerciseDetails::from(&exercise);
 
-        let series = SetRepository::select_by_exercise_in_conn(
+        let series = SetRepository::select_by_exercise_in(
             conn,
             category,
             id,
