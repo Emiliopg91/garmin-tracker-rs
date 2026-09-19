@@ -33,9 +33,9 @@ libc = "^0"
 mtp-rs = "^0"
 nusb = "^0"
 ouroboros = "^0"
-phf = { version = "0.11", features = ["macros"] }
+phf = { version = "^0", features = ["macros"] }
 rayon = "^1"
-rfd = "0.17.2"
+rfd = "^0"
 #rusqlite_orm = { path = "../rusqlite_orm/orm", features = ["derive"] }
 rusqlite_orm = { version = "^0", features = ["derive"] }
 rustyfit = { version = "^0", features = ["serde"] }
