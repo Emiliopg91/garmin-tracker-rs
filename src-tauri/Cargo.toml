@@ -36,10 +36,8 @@ ouroboros = "^0"
 phf = { version = "0.11", features = ["macros"] }
 rayon = "^1"
 rfd = "0.17.2"
-#rusqlite_orm = { path = "../rusqlite_orm/orm" }
-rusqlite_orm = "^0"
-#rusqlite_orm_macros = { path = "../rusqlite_orm/macros" }
-rusqlite_orm_macros = "^0"
+#rusqlite_orm = { path = "../rusqlite_orm/orm", features = ["derive"] }
+rusqlite_orm = { version = "^0", features = ["derive"] }
 rustyfit = { version = "^0", features = ["serde"] }
 semver = "^1"
 serde = { version = "^1", features = ["derive"] }

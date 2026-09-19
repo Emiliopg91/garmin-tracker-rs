@@ -15,7 +15,7 @@ use rusqlite_orm::database::{
     DatabasePool,
     builder::{DatabaseConnectionBuilder, JournalMode},
 };
-use rusqlite_orm_macros::dlls;
+use rusqlite_orm::dlls;
 use tauri::{Manager, WindowEvent};
 use tauri_plugin_log::{
     Target, TargetKind,

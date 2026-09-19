@@ -1385,7 +1385,6 @@ dependencies = [
  "rayon",
  "rfd",
  "rusqlite_orm",
- "rusqlite_orm_macros",
  "rustyfit",
  "semver",
  "serde",
@@ -3497,13 +3496,14 @@ dependencies = [
 
 [[package]]
 name = "rusqlite_orm"
-version = "0.5.1"
+version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "24e755eb8c0cd4ecfd3bc6b07b7634c901632d5ea95e292cee15d28dcbd8b4ac"
+checksum = "3d535e2d126b0dadfc0302b4f5329dff2fcd57165347aac57eb211dde73a9701"
 dependencies = [
  "log",
  "r2d2",
  "r2d2_sqlite",
+ "rusqlite_orm_macros",
  "serde",
  "thiserror 2.0.20",
 ]

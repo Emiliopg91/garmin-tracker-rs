@@ -1,5 +1,5 @@
+use rusqlite_orm::Entity;
 use rusqlite_orm::{dao::Repository, database::DatabasePool};
-use rusqlite_orm_macros::Entity;
 use semver::Version;
 use serde::{Deserialize, Serialize};
 use std::fmt;

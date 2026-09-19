@@ -1,4 +1,4 @@
-use rusqlite_orm_macros::Entity;
+use rusqlite_orm::Entity;
 use serde::{Deserialize, Serialize};
 
 use crate::dao::exercise_category::{self, ExerciseCategory};
