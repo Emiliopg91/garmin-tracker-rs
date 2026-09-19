@@ -50,7 +50,7 @@ fn generate_translations_file() {
     for (key, translations) in &translation_map {
         let mut inner_map: PhfMap<&str> = PhfMap::new();
         for (lang, text) in translations {
-            inner_map.entry(lang.as_str(), &format!("{:?}", text));
+            inner_map.entry(lang.as_str(), format!("{:?}", text).clone());
         }
         inner_codes.push((key.clone(), inner_map.build().to_string()));
     }
