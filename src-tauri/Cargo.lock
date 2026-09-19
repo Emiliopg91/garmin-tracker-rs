@@ -452,9 +452,9 @@ dependencies = [
 
 [[package]]
 name = "cc"
-version = "1.4.6"
+version = "1.4.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a3eb0f42d6c360dc3f8a821f6bf2fdea7f72bfd36b3076eb0e6d1e9e0752fff4"
+checksum = "54413ede23c2daf518f35156dfde027feb2374004d63bd497f983c8db9c0e313"
 dependencies = [
  "find-msvc-tools",
  "shlex",
@@ -1197,9 +1197,9 @@ dependencies = [
 
 [[package]]
 name = "find-msvc-tools"
-version = "0.1.12"
+version = "0.1.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3e0f1c7c3a72c66fd80abe965175f7523475c0489a87d3ff9d6e8c87d87a9d2d"
+checksum = "ef25905e51abafe4dcea6c15fec58c57b601cdbd0ee53d22ea1d3016c587d39b"
 
 [[package]]
 name = "flate2"
@@ -2499,9 +2499,9 @@ checksum = "650eef8c711430f1a879fdd01d4745a7deea475becfb90269c06775983bbf086"
 
 [[package]]
 name = "noyalib"
-version = "0.0.44"
+version = "0.0.45"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f307578cc6389d7c00bc284401ee1bff6d47c66c39debd8fc4db5b02892bc7a4"
+checksum = "10912f3af95a00e49a000323539768b9209a5948d76389fc2795c09f4fa6ed7d"
 dependencies = [
  "hashbrown 0.17.1",
  "indexmap 2.14.2",
@@ -3510,9 +3510,9 @@ dependencies = [
 
 [[package]]
 name = "rusqlite_orm_macros"
-version = "0.4.16"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "73c10e5eeeeaf24ba4934f1391090ecef0bf332695aaff09800cc9309832cf76"
+checksum = "27c8a4f607b603ce427310853b2ad7bf64cff8713a0738325cdb4de3dd9fe104"
 dependencies = [
  "proc-macro2",
  "quote",

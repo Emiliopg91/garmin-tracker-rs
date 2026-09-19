@@ -4,7 +4,7 @@ node:
   '@eslint/js': 9.39.5
   '@mui/icons-material': 9.4.0
   '@mui/material': 9.4.0
-  '@mui/x-date-pickers': 9.13.0
+  '@mui/x-date-pickers': 9.14.0
   '@tauri-apps/api': 2.11.1
   '@tauri-apps/cli': 2.11.4
   '@tauri-apps/plugin-autostart': 2.5.1
@@ -18,7 +18,7 @@ node:
   eslint: 9.39.5
   eslint-plugin-react: 7.37.5
   leaflet: 1.9.4
-  prettier: 3.9.7
+  prettier: 3.9.8
   react: 19.3.0
   react-dom: 19.3.0
   react-leaflet: 5.0.0
@@ -34,7 +34,7 @@ rust:
   garmin-tracker-rs-macros: 0.1.0
   libc: 0.2.189
   mtp-rs: 0.32.0
-  noyalib: 0.0.44
+  noyalib: 0.0.45
   nusb: 0.2.7
   ouroboros: 0.18.5
   phf: 0.13.1
@@ -42,7 +42,7 @@ rust:
   rayon: 1.12.0
   rfd: 0.17.2
   rusqlite_orm: 0.5.1
-  rusqlite_orm_macros: 0.4.16
+  rusqlite_orm_macros: 0.5.0
   rustyfit: 0.10.3
   semver: 1.0.28
   serde: 1.0.229
