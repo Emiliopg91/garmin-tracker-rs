@@ -14,6 +14,15 @@ import { JSX } from "react/jsx-runtime";
 import { AppContext } from "./AppContext";
 import { LoadingContext } from "./LoadingContext";
 import { I18nSettingsContext } from "./I18nSettingsContext";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { enGB, es, type Locale } from "date-fns/locale";
+
+// Both locales start the week on Monday
+const DATE_LOCALES: Record<Languages, Locale> = {
+  [Languages.Spanish]: es,
+  [Languages.English]: enGB,
+};
 
 export function AppProvider({
   children,
@@ -191,7 +200,12 @@ export function AppProvider({
   return (
     <LoadingContext.Provider value={loadingValue}>
       <I18nSettingsContext.Provider value={i18nSettingsValue}>
-        <AppContext.Provider value={appValue}>{children}</AppContext.Provider>
+        <LocalizationProvider
+          dateAdapter={AdapterDateFns}
+          adapterLocale={DATE_LOCALES[settings.language]}
+        >
+          <AppContext.Provider value={appValue}>{children}</AppContext.Provider>
+        </LocalizationProvider>
       </I18nSettingsContext.Provider>
     </LoadingContext.Provider>
   );
