@@ -142,7 +142,7 @@ export function Settings({ onClose }: Props) {
 
         <DialogContent dividers>
           <fieldset>
-            <legend>{translate("interface")}</legend>
+            <legend>{translate("user_settings")}</legend>
             <table>
               <colgroup>
                 <col className="col-250"></col>

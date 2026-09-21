@@ -8,24 +8,6 @@ import { I18nSettingsContext } from "@/context/I18nSettingsContext";
 import { TimeUtils } from "@/utils/TimeUtils";
 import { UnitUtils } from "@/utils/UnitUtils";
 
-export const calc1RMEstimation = (reps: number, weight: number): number => {
-  if (reps <= 1) return weight;
-
-  if (reps <= 10 && 37 - reps > 0) {
-    return (weight * 36) / (37 - reps);
-  }
-
-  if (reps <= 20) {
-    if (101.3 - 2.67123 * reps > 0) {
-      return (100 * weight) / (101.3 - 2.67123 * reps);
-    } else {
-      return weight * (1 + reps / 30);
-    }
-  }
-
-  return weight * Math.pow(reps, 0.1);
-};
-
 export function ExercisesList() {
   const { sessionsVersion } = useContext(AppContext);
   const { startLoading, finishLoading } = useContext(LoadingContext);
@@ -99,10 +81,7 @@ export function ExercisesList() {
                   UnitUtils.getUnit(settings.weight_unit)}
               </td>
               <td>
-                {UnitUtils.fromKg(
-                  calc1RMEstimation(exercise.reps, exercise.weight),
-                  settings.weight_unit,
-                ).toFixed(1) +
+                {UnitUtils.fromKg(exercise.e1rm, settings.weight_unit) +
                   " " +
                   UnitUtils.getUnit(settings.weight_unit)}
               </td>

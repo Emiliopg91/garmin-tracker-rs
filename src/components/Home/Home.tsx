@@ -38,6 +38,7 @@ export function Home() {
   const { translate, settings } = useContext(I18nSettingsContext);
   const adapter = usePickerAdapter();
 
+  const [day, setDay] = useState(() => new Date().toDateString());
   const [availableData, setAvailableData] = useState(false);
   const [workload, setWorkload] = useState<WorkoutLoad[]>([]);
   const [minDate, setMinDate] = useState(0);
@@ -58,6 +59,7 @@ export function Home() {
   const [workout, setWorkout] = useState<WorkoutListItem | undefined>(
     undefined,
   );
+  const [rest, setRest] = useState(false);
   const [workoutDetails, setWorkoutDetails] = useState<
     WorkoutDetails | undefined
   >(undefined);
@@ -103,11 +105,15 @@ export function Home() {
         setAvailableData(data.length > 0);
 
         if (data.length > 0) {
+          const workout_data = SessionUtils.calculateWorkoutLoad(data);
+          const overreaching = SessionUtils.isOverreaching(workout_data);
+          setRest(overreaching);
+
           startLoading();
           BackendClient.getWorkoutList()
             .then((data) => {
               const filtered = data.filter((w) => w.enabled);
-              if (filtered.length > 0) {
+              if (!overreaching && filtered.length > 0) {
                 let oldest = filtered[0];
                 for (let i = 0; i < filtered.length; i++) {
                   if (oldest.latest_session > filtered[i].latest_session) {
@@ -169,9 +175,7 @@ export function Home() {
           setMonthKCal(monthKcl);
           setMonthTime(monthTmp);
 
-          const workout_data = SessionUtils.calculateWorkoutLoad(data);
           setWorkload(workout_data);
-          console.table(workout_data);
           if (workout_data.length > 0) {
             setMinDate(workout_data[0].date);
           }
@@ -203,6 +207,31 @@ export function Home() {
   };
 
   useEffect(() => {
+    const checkDay = () => setDay(new Date().toDateString());
+
+    const now = new Date();
+    const nextMidnight = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate() + 1,
+    );
+    const timer = setTimeout(
+      checkDay,
+      nextMidnight.getTime() - now.getTime() + 1000,
+    );
+
+    // Timers may not fire on time after the system suspends
+    document.addEventListener("visibilitychange", checkDay);
+    window.addEventListener("focus", checkDay);
+
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener("visibilitychange", checkDay);
+      window.removeEventListener("focus", checkDay);
+    };
+  }, [day]);
+
+  useEffect(() => {
     const unregisterSessionLocation = BackendListener.onSessionLocationUpdate(
       (data) => {
         setLastSession((prev) =>
@@ -218,7 +247,7 @@ export function Home() {
     return () => {
       unregisterSessionLocation();
     };
-  }, [sessionsVersion, adapter]);
+  }, [sessionsVersion, adapter, day]);
 
   return (
     <>
@@ -385,8 +414,13 @@ export function Home() {
           </div>
           <div className="dashboard-box">
             <fieldset>
-              <legend>{translate("next_workout")}</legend>
-              {workout && (
+              <legend>{translate("activity_suggestion")}</legend>
+              {rest && (
+                <div style={{ textAlign: "center" }}>
+                  <p>{translate("rest_recommended")}</p>
+                </div>
+              )}
+              {!rest && workout && (
                 <div id="list-layer">
                   <table>
                     <thead>

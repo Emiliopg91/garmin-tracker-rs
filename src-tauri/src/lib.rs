@@ -7,21 +7,27 @@ mod rclone;
 mod udev;
 mod utils;
 
+use std::collections::HashSet;
 #[cfg(debug_assertions)]
 use std::path::Path;
 use std::{fs, process::exit, sync::RwLock, time::Duration};
 
-use rusqlite_orm::database::{
-    DatabasePool,
-    builder::{DatabaseConnectionBuilder, JournalMode},
-};
 use rusqlite_orm::dlls;
+use rusqlite_orm::types::where_clause::Where;
+use rusqlite_orm::{
+    dao::Repository,
+    database::{
+        DatabasePool,
+        builder::{DatabaseConnectionBuilder, JournalMode},
+    },
+};
 use tauri::{Manager, WindowEvent};
 use tauri_plugin_log::{
     Target, TargetKind,
     log::{LevelFilter, debug, error, info, warn},
 };
 
+use crate::dao::set::{self, Set, SetRepository};
 use crate::{
     dto::app::Settings,
     logic::{
@@ -33,7 +39,7 @@ use crate::{
         exercises::{get_exercise_details, get_exercises},
         sessions::{
             _import_from_files, get_session_details, get_sessions, import_from_device,
-            import_from_files, save_session_changes,
+            import_from_files, save_session_changes, update_prs,
         },
         workouts::{get_workout_details, get_workout_list, set_workout_status},
     },
@@ -202,6 +208,28 @@ pub fn run(log_level: LevelFilter) {
             }
 
             let (database, settings) = initialize();
+
+            database.run_in_transaction(|tx| {
+                let count = SetRepository::select()
+                    .where_(Where::NotEq(set::entity::columns::E1RM, 0.into()))
+                    .count_in(tx)?;
+                if count == 0 {
+                    info!("Recalculating e1RM...");
+                    let mut sets = SetRepository::select().fetch_in(tx)?;
+                    for set in &mut sets {
+                        set.e1rm = Set::estimate_1rm(set.weight, set.reps);
+                        set.update_by_id_in(tx)?;
+                    }
+
+                    let exercises = sets
+                        .iter()
+                        .map(|e| (e.ex_cat, e.ex_id))
+                        .collect::<HashSet<_>>();
+                    update_prs(tx, exercises, &[], settings.language)?;
+                }
+                Ok(())
+            })?;
+
             app.manage(database);
             app.manage(SettingsLock::new(settings));
 

@@ -78,6 +78,7 @@ impl TryFrom<FitParser> for Session {
                         reps,
                         weight,
                         pr: false,
+                        e1rm: Set::estimate_1rm(weight, reps),
                         exercise: Some(exercise.clone()),
                     });
 

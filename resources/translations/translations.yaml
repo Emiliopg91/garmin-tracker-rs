@@ -404,9 +404,18 @@ today:
 this_week:
   en: This week
   es: Esta semana
-next_workout:
-  en: Next workout
-  es: Siguiente entrenamiento
+activity_suggestion:
+  en: Activity suggestion
+  es: Sugerencia de actividad
 training_status:
   en: Training status
   es: Estado de entrenamiento
+rest_recommended:
+  en: Acute load is high relative to chronic load, rest today
+  es: La carga aguda es alta respecto a la crónica, descansa hoy
+user_settings:
+  en: User settings
+  es: Ajustes de usuario
+birth_date:
+  en: Birth date
+  es: Fecha de nacimiento

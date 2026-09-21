@@ -49,6 +49,7 @@ pub fn get_exercises(
                     reps: pr.reps,
                     weight: pr.weight,
                     date: pr.session as i32,
+                    e1rm: pr.e1rm,
                 });
             }
         }
@@ -101,6 +102,7 @@ pub fn get_exercise_details(
         res.reps = pr.reps;
         res.weight = pr.weight;
         res.pr_date = pr.session as i32;
+        res.e1rm = pr.e1rm;
 
         let mut timestamps = HashSet::new();
         series.iter().map(|s| s.session).for_each(|t| {

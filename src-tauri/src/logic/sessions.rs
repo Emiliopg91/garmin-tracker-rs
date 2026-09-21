@@ -14,7 +14,7 @@ use crate::{
         exercise::{self, ExerciseRepository},
         lap::LapRepository,
         session::{self, Session, SessionRepository},
-        set::{self, SetRepository, entity},
+        set::{self, Set, SetRepository, entity},
         workout::{Workout, WorkoutRepository},
     },
     dto::{
@@ -180,6 +180,10 @@ pub fn save_session_changes(
             SetRepository::update()
                 .set(entity::columns::REPS, serie.reps.into())
                 .set(entity::columns::WEIGHT, serie.weight.into())
+                .set(
+                    entity::columns::E1RM,
+                    Set::estimate_1rm(serie.weight, serie.reps).into(),
+                )
                 .where_(Where::And(vec![
                     Where::Eq(entity::columns::SESSION, details.timestamp.into()),
                     Where::Eq(entity::columns::IDX, serie.idx.into()),
@@ -528,7 +532,7 @@ where
 }
 
 /// Recomputes the `pr` flag for each affected exercise and notifies if any of the just-imported/edited sessions set a new record.
-fn update_prs(
+pub fn update_prs(
     tx: &rusqlite_orm::rusqlite::Transaction,
     exercises: HashSet<(u16, u16)>,
     sessions: &[i64],
@@ -548,8 +552,7 @@ fn update_prs(
                 Where::Eq(set::entity::columns::EX_CAT, exer.0.into()),
                 Where::Eq(set::entity::columns::EX_ID, exer.1.into()),
             ]))
-            .order_by(OrderBy::Desc(entity::columns::WEIGHT))
-            .order_by(OrderBy::Desc(entity::columns::REPS))
+            .order_by(OrderBy::Desc(entity::columns::E1RM))
             .order_by(OrderBy::Asc(entity::columns::SESSION))
             .order_by(OrderBy::Asc(entity::columns::IDX))
             .limit(1)

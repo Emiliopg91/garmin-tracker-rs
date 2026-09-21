@@ -219,6 +219,7 @@ export class SessionUtils {
           validHrs.push(0);
         }
       }
+
       const maxHr = Math.max(189, ...validHrs);
 
       details.zones_times = [0, 0, 0, 0, 0];
@@ -259,7 +260,6 @@ export class SessionUtils {
           ),
           Math.max(...nonZeroHrs),
         ];
-        const maxHr = Math.max(189, Math.max(...validHrs));
 
         validHrs.forEach((hr, idx) => {
           let color = "red";
@@ -308,6 +308,15 @@ export class SessionUtils {
   }
 
   public static CHRONIC_DAYS = 28;
+  public static ACWR_UPPER_RATIO = 1.4;
+
+  public static isOverreaching(load: WorkoutLoad[]): boolean {
+    if (load.length === 0) {
+      return false;
+    }
+    const last = load[load.length - 1];
+    return last.current > last.reference * SessionUtils.ACWR_UPPER_RATIO;
+  }
 
   public static calculateWorkoutLoad(data: SessionListItem[]): WorkoutLoad[] {
     if (data.length === 0) {
@@ -323,7 +332,6 @@ export class SessionUtils {
       };
 
       const ACUTE_DAYS = 7;
-      const ACWR_UPPER_RATIO = 1.4;
       const ACWR_LOWER_RATIO = 0.9;
       const TODAY = startOfDay(new Date());
 
@@ -398,7 +406,8 @@ export class SessionUtils {
           .filter((_, idx) => idx >= SessionUtils.CHRONIC_DAYS)
           .map((e) => ({
             date: e.date,
-            upper: e.chronic * (ACWR_UPPER_RATIO - ACWR_LOWER_RATIO),
+            upper:
+              e.chronic * (SessionUtils.ACWR_UPPER_RATIO - ACWR_LOWER_RATIO),
             lower: e.chronic * ACWR_LOWER_RATIO,
             current: e.acute,
             reference: e.chronic,
