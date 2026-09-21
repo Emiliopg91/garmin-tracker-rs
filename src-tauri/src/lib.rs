@@ -162,7 +162,7 @@ pub fn run(log_level: LevelFilter) {
                 exit(constants::ExitCodes::UdevError.into())
             }
 
-            fn initialize() -> (DatabasePool, Settings) {
+            fn initialize() -> (DatabasePool, Settings, Version) {
                 debug!("Initializing database...");
                 let already_exists = fs::exists(constants::DB_FILE.clone()).unwrap();
                 let builder = DatabaseConnectionBuilder::default()
@@ -180,9 +180,8 @@ pub fn run(log_level: LevelFilter) {
                             exit(constants::ExitCodes::DbError.into())
                         }
 
-                        if already_exists
-                            && crate::dao::settings::Settings::get_version(&database).major == 0
-                        {
+                        let version = crate::dao::settings::Settings::get_version(&database);
+                        if already_exists && version.major == 0 {
                             warn!("Detected incompatible database schema version, cleaning up...");
                             drop(database);
                             let _ = fs::remove_file(constants::DB_FILE.clone());
@@ -197,7 +196,7 @@ pub fn run(log_level: LevelFilter) {
                             )
                             .unwrap();
 
-                            (database, settings)
+                            (database, settings, version)
                         }
                     }
                     Err(e) => {
@@ -207,7 +206,7 @@ pub fn run(log_level: LevelFilter) {
                 }
             }
 
-            let (database, settings) = initialize();
+            let (database, settings, version) = initialize();
 
             database.run_in_transaction(|tx| {
                 let count = SetRepository::select()

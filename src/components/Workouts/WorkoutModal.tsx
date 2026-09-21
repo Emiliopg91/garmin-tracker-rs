@@ -1,5 +1,5 @@
 import { I18nSettingsContext } from "@/context/I18nSettingsContext";
-import { WorkoutDetails } from "@/utils/backend/models";
+import { Languages, WorkoutDetails } from "@/utils/backend/models";
 import { TimeUtils } from "@/utils/TimeUtils";
 import { UnitUtils } from "@/utils/UnitUtils";
 import { useContext, useEffect, useState } from "react";
@@ -23,6 +23,11 @@ import {
 } from "recharts";
 import { BackendClient } from "@/utils/backend/client";
 import { LoadingContext } from "@/context/LoadingContext";
+
+const NUMBER_LOCALES: Record<Languages, string> = {
+  [Languages.Spanish]: "es-ES",
+  [Languages.English]: "en-US",
+};
 
 type Props = {
   workout: WorkoutDetails;
@@ -50,11 +55,8 @@ export function WorkoutModal({
 
   useEffect(() => {
     const data = [...workout.sessions].reverse().map((ws) => {
-      const [dd, mm, yyyy] = TimeUtils.formatTimeDate(ws.date)
-        .split(" ")[1]
-        .split("/")
-        .map(Number);
-      const date = new Date(yyyy, mm - 1, dd);
+      const day = new Date(ws.date * 1000);
+      const date = new Date(day.getFullYear(), day.getMonth(), day.getDate());
       return {
         date: date.getTime(),
         volume: ws.volume,
@@ -226,12 +228,15 @@ export function WorkoutModal({
                     {UnitUtils.getUnit(settings.weight_unit)}
                     {idx < workout.sessions.length - 1 &&
                       " (" +
-                        new Intl.NumberFormat("es-ES", {
-                          style: "percent",
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                          signDisplay: "always",
-                        }).format(
+                        new Intl.NumberFormat(
+                          NUMBER_LOCALES[settings.language],
+                          {
+                            style: "percent",
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                            signDisplay: "always",
+                          },
+                        ).format(
                           (workout.sessions[idx].volume -
                             workout.sessions[idx + 1].volume) /
                             workout.sessions[idx + 1].volume,

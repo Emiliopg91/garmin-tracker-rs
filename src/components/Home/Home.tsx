@@ -341,11 +341,13 @@ export function Home() {
                   <col />
                 </colgroup>
                 <thead>
-                  <th></th>
-                  <th>{translate("today")}</th>
-                  <th>{translate("this_week")}</th>
-                  <th>{translate("last_7_days")}</th>
-                  <th>{translate("last_30_days")}</th>
+                  <tr>
+                    <th></th>
+                    <th>{translate("today")}</th>
+                    <th>{translate("this_week")}</th>
+                    <th>{translate("last_7_days")}</th>
+                    <th>{translate("last_30_days")}</th>
+                  </tr>
                 </thead>
                 <tbody>
                   <tr>
@@ -471,7 +473,7 @@ export function Home() {
             session={sessionDetails}
             onClose={() => setSessionDetails(undefined)}
             onUpdate={() => {
-              /**/
+              refresh();
             }}
           />
         )}

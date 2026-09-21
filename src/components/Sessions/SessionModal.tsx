@@ -335,75 +335,23 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                           {translate("heart_rate")}
                         </div>
                         <div className="session-hr-legend-zones">
-                          {localSession.zones_times[1] > 0 && (
-                            <span className="session-hr-zone session-hr-zone-1">
-                              {TimeUtils.formatDuration(
-                                localSession.zones_times[0],
-                              ) +
-                                " (" +
-                                Math.round(
-                                  100 *
-                                    (localSession.zones_times[0] /
-                                      localSession.total_elapsed_time),
-                                ) +
-                                "%)"}
-                            </span>
-                          )}
-                          {localSession.zones_times[1] > 0 && (
-                            <span className="session-hr-zone session-hr-zone-2">
-                              {TimeUtils.formatDuration(
-                                localSession.zones_times[1],
-                              ) +
-                                " (" +
-                                Math.round(
-                                  100 *
-                                    (localSession.zones_times[1] /
-                                      localSession.total_elapsed_time),
-                                ) +
-                                "%)"}
-                            </span>
-                          )}
-                          {localSession.zones_times[2] > 0 && (
-                            <span className="session-hr-zone session-hr-zone-3">
-                              {TimeUtils.formatDuration(
-                                localSession.zones_times[2],
-                              ) +
-                                " (" +
-                                Math.round(
-                                  100 *
-                                    (localSession.zones_times[2] /
-                                      localSession.total_elapsed_time),
-                                ) +
-                                "%)"}
-                            </span>
-                          )}
-                          {localSession.zones_times[3] > 0 && (
-                            <span className="session-hr-zone session-hr-zone-4">
-                              {TimeUtils.formatDuration(
-                                localSession.zones_times[3],
-                              ) +
-                                " (" +
-                                Math.round(
-                                  100 *
-                                    (localSession.zones_times[3] /
-                                      localSession.total_elapsed_time),
-                                ) +
-                                "%)"}
-                            </span>
-                          )}
-                          {localSession.zones_times[4] > 0 && (
-                            <span className="session-hr-zone session-hr-zone-5">
-                              {TimeUtils.formatDuration(
-                                localSession.zones_times[4],
-                              ) +
-                                " (" +
-                                Math.round(
-                                  100 *
-                                    (localSession.zones_times[4] /
-                                      localSession.total_elapsed_time),
-                                ) +
-                                "%)"}
-                            </span>
+                          {localSession.zones_times.map(
+                            (time, zone) =>
+                              time > 0 && (
+                                <span
+                                  key={"zone-" + zone}
+                                  className={`session-hr-zone session-hr-zone-${zone + 1}`}
+                                >
+                                  {TimeUtils.formatDuration(time) +
+                                    " (" +
+                                    Math.round(
+                                      100 *
+                                        (time /
+                                          localSession.total_elapsed_time),
+                                    ) +
+                                    "%)"}
+                                </span>
+                              ),
                           )}
                         </div>
                       </div>

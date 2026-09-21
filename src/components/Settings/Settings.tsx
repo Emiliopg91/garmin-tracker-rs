@@ -29,7 +29,6 @@ export function Settings({ onClose }: Props) {
   const { startLoading, finishLoading } = useContext(LoadingContext);
   const { settings, translate, refreshTranslations } =
     useContext(I18nSettingsContext);
-  console.log(environment);
 
   const [weightUnit, setWeightUnit] = useState(settings.weight_unit);
   const [distanceUnit, setDistanceUnit] = useState(settings.distance_unit);
@@ -81,7 +80,7 @@ export function Settings({ onClose }: Props) {
     BackendClient.updateSettingsValue("start_boot", value ? "true" : "false")
       .then(() => {
         setStartOnBoot(value);
-        settings.auto_sync = value;
+        settings.start_boot = value;
       })
       .finally(() => {
         finishLoading();
@@ -148,66 +147,68 @@ export function Settings({ onClose }: Props) {
                 <col className="col-250"></col>
                 <col className="col-200"></col>
               </colgroup>
-              <tr>
-                <td>{translate("language")}</td>
-                <td>
-                  <Select
-                    size="small"
-                    fullWidth
-                    value={language}
-                    onChange={(e) =>
-                      updateLanguage(e.target.value as Languages)
-                    }
-                  >
-                    <MenuItem value={Languages.English}>
-                      {translate("lang_en")}
-                    </MenuItem>
-                    <MenuItem value={Languages.Spanish}>
-                      {translate("lang_es")}
-                    </MenuItem>
-                  </Select>
-                </td>
-              </tr>
-              <tr>
-                <td>{translate("weight_unit")}</td>
-                <td>
-                  <Select
-                    size="small"
-                    fullWidth
-                    value={weightUnit}
-                    onChange={(e) =>
-                      updateWeightUnit(e.target.value as WeightUnit)
-                    }
-                  >
-                    <MenuItem value={WeightUnit.Kilograms}>
-                      {translate("weight_unit_kilograms")}
-                    </MenuItem>
-                    <MenuItem value={WeightUnit.Pounds}>
-                      {translate("weight_unit_pounds")}
-                    </MenuItem>
-                  </Select>
-                </td>
-              </tr>
-              <tr>
-                <td>{translate("distance_unit")}</td>
-                <td>
-                  <Select
-                    size="small"
-                    fullWidth
-                    value={distanceUnit}
-                    onChange={(e) =>
-                      updateDistanceUnit(e.target.value as DistanceUnit)
-                    }
-                  >
-                    <MenuItem value={DistanceUnit.Kilometers}>
-                      {translate("distance_unit_kilometers")}
-                    </MenuItem>
-                    <MenuItem value={DistanceUnit.Miles}>
-                      {translate("distance_unit_miles")}
-                    </MenuItem>
-                  </Select>
-                </td>
-              </tr>
+              <tbody>
+                <tr>
+                  <td>{translate("language")}</td>
+                  <td>
+                    <Select
+                      size="small"
+                      fullWidth
+                      value={language}
+                      onChange={(e) =>
+                        updateLanguage(e.target.value as Languages)
+                      }
+                    >
+                      <MenuItem value={Languages.English}>
+                        {translate("lang_en")}
+                      </MenuItem>
+                      <MenuItem value={Languages.Spanish}>
+                        {translate("lang_es")}
+                      </MenuItem>
+                    </Select>
+                  </td>
+                </tr>
+                <tr>
+                  <td>{translate("weight_unit")}</td>
+                  <td>
+                    <Select
+                      size="small"
+                      fullWidth
+                      value={weightUnit}
+                      onChange={(e) =>
+                        updateWeightUnit(e.target.value as WeightUnit)
+                      }
+                    >
+                      <MenuItem value={WeightUnit.Kilograms}>
+                        {translate("weight_unit_kilograms")}
+                      </MenuItem>
+                      <MenuItem value={WeightUnit.Pounds}>
+                        {translate("weight_unit_pounds")}
+                      </MenuItem>
+                    </Select>
+                  </td>
+                </tr>
+                <tr>
+                  <td>{translate("distance_unit")}</td>
+                  <td>
+                    <Select
+                      size="small"
+                      fullWidth
+                      value={distanceUnit}
+                      onChange={(e) =>
+                        updateDistanceUnit(e.target.value as DistanceUnit)
+                      }
+                    >
+                      <MenuItem value={DistanceUnit.Kilometers}>
+                        {translate("distance_unit_kilometers")}
+                      </MenuItem>
+                      <MenuItem value={DistanceUnit.Miles}>
+                        {translate("distance_unit_miles")}
+                      </MenuItem>
+                    </Select>
+                  </td>
+                </tr>
+              </tbody>
             </table>
           </fieldset>
           <br />
@@ -218,94 +219,102 @@ export function Settings({ onClose }: Props) {
                 <col className="col-250"></col>
                 <col className="col-200"></col>
               </colgroup>
-              <tr>
-                <td>{translate("start_on_boot")}</td>
-                <td>
-                  <Select
-                    size="small"
-                    fullWidth
-                    value={startOnBoot ? "true" : "false"}
-                    onChange={(e) =>
-                      updateStartOnBoot(e.target.value === "true")
-                    }
-                    disabled={environment == AppEnvironment.Debug}
-                  >
-                    <MenuItem value="false">
-                      {translate("start_on_boot_false")}
-                    </MenuItem>
-                    <MenuItem value="true">
-                      {translate("start_on_boot_true")}
-                    </MenuItem>
-                  </Select>
-                </td>
-              </tr>
-              <tr>
-                <td>{translate("on_device_connect")}</td>
-                <td>
-                  <Select
-                    size="small"
-                    fullWidth
-                    value={onDeviceCOnnect ? "true" : "false"}
-                    onChange={(e) =>
-                      updateOnDeviceConnect(e.target.value === "true")
-                    }
-                  >
-                    <MenuItem value="false">{translate("do_nothing")}</MenuItem>
-                    <MenuItem value="true">
-                      {translate("start_automatically")}
-                    </MenuItem>
-                  </Select>
-                </td>
-              </tr>
-              <tr>
-                <td>{translate("auto_sync")}</td>
-                <td>
-                  <Select
-                    size="small"
-                    fullWidth
-                    value={autoSync ? "true" : "false"}
-                    onChange={(e) => updateAutoSync(e.target.value === "true")}
-                  >
-                    <MenuItem value="true">
-                      {translate("auto_sync_true")}
-                    </MenuItem>
-                    <MenuItem value="false">
-                      {translate("auto_sync_false")}
-                    </MenuItem>
-                  </Select>
-                </td>
-              </tr>
-              <tr>
-                <td>{translate("database_operations")}</td>
-                <td>
-                  <table style={{ width: "100%" }}>
-                    <tr>
-                      <td>
-                        <Button
-                          id="add-measure-button"
-                          variant="contained"
-                          className="full-width-button"
-                          onClick={exportDatabase}
-                        >
-                          {translate("backup_database")}
-                        </Button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <Button
-                          id="upload-onedrive-button"
-                          variant="contained"
-                          className="full-width-button"
-                          onClick={uploadOnedrive}
-                        >
-                          {translate("upload_onedrive")}
-                        </Button>
-                      </td>
-                    </tr>
-                  </table>
-                </td>
-              </tr>
+              <tbody>
+                <tr>
+                  <td>{translate("start_on_boot")}</td>
+                  <td>
+                    <Select
+                      size="small"
+                      fullWidth
+                      value={startOnBoot ? "true" : "false"}
+                      onChange={(e) =>
+                        updateStartOnBoot(e.target.value === "true")
+                      }
+                      disabled={environment == AppEnvironment.Debug}
+                    >
+                      <MenuItem value="false">
+                        {translate("start_on_boot_false")}
+                      </MenuItem>
+                      <MenuItem value="true">
+                        {translate("start_on_boot_true")}
+                      </MenuItem>
+                    </Select>
+                  </td>
+                </tr>
+                <tr>
+                  <td>{translate("on_device_connect")}</td>
+                  <td>
+                    <Select
+                      size="small"
+                      fullWidth
+                      value={onDeviceCOnnect ? "true" : "false"}
+                      onChange={(e) =>
+                        updateOnDeviceConnect(e.target.value === "true")
+                      }
+                    >
+                      <MenuItem value="false">
+                        {translate("do_nothing")}
+                      </MenuItem>
+                      <MenuItem value="true">
+                        {translate("start_automatically")}
+                      </MenuItem>
+                    </Select>
+                  </td>
+                </tr>
+                <tr>
+                  <td>{translate("auto_sync")}</td>
+                  <td>
+                    <Select
+                      size="small"
+                      fullWidth
+                      value={autoSync ? "true" : "false"}
+                      onChange={(e) =>
+                        updateAutoSync(e.target.value === "true")
+                      }
+                    >
+                      <MenuItem value="true">
+                        {translate("auto_sync_true")}
+                      </MenuItem>
+                      <MenuItem value="false">
+                        {translate("auto_sync_false")}
+                      </MenuItem>
+                    </Select>
+                  </td>
+                </tr>
+                <tr>
+                  <td>{translate("database_operations")}</td>
+                  <td>
+                    <table style={{ width: "100%" }}>
+                      <tbody>
+                        <tr>
+                          <td>
+                            <Button
+                              id="add-measure-button"
+                              variant="contained"
+                              className="full-width-button"
+                              onClick={exportDatabase}
+                            >
+                              {translate("backup_database")}
+                            </Button>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>
+                            <Button
+                              id="upload-onedrive-button"
+                              variant="contained"
+                              className="full-width-button"
+                              onClick={uploadOnedrive}
+                            >
+                              {translate("upload_onedrive")}
+                            </Button>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
+              </tbody>
             </table>
           </fieldset>
         </DialogContent>

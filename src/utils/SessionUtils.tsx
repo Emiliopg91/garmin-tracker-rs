@@ -5,7 +5,6 @@ import {
   SessionSet,
   WeightUnit,
 } from "./backend/models";
-import { TimeUtils } from "./TimeUtils";
 import { UnitUtils } from "./UnitUtils";
 import L from "leaflet";
 
@@ -341,12 +340,10 @@ export class SessionUtils {
       let working_data = Array.from(
         data
           .map((s) => {
-            const [dd, mm, yyyy] = TimeUtils.formatDate(s.timestamp)
-              .split("/")
-              .map(Number);
-            const date = new Date(yyyy, mm - 1, dd).getTime();
-
-            return { date, load: s.training_load };
+            return {
+              date: startOfDay(new Date(s.timestamp * 1000)),
+              load: s.training_load,
+            };
           })
           .filter(
             (s) =>

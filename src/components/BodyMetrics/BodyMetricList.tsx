@@ -57,7 +57,7 @@ export function BodyMetricList() {
   >([]);
 
   const goToCompare = () => {
-    const sorted = toCompare.sort();
+    const sorted = [...toCompare].sort((a, b) => a - b);
     const sessions = [];
     for (let i = 0; i < sorted.length; i++) {
       sessions.push(bodyMetrics.find((entry) => entry.date == sorted[i])!);
@@ -88,23 +88,14 @@ export function BodyMetricList() {
             weight: data.weight,
           });
 
-          if (lMinKg > data.weight) {
-            lMinKg = data.weight;
-          } else if (lMaxKg < data.weight) {
-            lMaxKg = data.weight;
-          }
+          lMinKg = Math.min(lMinKg, data.weight);
+          lMaxKg = Math.max(lMaxKg, data.weight);
 
-          if (lMinLean > data.lean_mass) {
-            lMinLean = data.lean_mass;
-          } else if (lMaxLean < data.lean_mass) {
-            lMaxLean = data.lean_mass;
-          }
+          lMinLean = Math.min(lMinLean, data.lean_mass);
+          lMaxLean = Math.max(lMaxLean, data.lean_mass);
 
-          if (lMinFat > data.fat_ratio) {
-            lMinFat = data.fat_ratio;
-          } else if (lMaxFat < data.fat_ratio) {
-            lMaxFat = data.fat_ratio;
-          }
+          lMinFat = Math.min(lMinFat, data.fat_ratio);
+          lMaxFat = Math.max(lMaxFat, data.fat_ratio);
         });
         const dates = [...newChartData].map(({ date }) => {
           return date;

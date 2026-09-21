@@ -81,7 +81,7 @@ export function App(): JSX.Element {
   return (
     <>
       <div id="viewport">
-        {!appReady || (loading && <Loading />)}
+        {(!appReady || loading) && <Loading />}
 
         {appReady && (
           <>
