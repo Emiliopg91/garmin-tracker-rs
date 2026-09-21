@@ -51,7 +51,7 @@ export function WorkoutsList() {
   };
 
   const setWorkoutState = (name: string, status: boolean) => {
-    let res = workouts.map((w) => {
+    const res = workouts.map((w) => {
       if (w.name == name) {
         return { ...w, enabled: status };
       } else {

@@ -1,0 +1,3 @@
+--- Disable workspace
+
+ALTER TABLE WORKOUT ADD COLUMN enabled BOOLEAN DEFAULT TRUE;
