@@ -108,10 +108,10 @@ impl TryFrom<FitParser> for Session {
         Ok(Session {
             date: session_data.timestamp,
             name: session_data.workout.clone().unwrap_or_default(),
-            workout_obj: session_data
-                .workout
-                .as_ref()
-                .map(|o| Workout { name: o.clone() }),
+            workout_obj: session_data.workout.as_ref().map(|o| Workout {
+                name: o.clone(),
+                enabled: true,
+            }),
             workout: session_data.workout,
             total_elapsed_time: session_data.total_elapsed_time,
             active_time: session_data.active_time,

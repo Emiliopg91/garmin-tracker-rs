@@ -16,12 +16,12 @@ import { LoadingContext } from "./LoadingContext";
 import { I18nSettingsContext } from "./I18nSettingsContext";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import { enGB, es, type Locale } from "date-fns/locale";
+import { enUS, es, type Locale } from "date-fns/locale";
 
 // Both locales start the week on Monday
 const DATE_LOCALES: Record<Languages, Locale> = {
   [Languages.Spanish]: es,
-  [Languages.English]: enGB,
+  [Languages.English]: enUS,
 };
 
 export function AppProvider({

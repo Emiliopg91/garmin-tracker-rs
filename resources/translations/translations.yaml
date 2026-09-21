@@ -124,6 +124,9 @@ update_sets:
 latest_session:
   en: Latest session
   es: Última sesión
+enabled:
+  en: Enabled
+  es: Activado
 session_count:
   en: Session count
   es: Número de sesiones

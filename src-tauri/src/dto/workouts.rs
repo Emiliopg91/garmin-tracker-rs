@@ -8,6 +8,7 @@ pub struct WorkoutListItem {
     pub latest_session: i32,
     pub sessions: u32,
     pub avg_time: u32,
+    pub enabled: bool,
 }
 
 #[derive(Serialize)]
@@ -35,4 +36,5 @@ pub struct WorkoutDetails {
     pub avg_time: u32,
     pub avg_volume: f64,
     pub sessions: Vec<WorkoutSession>,
+    pub enabled: bool,
 }

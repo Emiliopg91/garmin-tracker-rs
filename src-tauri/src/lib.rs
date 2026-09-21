@@ -35,7 +35,7 @@ use crate::{
             _import_from_files, get_session_details, get_sessions, import_from_device,
             import_from_files, save_session_changes,
         },
-        workouts::{get_workout_details, get_workout_list},
+        workouts::{get_workout_details, get_workout_list, set_workout_status},
     },
     udev::UdevManager,
     utils::{constants, single_instance::SingleInstance},
@@ -247,7 +247,8 @@ pub fn run(log_level: LevelFilter) {
             export_database,
             get_translations,
             upload_to_cloud,
-            import_from_files
+            import_from_files,
+            set_workout_status
         ])
         .run(tauri::generate_context!())
     {

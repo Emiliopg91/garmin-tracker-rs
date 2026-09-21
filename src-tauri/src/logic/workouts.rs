@@ -14,6 +14,7 @@ use crate::{
     dao::{
         session::{self, SessionRepository, entity},
         set::{self, SetRepository},
+        workout::{self, WorkoutRepository},
     },
     dto::workouts::{WorkoutDetails, WorkoutListItem, WorkoutSession},
     logic::report_error,
@@ -28,6 +29,11 @@ pub fn get_workout_list(
 ) -> Result<Vec<WorkoutListItem>, String> {
     info!("Getting workouts list...");
     let res = database.run_in_connection(|conn| {
+        let enabled_workouts = WorkoutRepository::select()
+            .fetch_in(conn)?
+            .into_iter()
+            .filter_map(|w| if w.enabled { return Some(w.name) } else { None })
+            .collect::<Vec<_>>();
         let sessions = SessionRepository::select()
             .where_(Where::NotNull(session::entity::columns::WORKOUT))
             .order_by(OrderBy::Desc(entity::columns::DATE))
@@ -48,6 +54,7 @@ pub fn get_workout_list(
         let mut res = workout_stats
             .into_iter()
             .map(|wd| WorkoutListItem {
+                enabled: enabled_workouts.contains(&wd.0),
                 name: wd.0,
                 sessions: wd.1.0,
                 avg_time: wd.1.1 / wd.1.0,
@@ -83,6 +90,8 @@ pub fn get_workout_details(
 ) -> Result<WorkoutDetails, String> {
     let res = database.run_in_connection(|conn| {
         info!("Getting details for workout {}", name);
+
+        let workout = WorkoutRepository::select_by_id_in(conn, name)?.unwrap();
 
         let sessions = SessionRepository::select_by_name_in(
             conn,
@@ -130,6 +139,7 @@ pub fn get_workout_details(
             avg_volume: volume / (sessions.len() as f64),
             session_count: count,
             sessions: session_list,
+            enabled: workout.enabled,
         };
 
         Ok(details)
@@ -147,4 +157,19 @@ pub fn get_workout_details(
             "Error getting workout details",
         )),
     }
+}
+
+#[traced_command]
+#[tauri::command]
+pub fn set_workout_status(
+    database: State<'_, DatabasePool>,
+    workout: &str,
+    status: bool,
+) -> Result<(), String> {
+    WorkoutRepository::update()
+        .where_(Where::Eq(workout::entity::columns::NAME, workout.into()))
+        .set(workout::entity::columns::ENABLED, status.into())
+        .execute(&database)
+        .map(|_| ())
+        .map_err(|e| e.to_string())
 }

@@ -447,6 +447,7 @@ where
                         .or_ignore()
                         .item(&mut Workout {
                             name: workout.to_string(),
+                            enabled: true,
                         })
                         .execute_in(tx)?;
                 }

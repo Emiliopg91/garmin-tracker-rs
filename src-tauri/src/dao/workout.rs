@@ -5,4 +5,5 @@ use serde::{Deserialize, Serialize};
 #[primary_key(name)]
 pub struct Workout {
     pub name: String,
+    pub enabled: bool,
 }

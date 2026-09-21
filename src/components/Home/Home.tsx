@@ -8,6 +8,7 @@ import {
   WorkoutLoad,
 } from "@/utils/SessionUtils";
 import { Button, Menu, MenuItem } from "@mui/material";
+import { usePickerAdapter } from "@mui/x-date-pickers/hooks";
 import { useContext, useEffect, useState } from "react";
 import {
   Area,
@@ -35,6 +36,7 @@ export function Home() {
   const { availableDevices, sessionsVersion } = useContext(AppContext);
   const { startLoading, finishLoading } = useContext(LoadingContext);
   const { translate, settings } = useContext(I18nSettingsContext);
+  const adapter = usePickerAdapter();
 
   const [availableData, setAvailableData] = useState(false);
   const [workload, setWorkload] = useState<WorkoutLoad[]>([]);
@@ -91,7 +93,6 @@ export function Home() {
         finishLoading();
       });
   };
-
   const refresh = () => {
     startLoading();
     const today = new Date(new Date().setHours(0, 0, 0, 0)).getTime() / 1000;
@@ -105,14 +106,17 @@ export function Home() {
           startLoading();
           BackendClient.getWorkoutList()
             .then((data) => {
-              if (data.length > 0) {
-                let oldest = data[0];
-                for (let i = 0; i < data.length; i++) {
-                  if (oldest.latest_session > data[i].latest_session) {
-                    oldest = data[i];
+              const filtered = data.filter((w) => w.enabled);
+              if (filtered.length > 0) {
+                let oldest = filtered[0];
+                for (let i = 0; i < filtered.length; i++) {
+                  if (oldest.latest_session > filtered[i].latest_session) {
+                    oldest = filtered[i];
                   }
                 }
                 setWorkout(oldest);
+              } else {
+                setWorkout(undefined);
               }
             })
             .finally(() => {
@@ -128,11 +132,9 @@ export function Home() {
           let monthTmp = 0;
           let monthKcl = 0;
 
-          const startOfWeek = new Date();
-          const day = startOfWeek.getDay();
-          const diff = (day === 0 ? -6 : 1) - day;
-          startOfWeek.setDate(startOfWeek.getDate() + diff);
-          startOfWeek.setHours(0, 0, 0, 0);
+          const startOfWeek = adapter.startOfWeek(
+            adapter.startOfDay(new Date()),
+          );
 
           const thisWeekLimit = startOfWeek.getTime() / 1000;
           const weekLimit = today - 6 * 24 * 60 * 60;
@@ -216,7 +218,7 @@ export function Home() {
     return () => {
       unregisterSessionLocation();
     };
-  }, [sessionsVersion]);
+  }, [sessionsVersion, adapter]);
 
   return (
     <>
@@ -381,10 +383,10 @@ export function Home() {
               </div>{" "}
             </fieldset>
           </div>
-          {workout && (
-            <div className="dashboard-box">
-              <fieldset>
-                <legend>{translate("next_workout")}</legend>
+          <div className="dashboard-box">
+            <fieldset>
+              <legend>{translate("next_workout")}</legend>
+              {workout && (
                 <div id="list-layer">
                   <table>
                     <thead>
@@ -422,10 +424,10 @@ export function Home() {
                       </tr>
                     </tbody>
                   </table>
-                </div>{" "}
-              </fieldset>
-            </div>
-          )}
+                </div>
+              )}
+            </fieldset>
+          </div>
         </>
       )}
 
@@ -445,6 +447,7 @@ export function Home() {
         {workoutDetails && (
           <WorkoutModal
             workout={workoutDetails}
+            showEnable={false}
             onClose={() => setWorkoutDetails(undefined)}
           />
         )}

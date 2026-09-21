@@ -6,6 +6,7 @@ import { AppContext } from "@/context/AppContext";
 import { LoadingContext } from "@/context/LoadingContext";
 import { I18nSettingsContext } from "@/context/I18nSettingsContext";
 import { TimeUtils } from "@/utils/TimeUtils";
+import "@/styles/Workouts/WorkoutLists.css";
 
 export function WorkoutsList() {
   const { sessionsVersion } = useContext(AppContext);
@@ -49,6 +50,17 @@ export function WorkoutsList() {
     });
   };
 
+  const setWorkoutState = (name: string, status: boolean) => {
+    let res = workouts.map((w) => {
+      if (w.name == name) {
+        return { ...w, enabled: status };
+      } else {
+        return { ...w };
+      }
+    });
+    setWorkouts(res);
+  };
+
   return (
     <>
       <table>
@@ -64,7 +76,9 @@ export function WorkoutsList() {
           {workouts.map((workout, idx) => (
             <tr
               key={idx}
-              className="clickable-row"
+              className={
+                "clickable-row" + (workout.enabled ? "" : " workout-disabled")
+              }
               onClick={() => getWorkoutDetails(workout.name)}
             >
               <td className="text-left">
@@ -83,7 +97,9 @@ export function WorkoutsList() {
         {workoutDetails && (
           <WorkoutModal
             workout={workoutDetails}
+            showEnable={true}
             onClose={() => setWorkoutDetails(undefined)}
+            onUpdate={setWorkoutState}
           />
         )}
       </div>

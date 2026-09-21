@@ -3,7 +3,13 @@ import { WorkoutDetails } from "@/utils/backend/models";
 import { TimeUtils } from "@/utils/TimeUtils";
 import { UnitUtils } from "@/utils/UnitUtils";
 import { useContext, useEffect, useState } from "react";
-import { Dialog, DialogContent, DialogTitle, IconButton } from "@mui/material";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+  Switch,
+} from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import {
   CartesianGrid,
@@ -15,13 +21,23 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { BackendClient } from "@/utils/backend/client";
+import { LoadingContext } from "@/context/LoadingContext";
 
 type Props = {
   workout: WorkoutDetails;
+  showEnable: boolean;
   onClose: () => void;
+  onUpdate?: (name: string, status: boolean) => void;
 };
 
-export function WorkoutModal({ workout, onClose }: Props) {
+export function WorkoutModal({
+  workout,
+  showEnable,
+  onClose,
+  onUpdate,
+}: Props) {
+  const { startLoading, finishLoading } = useContext(LoadingContext);
   const { translate, settings } = useContext(I18nSettingsContext);
   const [chartData, setChartData] = useState<
     { date: number; volume: number }[]
@@ -30,6 +46,7 @@ export function WorkoutModal({ workout, onClose }: Props) {
   const [maxVol, setMaxVol] = useState(0);
   const [minDate, setMinDate] = useState(99999);
   const [maxDate, setMaxDate] = useState(0);
+  const [enabled, setEnabled] = useState(workout.enabled);
 
   useEffect(() => {
     const data = [...workout.sessions].reverse().map((ws) => {
@@ -55,6 +72,20 @@ export function WorkoutModal({ workout, onClose }: Props) {
     setMinVol(Math.min(...volumes));
     setMaxVol(Math.max(...volumes));
   }, []);
+
+  const toggleEnabled = () => {
+    startLoading();
+    BackendClient.setWorkoutStatus(workout.name, !enabled)
+      .then(() => {
+        if (onUpdate) {
+          onUpdate(workout.name, !enabled);
+        }
+        setEnabled((prev) => !prev);
+      })
+      .finally(() => {
+        finishLoading();
+      });
+  };
 
   return (
     <Dialog open={true} onClose={onClose} fullWidth maxWidth="md">
@@ -95,6 +126,20 @@ export function WorkoutModal({ workout, onClose }: Props) {
                     settings.weight_unit,
                   ).toFixed(1)}{" "}
                   {UnitUtils.getUnit(settings.weight_unit)}
+                </td>
+              </tr>
+            )}
+            {showEnable && (
+              <tr>
+                <td>{translate("enabled")}</td>
+                <td>
+                  <Switch
+                    checked={enabled}
+                    onChange={toggleEnabled}
+                    slotProps={{
+                      input: { "aria-label": translate("enabled") },
+                    }}
+                  />
                 </td>
               </tr>
             )}
