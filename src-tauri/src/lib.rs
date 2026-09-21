@@ -162,7 +162,7 @@ pub fn run(log_level: LevelFilter) {
                 exit(constants::ExitCodes::UdevError.into())
             }
 
-            fn initialize() -> (DatabasePool, Settings, Version) {
+            fn initialize() -> (DatabasePool, Settings) {
                 debug!("Initializing database...");
                 let already_exists = fs::exists(constants::DB_FILE.clone()).unwrap();
                 let builder = DatabaseConnectionBuilder::default()
@@ -196,7 +196,7 @@ pub fn run(log_level: LevelFilter) {
                             )
                             .unwrap();
 
-                            (database, settings, version)
+                            (database, settings)
                         }
                     }
                     Err(e) => {
@@ -206,7 +206,7 @@ pub fn run(log_level: LevelFilter) {
                 }
             }
 
-            let (database, settings, version) = initialize();
+            let (database, settings) = initialize();
 
             database.run_in_transaction(|tx| {
                 let count = SetRepository::select()
