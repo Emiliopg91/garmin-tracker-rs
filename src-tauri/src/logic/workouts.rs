@@ -32,7 +32,7 @@ pub fn get_workout_list(
         let enabled_workouts = WorkoutRepository::select()
             .fetch_in(conn)?
             .into_iter()
-            .filter_map(|w| if w.enabled { return Some(w.name) } else { None })
+            .filter_map(|w| if w.enabled { Some(w.name) } else { None })
             .collect::<Vec<_>>();
         let sessions = SessionRepository::select()
             .where_(Where::NotNull(session::entity::columns::WORKOUT))
