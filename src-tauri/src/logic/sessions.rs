@@ -40,7 +40,7 @@ use rusqlite_orm::{
     types::{order_by::OrderBy, value::Value, where_clause::Where},
 };
 use tauri::{AppHandle, Emitter, Manager, State};
-use tauri_plugin_log::log::{error, info, warn};
+use tauri_plugin_log::log::{debug, error, info, warn};
 
 /// Returns every recorded session, newest first.
 #[traced_command]
@@ -192,7 +192,7 @@ pub fn save_session_changes(
             exercises.insert((serie.ex_cat, serie.ex_id));
         }
 
-        update_prs(tx, exercises, &[details.timestamp as i64], lang)?;
+        update_prs(tx, exercises, &[details.timestamp as i64], Some(lang))?;
         Ok(())
     });
 
@@ -525,7 +525,7 @@ where
             body: translate_and_replace("imported_n_sessions", &[&success.len().to_string()], lang),
             kind: NotificationKind::Temporal,
         });
-        update_prs(tx, handled_exercises, &success, lang)?;
+        update_prs(tx, handled_exercises, &success, Some(lang))?;
     }
 
     Ok(success)
@@ -536,7 +536,7 @@ pub fn update_prs(
     tx: &rusqlite_orm::rusqlite::Transaction,
     exercises: HashSet<(u16, u16)>,
     sessions: &[i64],
-    lang: Languages,
+    lang: Option<Languages>,
 ) -> rusqlite_orm::errors::Result<()> {
     let mut new_prs = false;
 
@@ -583,7 +583,7 @@ pub fn update_prs(
             .execute_in(tx)?;
     }
 
-    if new_prs {
+    if new_prs && let Some(lang) = lang {
         show_notification(NotificationDefinition {
             title: translate("new_record", lang),
             body: translate("contratulations_pr", lang),
@@ -716,4 +716,22 @@ pub fn update_pending_geolocation(app: &AppHandle, db: &DatabasePool) {
             error!("Error while looking for pending sessions: {}", e);
         }
     }
+}
+
+pub fn recalculate_e1rm(
+    tx: &mut rusqlite_orm::rusqlite::Transaction,
+) -> rusqlite_orm::errors::Result<()> {
+    debug!("Recalculating e1RM...");
+    let mut sets = SetRepository::select().fetch_in(tx)?;
+    for set in &mut sets {
+        set.e1rm = Set::estimate_1rm(set.weight, set.reps);
+        set.update_by_id_in(tx)?;
+    }
+
+    let exercises = sets
+        .iter()
+        .map(|e| (e.ex_cat, e.ex_id))
+        .collect::<HashSet<_>>();
+    update_prs(tx, exercises, &[], None)?;
+    Ok(())
 }

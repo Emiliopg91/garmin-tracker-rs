@@ -7,27 +7,21 @@ mod rclone;
 mod udev;
 mod utils;
 
-use std::collections::HashSet;
 #[cfg(debug_assertions)]
 use std::path::Path;
 use std::{fs, process::exit, sync::RwLock, time::Duration};
 
-use rusqlite_orm::dlls;
-use rusqlite_orm::types::where_clause::Where;
-use rusqlite_orm::{
-    dao::Repository,
-    database::{
-        DatabasePool,
-        builder::{DatabaseConnectionBuilder, JournalMode},
-    },
+use rusqlite_orm::database::{
+    DatabasePool,
+    builder::{DatabaseConnectionBuilder, JournalMode},
 };
+use rusqlite_orm::ddls;
 use tauri::{Manager, WindowEvent};
 use tauri_plugin_log::{
     Target, TargetKind,
     log::{LevelFilter, debug, error, info, warn},
 };
 
-use crate::dao::set::{self, Set, SetRepository};
 use crate::{
     dto::app::Settings,
     logic::{
@@ -39,7 +33,7 @@ use crate::{
         exercises::{get_exercise_details, get_exercises},
         sessions::{
             _import_from_files, get_session_details, get_sessions, import_from_device,
-            import_from_files, save_session_changes, update_prs,
+            import_from_files, recalculate_e1rm, save_session_changes,
         },
         workouts::{get_workout_details, get_workout_list, set_workout_status},
     },
@@ -91,8 +85,6 @@ pub fn write_mtp_rules(auto_run: bool) -> crate::udev::errors::Result<()> {
 pub fn force_write_mtp_rules(auto_run: bool) -> crate::udev::errors::Result<()> {
     UdevManager::write_rules_file(auto_run)
 }
-
-dlls!("../resources/ddl");
 
 pub type SettingsLock = RwLock<Settings>;
 
@@ -175,7 +167,14 @@ pub fn run(log_level: LevelFilter) {
                     .journal_mode(JournalMode::Delete);
                 match builder.build("gtrs") {
                     Ok(database) => {
-                        if let Err(e) = database.create_schema(&DDLS) {
+                        let mut ddls = ddls!("../resources/ddl");
+                        for ddl in &mut ddls {
+                            if ddl.version == 5 {
+                                ddl.update_fn = Some(recalculate_e1rm);
+                            }
+                        }
+
+                        if let Err(e) = database.create_schema(&ddls) {
                             error!("Could not initialize database: {}", e);
                             exit(constants::ExitCodes::DbError.into())
                         }
@@ -207,27 +206,6 @@ pub fn run(log_level: LevelFilter) {
             }
 
             let (database, settings) = initialize();
-
-            database.run_in_transaction(|tx| {
-                let count = SetRepository::select()
-                    .where_(Where::NotEq(set::entity::columns::E1RM, 0.into()))
-                    .count_in(tx)?;
-                if count == 0 {
-                    info!("Recalculating e1RM...");
-                    let mut sets = SetRepository::select().fetch_in(tx)?;
-                    for set in &mut sets {
-                        set.e1rm = Set::estimate_1rm(set.weight, set.reps);
-                        set.update_by_id_in(tx)?;
-                    }
-
-                    let exercises = sets
-                        .iter()
-                        .map(|e| (e.ex_cat, e.ex_id))
-                        .collect::<HashSet<_>>();
-                    update_prs(tx, exercises, &[], settings.language)?;
-                }
-                Ok(())
-            })?;
 
             app.manage(database);
             app.manage(SettingsLock::new(settings));

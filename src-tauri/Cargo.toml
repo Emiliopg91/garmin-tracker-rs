@@ -37,7 +37,7 @@ phf = { version = "^0", features = ["macros"] }
 rayon = "^1"
 rfd = "^0"
 #rusqlite_orm = { path = "../rusqlite_orm/orm", features = ["derive"] }
-rusqlite_orm = { version = "^0", features = ["derive"] }
+rusqlite_orm = { version = "^1", features = ["derive"] }
 rustyfit = { version = "^0", features = ["serde"] }
 semver = "^1"
 serde = { version = "^1", features = ["derive"] }
