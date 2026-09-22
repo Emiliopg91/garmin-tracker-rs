@@ -207,7 +207,9 @@ impl From<Session> for Gpx {
 
         for lap in session.laps {
             if let Some((lat, lon)) = lap.get_coordinates_degrees() {
-                gpx.waypoints.push(Waypoint::new(Point::new(lon, lat)));
+                let mut wp = Waypoint::new(Point::new(lon, lat));
+                wp.name = Some(format!("{}", lap.idx + 1));
+                gpx.waypoints.push(wp);
             }
         }
 
