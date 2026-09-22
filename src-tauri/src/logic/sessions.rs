@@ -175,6 +175,13 @@ pub fn save_session_changes(
     );
     let lang = settings.read().unwrap().language;
     let res = database.run_in_transaction(|tx| {
+        AdditionalDataRepository::update()
+            .set(
+                additional_data::entity::columns::NOTES,
+                details.notes.clone().into(),
+            )
+            .execute_in(tx)?;
+
         let mut exercises = HashSet::new();
         for serie in &details.sets {
             SetRepository::update()

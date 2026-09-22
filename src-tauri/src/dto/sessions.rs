@@ -104,6 +104,7 @@ pub struct SessionDetails {
     pub laps: Vec<SessionLap>,
     pub speeds: Vec<Option<f64>>,
     pub distance: Option<f64>,
+    pub notes: String,
 
     pub device: Option<String>,
 }
@@ -120,6 +121,7 @@ impl From<(&Session, &[Exercise], &[Set], &[Lap])> for SessionDetails {
         let mut gps_coordinates = Vec::new();
         let mut speeds = Vec::new();
         let mut distance = None;
+        let mut notes = "".to_string();
 
         if let Some(add_data) = &value.0.additional_data {
             distance = add_data.distance.map(|d| d / 1000_f64);
@@ -131,6 +133,9 @@ impl From<(&Session, &[Exercise], &[Set], &[Lap])> for SessionDetails {
             }
             if let Some(spds) = add_data.get_speeds() {
                 speeds = spds;
+            }
+            if let Some(nts) = add_data.notes.clone() {
+                notes = nts
             }
         }
 
@@ -154,6 +159,7 @@ impl From<(&Session, &[Exercise], &[Set], &[Lap])> for SessionDetails {
             coordinates: gps_coordinates,
             speeds,
             distance,
+            notes,
         }
     }
 }
@@ -162,6 +168,7 @@ impl From<(&Session, &[Exercise], &[Set], &[Lap])> for SessionDetails {
 pub struct SessionSetsUpdate {
     pub timestamp: i32,
     pub sets: Vec<SessionSet>,
+    pub notes: Option<String>,
 }
 
 #[derive(Serialize, Clone)]

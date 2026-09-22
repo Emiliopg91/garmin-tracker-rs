@@ -1,0 +1,3 @@
+--- Session notes
+
+ALTER TABLE ADDITIONAL_DATA ADD COLUMN notes TEXT;

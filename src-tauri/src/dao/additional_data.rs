@@ -10,6 +10,7 @@ pub struct AdditionalData {
     pub coordinates: Option<Vec<u8>>,
     pub speeds: Option<Vec<u8>>,
     pub distance: Option<f64>,
+    pub notes: Option<String>,
 }
 
 impl AdditionalData {

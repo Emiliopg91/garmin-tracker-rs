@@ -2,8 +2,8 @@
 
 // From src-tauri/src/dto/app.rs:5
 export enum AppEnvironment {
-  Debug = "Debug",
-  Release = "Release",
+	Debug = "Debug",
+	Release = "Release",
 }
 
 // From src-tauri/src/dto/body_metrics.rs:6
@@ -24,8 +24,8 @@ export interface DeviceListItem {
 
 // From src-tauri/src/dao/settings.rs:178
 export enum DistanceUnit {
-  Kilometers = "Kilometers",
-  Miles = "Miles",
+	Kilometers = "Kilometers",
+	Miles = "Miles",
 }
 
 // From src-tauri/src/dto/exercises.rs:31
@@ -52,8 +52,8 @@ export interface ExerciseListItem {
 
 // From src-tauri/src/utils/translations.rs:10
 export enum Languages {
-  Spanish = "Spanish",
-  English = "English",
+	Spanish = "Spanish",
+	English = "English",
 }
 
 // From src-tauri/src/dto/sessions.rs:86
@@ -66,6 +66,7 @@ export interface SessionDetails {
   laps: SessionLap[];
   metabolic_calories: number;
   name: string;
+  notes: string;
   sets: SessionSet[];
   speeds: (number | null)[];
   sport: number;
@@ -95,7 +96,7 @@ export interface SessionListItem {
   training_load: number;
 }
 
-// From src-tauri/src/dto/sessions.rs:168
+// From src-tauri/src/dto/sessions.rs:175
 export interface SessionLocation {
   location: string;
   session: number;
@@ -111,8 +112,9 @@ export interface SessionSet {
   weight: number;
 }
 
-// From src-tauri/src/dto/sessions.rs:162
+// From src-tauri/src/dto/sessions.rs:168
 export interface SessionSetsUpdate {
+  notes: string | null;
   sets: SessionSet[];
   timestamp: number;
 }
@@ -129,8 +131,8 @@ export interface Settings {
 
 // From src-tauri/src/dao/settings.rs:206
 export enum WeightUnit {
-  Kilograms = "Kilograms",
-  Pounds = "Pounds",
+	Kilograms = "Kilograms",
+	Pounds = "Pounds",
 }
 
 // From src-tauri/src/dto/workouts.rs:32
@@ -159,3 +161,4 @@ export interface WorkoutSession {
   time: number;
   volume: number;
 }
+

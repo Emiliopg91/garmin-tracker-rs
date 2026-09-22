@@ -118,9 +118,9 @@ min_heart_rate:
 exercise:
   en: Exercise
   es: Ejercicio
-update_sets:
-  en: Update sets
-  es: Actualizar series
+update_session:
+  en: Update session
+  es: Actualizar sesión
 latest_session:
   en: Latest session
   es: Última sesión
@@ -416,3 +416,6 @@ rest_recommended:
 user_settings:
   en: User settings
   es: Ajustes de usuario
+session_notes:
+  en: Session notes
+  es: Notas de sesión

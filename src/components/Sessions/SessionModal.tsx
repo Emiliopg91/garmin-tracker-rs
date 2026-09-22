@@ -14,6 +14,7 @@ import {
   IconButton,
   Radio,
   RadioGroup,
+  TextareaAutosize,
   TextField,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
@@ -51,6 +52,8 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
   const [localSession, setLocalSession] = useState({ ...session });
   const [changed, setChanged] = useState(false);
   const [url, setUrl] = useState(1);
+  const [sets, setSets] = useState(session.sets.slice());
+  const [notes, setNotes] = useState(session.notes);
 
   const handleMapTypeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setUrl(event.target.value === "street" ? 0 : 1);
@@ -77,8 +80,9 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
 
       const sets = prev.sets.slice();
       sets[serieIdx] = { ...sets[serieIdx], [field]: value };
+      setSets(sets);
 
-      setChanged(hasChanges(sets));
+      setChanged(hasChanges(sets) || notes != originalSession.notes);
 
       return {
         ...prev,
@@ -104,11 +108,24 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
     updateSerie(exercise, idx, "weight", weight);
   };
 
+  const updateNote = (notes: string) => {
+    setLocalSession((prev) => {
+      setNotes(notes);
+      setChanged(hasChanges(sets) || notes != originalSession.notes);
+
+      return {
+        ...prev,
+        notes,
+      };
+    });
+  };
+
   const saveChanges = () => {
     startLoading();
     const update: SessionSetsUpdate = {
       timestamp: localSession.timestamp,
       sets: [],
+      notes: notes.length > 0 ? notes : null,
     };
     localSession.sets.forEach((serie, serIdx) => {
       if (
@@ -393,97 +410,118 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
           </>
         )}
         {localSession.sets && Object.keys(localSession.sets).length > 0 && (
-          <div className="session-sets-container">
-            <table>
-              <colgroup>
-                <col className="col-350" />
-                <col className="col-200" />
-              </colgroup>
+          <>
+            <div className="session-sets-container">
+              <table>
+                <colgroup>
+                  <col className="col-350" />
+                  <col className="col-200" />
+                </colgroup>
 
-              <thead>
-                <tr className="divider-bottom">
-                  <th>{translate("exercise")}:</th>
-                  <th>{translate("series")}:</th>
-                </tr>
-              </thead>
-              <tbody>
-                {localSession.exercises.map((exercise) =>
-                  localSession.grouped_series[exercise].map((serie, idx) => (
-                    <tr key={`${exercise}-${idx}`}>
-                      {idx === 0 && (
+                <thead>
+                  <tr className="divider-bottom">
+                    <th>{translate("exercise")}:</th>
+                    <th>{translate("series")}:</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {localSession.exercises.map((exercise) =>
+                    localSession.grouped_series[exercise].map((serie, idx) => (
+                      <tr key={`${exercise}-${idx}`}>
+                        {idx === 0 && (
+                          <td
+                            className="divider-bottom"
+                            rowSpan={
+                              localSession.grouped_series[exercise].length
+                            }
+                          >
+                            {translate(
+                              "exercise_" + serie.ex_cat + "_" + serie.ex_id,
+                            )}
+                          </td>
+                        )}
+
                         <td
-                          className="divider-bottom"
-                          rowSpan={localSession.grouped_series[exercise].length}
+                          className={[
+                            idx ===
+                            localSession.grouped_series[exercise].length - 1
+                              ? "divider-bottom group-cell-last"
+                              : undefined,
+                            idx === 0 ? "group-cell-first" : undefined,
+                          ]
+                            .filter(Boolean)
+                            .join(" ")}
                         >
-                          {translate(
-                            "exercise_" + serie.ex_cat + "_" + serie.ex_id,
+                          <TextField
+                            variant="standard"
+                            type="number"
+                            value={serie.reps}
+                            slotProps={{
+                              htmlInput: {
+                                className: "no-spinner session-sets-reps-input",
+                                min: 0,
+                              },
+                            }}
+                            onChange={(e) => {
+                              updateSerieReps(exercise, idx, e.target.value);
+                            }}
+                          />{" "}
+                          x{" "}
+                          <TextField
+                            variant="standard"
+                            type="number"
+                            value={serie.weight?.toString()}
+                            slotProps={{
+                              htmlInput: {
+                                className:
+                                  "no-spinner session-sets-weight-input",
+                                min: 0,
+                              },
+                            }}
+                            onChange={(e) => {
+                              updateSerieWeight(exercise, idx, e.target.value);
+                            }}
+                          />
+                          {" " + UnitUtils.getUnit(settings.weight_unit) + " "}
+                          {serie.pr && (
+                            <EmojiEventsIcon className="trophy-icon" />
                           )}
                         </td>
-                      )}
-
-                      <td
-                        className={[
-                          idx ===
-                          localSession.grouped_series[exercise].length - 1
-                            ? "divider-bottom group-cell-last"
-                            : undefined,
-                          idx === 0 ? "group-cell-first" : undefined,
-                        ]
-                          .filter(Boolean)
-                          .join(" ")}
-                      >
-                        <TextField
-                          variant="standard"
-                          type="number"
-                          value={serie.reps}
-                          slotProps={{
-                            htmlInput: {
-                              className: "no-spinner session-sets-reps-input",
-                              min: 0,
-                            },
-                          }}
-                          onChange={(e) => {
-                            updateSerieReps(exercise, idx, e.target.value);
-                          }}
-                        />{" "}
-                        x{" "}
-                        <TextField
-                          variant="standard"
-                          type="number"
-                          value={serie.weight?.toString()}
-                          slotProps={{
-                            htmlInput: {
-                              className: "no-spinner session-sets-weight-input",
-                              min: 0,
-                            },
-                          }}
-                          onChange={(e) => {
-                            updateSerieWeight(exercise, idx, e.target.value);
-                          }}
-                        />
-                        {" " + UnitUtils.getUnit(settings.weight_unit) + " "}
-                        {serie.pr && (
-                          <EmojiEventsIcon className="trophy-icon" />
-                        )}
-                      </td>
-                    </tr>
-                  )),
-                )}
-              </tbody>
-            </table>
-            <div className="session-sets-actions">
-              <Button
-                id="import-button"
-                variant="contained"
-                disabled={!changed}
-                className="full-width-button"
-                onClick={saveChanges}
-              >
-                {translate("update_sets")}
-              </Button>
+                      </tr>
+                    )),
+                  )}
+                </tbody>
+              </table>
             </div>
-          </div>
+          </>
         )}
+        <div>
+          <TextareaAutosize
+            minRows={4}
+            placeholder={translate("session_notes")}
+            value={notes}
+            style={{
+              width: "100%",
+              backgroundColor: "#202020",
+              color: "white",
+              resize: "none",
+            }}
+            onChange={(e) => {
+              updateNote(e.target.value);
+            }}
+          />
+        </div>
+        <div className="session-sets-actions">
+          <Button
+            id="import-button"
+            variant="contained"
+            disabled={!changed}
+            className="full-width-button"
+            onClick={saveChanges}
+          >
+            {translate("update_session")}
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   );

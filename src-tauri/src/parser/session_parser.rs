@@ -343,6 +343,7 @@ impl From<RecordAccumulator> for Option<AdditionalData> {
                 coordinates: coords.map(|coords| AdditionalData::build_coordinates_blob(&coords)),
                 speeds: speeds.map(|speeds| AdditionalData::build_speeds_blob(&speeds)),
                 distance: value.distance,
+                notes: None,
             })
         } else {
             None
