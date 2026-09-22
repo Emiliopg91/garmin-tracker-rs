@@ -57,6 +57,7 @@ export class SessionUtils {
     };
 
     SessionUtils.handleSeries(details, weightUnit);
+    SessionUtils.handleLaps(details);
     SessionUtils.handleGpsCoordiates(details);
     SessionUtils.handleHeartRate(details);
 
@@ -183,6 +184,25 @@ export class SessionUtils {
             coordinates: [details.coordinates[i]!, details.coordinates[i + 1]!],
             color: `hsl(${colors[i]}, 100%, 50%)`,
           });
+        }
+      }
+    }
+  }
+
+  private static handleLaps(details: SessionFrontDetails) {
+    if (details.laps.length > 0) {
+      if (details.laps.length > 0) {
+        for (let i = 0; i < details.laps.length; i++) {
+          if (
+            details.laps[i].start_latitude &&
+            details.laps[i].start_longitude
+          ) {
+            details.laps[i].start_latitude =
+              details.laps[i].start_latitude! * UnitUtils.SEMICIRCLE_TO_DEGREES;
+            details.laps[i].start_longitude =
+              details.laps[i].start_longitude! *
+              UnitUtils.SEMICIRCLE_TO_DEGREES;
+          }
         }
       }
     }

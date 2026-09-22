@@ -5,9 +5,7 @@ use gpx::{Gpx, Track, TrackSegment, Waypoint};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    dao::{
-        additional_data::AdditionalData, exercise::Exercise, lap::Lap, session::Session, set::Set,
-    },
+    dao::{exercise::Exercise, lap::Lap, session::Session, set::Set},
     utils::constants,
 };
 
@@ -68,6 +66,23 @@ impl From<&Set> for SessionSet {
             reps: value.reps,
             weight: value.weight,
             pr: value.pr,
+        }
+    }
+}
+
+#[derive(Serialize)]
+pub struct SessionLap {
+    idx: i32,
+    start_latitude: Option<i32>,
+    start_longitude: Option<i32>,
+}
+
+impl From<&Lap> for SessionLap {
+    fn from(value: &Lap) -> Self {
+        Self {
+            idx: value.idx,
+            start_latitude: value.start_latitude,
+            start_longitude: value.start_longitude,
         }
     }
 }
@@ -180,8 +195,10 @@ impl From<Session> for Gpx {
         let mut segment = TrackSegment::new();
 
         if let Some(coords) = session.additional_data.unwrap().get_coordinates_degrees() {
-            for (lat, lon) in coords.into_iter().flatten() {
-                segment.points.push(Waypoint::new(Point::new(lon, lat)));
+            for coord in coords {
+                if let Some((lat, lon)) = coord {
+                    segment.points.push(Waypoint::new(Point::new(lon, lat)));
+                }
             }
         }
 
@@ -195,28 +212,5 @@ impl From<Session> for Gpx {
         }
 
         gpx
-    }
-}
-
-#[derive(Serialize)]
-pub struct SessionLap {
-    pub session: i64,
-    pub idx: i32,
-    pub start_latitude: Option<f64>,
-    pub start_longitude: Option<f64>,
-}
-
-impl From<&Lap> for SessionLap {
-    fn from(value: &Lap) -> Self {
-        Self {
-            session: value.session,
-            idx: value.idx,
-            start_latitude: value
-                .start_latitude
-                .map(|s| s as f64 * AdditionalData::SEMICIRCLE_TO_DEGREES),
-            start_longitude: value
-                .start_longitude
-                .map(|s| s as f64 * AdditionalData::SEMICIRCLE_TO_DEGREES),
-        }
     }
 }

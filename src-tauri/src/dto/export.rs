@@ -8,13 +8,13 @@ use crate::{
         additional_data::{AdditionalData, AdditionalDataRepository},
         body_metric::{BodyMetric, BodyMetricRepository},
         device::{Device, DeviceRepository},
-        lap::LapRepository,
+        lap::{Lap, LapRepository},
         session::{Session, SessionRepository},
         set::{Set, SetRepository},
         settings::{Settings, SettingsRepository},
         workout::{Workout, WorkoutRepository},
     },
-    dto::sessions::{SessionLap, SessionSet},
+    dto::sessions::SessionSet,
     utils::translations::{Languages, translate},
 };
 
@@ -26,7 +26,7 @@ pub struct Export {
     workouts: Vec<Workout>,
     sessions: Vec<SessionExport>,
     settings: Vec<Settings>,
-    laps: Vec<SessionLap>,
+    laps: Vec<LapExport>,
 }
 
 impl Export {
@@ -40,8 +40,8 @@ impl Export {
             let sessions = SessionRepository::select().fetch_in(conn)?;
             let laps = LapRepository::select()
                 .fetch_in(conn)?
-                .iter()
-                .map(SessionLap::from)
+                .into_iter()
+                .map(LapExport::from)
                 .collect::<Vec<_>>();
 
             let mut additional_datas: HashMap<i64, AdditionalData> = HashMap::new();
@@ -169,4 +169,27 @@ pub struct ExerciseExport {
     category: u16,
     id: u16,
     name: String,
+}
+
+#[derive(Serialize)]
+pub struct LapExport {
+    pub session: i64,
+    pub idx: i32,
+    pub start_latitude: Option<f64>,
+    pub start_longitude: Option<f64>,
+}
+
+impl From<Lap> for LapExport {
+    fn from(value: Lap) -> Self {
+        Self {
+            session: value.session,
+            idx: value.idx,
+            start_latitude: value
+                .start_latitude
+                .map(|s| s as f64 * AdditionalData::SEMICIRCLE_TO_DEGREES),
+            start_longitude: value
+                .start_longitude
+                .map(|s| s as f64 * AdditionalData::SEMICIRCLE_TO_DEGREES),
+        }
+    }
 }
