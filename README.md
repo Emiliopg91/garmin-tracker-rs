@@ -18,7 +18,7 @@ Garmin Tracker is a cross-platform desktop application built with [Tauri](https:
 - **Device sync over USB (MTP)** — Auto-detects Garmin devices and downloads new activities.
 - **Launch on device connect** — Starts the app automatically when a device is plugged in.
 - **`.FIT` parsing** — Sessions, series, heart rate, GPS, speed, and laps.
-- **Strength training tracking** — Review/edit sessions and sets, with 1RM estimation.
+- **Activities and training tracking** — Review/edit sessions, notes and sets, with 1RM estimation.
 - **GPS route tracking with laps** — Interactive map, speed-colored track, satellite/street toggle, reverse-geocoded naming.
 - **Heart-rate zones** — Color-coded HR chart and time-in-zone breakdown.
 - **Personal record notifications** — Desktop alert on a new strength PR.
