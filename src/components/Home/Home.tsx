@@ -49,12 +49,16 @@ export function Home() {
 
   const [todayTime, setTodayTime] = useState(0);
   const [todayKcal, setTodayKCal] = useState(0);
+  const [todayLoad, setTodayLoad] = useState(0);
   const [weekTime, setWeekTime] = useState(0);
   const [weekKcal, setWeekKCal] = useState(0);
+  const [weekLoad, setWeekLoad] = useState(0);
   const [thisWeekTime, setThisWeekTime] = useState(0);
   const [thisWeekKcal, setThisWeekKCal] = useState(0);
+  const [thisWeekLoad, setThisWeekLoad] = useState(0);
   const [monthTime, setMonthTime] = useState(0);
   const [monthKcal, setMonthKCal] = useState(0);
+  const [monthLoad, setMonthLoad] = useState(0);
 
   const [workout, setWorkout] = useState<WorkoutListItem | undefined>(
     undefined,
@@ -131,12 +135,16 @@ export function Home() {
 
           let todayTmp = 0;
           let todayKcl = 0;
+          let todayLoad = 0;
           let thisWeekTmp = 0;
           let thisWeekKcl = 0;
+          let thisWeekLoad = 0;
           let weekTmp = 0;
           let weekKcl = 0;
+          let weekLoad = 0;
           let monthTmp = 0;
           let monthKcl = 0;
+          let monthLoad = 0;
 
           const startOfWeek = adapter.startOfWeek(
             adapter.startOfDay(new Date()),
@@ -152,28 +160,37 @@ export function Home() {
             }
             monthTmp += data[i].total_elapsed_time;
             monthKcl += data[i].active_calories;
+            monthLoad += data[i].training_load;
             if (data[i].timestamp >= weekLimit) {
               weekTmp += data[i].total_elapsed_time;
               weekKcl += data[i].active_calories;
+              weekLoad += data[i].training_load;
 
               if (data[i].timestamp >= thisWeekLimit) {
                 thisWeekTmp += data[i].total_elapsed_time;
                 thisWeekKcl += data[i].active_calories;
+                thisWeekLoad += data[i].training_load;
+
                 if (data[i].timestamp >= today) {
                   todayTmp += data[i].total_elapsed_time;
                   todayKcl += data[i].active_calories;
+                  todayLoad += data[i].training_load;
                 }
               }
             }
           }
           setTodayKCal(todayKcl);
           setTodayTime(todayTmp);
+          setTodayLoad(todayLoad);
           setThisWeekKCal(thisWeekKcl);
           setThisWeekTime(thisWeekTmp);
+          setThisWeekLoad(thisWeekLoad);
           setWeekKCal(weekKcl);
           setWeekTime(weekTmp);
+          setWeekLoad(weekLoad);
           setMonthKCal(monthKcl);
           setMonthTime(monthTmp);
+          setMonthLoad(monthLoad);
 
           setWorkload(workout_data);
           if (workout_data.length > 0) {
@@ -349,6 +366,15 @@ export function Home() {
                     <th>{translate("last_30_days")}</th>
                   </tr>
                 </thead>
+                <tbody>
+                  <tr>
+                    <td>{translate("workout_load")}</td>
+                    <td>{todayLoad}</td>
+                    <td>{thisWeekLoad}</td>
+                    <td>{weekLoad}</td>
+                    <td>{monthLoad}</td>
+                  </tr>
+                </tbody>
                 <tbody>
                   <tr>
                     <td>{translate("active_time")}</td>

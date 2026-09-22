@@ -1,8 +1,15 @@
 use std::hash::Hash;
 
+use geo_types::Point;
+use gpx::{Gpx, Track, TrackSegment, Waypoint};
 use serde::{Deserialize, Serialize};
 
-use crate::dao::{exercise::Exercise, lap::Lap, session::Session, set::Set};
+use crate::{
+    dao::{
+        additional_data::AdditionalData, exercise::Exercise, lap::Lap, session::Session, set::Set,
+    },
+    utils::constants,
+};
 
 #[derive(Serialize, Default)]
 pub struct SessionListItem {
@@ -61,23 +68,6 @@ impl From<&Set> for SessionSet {
             reps: value.reps,
             weight: value.weight,
             pr: value.pr,
-        }
-    }
-}
-
-#[derive(Serialize)]
-pub struct SessionLap {
-    idx: i32,
-    start_latitude: Option<i32>,
-    start_longitude: Option<i32>,
-}
-
-impl From<&Lap> for SessionLap {
-    fn from(value: &Lap) -> Self {
-        Self {
-            idx: value.idx,
-            start_latitude: value.start_latitude,
-            start_longitude: value.start_longitude,
         }
     }
 }
@@ -175,4 +165,58 @@ pub struct SessionSetsUpdate {
 pub struct SessionLocation {
     pub session: i32,
     pub location: String,
+}
+
+impl From<Session> for Gpx {
+    fn from(session: Session) -> Self {
+        let mut gpx = Gpx::default();
+
+        gpx.version = gpx::GpxVersion::Gpx11;
+        gpx.creator = Some(constants::APP_TITLE.to_string());
+
+        let mut track = Track::new();
+        track.name = Some(session.name);
+
+        let mut segment = TrackSegment::new();
+
+        if let Some(coords) = session.additional_data.unwrap().get_coordinates_degrees() {
+            for (lat, lon) in coords.into_iter().flatten() {
+                segment.points.push(Waypoint::new(Point::new(lon, lat)));
+            }
+        }
+
+        track.segments.push(segment);
+        gpx.tracks.push(track);
+
+        for lap in session.laps {
+            if let Some((lat, lon)) = lap.get_coordinates_degrees() {
+                gpx.waypoints.push(Waypoint::new(Point::new(lon, lat)));
+            }
+        }
+
+        gpx
+    }
+}
+
+#[derive(Serialize)]
+pub struct SessionLap {
+    pub session: i64,
+    pub idx: i32,
+    pub start_latitude: Option<f64>,
+    pub start_longitude: Option<f64>,
+}
+
+impl From<&Lap> for SessionLap {
+    fn from(value: &Lap) -> Self {
+        Self {
+            session: value.session,
+            idx: value.idx,
+            start_latitude: value
+                .start_latitude
+                .map(|s| s as f64 * AdditionalData::SEMICIRCLE_TO_DEGREES),
+            start_longitude: value
+                .start_longitude
+                .map(|s| s as f64 * AdditionalData::SEMICIRCLE_TO_DEGREES),
+        }
+    }
 }

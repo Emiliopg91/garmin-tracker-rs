@@ -32,7 +32,7 @@ use crate::{
         body_metrics::{add_body_measures, delete_body_metric, get_body_measures},
         exercises::{get_exercise_details, get_exercises},
         sessions::{
-            _import_from_files, get_session_details, get_sessions, import_from_device,
+            _import_from_files, export_gpx, get_session_details, get_sessions, import_from_device,
             import_from_files, recalculate_e1rm, save_session_changes,
         },
         workouts::{get_workout_details, get_workout_list, set_workout_status},
@@ -253,7 +253,8 @@ pub fn run(log_level: LevelFilter) {
             get_translations,
             upload_to_cloud,
             import_from_files,
-            set_workout_status
+            set_workout_status,
+            export_gpx
         ])
         .run(tauri::generate_context!())
     {

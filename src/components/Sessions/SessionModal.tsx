@@ -148,6 +148,13 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
       });
   };
 
+  const exportTrack = () => {
+    startLoading();
+    BackendClient.exportGpx(localSession.timestamp).finally(() => {
+      finishLoading();
+    });
+  };
+
   const hrGradientStops = useMemo(
     () =>
       localSession.hrBreathData.flatMap((point, i) => {
@@ -222,25 +229,33 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                   ]),
                 )}
             </MapContainer>
-            <FormControl className="session-map-type-control">
-              <RadioGroup
-                row
-                name="row-radio-buttons-group"
-                value={url === 0 ? "street" : "satellite"}
-                onChange={handleMapTypeChange}
+            <div style={{ display: "flex" }}>
+              <FormControl
+                className="session-map-type-control"
+                style={{ flex: 1 }}
               >
-                <FormControlLabel
-                  value="satellite"
-                  control={<Radio />}
-                  label={translate("satellite_map")}
-                />
-                <FormControlLabel
-                  value="street"
-                  control={<Radio />}
-                  label={translate("street_map")}
-                />
-              </RadioGroup>
-            </FormControl>
+                <RadioGroup
+                  row
+                  name="row-radio-buttons-group"
+                  value={url === 0 ? "street" : "satellite"}
+                  onChange={handleMapTypeChange}
+                >
+                  <FormControlLabel
+                    value="satellite"
+                    control={<Radio />}
+                    label={translate("satellite_map")}
+                  />
+                  <FormControlLabel
+                    value="street"
+                    control={<Radio />}
+                    label={translate("street_map")}
+                  />
+                </RadioGroup>
+              </FormControl>
+              <Button onClick={exportTrack} style={{ flex: 1 }}>
+                {translate("export_gpx")}
+              </Button>
+            </div>
             <hr />
           </>
         )}

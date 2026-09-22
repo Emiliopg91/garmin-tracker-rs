@@ -29,6 +29,8 @@ chrono = "^0"
 curl-rest = "^0"
 embedded-io-adapters = { version = "^0", features = ["std"] }
 garmin-tracker-rs-macros = { path = "../src-tauri-macros" }
+geo-types = "^0"
+gpx = "^0"
 libc = "^0"
 mtp-rs = "^0"
 nusb = "^0"

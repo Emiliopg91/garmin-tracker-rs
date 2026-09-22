@@ -1,6 +1,7 @@
 use std::{
     collections::HashSet,
-    fs,
+    fs::{self, File},
+    io::BufWriter,
     path::{Path, PathBuf},
     sync::Mutex,
     time::Duration,
@@ -32,6 +33,7 @@ use crate::{
 use chrono::{Datelike, Local, TimeZone, Timelike, offset::LocalResult};
 use curl_rest::StatusCode;
 use garmin_tracker_rs_macros::traced_command;
+use gpx::Gpx;
 use rayon::prelude::*;
 use rusqlite_orm::{
     dao::Repository,
@@ -741,4 +743,59 @@ pub fn recalculate_e1rm(
         .collect::<HashSet<_>>();
     update_prs(tx, exercises, &[], None)?;
     Ok(())
+}
+
+#[traced_command]
+#[tauri::command]
+pub async fn export_gpx(
+    database: State<'_, DatabasePool>,
+    settings: State<'_, SettingsLock>,
+    session: i32,
+) -> Result<(), String> {
+    let session = database
+        .run_in_connection(|conn| {
+            let mut session = SessionRepository::select_by_id_in(conn, session as i64)?.unwrap();
+            session.fetch_additional_data_relationship_in(conn)?;
+            session.fetch_laps_relationship_in(conn)?;
+
+            Ok(session)
+        })
+        .map_err(|e| e.to_string())?;
+
+    let path = constants::HOME_DIR.join(format!(
+        "{}-{}.gpx",
+        session.name,
+        Local.timestamp_millis_opt(session.date * 1000).unwrap()
+    ));
+    let path_str = path.display().to_string();
+    info!("Exporting track to {}...", path.display());
+
+    let gpx = Gpx::from(session);
+    let res = tokio::task::spawn_blocking(move || {
+        let file = File::create(&path).map_err(|e| e.to_string())?;
+        let writer = BufWriter::new(file);
+        gpx::write(&gpx, writer).map_err(|e| e.to_string())?;
+        Ok::<(), String>(())
+    })
+    .await
+    .map_err(|e| e.to_string())
+    .flatten();
+
+    let lang = settings.read().unwrap().language;
+    match res {
+        Ok(()) => {
+            show_notification(NotificationDefinition {
+                title: translate("ok_on_track_export", lang),
+                body: translate_and_replace("export_file_path", &[&path_str], lang),
+                kind: NotificationKind::Temporal,
+            });
+            Ok(())
+        }
+        Err(e) => Err(report_error(
+            e,
+            lang,
+            "error_on_export",
+            "Error exporting track",
+        )),
+    }
 }

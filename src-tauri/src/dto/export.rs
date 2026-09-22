@@ -8,12 +8,13 @@ use crate::{
         additional_data::{AdditionalData, AdditionalDataRepository},
         body_metric::{BodyMetric, BodyMetricRepository},
         device::{Device, DeviceRepository},
+        lap::LapRepository,
         session::{Session, SessionRepository},
         set::{Set, SetRepository},
         settings::{Settings, SettingsRepository},
         workout::{Workout, WorkoutRepository},
     },
-    dto::sessions::SessionSet,
+    dto::sessions::{SessionLap, SessionSet},
     utils::translations::{Languages, translate},
 };
 
@@ -25,6 +26,7 @@ pub struct Export {
     workouts: Vec<Workout>,
     sessions: Vec<SessionExport>,
     settings: Vec<Settings>,
+    laps: Vec<SessionLap>,
 }
 
 impl Export {
@@ -36,6 +38,11 @@ impl Export {
             let devices = DeviceRepository::select().fetch_in(conn)?;
             let settings = SettingsRepository::select().fetch_in(conn)?;
             let sessions = SessionRepository::select().fetch_in(conn)?;
+            let laps = LapRepository::select()
+                .fetch_in(conn)?
+                .iter()
+                .map(SessionLap::from)
+                .collect::<Vec<_>>();
 
             let mut additional_datas: HashMap<i64, AdditionalData> = HashMap::new();
             AdditionalDataRepository::select()
@@ -83,6 +90,7 @@ impl Export {
                 sessions,
                 exercises,
                 settings,
+                laps,
             })
         })
     }
