@@ -25,5 +25,8 @@ setup-toolchain:
 update:
 	@python resources/scripts/update-dependencies.py
 
-publish:  
+publish:
 	@RUSTC_WRAPPER=sccache python resources/scripts/publish.py
+
+test:
+	@cd src-tauri && cargo test

@@ -35,6 +35,7 @@ if __name__ == "__main__":
             print("")
         sys.exit(1)
 
+    subprocess.check_call(["make", "test"])
     subprocess.check_call(["make", "build"])
 
     subprocess.check_call(["pnpm", "tsc"])

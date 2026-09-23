@@ -66,11 +66,20 @@ pub fn translate(key: &str, lang: Languages) -> String {
 
 /// Like `translate`, but substitutes each `{}` placeholder in order with the given `replacements`.
 pub fn translate_and_replace(key: &str, replacements: &[&str], lang: Languages) -> String {
-    let mut literal = translate(key, lang);
+    let literal = translate(key, lang);
 
-    for replacement in replacements {
-        literal = literal.replace("{}", replacement)
+    let mut result = String::with_capacity(literal.len());
+    let mut replacements = replacements.iter();
+    let mut rest = literal.as_str();
+    while let Some(pos) = rest.find("{}") {
+        let Some(replacement) = replacements.next() else {
+            break;
+        };
+        result.push_str(&rest[..pos]);
+        result.push_str(replacement);
+        rest = &rest[pos + 2..];
     }
+    result.push_str(rest);
 
-    literal
+    result
 }

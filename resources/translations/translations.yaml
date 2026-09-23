@@ -285,7 +285,7 @@ select_output_folder:
   es: Selecciona directorio de salida
 select_file_import:
   en: Select file to import
-  en: Selecciona archivo a importar
+  es: Selecciona archivo a importar
 database_operations:
   en: Database management
   es: Gestión de base de datos
@@ -295,9 +295,6 @@ backup_database:
 restore_database:
   en: Restore
   es: Restaurar
-ok_on_export:
-  en: Database exported succesfully
-  es: Base de datos exportada correctamente
 ok_on_export:
   en: Database exported succesfully
   es: Base de datos exportada correctamente
@@ -318,8 +315,10 @@ language:
   es: Idioma
 lang_en:
   en: English
+  es: English
 lang_es:
   en: Español
+  es: Español
 application:
   en: Application
   es: Aplicación

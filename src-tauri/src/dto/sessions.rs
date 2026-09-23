@@ -193,13 +193,10 @@ impl From<Session> for Gpx {
         track.name = Some(session.name);
 
         let mut segment = TrackSegment::new();
-        if let Some(coords) = session
-            .additional_data
-            .clone()
-            .unwrap()
-            .get_coordinates_degrees()
+        if let Some(additional_data) = &session.additional_data
+            && let Some(coords) = additional_data.get_coordinates_degrees()
         {
-            let altitudes =session.additional_data.unwrap().get_altitudes().unwrap_or_default();
+            let altitudes = additional_data.get_altitudes().unwrap_or_default();
 
             for (idx, coord) in coords.into_iter().enumerate() {
                 if let Some((lat, lon)) = coord {

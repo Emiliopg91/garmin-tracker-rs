@@ -7,12 +7,15 @@ mod rclone;
 mod udev;
 mod utils;
 
+#[cfg(test)]
+mod tests;
+
 #[cfg(debug_assertions)]
 use std::path::Path;
 use std::{fs, process::exit, sync::RwLock, time::Duration};
 
 use rusqlite_orm::database::{
-    DatabasePool,
+    DatabasePool, DdlVersion,
     builder::{DatabaseConnectionBuilder, JournalMode},
 };
 use rusqlite_orm::ddls;
@@ -33,7 +36,7 @@ use crate::{
         exercises::{get_exercise_details, get_exercises},
         sessions::{
             _import_from_files, export_gpx, get_session_details, get_sessions, import_from_device,
-            import_from_files, recalculate_e1rm, recalculate_prs, save_session_changes,
+            import_from_files, recalculate_e1rm, save_session_changes,
         },
         workouts::{get_workout_details, get_workout_list, set_workout_status},
     },
@@ -87,6 +90,21 @@ pub fn force_write_mtp_rules(auto_run: bool) -> crate::udev::errors::Result<()> 
 }
 
 pub type SettingsLock = RwLock<Settings>;
+
+/// Schema DDLs sorted by version, with the data update hooks attached to their migration.
+fn schema_ddls() -> Vec<DdlVersion> {
+    let mut ddls = ddls!("../resources/ddl").to_vec();
+    ddls.sort_by_key(|ddl| ddl.version);
+
+    for ddl in &mut ddls {
+        ddl.update_fn = match ddl.version {
+            5 | 6 => Some(recalculate_e1rm),
+            _ => None,
+        };
+    }
+
+    ddls
+}
 
 /// Boots the Tauri app: acquires the single-instance lock, opens/migrates the DB, loads settings, and registers commands.
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -167,11 +185,7 @@ pub fn run(log_level: LevelFilter) {
                     .journal_mode(JournalMode::Delete);
                 match builder.build("gtrs") {
                     Ok(database) => {
-                        let mut ddls = ddls!("../resources/ddl");
-                        ddls[4].update_fn = Some(recalculate_e1rm);
-                        ddls[5].update_fn = Some(recalculate_prs);
-
-                        if let Err(e) = database.create_schema(&ddls) {
+                        if let Err(e) = database.create_schema(&schema_ddls()) {
                             error!("Could not initialize database: {}", e);
                             exit(constants::ExitCodes::DbError.into())
                         }
