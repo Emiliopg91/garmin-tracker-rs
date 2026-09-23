@@ -68,3 +68,49 @@ impl FitParser {
         Ok(())
     }
 }
+
+/// Inverse of [`FitParser::debug_dump`]: encodes a JSON dump back into a FIT file, written next to it
+/// without the `.json` extension (or with `.fit` appended). Never overwrites an existing file.
+#[cfg(debug_assertions)]
+pub fn debug_encode<P>(path: P) -> Result<PathBuf, Box<dyn std::error::Error>>
+where
+    P: AsRef<Path>,
+{
+    use rustyfit::{
+        Encoder,
+        proto::{FIT, Message, Value},
+    };
+
+    // serde_json dumps NaN (the FIT invalid float) as null, which does not deserialize back
+    const NAN_SENTINEL: f32 = 123456.0;
+
+    let path = path.as_ref();
+    let fit_path = match path.extension() {
+        Some(ext) if ext == "json" => path.with_extension(""),
+        _ => PathBuf::from(format!("{}.fit", path.display())),
+    };
+    if fit_path.exists() {
+        return Err(format!("{} already exists", fit_path.display()).into());
+    }
+
+    let json = std::fs::read_to_string(path)?.replace("\"c\": null", "\"c\": 123456.0");
+    let mut messages: Vec<Message> = serde_json::from_str(&json)?;
+    for field in messages.iter_mut().flat_map(|m| m.fields.iter_mut()) {
+        if let Value::Float32(v) = &mut field.value
+            && *v == NAN_SENTINEL
+        {
+            *v = f32::from_bits(u32::MAX);
+        }
+    }
+
+    let mut fit = FIT {
+        messages,
+        ..Default::default()
+    };
+    let writer = FromStd::new(std::io::BufWriter::new(File::create_new(&fit_path)?));
+    Encoder::new()
+        .encode(writer, &mut fit)
+        .map_err(|e| format!("{e:?}"))?;
+
+    Ok(fit_path)
+}

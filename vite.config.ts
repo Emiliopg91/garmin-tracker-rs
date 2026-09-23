@@ -2,6 +2,14 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
+import { BaseSequencer, type TestSpecification } from "vitest/node";
+
+// Run test files one after another, sorted by path
+class PathSequencer extends BaseSequencer {
+  async sort(files: TestSpecification[]) {
+    return [...files].sort((a, b) => a.moduleId.localeCompare(b.moduleId));
+  }
+}
 
 // @ts-expect-error process is a nodejs global
 const host = process.env.TAURI_DEV_HOST;
@@ -19,6 +27,11 @@ export default defineConfig(async () => ({
     environment: "jsdom",
     include: ["src/test/**/*.test.{ts,tsx}"],
     setupFiles: ["src/test/setup.ts"],
+    fileParallelism: false,
+    isolate: false,
+    sequence: {
+      sequencer: PathSequencer,
+    },
   },
 
   // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`

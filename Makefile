@@ -30,4 +30,4 @@ publish:
 
 test:
 	@pnpm test
-	@cd src-tauri && cargo test --lib --bins --tests
+	@cd src-tauri && cargo test --lib --bins --tests -- --test-threads=1

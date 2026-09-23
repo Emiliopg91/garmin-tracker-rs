@@ -70,6 +70,18 @@ where
     }
 }
 
+#[cfg(debug_assertions)]
+pub fn encode_files<P>(paths: &[P])
+where
+    P: AsRef<Path>,
+{
+    for path in paths {
+        if let Err(e) = crate::parser::debug_encode(path) {
+            eprintln!("Error handling '{}': \n  {}", path.as_ref().display(), e)
+        }
+    }
+}
+
 pub fn check_running() -> bool {
     SingleInstance::is_app_running().0
 }

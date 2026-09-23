@@ -38,6 +38,10 @@ fn main() {
         let paths = &args[2..];
         garmin_tracker_rs_lib::decode_files(paths);
         exit(0);
+    } else if args.len() >= 3 && args.get(1).unwrap() == "--encode" {
+        let paths = &args[2..];
+        garmin_tracker_rs_lib::encode_files(paths);
+        exit(0);
     } else {
         if std::env::var("IN_DEBUG").is_err() {
             tauri_rs_ts_ipc::build();
