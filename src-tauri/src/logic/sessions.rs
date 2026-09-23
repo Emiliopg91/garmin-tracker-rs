@@ -561,7 +561,8 @@ pub fn update_prs(
                 Where::Eq(set::entity::columns::EX_CAT, exer.0.into()),
                 Where::Eq(set::entity::columns::EX_ID, exer.1.into()),
             ]))
-            .order_by(OrderBy::Desc(entity::columns::E1RM))
+            .order_by(OrderBy::Desc(entity::columns::WEIGHT))
+            .order_by(OrderBy::Desc(entity::columns::REPS))
             .order_by(OrderBy::Asc(entity::columns::SESSION))
             .order_by(OrderBy::Asc(entity::columns::IDX))
             .limit(1)
@@ -736,7 +737,14 @@ pub fn recalculate_e1rm(
         set.e1rm = Set::estimate_1rm(set.weight, set.reps);
         set.update_by_id_in(tx)?;
     }
+    Ok(())
+}
 
+pub fn recalculate_prs(
+    tx: &mut rusqlite_orm::rusqlite::Transaction,
+) -> rusqlite_orm::errors::Result<()> {
+    debug!("Recalculating PRs...");
+    let  sets = SetRepository::select().fetch_in(tx)?;
     let exercises = sets
         .iter()
         .map(|e| (e.ex_cat, e.ex_id))
