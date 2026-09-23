@@ -4,12 +4,10 @@ use curl_rest::StatusCode;
 use serde_json::Value;
 use tauri_plugin_log::log::info;
 
-use crate::{
-    rclone::{
-        RCloneClient, RCloneTrait,
-        errors::{self, RCloneError},
-        providers::OneDrive,
-    },
+use crate::rclone::{
+    RCloneClient, RCloneTrait,
+    errors::{self, RCloneError},
+    providers::OneDrive,
 };
 
 impl RCloneTrait for RCloneClient<OneDrive> {

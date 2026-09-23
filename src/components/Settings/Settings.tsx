@@ -27,7 +27,7 @@ type Props = {
 };
 
 export function Settings({ onClose }: Props) {
-  const { environment,rcloneAvailable } = useContext(AppContext);
+  const { environment, rcloneAvailable } = useContext(AppContext);
   const { startLoading, finishLoading } = useContext(LoadingContext);
   const { settings, translate, refreshTranslations } =
     useContext(I18nSettingsContext);
@@ -311,19 +311,28 @@ export function Settings({ onClose }: Props) {
                                 variant="contained"
                                 className="full-width-button"
                                 onClick={(e) =>
-                                  setImportMenuAnchor({ top: e.clientY, left: e.clientX })
+                                  setImportMenuAnchor({
+                                    top: e.clientY,
+                                    left: e.clientX,
+                                  })
                                 }
                               >
                                 {translate("upload_onedrive")}
-                              </Button> 
+                              </Button>
                               <Menu
                                 id="import-file-menu"
                                 anchorReference="anchorPosition"
                                 anchorPosition={importMenuAnchor ?? undefined}
                                 open={Boolean(importMenuAnchor)}
                                 onClose={() => setImportMenuAnchor(null)}
-                                anchorOrigin={{ vertical: "top", horizontal: "left" }}
-                                transformOrigin={{ vertical: "bottom", horizontal: "left" }}
+                                anchorOrigin={{
+                                  vertical: "top",
+                                  horizontal: "left",
+                                }}
+                                transformOrigin={{
+                                  vertical: "bottom",
+                                  horizontal: "left",
+                                }}
                               >
                                 <MenuItem
                                   onClick={() => {

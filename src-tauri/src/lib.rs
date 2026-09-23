@@ -30,7 +30,7 @@ use crate::{
     logic::{
         app::{
             export_database, get_environment, get_settings, get_translations,
-            notify_frontend_ready, update_settings_value, upload_to_cloud,rclone_available
+            notify_frontend_ready, rclone_available, update_settings_value, upload_to_cloud,
         },
         body_metrics::{add_body_measures, delete_body_metric, get_body_measures},
         exercises::{get_exercise_details, get_exercises},

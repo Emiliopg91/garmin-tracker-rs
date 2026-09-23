@@ -12,7 +12,7 @@ interface AppContexType {
   closeSettings: () => void;
   settingsOpened: boolean;
   sessionsVersion: number;
-  rcloneAvailable: boolean,
+  rcloneAvailable: boolean;
 }
 
 const defaultValue: AppContexType = {
@@ -31,7 +31,7 @@ const defaultValue: AppContexType = {
     /* */
   },
   sessionsVersion: 0,
-  rcloneAvailable: false
+  rcloneAvailable: false,
 };
 
 export const AppContext = createContext(defaultValue);

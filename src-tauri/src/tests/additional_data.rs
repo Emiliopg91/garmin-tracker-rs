@@ -19,7 +19,13 @@ fn coordinates_blob_roundtrip() {
 #[test]
 fn coordinates_invalid_position_is_none() {
     let invalid = AdditionalData::INVALID_POSITION;
-    let points = [(1, 2), (invalid, 5), (5, invalid), (invalid, invalid), (3, 4)];
+    let points = [
+        (1, 2),
+        (invalid, 5),
+        (5, invalid),
+        (invalid, invalid),
+        (3, 4),
+    ];
 
     let mut data = common::additional_data(1);
     data.coordinates = Some(AdditionalData::build_coordinates_blob(&points));
@@ -52,7 +58,10 @@ fn coordinates_trailing_bytes_are_ignored() {
     let mut data = common::additional_data(1);
     data.coordinates = Some(blob);
 
-    assert_eq!(data.get_coordinates_semicircle().unwrap(), vec![Some((7, 8))]);
+    assert_eq!(
+        data.get_coordinates_semicircle().unwrap(),
+        vec![Some((7, 8))]
+    );
 }
 
 #[test]

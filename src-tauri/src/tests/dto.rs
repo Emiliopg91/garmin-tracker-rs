@@ -101,7 +101,10 @@ fn gpx_track_and_lap_waypoints() {
     let mut data = common::additional_data(1);
     data.coordinates = Some(AdditionalData::build_coordinates_blob(&[
         (0, 0),
-        (AdditionalData::INVALID_POSITION, AdditionalData::INVALID_POSITION),
+        (
+            AdditionalData::INVALID_POSITION,
+            AdditionalData::INVALID_POSITION,
+        ),
         (QUARTER_TURN, QUARTER_TURN),
     ]));
     data.altitudes = Some(AdditionalData::build_altitudes_blob(&[

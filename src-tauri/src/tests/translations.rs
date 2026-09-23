@@ -5,13 +5,19 @@ const ALL_LANGUAGES: [Languages; 2] = [Languages::Spanish, Languages::English];
 #[test]
 fn unknown_key_returns_the_key() {
     for lang in ALL_LANGUAGES {
-        assert_eq!(translate("this_key_does_not_exist", lang), "this_key_does_not_exist");
+        assert_eq!(
+            translate("this_key_does_not_exist", lang),
+            "this_key_does_not_exist"
+        );
     }
 }
 
 #[test]
 fn known_key_is_translated() {
-    let (key, _) = TRANSLATIONS.entries().next().expect("translations not empty");
+    let (key, _) = TRANSLATIONS
+        .entries()
+        .next()
+        .expect("translations not empty");
     for lang in ALL_LANGUAGES {
         let text = translate(key, lang);
         assert!(!text.is_empty());
@@ -53,8 +59,14 @@ fn language_codes() {
     assert!(matches!(Languages::from("es"), Languages::Spanish));
     assert!(matches!(Languages::from(" en "), Languages::English));
     assert!(matches!(Languages::from("fr"), Languages::English));
-    assert!(matches!(Languages::from_name("Spanish"), Languages::Spanish));
-    assert!(matches!(Languages::from_name("English"), Languages::English));
+    assert!(matches!(
+        Languages::from_name("Spanish"),
+        Languages::Spanish
+    ));
+    assert!(matches!(
+        Languages::from_name("English"),
+        Languages::English
+    ));
 
     for lang in ALL_LANGUAGES {
         assert!(matches!(

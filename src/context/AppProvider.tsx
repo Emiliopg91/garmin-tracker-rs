@@ -148,13 +148,15 @@ export function AppProvider({
                 setTranslations(translations);
               })
               .finally(() => {
-                BackendClient.rcloneAvailable().then((available)=>{
-                  setRcloneAvailable(available);
-                }).finally(()=>{
-                  BackendClient.notifyFrontendReady().then(() => {
-                    setAppReady(true);
+                BackendClient.rcloneAvailable()
+                  .then((available) => {
+                    setRcloneAvailable(available);
+                  })
+                  .finally(() => {
+                    BackendClient.notifyFrontendReady().then(() => {
+                      setAppReady(true);
+                    });
                   });
-                });
               });
           });
       });
@@ -184,7 +186,7 @@ export function AppProvider({
       showSettings,
       closeSettings,
       sessionsVersion,
-      rcloneAvailable
+      rcloneAvailable,
     }),
     [
       tab,
@@ -195,7 +197,7 @@ export function AppProvider({
       showSettings,
       closeSettings,
       sessionsVersion,
-      rcloneAvailable
+      rcloneAvailable,
     ],
   );
 
