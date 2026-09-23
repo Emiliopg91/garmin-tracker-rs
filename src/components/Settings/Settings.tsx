@@ -18,6 +18,7 @@ import {
   DialogContent,
   DialogTitle,
   IconButton,
+  Menu,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 
@@ -26,7 +27,7 @@ type Props = {
 };
 
 export function Settings({ onClose }: Props) {
-  const { environment } = useContext(AppContext);
+  const { environment,rcloneAvailable } = useContext(AppContext);
   const { startLoading, finishLoading } = useContext(LoadingContext);
   const { settings, translate, refreshTranslations } =
     useContext(I18nSettingsContext);
@@ -39,6 +40,10 @@ export function Settings({ onClose }: Props) {
   const [onDeviceCOnnect, setOnDeviceConnect] = useState(
     settings.on_device_connect,
   );
+  const [importMenuAnchor, setImportMenuAnchor] = useState<{
+    top: number;
+    left: number;
+  } | null>(null);
 
   const updateWeightUnit = (value: WeightUnit) => {
     startLoading();
@@ -299,18 +304,47 @@ export function Settings({ onClose }: Props) {
                             </Button>
                           </td>
                         </tr>
-                        <tr>
-                          <td>
-                            <Button
-                              id="upload-onedrive-button"
-                              variant="contained"
-                              className="full-width-button"
-                              onClick={()=>{uploadToCloud(CloudProvider.OneDrive)}}
-                            >
-                              {translate("upload_onedrive")}
-                            </Button>
-                          </td>
-                        </tr>
+                        {rcloneAvailable && (
+                          <tr>
+                            <td>
+                              <Button
+                                variant="contained"
+                                className="full-width-button"
+                                onClick={(e) =>
+                                  setImportMenuAnchor({ top: e.clientY, left: e.clientX })
+                                }
+                              >
+                                {translate("upload_onedrive")}
+                              </Button> 
+                              <Menu
+                                id="import-file-menu"
+                                anchorReference="anchorPosition"
+                                anchorPosition={importMenuAnchor ?? undefined}
+                                open={Boolean(importMenuAnchor)}
+                                onClose={() => setImportMenuAnchor(null)}
+                                anchorOrigin={{ vertical: "top", horizontal: "left" }}
+                                transformOrigin={{ vertical: "bottom", horizontal: "left" }}
+                              >
+                                <MenuItem
+                                  onClick={() => {
+                                    setImportMenuAnchor(null);
+                                    uploadToCloud(CloudProvider.DropBox);
+                                  }}
+                                >
+                                  DropBox
+                                </MenuItem>
+                                <MenuItem
+                                  onClick={() => {
+                                    setImportMenuAnchor(null);
+                                    uploadToCloud(CloudProvider.OneDrive);
+                                  }}
+                                >
+                                  OneDrive
+                                </MenuItem>
+                              </Menu>
+                            </td>
+                          </tr>
+                        )}
                       </tbody>
                     </table>
                   </td>

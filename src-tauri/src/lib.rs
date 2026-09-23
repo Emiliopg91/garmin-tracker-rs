@@ -27,7 +27,7 @@ use crate::{
     logic::{
         app::{
             export_database, get_environment, get_settings, get_translations,
-            notify_frontend_ready, update_settings_value, upload_to_cloud,
+            notify_frontend_ready, update_settings_value, upload_to_cloud,rclone_available
         },
         body_metrics::{add_body_measures, delete_body_metric, get_body_measures},
         exercises::{get_exercise_details, get_exercises},
@@ -251,7 +251,8 @@ pub fn run(log_level: LevelFilter) {
             upload_to_cloud,
             import_from_files,
             set_workout_status,
-            export_gpx
+            export_gpx,
+            rclone_available
         ])
         .run(tauri::generate_context!())
     {

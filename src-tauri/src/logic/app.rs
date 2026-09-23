@@ -9,22 +9,16 @@ use tauri::{AppHandle, Manager, State, WebviewWindow};
 use tauri_plugin_autostart::ManagerExt;
 
 use crate::{
-    SettingsLock, constants,
-    dao::settings::settings_keys::{
+    SettingsLock, constants, dao::settings::settings_keys::{
         AUTO_SYNC, DISTANCE_UNIT, LANGUAGE, ON_DEVICE_CONNECT, START_ON_BOOT, WEIGHT_UNIT,
-    },
-    dto::{
+    }, dto::{
         app::{AppEnvironment, Settings},
         export::Export,
         notifications::{NotificationDefinition, NotificationKind},
-    },
-    logic::{
+    }, logic::{
         devices::start_device_watcher, notifications::show_notification, report_error,
         sessions::update_pending_geolocation,
-    },
-    rclone::providers::CloudProvider,
-    udev::UdevManager,
-    utils::translations::{Languages, TRANSLATIONS, translate, translate_and_replace},
+    }, rclone::{RCloneClient, providers::CloudProvider}, udev::UdevManager, utils::translations::{Languages, TRANSLATIONS, translate, translate_and_replace},
 };
 use tauri_plugin_log::log::{debug, info};
 
@@ -320,4 +314,10 @@ pub async fn upload_to_cloud(settings: State<'_, SettingsLock>, provider: CloudP
             "Error uploading file",
         )),
     }
+}
+
+#[traced_command]
+#[tauri::command]
+pub async fn rclone_available() -> bool {
+    RCloneClient::is_available().await
 }

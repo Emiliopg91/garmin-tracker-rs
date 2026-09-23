@@ -199,23 +199,16 @@ impl From<Session> for Gpx {
             .unwrap()
             .get_coordinates_degrees()
         {
-            let altitudes =
-                if let Some(altitudes) = session.additional_data.unwrap().get_altitudes() {
-                    altitudes
-                } else {
-                    Vec::new()
-                };
+            let altitudes =session.additional_data.unwrap().get_altitudes().unwrap_or_default();
 
-            let mut idx = 0;
-            for coord in coords {
+            for (idx, coord) in coords.into_iter().enumerate() {
                 if let Some((lat, lon)) = coord {
                     let mut wpt = Waypoint::new(Point::new(lon, lat));
                     if let Some(altitude) = altitudes.get(idx) {
-                        wpt.elevation = altitude.clone();
+                        wpt.elevation = *altitude;
                     }
                     segment.points.push(wpt);
                 }
-                idx += 1
             }
         }
 

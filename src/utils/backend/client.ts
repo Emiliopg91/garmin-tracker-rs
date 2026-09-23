@@ -20,7 +20,7 @@ export class BackendClient {
 	}
 	
 
-	// From src-tauri/src/logic/app.rs:164
+	// From src-tauri/src/logic/app.rs:158
 	public static exportDatabase(): Promise<void> {
 	  return BackendClient.inner_invoke("export_database"); 
 	}
@@ -38,7 +38,7 @@ export class BackendClient {
 	}
 	
 
-	// From src-tauri/src/logic/app.rs:67
+	// From src-tauri/src/logic/app.rs:61
 	public static getEnvironment(): Promise<AppEnvironment> {
 	  return BackendClient.inner_invoke("get_environment"); 
 	}
@@ -68,13 +68,13 @@ export class BackendClient {
 	}
 	
 
-	// From src-tauri/src/logic/app.rs:34
+	// From src-tauri/src/logic/app.rs:28
 	public static getSettings(): Promise<Settings> {
 	  return BackendClient.inner_invoke("get_settings"); 
 	}
 	
 
-	// From src-tauri/src/logic/app.rs:212
+	// From src-tauri/src/logic/app.rs:206
 	public static getTranslations(): Promise<Record<string, string>> {
 	  return BackendClient.inner_invoke("get_translations"); 
 	}
@@ -104,9 +104,15 @@ export class BackendClient {
 	}
 	
 
-	// From src-tauri/src/logic/app.rs:41
+	// From src-tauri/src/logic/app.rs:35
 	public static notifyFrontendReady(): Promise<void> {
 	  return BackendClient.inner_invoke("notify_frontend_ready"); 
+	}
+	
+
+	// From src-tauri/src/logic/app.rs:321
+	public static rcloneAvailable(): Promise<boolean> {
+	  return BackendClient.inner_invoke("rclone_available"); 
 	}
 	
 
@@ -122,13 +128,13 @@ export class BackendClient {
 	}
 	
 
-	// From src-tauri/src/logic/app.rs:78
+	// From src-tauri/src/logic/app.rs:72
 	public static updateSettingsValue(name: string, value: string): Promise<void> {
 	  return BackendClient.inner_invoke("update_settings_value", { name, value }); 
 	}
 	
 
-	// From src-tauri/src/logic/app.rs:286
+	// From src-tauri/src/logic/app.rs:280
 	public static uploadToCloud(provider: CloudProvider): Promise<void> {
 	  return BackendClient.inner_invoke("upload_to_cloud", { provider }); 
 	}

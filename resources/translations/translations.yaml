@@ -365,9 +365,9 @@ do_nothing:
 start_automatically:
   en: Start automatically
   es: Iniciar automaticamente
-upload_onedrive:
-  en: Upload to OneDrive
-  es: Cargar en OneDrive
+upload_to:
+  en: Upload to...
+  es: Cargar en...
 upload_succesful:
   en: File uploaded succesfully
   es: Archivo cargado con éxito

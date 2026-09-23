@@ -1,7 +1,7 @@
 pub mod errors;
 pub mod providers;
 
-use std::{ffi::OsStr, marker::PhantomData, path::Path, process::Output};
+use std::{ffi::OsStr, marker::PhantomData, path::Path, process::{Output}};
 
 use tokio::{fs, process::Command};
 
@@ -9,6 +9,18 @@ use crate::{rclone::errors::RCloneError, utils::constants};
 
 pub struct RCloneClient<T> {
     _marker: PhantomData<T>,
+}
+
+impl RCloneClient<()> {
+    pub async fn is_available() -> bool {
+        let result = Command::new("which").arg("rclone").status().await;
+        match result {
+            Ok(status)=>{
+                status.success()
+            }
+            Err(_)=>false
+        }
+    }
 }
 
 impl<T> Default for RCloneClient<T> {
