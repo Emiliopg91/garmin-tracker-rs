@@ -22,7 +22,7 @@ use rusqlite_orm::ddls;
 use tauri::{Manager, WindowEvent};
 use tauri_plugin_log::{
     Target, TargetKind,
-    log::{LevelFilter, debug, error, info, warn},
+    log::{LevelFilter, debug, error, info},
 };
 
 use crate::{
@@ -105,7 +105,6 @@ pub type SettingsLock = RwLock<Settings>;
 
 fn initialize() -> (DatabasePool, Settings) {
     debug!("Initializing database...");
-    let already_exists = fs::exists(constants::DB_FILE.clone()).unwrap();
     let builder = DatabaseConnectionBuilder::default()
         .location(constants::DB_FILE.clone())
         .busy_timeout(Duration::from_secs(8))
@@ -121,24 +120,16 @@ fn initialize() -> (DatabasePool, Settings) {
                 exit(constants::ExitCodes::DbError.into())
             }
 
-            let version = crate::dao::settings::Settings::get_version(&database);
-            if already_exists && version.major == 0 {
-                warn!("Detected incompatible database schema version, cleaning up...");
-                drop(database);
-                let _ = fs::remove_file(constants::DB_FILE.clone());
-                initialize()
-            } else {
-                debug!("Loading settings...");
-                let settings = Settings::from(&database);
+            debug!("Loading settings...");
+            let settings = Settings::from(&database);
 
-                crate::dao::settings::Settings::set_version(
-                    &database,
-                    &constants::APP_SEM_VERSION.clone(),
-                )
-                .unwrap();
+            crate::dao::settings::Settings::set_version(
+                &database,
+                &constants::APP_SEM_VERSION.clone(),
+            )
+            .unwrap();
 
-                (database, settings)
-            }
+            (database, settings)
         }
         Err(e) => {
             error!("Could not open database: {}", e);
