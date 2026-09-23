@@ -4,6 +4,7 @@ import { I18nSettingsContext } from "@/context/I18nSettingsContext";
 import { BackendClient } from "@/utils/backend/client";
 import {
   AppEnvironment,
+  CloudProvider,
   DistanceUnit,
   Languages,
   WeightUnit,
@@ -122,9 +123,9 @@ export function Settings({ onClose }: Props) {
     });
   };
 
-  const uploadOnedrive = () => {
+  const uploadToCloud = (provider: CloudProvider) => {
     startLoading();
-    BackendClient.uploadToCloud().finally(() => {
+    BackendClient.uploadToCloud(provider).finally(() => {
       finishLoading();
     });
   };
@@ -304,7 +305,7 @@ export function Settings({ onClose }: Props) {
                               id="upload-onedrive-button"
                               variant="contained"
                               className="full-width-button"
-                              onClick={uploadOnedrive}
+                              onClick={()=>{uploadToCloud(CloudProvider.OneDrive)}}
                             >
                               {translate("upload_onedrive")}
                             </Button>

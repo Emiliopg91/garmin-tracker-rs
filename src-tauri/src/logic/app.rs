@@ -22,7 +22,7 @@ use crate::{
         devices::start_device_watcher, notifications::show_notification, report_error,
         sessions::update_pending_geolocation,
     },
-    rclone::RCloneClient,
+    rclone::providers::CloudProvider,
     udev::UdevManager,
     utils::translations::{Languages, TRANSLATIONS, translate, translate_and_replace},
 };
@@ -283,19 +283,18 @@ fn check_for_update(app: AppHandle) {
 
 #[traced_command]
 #[tauri::command]
-pub async fn upload_to_cloud(settings: State<'_, SettingsLock>) -> Result<(), String> {
+pub async fn upload_to_cloud(settings: State<'_, SettingsLock>, provider: CloudProvider) -> Result<(), String> {
     let lang = settings.read().unwrap().language;
 
     let res: Result<(), String> = async {
-        let configured = RCloneClient::is_configured()
-            .await
-            .map_err(|e| e.to_string())?;
+        let configured = provider.is_configured().await.map_err(|e| e.to_string())?;
 
         if !configured {
-            RCloneClient::configure().await.map_err(|e| e.to_string())?;
+            provider.configure().await.map_err(|e| e.to_string())?;
         }
 
-        RCloneClient::upload(constants::DB_FILE.to_path_buf())
+        provider
+            .upload(constants::DB_FILE.to_path_buf())
             .await
             .map_err(|e| e.to_string())?;
 

@@ -744,7 +744,7 @@ pub fn recalculate_prs(
     tx: &mut rusqlite_orm::rusqlite::Transaction,
 ) -> rusqlite_orm::errors::Result<()> {
     debug!("Recalculating PRs...");
-    let  sets = SetRepository::select().fetch_in(tx)?;
+    let sets = SetRepository::select().fetch_in(tx)?;
     let exercises = sets
         .iter()
         .map(|e| (e.ex_cat, e.ex_id))

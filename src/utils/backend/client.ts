@@ -2,7 +2,7 @@
 
 import { invoke, InvokeArgs } from "@tauri-apps/api/core";
 
-import { AppEnvironment, BodyMetricListItem, ExerciseDetails, ExerciseListItem, SessionDetails, SessionListItem, SessionSetsUpdate, Settings, WorkoutDetails, WorkoutListItem } from "./models";
+import { AppEnvironment, BodyMetricListItem, CloudProvider, ExerciseDetails, ExerciseListItem, SessionDetails, SessionListItem, SessionSetsUpdate, Settings, WorkoutDetails, WorkoutListItem } from "./models";
 
 export class BackendClient {
 
@@ -26,7 +26,7 @@ export class BackendClient {
 	}
 	
 
-	// From src-tauri/src/logic/sessions.rs:750
+	// From src-tauri/src/logic/sessions.rs:758
 	public static exportGpx(session: number): Promise<void> {
 	  return BackendClient.inner_invoke("export_gpx", { session }); 
 	}
@@ -129,8 +129,8 @@ export class BackendClient {
 	
 
 	// From src-tauri/src/logic/app.rs:286
-	public static uploadToCloud(): Promise<void> {
-	  return BackendClient.inner_invoke("upload_to_cloud"); 
+	public static uploadToCloud(provider: CloudProvider): Promise<void> {
+	  return BackendClient.inner_invoke("upload_to_cloud", { provider }); 
 	}
 	
 

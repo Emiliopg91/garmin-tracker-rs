@@ -23,14 +23,22 @@ use tauri_plugin_log::{
 };
 
 use crate::{
-    dto::app::Settings, logic::{
+    dto::app::Settings,
+    logic::{
         app::{
             export_database, get_environment, get_settings, get_translations,
             notify_frontend_ready, update_settings_value, upload_to_cloud,
-        }, body_metrics::{add_body_measures, delete_body_metric, get_body_measures}, exercises::{get_exercise_details, get_exercises}, sessions::{
-            _import_from_files, export_gpx, get_session_details, get_sessions, import_from_device, import_from_files, recalculate_e1rm, recalculate_prs, save_session_changes,
-        }, workouts::{get_workout_details, get_workout_list, set_workout_status},
-    }, udev::UdevManager, utils::{constants, single_instance::SingleInstance},
+        },
+        body_metrics::{add_body_measures, delete_body_metric, get_body_measures},
+        exercises::{get_exercise_details, get_exercises},
+        sessions::{
+            _import_from_files, export_gpx, get_session_details, get_sessions, import_from_device,
+            import_from_files, recalculate_e1rm, recalculate_prs, save_session_changes,
+        },
+        workouts::{get_workout_details, get_workout_list, set_workout_status},
+    },
+    udev::UdevManager,
+    utils::{constants, single_instance::SingleInstance},
 };
 
 #[cfg(debug_assertions)]
@@ -160,8 +168,8 @@ pub fn run(log_level: LevelFilter) {
                 match builder.build("gtrs") {
                     Ok(database) => {
                         let mut ddls = ddls!("../resources/ddl");
-                        ddls[4].update_fn=Some(recalculate_e1rm);
-                        ddls[5].update_fn=Some(recalculate_prs);
+                        ddls[4].update_fn = Some(recalculate_e1rm);
+                        ddls[5].update_fn = Some(recalculate_prs);
 
                         if let Err(e) = database.create_schema(&ddls) {
                             error!("Could not initialize database: {}", e);
