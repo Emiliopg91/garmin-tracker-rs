@@ -28,7 +28,7 @@ export interface DeviceListItem {
   serial_number: string;
 }
 
-// From src-tauri/src/dao/settings.rs:178
+// From src-tauri/src/dao/settings.rs:179
 export enum DistanceUnit {
 	Kilometers = "Kilometers",
 	Miles = "Miles",
@@ -65,6 +65,7 @@ export enum Languages {
 // From src-tauri/src/dto/sessions.rs:91
 export interface SessionDetails {
   active_time: number;
+  altitudes: (number | null)[];
   coordinates: ([number, number] | null)[];
   device: string | null;
   distance: number | null;
@@ -102,7 +103,7 @@ export interface SessionListItem {
   training_load: number;
 }
 
-// From src-tauri/src/dto/sessions.rs:180
+// From src-tauri/src/dto/sessions.rs:186
 export interface SessionLocation {
   location: string;
   session: number;
@@ -118,7 +119,7 @@ export interface SessionSet {
   weight: number;
 }
 
-// From src-tauri/src/dto/sessions.rs:173
+// From src-tauri/src/dto/sessions.rs:179
 export interface SessionSetsUpdate {
   notes: string | null;
   sets: SessionSet[];
@@ -135,7 +136,7 @@ export interface Settings {
   weight_unit: WeightUnit;
 }
 
-// From src-tauri/src/dao/settings.rs:206
+// From src-tauri/src/dao/settings.rs:207
 export enum WeightUnit {
 	Kilograms = "Kilograms",
 	Pounds = "Pounds",

@@ -26,6 +26,7 @@ noyalib = "^0"
 
 [dependencies]
 chrono = "^0"
+crossterm = "^0"
 curl-rest = "^0"
 embedded-io-adapters = { version = "^0", features = ["std"] }
 garmin-tracker-rs-macros = { path = "../src-tauri-macros" }
@@ -36,6 +37,7 @@ mtp-rs = "^0"
 nusb = "^0"
 ouroboros = "^0"
 phf = { version = "^0", features = ["macros"] }
+ratatui = "^0"
 rayon = "^1"
 rfd = "^0"
 #rusqlite_orm = { path = "../rusqlite_orm/orm", features = ["derive"] }
@@ -52,7 +54,7 @@ tauri-plugin-opener = "^2"
 tauri-rs-ts-ipc = { version = "^0" }
 tempfile = "^3"
 thiserror = "^2"
-tokio = { version = "^1", features = ["process"] }
+tokio = { version = "^1", features = ["process", "rt"] }
 tokio-stream = "^0"
 
 [profile.release]

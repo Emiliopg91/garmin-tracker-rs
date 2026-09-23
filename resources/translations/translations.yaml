@@ -424,3 +424,6 @@ export_gpx:
 ok_on_track_export:
   en: Track exported succesfully
   es: Ruta exportada con éxito
+elevations:
+  en: Elevation
+  es: Elevacion

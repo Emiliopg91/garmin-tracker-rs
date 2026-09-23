@@ -153,6 +153,7 @@ impl Settings {
             .map(|_| ())
     }
 
+    #[allow(dead_code)]
     /// Reads latest version.
     pub fn get_version(db: &DatabasePool) -> Version {
         SettingsRepository::select_by_id(db, settings_keys::VERSION)

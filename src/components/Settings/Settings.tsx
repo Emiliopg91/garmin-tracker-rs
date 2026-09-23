@@ -317,7 +317,7 @@ export function Settings({ onClose }: Props) {
                                   })
                                 }
                               >
-                                {translate("upload_onedrive")}
+                                {translate("upload_to")}
                               </Button>
                               <Menu
                                 id="import-file-menu"

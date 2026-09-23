@@ -26,7 +26,7 @@ export class BackendClient {
 	}
 	
 
-	// From src-tauri/src/logic/sessions.rs:745
+	// From src-tauri/src/logic/sessions.rs:768
 	public static exportGpx(session: number): Promise<void> {
 	  return BackendClient.inner_invoke("export_gpx", { session }); 
 	}
@@ -92,13 +92,13 @@ export class BackendClient {
 	}
 	
 
-	// From src-tauri/src/logic/sessions.rs:231
+	// From src-tauri/src/logic/sessions.rs:227
 	public static importFromDevice(serial: string): Promise<number> {
 	  return BackendClient.inner_invoke("import_from_device", { serial }); 
 	}
 	
 
-	// From src-tauri/src/logic/sessions.rs:337
+	// From src-tauri/src/logic/sessions.rs:333
 	public static importFromFiles(): Promise<number> {
 	  return BackendClient.inner_invoke("import_from_files"); 
 	}

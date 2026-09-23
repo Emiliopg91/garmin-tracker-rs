@@ -12,6 +12,7 @@ import {
   FormControl,
   FormControlLabel,
   IconButton,
+  Link,
   Radio,
   RadioGroup,
   TextareaAutosize,
@@ -252,9 +253,11 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                   />
                 </RadioGroup>
               </FormControl>
-              <Button onClick={exportTrack} style={{ flex: 1 }}>
-                {translate("export_gpx")}
-              </Button>
+              <div style={{ display: "block", margin: "auto" }}>
+                <Link href="#" onClick={exportTrack} style={{ flex: 1 }}>
+                  {translate("export_gpx")}
+                </Link>
+              </div>
             </div>
             <hr />
           </>
@@ -320,6 +323,16 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
                   </td>
                 </tr>
               </>
+            )}
+            {localSession.elevations && (
+              <tr>
+                <td>{translate("elevations")}:</td>
+                <td>
+                  {Math.round(localSession.elevations[0]) +
+                    " ↑   ↓ " +
+                    Math.round(localSession.elevations[1])}
+                </td>
+              </tr>
             )}
             {localSession.volume > 0 && (
               <tr>
