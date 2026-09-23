@@ -29,4 +29,4 @@ aur
 src-tauri-macros/target
 rusqlite_orm
 tauri-rs-ts-ipc
-src-tauri/src/main-rclone.rs
+resources/scripts/__pycache__
