@@ -56,6 +56,12 @@ export class BackendClient {
 	}
 	
 
+	// From src-tauri/src/logic/sessions.rs:823
+	public static getLastYearLoads(): Promise<number[][]> {
+	  return BackendClient.inner_invoke("get_last_year_loads"); 
+	}
+	
+
 	// From src-tauri/src/logic/sessions.rs:101
 	public static getSessionDetails(timestamp: number): Promise<SessionDetails> {
 	  return BackendClient.inner_invoke("get_session_details", { timestamp }); 

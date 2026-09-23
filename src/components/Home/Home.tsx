@@ -31,6 +31,7 @@ import {
 import { BackendListener } from "@/utils/backend/listener";
 import { SessionModal } from "../Sessions/SessionModal";
 import { WorkoutModal } from "../Workouts/WorkoutModal";
+import { Heatmap } from "./Heatmap";
 
 export function Home() {
   const { availableDevices, sessionsVersion } = useContext(AppContext);
@@ -59,6 +60,9 @@ export function Home() {
   const [monthTime, setMonthTime] = useState(0);
   const [monthKcal, setMonthKCal] = useState(0);
   const [monthLoad, setMonthLoad] = useState(0);
+  const [heatMapData, setHeatMapData] = useState<number[][] | undefined>(
+    undefined,
+  );
 
   const [workout, setWorkout] = useState<WorkoutListItem | undefined>(
     undefined,
@@ -112,6 +116,15 @@ export function Home() {
           const workout_data = SessionUtils.calculateWorkoutLoad(data);
           const overreaching = SessionUtils.isOverreaching(workout_data);
           setRest(overreaching);
+
+          startLoading();
+          BackendClient.getLastYearLoads()
+            .then((data) => {
+              setHeatMapData(data);
+            })
+            .finally(() => {
+              finishLoading();
+            });
 
           startLoading();
           BackendClient.getWorkoutList()
@@ -279,77 +292,84 @@ export function Home() {
           <div className="dashboard-box">
             <fieldset>
               <legend>{translate("training_status")}</legend>
-              {workload.length > 0 && (
-                <div className="chart-container ">
-                  <ResponsiveContainer
-                    className="chart-responsive"
-                    width="100%"
-                    height="100%"
-                  >
-                    <ComposedChart data={workload}>
-                      <CartesianGrid stroke="#80808000" strokeDasharray="5 5" />
-                      <XAxis
-                        dataKey="date"
-                        type="number"
-                        domain={[minDate, workload[workload.length - 1].date]}
-                        stroke="#fff"
-                        tick={false}
-                        height={0}
-                      />
-                      <YAxis
-                        yAxisId="left"
-                        stroke="#fff"
-                        width={0}
-                        domain={[0, 1]}
-                        tick={false}
-                      />{" "}
-                      <Area
-                        dataKey="lower"
-                        stackId="1"
-                        stroke="none"
-                        type="monotone"
-                        legendType="none"
-                        fill="transparent"
-                        dot={false}
-                        isAnimationActive={false}
-                        activeDot={false}
-                      />
-                      <Area
-                        dataKey="upper"
-                        stackId="1"
-                        stroke="none"
-                        type="monotone"
-                        fill="lightgreen"
-                        legendType="none"
-                        fillOpacity={0.1}
-                        dot={false}
-                        isAnimationActive={false}
-                        activeDot={false}
-                      />
-                      <Line
-                        type="monotone"
-                        name={translate("workload")}
-                        dataKey="current"
-                        stroke="green"
-                        dot={{ fill: "green" }}
-                        isAnimationActive={false}
-                        activeDot={false}
-                      />
-                      <Line
-                        type="monotone"
-                        name={translate("reference")}
-                        legendType="line"
-                        dataKey="reference"
-                        stroke="#ffffff40"
-                        dot={false}
-                        isAnimationActive={false}
-                        activeDot={false}
-                      />
-                      <Legend />
-                    </ComposedChart>
-                  </ResponsiveContainer>
-                </div>
-              )}
+              <div style={{ display: "flex" }}>
+                {workload.length > 0 && (
+                  <div className="chart-container ">
+                    <ResponsiveContainer
+                      className="chart-responsive"
+                      width="100%"
+                      height="100%"
+                    >
+                      <ComposedChart data={workload}>
+                        <CartesianGrid
+                          stroke="#80808000"
+                          strokeDasharray="5 5"
+                        />
+                        <XAxis
+                          dataKey="date"
+                          type="number"
+                          domain={[minDate, workload[workload.length - 1].date]}
+                          stroke="#fff"
+                          tick={false}
+                          height={0}
+                        />
+                        <YAxis
+                          yAxisId="left"
+                          stroke="#fff"
+                          width={0}
+                          domain={[0, 1]}
+                          tick={false}
+                        />{" "}
+                        <Area
+                          dataKey="lower"
+                          stackId="1"
+                          stroke="none"
+                          type="monotone"
+                          legendType="none"
+                          fill="transparent"
+                          dot={false}
+                          isAnimationActive={false}
+                          activeDot={false}
+                        />
+                        <Area
+                          dataKey="upper"
+                          stackId="1"
+                          stroke="none"
+                          type="monotone"
+                          fill="lightgreen"
+                          legendType="none"
+                          fillOpacity={0.1}
+                          dot={false}
+                          isAnimationActive={false}
+                          activeDot={false}
+                        />
+                        <Line
+                          type="monotone"
+                          name={translate("workload")}
+                          dataKey="current"
+                          stroke="green"
+                          dot={{ fill: "green" }}
+                          isAnimationActive={false}
+                          activeDot={false}
+                        />
+                        <Line
+                          type="monotone"
+                          name={translate("reference")}
+                          legendType="line"
+                          dataKey="reference"
+                          stroke="#ffffff40"
+                          dot={false}
+                          isAnimationActive={false}
+                          activeDot={false}
+                        />
+                        <Legend />
+                      </ComposedChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
+
+                <Heatmap data={heatMapData} />
+              </div>
               <table id="last-days">
                 <colgroup>
                   <col />
@@ -437,7 +457,7 @@ export function Home() {
                     </tr>
                   </tbody>
                 </table>
-              </div>{" "}
+              </div>
             </fieldset>
           </div>
           <div className="dashboard-box">

@@ -427,3 +427,21 @@ ok_on_track_export:
 elevations:
   en: Elevation
   es: Elevacion
+month_1:
+  en: January
+  es: Enero
+month_3:
+  en: March
+  es: Marzo
+month_5:
+  en: May
+  es: Mayo
+month_7:
+  en: July
+  es: Julio
+month_9:
+  en: September
+  es: Septiembre
+month_11:
+  en: November
+  es: Noviembre

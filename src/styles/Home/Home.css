@@ -45,6 +45,15 @@
   }
 }
 
+.heatmap-tooltip {
+  background-color: #262626;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 0.8rem;
+  color: white;
+}
+
 #last-days {
   width: 100%;
   table-layout: fixed;

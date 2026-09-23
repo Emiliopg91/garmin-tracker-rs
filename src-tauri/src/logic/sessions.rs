@@ -30,7 +30,7 @@ use crate::{
         translations::{Languages, translate, translate_and_replace},
     },
 };
-use chrono::{Datelike, Local, TimeZone, Timelike, offset::LocalResult};
+use chrono::{Datelike, Days, Local, Months, TimeZone, Timelike, offset::LocalResult};
 use curl_rest::StatusCode;
 use garmin_tracker_rs_macros::traced_command;
 use gpx::Gpx;
@@ -816,4 +816,38 @@ pub async fn export_gpx(
             "Error exporting track",
         )),
     }
+}
+
+#[traced_command]
+#[tauri::command]
+pub fn get_last_year_loads(database: State<'_, DatabasePool>) -> Result<Vec<Vec<u32>>, String> {
+    let today = Local::now().date_naive();
+    let a_year_ago = today
+        .checked_sub_months(Months::new(12))
+        .and_then(|d| d.checked_add_days(Days::new(1)))
+        .unwrap();
+    let midnight = a_year_ago.and_hms_opt(0, 0, 0).unwrap();
+
+    let ts = Local
+        .from_local_datetime(&midnight)
+        .earliest()
+        .unwrap()
+        .timestamp();
+
+    let mut res = vec![vec![0_u32; 31]; 12];
+
+    database
+        .run_in_connection(|conn| {
+            Ok(SessionRepository::select()
+                .where_(Where::Gte(session::entity::columns::DATE, ts.into()))
+                .fetch_in(conn)?)
+        })
+        .map_err(|e| e.to_string())?
+        .iter()
+        .for_each(|session| {
+            let dt = Local.timestamp_opt(session.date, 0).single().unwrap();
+            res[dt.month0() as usize][dt.day0() as usize] += session.training_load as u32;
+        });
+
+    Ok(res)
 }
