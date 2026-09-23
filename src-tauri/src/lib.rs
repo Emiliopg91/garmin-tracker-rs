@@ -103,6 +103,52 @@ pub fn force_write_mtp_rules(auto_run: bool) -> crate::udev::errors::Result<()> 
 
 pub type SettingsLock = RwLock<Settings>;
 
+
+
+fn initialize() -> (DatabasePool, Settings) {
+    debug!("Initializing database...");
+    let already_exists = fs::exists(constants::DB_FILE.clone()).unwrap();
+    let builder = DatabaseConnectionBuilder::default()
+        .location(constants::DB_FILE.clone())
+        .busy_timeout(Duration::from_secs(8))
+        .connection_timeout(Duration::from_secs(5))
+        .pool_size(2)
+        .min_idle(2)
+        .enable_foreign_keys()
+        .journal_mode(JournalMode::Delete);
+    match builder.build("gtrs") {
+        Ok(database) => {
+            if let Err(e) = database.create_schema(&schema_ddls()) {
+                error!("Could not initialize database: {}", e);
+                exit(constants::ExitCodes::DbError.into())
+            }
+
+            let version = crate::dao::settings::Settings::get_version(&database);
+            if already_exists && version.major == 0 {
+                warn!("Detected incompatible database schema version, cleaning up...");
+                drop(database);
+                let _ = fs::remove_file(constants::DB_FILE.clone());
+                initialize()
+            } else {
+                debug!("Loading settings...");
+                let settings = Settings::from(&database);
+
+                crate::dao::settings::Settings::set_version(
+                    &database,
+                    &constants::APP_SEM_VERSION.clone(),
+                )
+                .unwrap();
+
+                (database, settings)
+            }
+        }
+        Err(e) => {
+            error!("Could not open database: {}", e);
+            exit(constants::ExitCodes::DbError.into())
+        }
+    }
+}
+
 /// Schema DDLs sorted by version, with the data update hooks attached to their migration.
 fn schema_ddls() -> Vec<DdlVersion> {
     let mut ddls = ddls!("../resources/ddl").to_vec();
@@ -119,7 +165,6 @@ fn schema_ddls() -> Vec<DdlVersion> {
 }
 
 /// Boots the Tauri app: acquires the single-instance lock, opens/migrates the DB, loads settings, and registers commands.
-#[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run(log_level: LevelFilter) {
     SingleInstance::acquire();
 
@@ -182,50 +227,6 @@ pub fn run(log_level: LevelFilter) {
             if let Err(e) = write_mtp_rules(false) {
                 eprintln!("Error installing udev rules {e}");
                 exit(constants::ExitCodes::UdevError.into())
-            }
-
-            fn initialize() -> (DatabasePool, Settings) {
-                debug!("Initializing database...");
-                let already_exists = fs::exists(constants::DB_FILE.clone()).unwrap();
-                let builder = DatabaseConnectionBuilder::default()
-                    .location(constants::DB_FILE.clone())
-                    .busy_timeout(Duration::from_secs(8))
-                    .connection_timeout(Duration::from_secs(5))
-                    .pool_size(2)
-                    .min_idle(2)
-                    .enable_foreign_keys()
-                    .journal_mode(JournalMode::Delete);
-                match builder.build("gtrs") {
-                    Ok(database) => {
-                        if let Err(e) = database.create_schema(&schema_ddls()) {
-                            error!("Could not initialize database: {}", e);
-                            exit(constants::ExitCodes::DbError.into())
-                        }
-
-                        let version = crate::dao::settings::Settings::get_version(&database);
-                        if already_exists && version.major == 0 {
-                            warn!("Detected incompatible database schema version, cleaning up...");
-                            drop(database);
-                            let _ = fs::remove_file(constants::DB_FILE.clone());
-                            initialize()
-                        } else {
-                            debug!("Loading settings...");
-                            let settings = Settings::from(&database);
-
-                            crate::dao::settings::Settings::set_version(
-                                &database,
-                                &constants::APP_SEM_VERSION.clone(),
-                            )
-                            .unwrap();
-
-                            (database, settings)
-                        }
-                    }
-                    Err(e) => {
-                        error!("Could not open database: {}", e);
-                        exit(constants::ExitCodes::DbError.into())
-                    }
-                }
             }
 
             let (database, settings) = initialize();
