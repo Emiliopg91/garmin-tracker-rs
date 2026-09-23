@@ -42,8 +42,9 @@ export class SessionUtils {
     backDetails: SessionDetails,
     weightUnit: WeightUnit,
   ): SessionFrontDetails {
+    // Deep copy: the handlers below convert sets, coordinates and laps in place
     const details: SessionFrontDetails = {
-      ...backDetails,
+      ...structuredClone(backDetails),
       zones_times: [0, 0, 0, 0, 0],
       gps_segments: [],
       valid_points: [],
@@ -112,20 +113,6 @@ export class SessionUtils {
           details.coordinates[i]![1] =
             details.coordinates[i]![1] * UnitUtils.SEMICIRCLE_TO_DEGREES;
           details.valid_points.push(details.coordinates[i]!);
-        }
-      }
-
-      if (!details.distance) {
-        details.distance = 0;
-        for (let i = 0; i < details.coordinates.length - 1; i++) {
-          if (details.coordinates[i]) {
-            const diff = SessionUtils.haversine(
-              details.coordinates[i]!,
-              details.coordinates[i + 1]!,
-            );
-
-            details.distance += diff;
-          }
         }
       }
 
@@ -209,7 +196,8 @@ export class SessionUtils {
   }
 
   private static handleHeartRate(details: SessionFrontDetails) {
-    if (details.heart_rates) {
+    // Without any sample (no HR sensor) keep the defaults so the HR section stays hidden
+    if (details.heart_rates?.some((hr) => hr)) {
       const validHrs = [];
       for (let i = 0; i < details.heart_rates.length; i++) {
         if (details.heart_rates[i]) {
@@ -283,27 +271,6 @@ export class SessionUtils {
         });
       }
     }
-  }
-
-  private static toRadians(grados: number): number {
-    return (grados * Math.PI) / 180;
-  }
-
-  private static haversine(
-    start: [number, number],
-    end: [number, number],
-  ): number {
-    const lat1 = SessionUtils.toRadians(start[0]);
-    const lat2 = SessionUtils.toRadians(end[0]);
-    const dLat = SessionUtils.toRadians(end[0] - start[0]);
-    const dLon = SessionUtils.toRadians(end[1] - start[1]);
-
-    const a =
-      Math.sin(dLat / 2) ** 2 +
-      Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) ** 2;
-    const c = 2 * Math.asin(Math.sqrt(a));
-
-    return 6371 * c;
   }
 
   public static CHRONIC_DAYS = 28;

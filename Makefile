@@ -29,4 +29,5 @@ publish:
 	@RUSTC_WRAPPER=sccache python resources/scripts/publish.py
 
 test:
-	@cd src-tauri && cargo test
+	@pnpm test
+	@cd src-tauri && cargo test --lib --bins --tests
