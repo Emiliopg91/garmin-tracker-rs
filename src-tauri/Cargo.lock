@@ -1406,6 +1406,7 @@ dependencies = [
  "tauri-plugin-log",
  "tauri-plugin-opener",
  "tauri-rs-ts-ipc",
+ "tempfile",
  "thiserror 2.0.20",
  "tokio",
  "tokio-stream",

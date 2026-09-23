@@ -1,6 +1,7 @@
 pub mod errors;
 
 use std::{
+    io::Write,
     os::unix::fs::PermissionsExt,
     process::{Command, ExitStatus, Stdio},
 };
@@ -31,26 +32,33 @@ impl UdevManager {
             UdevManager::reload()?;
             UdevManager::trigger()?;
         } else {
-            let args = std::env::args().collect::<Vec<String>>();
-            let arg0 = args.first().unwrap();
+            let current_exe = std::env::current_exe().unwrap();
 
-            let askpass_file = format!("/tmp/{}-askpass", *constants::APP_NAME);
-            if !std::fs::exists(&askpass_file).unwrap() {
-                let askpass_content = r#"#!/bin/bash
+            // Kept alive until after `sudo` runs: `NamedTempFile` deletes the file on drop,
+            // whether the block below succeeds or returns early via `?`.
+            let mut askpass_file = tempfile::Builder::new()
+                .prefix(&format!("{}-askpass-", *constants::APP_NAME))
+                .tempfile()
+                .map_err(UdevError::Write)?;
+
+            let askpass_content = r#"#!/bin/bash
 zenity --password --title="Elevated permissions are required to edit device rules"
 "#;
-                let _ = std::fs::write(&askpass_file, askpass_content);
-                let permisos = std::fs::Permissions::from_mode(0o555);
-                let _ = std::fs::set_permissions(&askpass_file, permisos);
-            }
+            askpass_file
+                .write_all(askpass_content.as_bytes())
+                .map_err(UdevError::Write)?;
+            askpass_file
+                .as_file()
+                .set_permissions(std::fs::Permissions::from_mode(0o700))
+                .map_err(UdevError::Write)?;
 
             let status = Command::new("sudo")
                 .arg("-k")
                 .arg("-A")
-                .arg(arg0)
+                .arg(&current_exe)
                 .arg("--rules")
                 .arg(auto_run.to_string())
-                .env("SUDO_ASKPASS", askpass_file)
+                .env("SUDO_ASKPASS", askpass_file.path())
                 .stdout(Stdio::inherit())
                 .stderr(Stdio::inherit())
                 .status()
