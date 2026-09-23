@@ -103,8 +103,6 @@ pub fn force_write_mtp_rules(auto_run: bool) -> crate::udev::errors::Result<()> 
 
 pub type SettingsLock = RwLock<Settings>;
 
-
-
 fn initialize() -> (DatabasePool, Settings) {
     debug!("Initializing database...");
     let already_exists = fs::exists(constants::DB_FILE.clone()).unwrap();

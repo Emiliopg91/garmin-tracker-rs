@@ -22,6 +22,18 @@ impl AdditionalData {
 
     pub const SEMICIRCLE_TO_DEGREES: f64 = 180.0 / (2_i64.pow(31) as f64);
 
+    pub fn new(session: i64) -> Self {
+        Self {
+            session,
+            altitudes: None,
+            coordinates: None,
+            distance: None,
+            heart_rates: None,
+            notes: None,
+            speeds: None,
+        }
+    }
+
     /// Unpacks the raw byte blob into (lat, lon) pairs in semicircles.
     pub fn get_coordinates_semicircle(&self) -> Option<Vec<Option<(i32, i32)>>> {
         self.coordinates.as_ref().map(|records| {

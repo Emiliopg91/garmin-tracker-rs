@@ -10,7 +10,7 @@ use std::{
 use crate::{
     SettingsLock,
     dao::{
-        additional_data::{self, AdditionalDataRepository},
+        additional_data::{self, AdditionalData, AdditionalDataRepository},
         device::{Device, DeviceRepository},
         exercise::{self, ExerciseRepository},
         lap::LapRepository,
@@ -176,13 +176,9 @@ pub fn save_session_changes(
             .to_rfc3339()
     );
     let lang = settings.read().unwrap().language;
+
     let res = database.run_in_transaction(|tx| {
-        AdditionalDataRepository::update()
-            .set(
-                additional_data::entity::columns::NOTES,
-                details.notes.clone().into(),
-            )
-            .execute_in(tx)?;
+        update_session_notes(tx, details.timestamp as i64, details.notes.as_deref())?;
 
         let mut exercises = HashSet::new();
         for serie in &details.sets {
@@ -538,6 +534,33 @@ where
     }
 
     Ok(success)
+}
+
+/// Stores the notes of a single session, creating its additional data row if needed. Blank notes are stored as `NULL`.
+pub fn update_session_notes(
+    tx: &rusqlite_orm::rusqlite::Transaction,
+    session: i64,
+    notes: Option<&str>,
+) -> rusqlite_orm::errors::Result<()> {
+    let notes = notes.filter(|n| !n.trim().is_empty()).map(str::to_string);
+
+    match AdditionalDataRepository::select_by_id_in(tx, session)? {
+        Some(mut add_data) => {
+            add_data.notes = notes;
+            add_data.update_by_id_in(tx)?;
+        }
+        None => {
+            if notes.is_some() {
+                let mut add_data = AdditionalData::new(session);
+                add_data.notes = notes;
+                AdditionalDataRepository::insert()
+                    .item(&mut add_data)
+                    .execute_in(tx)?;
+            }
+        }
+    };
+
+    Ok(())
 }
 
 /// Recomputes the `pr` flag for each affected exercise and notifies if any of the just-imported/edited sessions set a new record.

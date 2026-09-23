@@ -3,6 +3,7 @@ mod common;
 mod dto;
 mod e1rm;
 mod export;
+mod notes;
 mod parser;
 mod prs;
 mod schema;
