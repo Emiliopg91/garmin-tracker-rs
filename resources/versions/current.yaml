@@ -24,7 +24,7 @@ node:
   react-leaflet: 5.0.0
   recharts: 3.10.1
   typescript: 5.8.3
-  typescript-eslint: 8.70.0
+  typescript-eslint: 8.70.1
   vite: 7.3.6
   vite-plugin-checker: 0.14.5
 rust:
@@ -32,9 +32,11 @@ rust:
   curl-rest: 0.6.0
   embedded-io-adapters: 0.7.0
   garmin-tracker-rs-macros: 0.1.0
+  geo-types: 0.7.20
+  gpx: 0.10.0
   libc: 0.2.189
   mtp-rs: 0.32.0
-  noyalib: 0.0.47
+  noyalib: 0.0.51
   nusb: 0.2.7
   ouroboros: 0.18.5
   phf: 0.14.0
