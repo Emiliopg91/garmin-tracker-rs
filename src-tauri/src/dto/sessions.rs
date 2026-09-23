@@ -193,12 +193,29 @@ impl From<Session> for Gpx {
         track.name = Some(session.name);
 
         let mut segment = TrackSegment::new();
+        if let Some(coords) = session
+            .additional_data
+            .clone()
+            .unwrap()
+            .get_coordinates_degrees()
+        {
+            let altitudes =
+                if let Some(altitudes) = session.additional_data.unwrap().get_altitudes() {
+                    altitudes
+                } else {
+                    Vec::new()
+                };
 
-        if let Some(coords) = session.additional_data.unwrap().get_coordinates_degrees() {
+            let mut idx = 0;
             for coord in coords {
                 if let Some((lat, lon)) = coord {
-                    segment.points.push(Waypoint::new(Point::new(lon, lat)));
+                    let mut wpt = Waypoint::new(Point::new(lon, lat));
+                    if let Some(altitude) = altitudes.get(idx) {
+                        wpt.elevation = altitude.clone();
+                    }
+                    segment.points.push(wpt);
                 }
+                idx += 1
             }
         }
 
