@@ -114,7 +114,11 @@ pub fn get_exercise_details(
         let mut ex_str = String::new();
         for serie in series {
             if last_session != Some(serie.session) {
-                ex_str = format!("{}\n{}", workouts.get(&serie.session).unwrap(), serie.session);
+                ex_str = format!(
+                    "{}\n{}",
+                    workouts.get(&serie.session).unwrap(),
+                    serie.session
+                );
                 res.workouts.push(ex_str.clone());
                 last_session = Some(serie.session);
             }

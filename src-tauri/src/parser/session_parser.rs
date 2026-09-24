@@ -337,7 +337,6 @@ impl RecordAccumulator {
             },
         );
     }
-
 }
 
 impl From<RecordAccumulator> for Option<AdditionalData> {
