@@ -21,7 +21,7 @@ export function WorkloadChart({ workload, minDate }: Props) {
   const { translate } = useContext(I18nSettingsContext);
 
   return (
-    <div className="chart-container ">
+    <div className="chart-container">
       <ResponsiveContainer
         className="chart-responsive"
         width="100%"

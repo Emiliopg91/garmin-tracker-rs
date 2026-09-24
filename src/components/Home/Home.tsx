@@ -263,7 +263,6 @@ export function Home() {
                 {workload.length > 0 && (
                   <WorkloadChart workload={workload} minDate={minDate} />
                 )}
-
                 <Heatmap data={heatMapData} />
               </div>
               <table id="last-days">

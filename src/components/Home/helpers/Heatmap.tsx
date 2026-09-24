@@ -19,23 +19,47 @@ interface HeatMapPoint {
   row: number;
 }
 
-// Chronological row for the Y axis: the month right after the current one
-// (the oldest, carried over from last year) sits at row 0 (top); the
-// current month sits at row 11 (bottom).
-const monthToRow = (month: number, todayMonth: number): number =>
-  (month - todayMonth - 1 + 12) % 12;
+// Chronological row for the Y axis. The current month is split in two: its
+// days after today haven't happened yet this year, so the cell for that
+// (month, day) actually holds last year's data - the oldest in the 12-month
+// window - and sits at row 0 (top). Its days up to and including today hold
+// this year's data - the newest - and sit at row 12 (bottom). The other 11
+// months fill rows 1-11 in between, in chronological order.
+const monthToRow = (
+  month: number,
+  day: number,
+  todayMonth: number,
+  todayDay: number,
+): number => {
+  if (month === todayMonth) {
+    return day > todayDay ? 0 : 12;
+  }
+  return ((month - todayMonth - 1 + 12) % 12) + 1;
+};
 
-const rowToMonth = (row: number, todayMonth: number): number =>
-  ((row + todayMonth) % 12) + 1;
+const rowToMonth = (row: number, todayMonth: number): number => {
+  if (row === 0 || row === 12) {
+    return todayMonth;
+  }
+  return ((row - 1 + todayMonth) % 12) + 1;
+};
 
-// The grid only tracks month/day, not year: a month after the current one
-// belongs to last year, everything up to and including the current month
-// belongs to this year.
+// The grid only tracks month/day, not year. For the current month, days
+// after today belong to last year (this year's occurrence hasn't happened
+// yet); days up to and including today belong to this year. Months before
+// the current one belong to this year, months after it belong to last year.
 const yearForMonth = (
   month: number,
+  day: number,
   todayMonth: number,
+  todayDay: number,
   todayYear: number,
-): number => (month <= todayMonth ? todayYear : todayYear - 1);
+): number => {
+  if (month === todayMonth) {
+    return day > todayDay ? todayYear - 1 : todayYear;
+  }
+  return month < todayMonth ? todayYear : todayYear - 1;
+};
 
 // Catches both the always-invalid days (Feb 30, Apr 31, ...) and Feb 29
 // on a non-leap year - the Date constructor already knows the real rule.
@@ -60,7 +84,7 @@ const HEATMAP_SCALE_MAX = 100;
 const HEATMAP_Y_AXIS_WIDTH = 65;
 const HEATMAP_X_AXIS_HEIGHT = 10;
 const HEATMAP_DAY_TICKS = [1, 10, 20, 30];
-const HEATMAP_ROW_TICKS = [0, 2, 4, 6, 8, 10];
+const HEATMAP_ROW_TICKS = [0, 2, 4, 6, 8, 10, 12];
 
 const hexToRgb = (hex: string): [number, number, number] => [
   parseInt(hex.slice(1, 3), 16),
@@ -128,25 +152,28 @@ export function Heatmap({ data }: HeatmapProps) {
 
   const isValidPoint = (point: HeatMapPoint) =>
     isValidCalendarDate(
-      yearForMonth(point.month, todayMonth, todayYear),
+      yearForMonth(point.month, point.day, todayMonth, todayDay, todayYear),
       point.month,
       point.day,
     );
 
   const points: HeatMapPoint[] = data.flatMap((monthLoads, m) => {
     const month = m + 1;
-    return monthLoads.map((data, d) => ({
-      month,
-      day: d + 1,
-      load: data[0],
-      records: data[1],
-      row: monthToRow(month, todayMonth),
-    }));
+    return monthLoads.map((data, d) => {
+      const day = d + 1;
+      return {
+        month,
+        day,
+        load: data[0],
+        records: data[1],
+        row: monthToRow(month, day, todayMonth, todayDay),
+      };
+    });
   });
   const rawCellWidth = (size.width - HEATMAP_Y_AXIS_WIDTH) / 31;
-  const rawCellHeight = (size.height - HEATMAP_X_AXIS_HEIGHT) / 12;
+  const rawCellHeight = (size.height - HEATMAP_X_AXIS_HEIGHT) / 13;
   const cellSize = Math.max(0, Math.min(rawCellWidth, rawCellHeight));
-  // Shrink the plot area itself to exactly cellSize * 31/12, so consecutive
+  // Shrink the plot area itself to exactly cellSize * 31/13, so consecutive
   // points sit cellSize apart (true square tiling) - the leftover space
   // becomes a margin around the whole grid instead of gaps between cells.
   const extraWidth = Math.max(
@@ -155,7 +182,7 @@ export function Heatmap({ data }: HeatmapProps) {
   );
   const extraHeight = Math.max(
     0,
-    size.height - HEATMAP_X_AXIS_HEIGHT - cellSize * 12,
+    size.height - HEATMAP_X_AXIS_HEIGHT - cellSize * 13,
   );
 
   const renderCell = (props: ScatterShapeProps) => {
@@ -214,7 +241,7 @@ export function Heatmap({ data }: HeatmapProps) {
           <YAxis
             dataKey="row"
             type="number"
-            domain={[0.5, 12.5]}
+            domain={[-0.5, 12.5]}
             reversed
             stroke="#fff"
             ticks={HEATMAP_ROW_TICKS}

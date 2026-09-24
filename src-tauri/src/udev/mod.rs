@@ -34,8 +34,6 @@ impl UdevManager {
         } else {
             let current_exe = std::env::current_exe().unwrap();
 
-            // Kept alive until after `sudo` runs: `NamedTempFile` deletes the file on drop,
-            // whether the block below succeeds or returns early via `?`.
             let mut askpass_file = tempfile::Builder::new()
                 .prefix(&format!("{}-askpass-", *constants::APP_NAME))
                 .tempfile()
@@ -52,13 +50,20 @@ zenity --password --title="Elevated permissions are required to edit device rule
                 .set_permissions(std::fs::Permissions::from_mode(0o700))
                 .map_err(UdevError::Write)?;
 
+            // Close the write fd before `sudo -A` execs this file: on Linux, execve() fails
+            // with ETXTBSY if any fd is still open for writing on the target. `into_temp_path`
+            // closes the `File` but keeps the on-disk entry, which is still removed on drop -
+            // kept alive until after `sudo` runs, whether the block below succeeds or returns
+            // early via `?`.
+            let askpass_path = askpass_file.into_temp_path();
+
             let status = Command::new("sudo")
                 .arg("-k")
                 .arg("-A")
                 .arg(&current_exe)
                 .arg("--rules")
                 .arg(auto_run.to_string())
-                .env("SUDO_ASKPASS", askpass_file.path())
+                .env("SUDO_ASKPASS", &askpass_path)
                 .stdout(Stdio::inherit())
                 .stderr(Stdio::inherit())
                 .status()
