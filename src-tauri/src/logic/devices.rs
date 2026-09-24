@@ -100,9 +100,11 @@ async fn mtp_dev_check_and_sync(app: AppHandle, devices: &mut Vec<DeviceListItem
             );
         }
 
-        let settings_state = app.state::<SettingsLock>();
-        let settings = settings_state.read().unwrap();
-        let lang = settings.language;
+        let (lang, auto_sync) = {
+            let settings_state = app.state::<SettingsLock>();
+            let settings = settings_state.read().unwrap();
+            (settings.language, settings.auto_sync)
+        };
         for device in &newly_enrolled {
             info!(
                 "Connected {} {} ({})",
@@ -113,7 +115,7 @@ async fn mtp_dev_check_and_sync(app: AppHandle, devices: &mut Vec<DeviceListItem
             let payload: DeviceListItem = device.clone();
             let _ = app.emit("device_connected", payload);
 
-            if settings.auto_sync {
+            if auto_sync {
                 devs_to_sync.push(device.serial_number.clone());
                 show_notification(NotificationDefinition {
                     title: translate("device_connected", lang),

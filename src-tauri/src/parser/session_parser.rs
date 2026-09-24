@@ -37,8 +37,8 @@ impl TryFrom<FitParser> for Session {
                         }
                         MesgNum::SESSION => {
                             let session_obj = mesgdef::Session::from(msg);
-                            session_data.set_session(session_obj.clone())?;
-                            records.append_session_data(session_obj);
+                            records.distance = session_obj.total_distance_scaled();
+                            session_data.set_session(session_obj)?;
                         }
                         MesgNum::WORKOUT_STEP => {
                             let record_obj = mesgdef::WorkoutStep::from(msg);
@@ -338,9 +338,6 @@ impl RecordAccumulator {
         );
     }
 
-    fn append_session_data(&mut self, ses: mesgdef::Session) {
-        self.distance = ses.total_distance_scaled()
-    }
 }
 
 impl From<RecordAccumulator> for Option<AdditionalData> {

@@ -1,4 +1,4 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 
 use garmin_tracker_rs_macros::traced_command;
 use rusqlite_orm::{
@@ -94,38 +94,32 @@ pub fn get_exercise_details(
         res.pr_date = pr.session as i32;
         res.e1rm = pr.e1rm;
 
-        let mut timestamps = HashSet::new();
-        series.iter().map(|s| s.session).for_each(|t| {
-            timestamps.insert(t);
-        });
+        let mut timestamps: Vec<Value> = Vec::new();
+        let mut last = None;
+        for s in &series {
+            if last != Some(s.session) {
+                timestamps.push(s.session.into());
+                last = Some(s.session);
+            }
+        }
 
         let workouts = SessionRepository::select()
-            .where_(Where::In(
-                session::entity::columns::DATE,
-                timestamps
-                    .into_iter()
-                    .map(|t| t.into())
-                    .collect::<Vec<Value>>(),
-            ))
+            .where_(Where::In(session::entity::columns::DATE, timestamps))
             .fetch_in(conn)?
             .iter()
             .map(|s| (s.date, s.name.clone()))
             .collect::<HashMap<_, _>>();
 
         let mut last_session = None;
+        let mut ex_str = String::new();
         for serie in series {
-            let ex_str = format!(
-                "{}\n{}",
-                workouts.get(&serie.session).unwrap(),
-                serie.session
-            );
-
             if last_session != Some(serie.session) {
+                ex_str = format!("{}\n{}", workouts.get(&serie.session).unwrap(), serie.session);
                 res.workouts.push(ex_str.clone());
                 last_session = Some(serie.session);
             }
 
-            let entry = res.series.entry(ex_str).or_default();
+            let entry = res.series.entry(ex_str.clone()).or_default();
             entry.push(SessionSet::from(&serie));
         }
 

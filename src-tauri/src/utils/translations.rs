@@ -52,7 +52,7 @@ impl Languages {
 /// Resolves `key` to a string in the current UI language, falling back to English then to the raw key.
 pub fn translate(key: &str, lang: Languages) -> String {
     match TRANSLATIONS.get(key) {
-        Some(langs) => match langs.get(&lang.to_string()) {
+        Some(langs) => match langs.get(lang.code().0) {
             Some(translation) => translation,
             None => match langs.get(constants::DEFAULT_LANGUAGE.code().0) {
                 Some(translation) => translation,
