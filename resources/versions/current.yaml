@@ -20,7 +20,7 @@ node:
   eslint-plugin-react: 7.37.5
   jsdom: 30.1.1
   leaflet: 1.9.4
-  prettier: 3.9.8
+  prettier: 3.9.9
   react: 19.3.0
   react-dom: 19.3.0
   react-leaflet: 5.0.0
@@ -32,6 +32,7 @@ node:
   vitest: 5.0.1
 rust:
   chrono: 0.4.45
+  crossterm: 0.29.0
   curl-rest: 0.6.0
   embedded-io-adapters: 0.7.0
   garmin-tracker-rs-macros: 0.1.0
@@ -44,6 +45,7 @@ rust:
   ouroboros: 0.18.5
   phf: 0.14.0
   phf_codegen: 0.14.0
+  ratatui: 0.30.2
   rayon: 1.12.0
   rfd: 0.17.2
   rusqlite_orm: 1.0.0
@@ -57,6 +59,7 @@ rust:
   tauri-plugin-log: 2.9.2
   tauri-plugin-opener: 2.5.5
   tauri-rs-ts-ipc: 0.1.20
-  thiserror: 2.0.20
+  tempfile: 3.27.0
+  thiserror: 2.0.21
   tokio: 1.53.1
   tokio-stream: 0.1.19
