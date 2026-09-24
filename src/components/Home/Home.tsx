@@ -48,7 +48,7 @@ export function Home() {
   const [monthKcal, setMonthKCal] = useState(0);
   const [monthLoad, setMonthLoad] = useState(0);
   const [heatMapData, setHeatMapData] = useState<
-    [number, boolean][][] | undefined
+    [number, number][][] | undefined
   >(undefined);
 
   const [workout, setWorkout] = useState<WorkoutListItem | undefined>(

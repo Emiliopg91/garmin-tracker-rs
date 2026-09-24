@@ -15,7 +15,7 @@ interface HeatMapPoint {
   month: number;
   day: number;
   load: number;
-  record: boolean;
+  records: number;
   row: number;
 }
 
@@ -82,7 +82,7 @@ const getHeatColor = (load: number): string => {
 };
 
 interface HeatmapProps {
-  data: [number, boolean][][] | undefined;
+  data: [number, number][][] | undefined;
 }
 
 export function Heatmap({ data }: HeatmapProps) {
@@ -139,7 +139,7 @@ export function Heatmap({ data }: HeatmapProps) {
       month,
       day: d + 1,
       load: data[0],
-      record: data[1],
+      records: data[1],
       row: monthToRow(month, todayMonth),
     }));
   });
@@ -169,7 +169,7 @@ export function Heatmap({ data }: HeatmapProps) {
     }
     const width = Math.max(0, cellSize - 1);
     const height = width;
-    const isRecord = point.record;
+    const isRecord = point.records > 0;
     const isToday = point.month === todayMonth && point.day === todayDay;
     return (
       <rect
@@ -237,7 +237,11 @@ export function Heatmap({ data }: HeatmapProps) {
               }
               return (
                 <div className="heatmap-tooltip">
-                  {`${point.day} ${translate("month_" + point.month)}:  ${point.load}`}
+                  <b>{`${point.day} ${translate("month_" + point.month)}`}</b>
+                  <br />
+                  <span>{translate("workout_load") + ": " + point.load}</span>
+                  <br />
+                  <span>{translate("records") + ": " + point.records}</span>
                 </div>
               );
             }}

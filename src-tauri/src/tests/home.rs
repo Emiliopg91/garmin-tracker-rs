@@ -64,8 +64,9 @@ fn heatmap_totals_and_record_flags_match_inserted_sessions() {
             "session {i} ({date}) training load mismatch"
         );
         assert_eq!(
-            cell.1, expected_record,
-            "session {i} ({date}) record flag mismatch"
+            cell.1,
+            if expected_record { 1 } else { 0 },
+            "session {i} ({date}) record count mismatch"
         );
     }
 }

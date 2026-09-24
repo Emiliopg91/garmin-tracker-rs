@@ -820,13 +820,11 @@ pub async fn export_gpx(
 
 #[traced_command]
 #[tauri::command]
-pub fn get_heatmap_data(
-    database: State<'_, DatabasePool>,
-) -> Result<Vec<Vec<(u32, bool)>>, String> {
+pub fn get_heatmap_data(database: State<'_, DatabasePool>) -> Result<Vec<Vec<(u32, u16)>>, String> {
     heatmap_data(&database)
 }
 
-pub fn heatmap_data(database: &DatabasePool) -> Result<Vec<Vec<(u32, bool)>>, String> {
+pub fn heatmap_data(database: &DatabasePool) -> Result<Vec<Vec<(u32, u16)>>, String> {
     let today = Local::now().date_naive();
     let a_year_ago = today
         .checked_sub_months(Months::new(12))
@@ -845,19 +843,14 @@ pub fn heatmap_data(database: &DatabasePool) -> Result<Vec<Vec<(u32, bool)>>, St
             let sessions = SessionRepository::select()
                 .where_(Where::Gte(session::entity::columns::DATE, ts.into()))
                 .fetch_in(conn)?;
+            let prs = SetRepository::select_by_personal_records_in(conn, true, None)?;
 
-            let prs = SetRepository::select_by_personal_records_in(conn, true, None)?
-                .iter()
-                .map(|set| set.session)
-                .collect::<Vec<_>>();
-
-            let mut res = vec![vec![((0_u32), false); 31]; 12];
-
+            let mut res = vec![vec![(0_u32, 0_u16); 31]; 12];
             sessions.iter().for_each(|session| {
                 let dt = Local.timestamp_opt(session.date, 0).single().unwrap();
                 let cell = &mut res[dt.month0() as usize][dt.day0() as usize];
                 cell.0 += session.training_load as u32;
-                cell.1 = cell.1 || prs.contains(&session.date);
+                cell.1 += prs.iter().filter(|s| s.session == session.date).count() as u16;
             });
 
             Ok(res)
