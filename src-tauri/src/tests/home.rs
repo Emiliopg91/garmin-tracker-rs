@@ -1,0 +1,71 @@
+use chrono::{Datelike, Days, Local, TimeZone};
+
+use crate::{logic::sessions::heatmap_data, tests::common};
+
+/// Builds a timestamp for `days_ago` days before today, anchored at local noon so the
+/// resulting instant never lands on a different calendar day due to DST shifts.
+fn timestamp_days_ago(days_ago: u64) -> i64 {
+    let date = Local::now()
+        .date_naive()
+        .checked_sub_days(Days::new(days_ago))
+        .unwrap();
+    let noon = date.and_hms_opt(12, 0, 0).unwrap();
+    Local
+        .from_local_datetime(&noon)
+        .earliest()
+        .unwrap()
+        .timestamp()
+}
+
+#[test]
+fn heatmap_totals_and_record_flags_match_inserted_sessions() {
+    let db = common::test_db();
+
+    // 20 sessions spread over the last year, far enough apart that each lands on its
+    // own calendar day (no two sessions share a month/day cell).
+    let days_ago: Vec<u64> = (0..20).map(|i| 5 + i * 17).collect();
+    assert!(days_ago.iter().all(|&d| d < 365));
+
+    // A subset of those sessions also set a personal record.
+    let record_indices: [usize; 6] = [1, 4, 7, 10, 13, 17];
+
+    db.run_in_transaction(|tx| {
+        for (i, &days) in days_ago.iter().enumerate() {
+            let date = timestamp_days_ago(days);
+            let mut session = common::session(date);
+            session.training_load = 40 + (i as u16) * 7;
+
+            if record_indices.contains(&i) {
+                let mut set = common::set(date, 0, (0, i as u16), 5, 100.0 + i as f64);
+                set.pr = true;
+                session.sets = vec![set];
+            }
+
+            common::insert_session(tx, session);
+        }
+        Ok(())
+    })
+    .unwrap();
+
+    let heatmap = heatmap_data(&db).unwrap();
+
+    for (i, &days) in days_ago.iter().enumerate() {
+        let date = Local::now()
+            .date_naive()
+            .checked_sub_days(Days::new(days))
+            .unwrap();
+        let cell = &heatmap[date.month0() as usize][date.day0() as usize];
+
+        let expected_load = (40 + (i as u16) * 7) as u32;
+        let expected_record = record_indices.contains(&i);
+
+        assert_eq!(
+            cell.0, expected_load,
+            "session {i} ({date}) training load mismatch"
+        );
+        assert_eq!(
+            cell.1, expected_record,
+            "session {i} ({date}) record flag mismatch"
+        );
+    }
+}

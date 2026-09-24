@@ -823,6 +823,10 @@ pub async fn export_gpx(
 pub fn get_heatmap_data(
     database: State<'_, DatabasePool>,
 ) -> Result<Vec<Vec<(u32, bool)>>, String> {
+    heatmap_data(&database)
+}
+
+pub fn heatmap_data(database: &DatabasePool) -> Result<Vec<Vec<(u32, bool)>>, String> {
     let today = Local::now().date_naive();
     let a_year_ago = today
         .checked_sub_months(Months::new(12))
