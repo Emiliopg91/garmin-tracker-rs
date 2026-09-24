@@ -57,8 +57,8 @@ export class BackendClient {
 	
 
 	// From src-tauri/src/logic/sessions.rs:823
-	public static getLastYearLoads(): Promise<number[][]> {
-	  return BackendClient.inner_invoke("get_last_year_loads"); 
+	public static getHeatmapData(): Promise<[number, boolean][][]> {
+	  return BackendClient.inner_invoke("get_heatmap_data"); 
 	}
 	
 

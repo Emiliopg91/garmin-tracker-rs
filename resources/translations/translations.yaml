@@ -410,8 +410,8 @@ training_status:
   en: Training status
   es: Estado de entrenamiento
 rest_recommended:
-  en: Acute load is high relative to chronic load, rest today
-  es: La carga aguda es alta respecto a la crónica, descansa hoy
+  en: Good job! Let's take a rest!
+  es: ¡Buen trabajo! Ahora toca descansar
 user_settings:
   en: User settings
   es: Ajustes de usuario

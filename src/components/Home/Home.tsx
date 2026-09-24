@@ -47,9 +47,9 @@ export function Home() {
   const [monthTime, setMonthTime] = useState(0);
   const [monthKcal, setMonthKCal] = useState(0);
   const [monthLoad, setMonthLoad] = useState(0);
-  const [heatMapData, setHeatMapData] = useState<number[][] | undefined>(
-    undefined,
-  );
+  const [heatMapData, setHeatMapData] = useState<
+    [number, boolean][][] | undefined
+  >(undefined);
 
   const [workout, setWorkout] = useState<WorkoutListItem | undefined>(
     undefined,
@@ -71,16 +71,20 @@ export function Home() {
     BackendClient.getSessions(
       today - SessionUtils.CHRONIC_DAYS * 2 * 24 * 60 * 60,
     )
-      .then((data) => {
-        setAvailableData(data.length > 0);
+      .then((sessions) => {
+        setAvailableData(sessions.length > 0);
 
-        if (data.length > 0) {
-          const workout_data = SessionUtils.calculateWorkoutLoad(data);
+        if (sessions.length > 0) {
+          const workout_data = SessionUtils.calculateWorkoutLoad(sessions);
           const overreaching = SessionUtils.isOverreaching(workout_data);
-          setRest(overreaching);
+          const lastSessDate = new Date(
+            sessions[0].timestamp * 1000,
+          ).toDateString();
+          const todayDate = new Date().toDateString();
+          setRest(overreaching || lastSessDate == todayDate);
 
           startLoading();
-          BackendClient.getLastYearLoads()
+          BackendClient.getHeatmapData()
             .then((data) => {
               setHeatMapData(data);
             })
@@ -90,8 +94,9 @@ export function Home() {
 
           startLoading();
           BackendClient.getWorkoutList()
-            .then((data) => {
-              const filtered = data.filter((w) => w.enabled);
+            .then((workouts) => {
+              const filtered = workouts.filter((w) => w.enabled);
+
               if (!overreaching && filtered.length > 0) {
                 let oldest = filtered[0];
                 for (let i = 0; i < filtered.length; i++) {
@@ -129,27 +134,27 @@ export function Home() {
           const weekLimit = today - 6 * 24 * 60 * 60;
           const monthLimit = today - 29 * 24 * 60 * 60;
 
-          for (let i = 0; i < data.length; i++) {
-            if (data[i].timestamp < monthLimit) {
+          for (let i = 0; i < sessions.length; i++) {
+            if (sessions[i].timestamp < monthLimit) {
               break;
             }
-            monthTmp += data[i].total_elapsed_time;
-            monthKcl += data[i].active_calories;
-            monthLoad += data[i].training_load;
-            if (data[i].timestamp >= weekLimit) {
-              weekTmp += data[i].total_elapsed_time;
-              weekKcl += data[i].active_calories;
-              weekLoad += data[i].training_load;
+            monthTmp += sessions[i].total_elapsed_time;
+            monthKcl += sessions[i].active_calories;
+            monthLoad += sessions[i].training_load;
+            if (sessions[i].timestamp >= weekLimit) {
+              weekTmp += sessions[i].total_elapsed_time;
+              weekKcl += sessions[i].active_calories;
+              weekLoad += sessions[i].training_load;
 
-              if (data[i].timestamp >= thisWeekLimit) {
-                thisWeekTmp += data[i].total_elapsed_time;
-                thisWeekKcl += data[i].active_calories;
-                thisWeekLoad += data[i].training_load;
+              if (sessions[i].timestamp >= thisWeekLimit) {
+                thisWeekTmp += sessions[i].total_elapsed_time;
+                thisWeekKcl += sessions[i].active_calories;
+                thisWeekLoad += sessions[i].training_load;
 
-                if (data[i].timestamp >= today) {
-                  todayTmp += data[i].total_elapsed_time;
-                  todayKcl += data[i].active_calories;
-                  todayLoad += data[i].training_load;
+                if (sessions[i].timestamp >= today) {
+                  todayTmp += sessions[i].total_elapsed_time;
+                  todayKcl += sessions[i].active_calories;
+                  todayLoad += sessions[i].training_load;
                 }
               }
             }
@@ -172,7 +177,7 @@ export function Home() {
             setMinDate(workout_data[0].date);
           }
 
-          setLastSession(data[0]);
+          setLastSession(sessions[0]);
         }
       })
       .finally(() => {

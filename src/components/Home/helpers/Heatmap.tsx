@@ -15,6 +15,7 @@ interface HeatMapPoint {
   month: number;
   day: number;
   load: number;
+  record: boolean;
   row: number;
 }
 
@@ -53,8 +54,7 @@ const isValidCalendarDate = (
 
 // GitHub-style ramp: 0 load is a translucent black tint over the box
 // background, load >= 100 saturates at GitHub's contribution green
-const HEATMAP_MIN_COLOR = "#000000";
-const HEATMAP_MIN_ALPHA = 0.25;
+const HEATMAP_ZERO_COLOR = "#000000";
 const HEATMAP_MAX_COLOR = "#00ff00";
 const HEATMAP_SCALE_MAX = 100;
 const HEATMAP_Y_AXIS_WIDTH = 65;
@@ -68,32 +68,21 @@ const hexToRgb = (hex: string): [number, number, number] => [
   parseInt(hex.slice(5, 7), 16),
 ];
 
-const lerpColor = (
-  from: string,
-  to: string,
-  ratio: number,
-  fromAlpha: number,
-  toAlpha: number,
-): string => {
-  const [r1, g1, b1] = hexToRgb(from);
-  const [r2, g2, b2] = hexToRgb(to);
-  const lerp = (a: number, b: number) => Math.round(a + (b - a) * ratio);
-  const alpha = fromAlpha + (toAlpha - fromAlpha) * ratio;
-  return `rgba(${lerp(r1, r2)}, ${lerp(g1, g2)}, ${lerp(b1, b2)}, ${alpha.toFixed(2)})`;
-};
-
 const getHeatColor = (load: number): string => {
-  return lerpColor(
-    HEATMAP_MIN_COLOR,
-    HEATMAP_MAX_COLOR,
-    Math.min(1, load / HEATMAP_SCALE_MAX),
-    HEATMAP_MIN_ALPHA,
-    1,
-  );
+  if (load == 0) {
+    const [r1, g1, b1] = hexToRgb(HEATMAP_ZERO_COLOR);
+    return `rgba(${r1}, ${g1}, ${b1}, 0.1)`;
+  } else {
+    const [r1, g1, b1] = hexToRgb(HEATMAP_MAX_COLOR);
+    const [r2, g2, b2] = hexToRgb(HEATMAP_MAX_COLOR);
+    const alpha = Math.min(1, load / HEATMAP_SCALE_MAX);
+    const lerp = (a: number, b: number) => Math.round(a + (b - a) * alpha);
+    return `rgba(${lerp(r1, r2)}, ${lerp(g1, g2)}, ${lerp(b1, b2)}, ${alpha})`;
+  }
 };
 
 interface HeatmapProps {
-  data: number[][] | undefined;
+  data: [number, boolean][][] | undefined;
 }
 
 export function Heatmap({ data }: HeatmapProps) {
@@ -146,10 +135,11 @@ export function Heatmap({ data }: HeatmapProps) {
 
   const points: HeatMapPoint[] = data.flatMap((monthLoads, m) => {
     const month = m + 1;
-    return monthLoads.map((load, d) => ({
+    return monthLoads.map((data, d) => ({
       month,
       day: d + 1,
-      load,
+      load: data[0],
+      record: data[1],
       row: monthToRow(month, todayMonth),
     }));
   });
@@ -179,6 +169,7 @@ export function Heatmap({ data }: HeatmapProps) {
     }
     const width = Math.max(0, cellSize - 1);
     const height = width;
+    const isRecord = point.record;
     const isToday = point.month === todayMonth && point.day === todayDay;
     return (
       <rect
@@ -188,8 +179,8 @@ export function Heatmap({ data }: HeatmapProps) {
         height={height}
         rx={1}
         fill={getHeatColor(point.load)}
-        stroke={isToday ? "#ffffff" : "none"}
-        strokeWidth={isToday ? 1.5 : 0}
+        stroke={isRecord ? "#A0A000" : isToday ? "#ffffff" : "none"}
+        strokeWidth={isRecord || isToday ? 2 : 0}
       />
     );
   };
@@ -246,7 +237,7 @@ export function Heatmap({ data }: HeatmapProps) {
               }
               return (
                 <div className="heatmap-tooltip">
-                  {`${point.day} ${translate("month_" + point.month)}: ${point.load}`}
+                  {`${point.day} ${translate("month_" + point.month)}:  ${point.load}`}
                 </div>
               );
             }}
