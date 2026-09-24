@@ -14,7 +14,7 @@ use crate::{
     dao::{
         exercise::ExerciseRepository,
         session::{self, SessionRepository},
-        set::{self, Set, SetRepository},
+        set::{self, SetRepository},
     },
     dto::{
         exercises::{ExerciseDetails, ExerciseListItem},
@@ -32,29 +32,19 @@ pub fn get_exercises(
 ) -> Result<Vec<ExerciseListItem>, String> {
     info!("Getting exercises list...");
     let res = database.run_in_connection(|conn| {
-        let mut result = Vec::new();
-
-        let exercises = ExerciseRepository::select().fetch_in(conn)?;
-
         let prs = SetRepository::select_by_personal_records_in(conn, true, None)?;
-        let pr_by_exercise: HashMap<(u16, u16), &Set> =
-            prs.iter().map(|pr| ((pr.ex_cat, pr.ex_id), pr)).collect();
 
-        for exercise in exercises {
-            let key = (exercise.category, exercise.id);
-            if let Some(pr) = pr_by_exercise.get(&key) {
-                result.push(ExerciseListItem {
-                    category: exercise.category,
-                    id: exercise.id,
-                    reps: pr.reps,
-                    weight: pr.weight,
-                    date: pr.session as i32,
-                    e1rm: pr.e1rm,
-                });
-            }
-        }
-
-        Ok(result)
+        Ok(prs
+            .iter()
+            .map(|pr| ExerciseListItem {
+                category: pr.ex_cat,
+                id: pr.ex_id,
+                reps: pr.reps,
+                weight: pr.weight,
+                date: pr.session as i32,
+                e1rm: pr.e1rm,
+            })
+            .collect::<Vec<_>>())
     });
 
     match res {

@@ -1,6 +1,5 @@
 # TODO
 
-- GitHub-contributions-style calendar heatmap of training days (a year grid colored by whether/how intensely you trained that day), with a filter by sport type (running/strength/cycling/all).
 - Delete sessions/activities from the UI (there's no `delete_session` in `logic/sessions.rs` nor a delete button in `SessionModal`/`SessionList`).
 - Paginate/virtualize the session list (`SessionList.tsx` loads every session with no pagination).
 - System tray icon (sync now / open / quit without fully closing the app).
