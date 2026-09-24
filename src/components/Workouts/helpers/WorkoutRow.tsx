@@ -13,9 +13,7 @@ export function WorkoutRow({ workout, onSelect }: Props) {
 
   return (
     <tr
-      className={
-        "clickable-row" + (workout.enabled ? "" : " workout-disabled")
-      }
+      className={"clickable-row" + (workout.enabled ? "" : " workout-disabled")}
       onClick={() => onSelect(workout.name)}
     >
       <td className="text-left">

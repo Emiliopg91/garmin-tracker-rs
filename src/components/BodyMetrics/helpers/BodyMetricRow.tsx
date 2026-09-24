@@ -43,9 +43,7 @@ export function BodyMetricRow({
       </td>
       <td>{measure.fat_ratio.toFixed(1)}%</td>
       <td>
-        {UnitUtils.fromKg(measure.lean_mass, settings.weight_unit).toFixed(
-          1,
-        )}{" "}
+        {UnitUtils.fromKg(measure.lean_mass, settings.weight_unit).toFixed(1)}{" "}
         {UnitUtils.getUnit(settings.weight_unit)}
       </td>
       <td>{measure.water_ratio.toFixed(1)}%</td>

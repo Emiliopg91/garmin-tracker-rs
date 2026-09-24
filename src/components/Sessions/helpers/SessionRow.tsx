@@ -14,7 +14,9 @@ export function SessionRow({ session, onSelect }: Props) {
 
   return (
     <tr onClick={() => onSelect(session.timestamp)} className="clickable-row">
-      <td>{session.has_record && <EmojiEventsIcon className="trophy-icon" />}</td>
+      <td>
+        {session.has_record && <EmojiEventsIcon className="trophy-icon" />}
+      </td>
       <td>{TimeUtils.formatTimeDate(session.timestamp)}</td>
       <td>
         {translate("sport_" + session.sport) +

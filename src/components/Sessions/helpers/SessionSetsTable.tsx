@@ -31,11 +31,7 @@ export function SessionSetsTable({
     onUpdateSerie(exercise, idx, "reps", reps);
   };
 
-  const updateSerieWeight = (
-    exercise: string,
-    idx: number,
-    newVal: string,
-  ) => {
+  const updateSerieWeight = (exercise: string, idx: number, newVal: string) => {
     let weight = parseFloat(newVal);
     if (isNaN(weight)) {
       weight = 0;
@@ -66,9 +62,7 @@ export function SessionSetsTable({
                     className="divider-bottom"
                     rowSpan={groupedSeries[exercise].length}
                   >
-                    {translate(
-                      "exercise_" + serie.ex_cat + "_" + serie.ex_id,
-                    )}
+                    {translate("exercise_" + serie.ex_cat + "_" + serie.ex_id)}
                   </td>
                 )}
 

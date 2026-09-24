@@ -4,7 +4,13 @@ import { BackendClient } from "@/utils/backend/client";
 import { SessionLap } from "@/utils/backend/models";
 import { SessionUtils } from "@/utils/SessionUtils";
 import { useContext, useState } from "react";
-import { FormControl, FormControlLabel, Link, Radio, RadioGroup } from "@mui/material";
+import {
+  FormControl,
+  FormControlLabel,
+  Link,
+  Radio,
+  RadioGroup,
+} from "@mui/material";
 import { MapContainer, Marker, Polyline, TileLayer } from "react-leaflet";
 
 const urls = [
@@ -15,7 +21,10 @@ const urls = [
 type Props = {
   timestamp: number;
   validPoints: [number, number][];
-  gpsSegments: { coordinates: [[number, number], [number, number]]; color: string }[];
+  gpsSegments: {
+    coordinates: [[number, number], [number, number]];
+    color: string;
+  }[];
   startPoint: [number, number];
   finishPoint: [number, number];
   laps: SessionLap[];
@@ -65,10 +74,7 @@ export function SessionMap({
 
         <Marker position={startPoint} icon={SessionUtils.START_ICON}></Marker>
 
-        <Marker
-          position={finishPoint}
-          icon={SessionUtils.END_ICON}
-        ></Marker>
+        <Marker position={finishPoint} icon={SessionUtils.END_ICON}></Marker>
 
         {laps
           .filter((lap) => lap.start_latitude && lap.start_longitude)
