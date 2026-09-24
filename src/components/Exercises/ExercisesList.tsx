@@ -1,17 +1,16 @@
 import { ExerciseDetails, ExerciseListItem } from "@/utils/backend/models";
 import { ExerciseModal } from "./ExerciseModal";
+import { ExerciseRow } from "./helpers/ExerciseRow";
 import { useContext, useEffect, useState } from "react";
 import { BackendClient } from "@/utils/backend/client";
 import { AppContext } from "@/context/AppContext";
 import { LoadingContext } from "@/context/LoadingContext";
 import { I18nSettingsContext } from "@/context/I18nSettingsContext";
-import { TimeUtils } from "@/utils/TimeUtils";
-import { UnitUtils } from "@/utils/UnitUtils";
 
 export function ExercisesList() {
   const { sessionsVersion } = useContext(AppContext);
   const { startLoading, finishLoading } = useContext(LoadingContext);
-  const { translate, settings } = useContext(I18nSettingsContext);
+  const { translate } = useContext(I18nSettingsContext);
   const [exercises, setExercises] = useState<ExerciseListItem[]>([]);
   const [exerciseDetails, setExerciseDetails] = useState<
     ExerciseDetails | undefined
@@ -62,31 +61,11 @@ export function ExercisesList() {
         </thead>
         <tbody>
           {exercises.map((exercise, idx) => (
-            <tr
+            <ExerciseRow
               key={idx}
-              className="clickable-row"
-              onClick={() => getExerciseDetails(exercise.category, exercise.id)}
-            >
-              <td className="text-left">
-                {translate("exercise_" + exercise.category + "_" + exercise.id)}
-              </td>
-              <td>
-                {exercise.reps +
-                  "x" +
-                  UnitUtils.fromKg(
-                    exercise.weight,
-                    settings.weight_unit,
-                  ).toFixed(1) +
-                  " " +
-                  UnitUtils.getUnit(settings.weight_unit)}
-              </td>
-              <td>
-                {UnitUtils.fromKg(exercise.e1rm, settings.weight_unit) +
-                  " " +
-                  UnitUtils.getUnit(settings.weight_unit)}
-              </td>
-              <td>{TimeUtils.formatDate(exercise.date)}</td>
-            </tr>
+              exercise={exercise}
+              onSelect={getExerciseDetails}
+            />
           ))}
         </tbody>
       </table>

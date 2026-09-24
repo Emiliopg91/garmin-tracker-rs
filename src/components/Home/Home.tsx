@@ -7,19 +7,8 @@ import {
   SessionUtils,
   WorkoutLoad,
 } from "@/utils/SessionUtils";
-import { Button, Menu, MenuItem } from "@mui/material";
 import { usePickerAdapter } from "@mui/x-date-pickers/hooks";
 import { useContext, useEffect, useState } from "react";
-import {
-  Area,
-  CartesianGrid,
-  ComposedChart,
-  Legend,
-  Line,
-  ResponsiveContainer,
-  XAxis,
-  YAxis,
-} from "recharts";
 import "@/styles/Home/Home.css";
 import "@/styles/Sessions/SessionModal.css";
 import { TimeUtils } from "@/utils/TimeUtils";
@@ -31,7 +20,9 @@ import {
 import { BackendListener } from "@/utils/backend/listener";
 import { SessionModal } from "../Sessions/SessionModal";
 import { WorkoutModal } from "../Workouts/WorkoutModal";
-import { Heatmap } from "./Heatmap";
+import { Heatmap } from "./helpers/Heatmap";
+import { WorkloadChart } from "./helpers/WorkloadChart";
+import { ImportSessionsMenu } from "./helpers/ImportSessionsMenu";
 
 export function Home() {
   const { availableDevices, sessionsVersion } = useContext(AppContext);
@@ -43,10 +34,6 @@ export function Home() {
   const [availableData, setAvailableData] = useState(false);
   const [workload, setWorkload] = useState<WorkoutLoad[]>([]);
   const [minDate, setMinDate] = useState(0);
-  const [importMenuAnchor, setImportMenuAnchor] = useState<{
-    top: number;
-    left: number;
-  } | null>(null);
 
   const [todayTime, setTodayTime] = useState(0);
   const [todayKcal, setTodayKCal] = useState(0);
@@ -78,31 +65,6 @@ export function Home() {
     SessionFrontDetails | undefined
   >(undefined);
 
-  const importDevice = (serial: string) => {
-    startLoading();
-    BackendClient.importFromDevice(serial)
-      .then((count) => {
-        if (count > 0) {
-          refresh();
-        }
-      })
-      .finally(() => {
-        finishLoading();
-      });
-  };
-
-  const importFromDisk = () => {
-    startLoading();
-    BackendClient.importFromFiles()
-      .then((count) => {
-        if (count > 0) {
-          refresh();
-        }
-      })
-      .finally(() => {
-        finishLoading();
-      });
-  };
   const refresh = () => {
     startLoading();
     const today = new Date(new Date().setHours(0, 0, 0, 0)).getTime() / 1000;
@@ -294,78 +256,7 @@ export function Home() {
               <legend>{translate("training_status")}</legend>
               <div style={{ display: "flex" }}>
                 {workload.length > 0 && (
-                  <div className="chart-container ">
-                    <ResponsiveContainer
-                      className="chart-responsive"
-                      width="100%"
-                      height="100%"
-                    >
-                      <ComposedChart data={workload}>
-                        <CartesianGrid
-                          stroke="#80808000"
-                          strokeDasharray="5 5"
-                        />
-                        <XAxis
-                          dataKey="date"
-                          type="number"
-                          domain={[minDate, workload[workload.length - 1].date]}
-                          stroke="#fff"
-                          tick={false}
-                          height={0}
-                        />
-                        <YAxis
-                          yAxisId="left"
-                          stroke="#fff"
-                          width={0}
-                          domain={[0, 1]}
-                          tick={false}
-                        />{" "}
-                        <Area
-                          dataKey="lower"
-                          stackId="1"
-                          stroke="none"
-                          type="monotone"
-                          legendType="none"
-                          fill="transparent"
-                          dot={false}
-                          isAnimationActive={false}
-                          activeDot={false}
-                        />
-                        <Area
-                          dataKey="upper"
-                          stackId="1"
-                          stroke="none"
-                          type="monotone"
-                          fill="lightgreen"
-                          legendType="none"
-                          fillOpacity={0.1}
-                          dot={false}
-                          isAnimationActive={false}
-                          activeDot={false}
-                        />
-                        <Line
-                          type="monotone"
-                          name={translate("workload")}
-                          dataKey="current"
-                          stroke="green"
-                          dot={{ fill: "green" }}
-                          isAnimationActive={false}
-                          activeDot={false}
-                        />
-                        <Line
-                          type="monotone"
-                          name={translate("reference")}
-                          legendType="line"
-                          dataKey="reference"
-                          stroke="#ffffff40"
-                          dot={false}
-                          isAnimationActive={false}
-                          activeDot={false}
-                        />
-                        <Legend />
-                      </ComposedChart>
-                    </ResponsiveContainer>
-                  </div>
+                  <WorkloadChart workload={workload} minDate={minDate} />
                 )}
 
                 <Heatmap data={heatMapData} />
@@ -535,63 +426,10 @@ export function Home() {
         )}
       </div>
 
-      <div className="list-action-bar">
-        {availableDevices.length == 0 && (
-          <Button
-            id="import-file-toggle"
-            variant="contained"
-            className="full-width-button"
-            onClick={importFromDisk}
-          >
-            {translate("import_from_disk")}
-          </Button>
-        )}
-        {availableDevices.length > 0 && (
-          <>
-            <Button
-              id="import-file-toggle"
-              variant="contained"
-              className="full-width-button"
-              onClick={(e) =>
-                setImportMenuAnchor({ top: e.clientY, left: e.clientX })
-              }
-            >
-              {translate("import_sessions")}
-            </Button>
-            <Menu
-              id="import-file-menu"
-              anchorReference="anchorPosition"
-              anchorPosition={importMenuAnchor ?? undefined}
-              open={Boolean(importMenuAnchor)}
-              onClose={() => setImportMenuAnchor(null)}
-              anchorOrigin={{ vertical: "top", horizontal: "left" }}
-              transformOrigin={{ vertical: "bottom", horizontal: "left" }}
-            >
-              <MenuItem
-                onClick={() => {
-                  setImportMenuAnchor(null);
-                  importFromDisk();
-                }}
-              >
-                {translate("import_from_disk")}
-              </MenuItem>
-              {availableDevices.map((device, idx) => (
-                <MenuItem
-                  key={"dev-" + idx}
-                  onClick={() => {
-                    setImportMenuAnchor(null);
-                    importDevice(device.serial_number);
-                  }}
-                >
-                  {translate("import_from_device", [
-                    device.manufacturer + " " + device.model,
-                  ])}
-                </MenuItem>
-              ))}
-            </Menu>
-          </>
-        )}
-      </div>
+      <ImportSessionsMenu
+        availableDevices={availableDevices}
+        onImported={refresh}
+      />
     </>
   );
 }

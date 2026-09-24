@@ -1,11 +1,11 @@
 import { WorkoutDetails, WorkoutListItem } from "@/utils/backend/models";
 import { WorkoutModal } from "./WorkoutModal";
+import { WorkoutRow } from "./helpers/WorkoutRow";
 import { BackendClient } from "@/utils/backend/client";
 import { useContext, useEffect, useState } from "react";
 import { AppContext } from "@/context/AppContext";
 import { LoadingContext } from "@/context/LoadingContext";
 import { I18nSettingsContext } from "@/context/I18nSettingsContext";
-import { TimeUtils } from "@/utils/TimeUtils";
 import "@/styles/Workouts/WorkoutLists.css";
 
 export function WorkoutsList() {
@@ -74,21 +74,11 @@ export function WorkoutsList() {
         </thead>
         <tbody>
           {workouts.map((workout, idx) => (
-            <tr
+            <WorkoutRow
               key={idx}
-              className={
-                "clickable-row" + (workout.enabled ? "" : " workout-disabled")
-              }
-              onClick={() => getWorkoutDetails(workout.name)}
-            >
-              <td className="text-left">
-                {workout.name.length > 0 && <span>{workout.name}</span>}
-                {workout.name.length == 0 && <span>{translate("other")}</span>}
-              </td>
-              <td>{TimeUtils.formatTimeDate(workout.latest_session)}</td>
-              <td>{workout.sessions}</td>
-              <td>{TimeUtils.formatDuration(workout.avg_time)}</td>
-            </tr>
+              workout={workout}
+              onSelect={getWorkoutDetails}
+            />
           ))}
         </tbody>
       </table>

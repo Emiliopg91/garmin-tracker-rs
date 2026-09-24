@@ -2,7 +2,7 @@ import { I18nSettingsContext } from "@/context/I18nSettingsContext";
 import { Languages, WorkoutDetails } from "@/utils/backend/models";
 import { TimeUtils } from "@/utils/TimeUtils";
 import { UnitUtils } from "@/utils/UnitUtils";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -11,18 +11,9 @@ import {
   Switch,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import {
-  CartesianGrid,
-  Legend,
-  Line,
-  LineChart,
-  ReferenceLine,
-  ResponsiveContainer,
-  XAxis,
-  YAxis,
-} from "recharts";
 import { BackendClient } from "@/utils/backend/client";
 import { LoadingContext } from "@/context/LoadingContext";
+import { WorkoutVolumeChart } from "./helpers/WorkoutVolumeChart";
 
 const NUMBER_LOCALES: Record<Languages, string> = {
   [Languages.Spanish]: "es-ES",
@@ -44,36 +35,7 @@ export function WorkoutModal({
 }: Props) {
   const { startLoading, finishLoading } = useContext(LoadingContext);
   const { translate, settings } = useContext(I18nSettingsContext);
-  const [chartData, setChartData] = useState<
-    { date: number; volume: number }[]
-  >([]);
-  const [minVol, setMinVol] = useState(99999);
-  const [maxVol, setMaxVol] = useState(0);
-  const [minDate, setMinDate] = useState(99999);
-  const [maxDate, setMaxDate] = useState(0);
   const [enabled, setEnabled] = useState(workout.enabled);
-
-  useEffect(() => {
-    const data = [...workout.sessions].reverse().map((ws) => {
-      const day = new Date(ws.date * 1000);
-      const date = new Date(day.getFullYear(), day.getMonth(), day.getDate());
-      return {
-        date: date.getTime(),
-        volume: ws.volume,
-      };
-    });
-    setChartData(data);
-    const dates = [...data].map(({ date }) => {
-      return date;
-    });
-    setMinDate(Math.min(...dates));
-    setMaxDate(Math.max(...dates));
-    const volumes = [...data].map(({ volume }) => {
-      return volume;
-    });
-    setMinVol(Math.min(...volumes));
-    setMaxVol(Math.max(...volumes));
-  }, []);
 
   const toggleEnabled = () => {
     startLoading();
@@ -151,48 +113,7 @@ export function WorkoutModal({
           <>
             <hr />
             {workout.avg_volume > 0 && (
-              <>
-                <div className="chart-container">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart
-                      data={chartData}
-                      margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
-                    >
-                      <CartesianGrid stroke="#80808000" strokeDasharray="5 5" />
-                      <XAxis
-                        dataKey="date"
-                        stroke="#fff"
-                        type="number"
-                        domain={[minDate, maxDate]}
-                        tick={false}
-                        height={0}
-                      />
-                      <YAxis
-                        stroke="#fff"
-                        width={0}
-                        domain={[minVol * 0.9, maxVol * 1.1]}
-                        tick={false}
-                      />{" "}
-                      {/* ← número, no "auto" */}
-                      <Line
-                        name={translate("volume")}
-                        type="monotone"
-                        dataKey="volume"
-                        stroke="#0f0"
-                        dot={{ fill: "#0f0" }}
-                        activeDot={{ stroke: "#00ff0000" }}
-                        isAnimationActive={false}
-                      />
-                      <ReferenceLine
-                        y={(minVol + maxVol) / 2}
-                        stroke="#808080"
-                        strokeDasharray="10 5"
-                      />
-                      <Legend />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
-              </>
+              <WorkoutVolumeChart sessions={workout.sessions} />
             )}
           </>
         )}

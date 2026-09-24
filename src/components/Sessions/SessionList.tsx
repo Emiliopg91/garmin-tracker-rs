@@ -5,9 +5,8 @@ import { BackendClient } from "@/utils/backend/client";
 import { SessionListItem } from "@/utils/backend/models";
 import { useContext, useEffect, useState } from "react";
 import { SessionModal } from "./SessionModal";
-import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
+import { SessionRow } from "./helpers/SessionRow";
 import { BackendListener } from "@/utils/backend/listener";
-import { TimeUtils } from "@/utils/TimeUtils";
 import { SessionFrontDetails, SessionUtils } from "@/utils/SessionUtils";
 
 export function SessionsList() {
@@ -79,28 +78,11 @@ export function SessionsList() {
 
           <tbody>
             {sessions.map((session, idx) => (
-              <tr
+              <SessionRow
                 key={idx}
-                onClick={() => getSessionDetails(session.timestamp)}
-                className="clickable-row"
-              >
-                <td>
-                  {session.has_record && (
-                    <EmojiEventsIcon className="trophy-icon" />
-                  )}
-                </td>
-                <td>{TimeUtils.formatTimeDate(session.timestamp)}</td>
-                <td>
-                  {translate("sport_" + session.sport) +
-                    " - " +
-                    translate(
-                      "sport_" + session.sport + "_" + session.sub_sport,
-                    )}
-                </td>
-                <td>{session.name}</td>
-                <td>{session.active_calories}</td>
-                <td>{session.training_load}</td>
-              </tr>
+                session={session}
+                onSelect={getSessionDetails}
+              />
             ))}
           </tbody>
         </table>

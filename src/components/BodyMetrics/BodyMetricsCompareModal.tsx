@@ -5,6 +5,7 @@ import { useContext } from "react";
 import { Dialog, DialogContent, DialogTitle, IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { TimeUtils } from "@/utils/TimeUtils";
+import { MetricCompareRow } from "./helpers/MetricCompareRow";
 
 type Props = {
   measures: BodyMetricListItem[];
@@ -42,65 +43,67 @@ export function BodyMetricsCompareModal({ measures, onClose }: Props) {
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>{translate("weight")}:</td>
-              {measures.map((entry, idx) => (
-                <td key={"entry-" + idx}>
+            <MetricCompareRow
+              label={translate("weight")}
+              measures={measures}
+              render={(entry) => (
+                <>
                   {UnitUtils.fromKg(entry.weight, settings.weight_unit).toFixed(
                     1,
                   )}{" "}
                   {UnitUtils.getUnit(settings.weight_unit)}
-                </td>
-              ))}
-            </tr>
-            <tr>
-              <td>{translate("fat_ratio")}:</td>
-              {measures.map((entry, idx) => (
-                <td key={"entry-" + idx}>{entry.fat_ratio}%</td>
-              ))}
-            </tr>
-            <tr>
-              <td>{translate("fat_mass")}:</td>
-              {measures.map((entry, idx) => (
-                <td key={"entry-" + idx}>
+                </>
+              )}
+            />
+            <MetricCompareRow
+              label={translate("fat_ratio")}
+              measures={measures}
+              render={(entry) => `${entry.fat_ratio}%`}
+            />
+            <MetricCompareRow
+              label={translate("fat_mass")}
+              measures={measures}
+              render={(entry) => (
+                <>
                   {UnitUtils.fromKg(
                     entry.weight * (entry.fat_ratio / 100),
                     settings.weight_unit,
                   ).toFixed(1)}{" "}
                   {UnitUtils.getUnit(settings.weight_unit)}
-                </td>
-              ))}
-            </tr>
-            <tr>
-              <td>{translate("lean_mass")}:</td>
-              {measures.map((entry, idx) => (
-                <td key={"entry-" + idx}>
+                </>
+              )}
+            />
+            <MetricCompareRow
+              label={translate("lean_mass")}
+              measures={measures}
+              render={(entry) => (
+                <>
                   {UnitUtils.fromKg(
                     entry.lean_mass,
                     settings.weight_unit,
                   ).toFixed(1)}{" "}
                   {UnitUtils.getUnit(settings.weight_unit)}
-                </td>
-              ))}
-            </tr>
-            <tr>
-              <td>{translate("water_ratio")}:</td>
-              {measures.map((entry, idx) => (
-                <td key={"entry-" + idx}>{entry.water_ratio}%</td>
-              ))}
-            </tr>
-            <tr>
-              <td>{translate("water_mass")}:</td>
-              {measures.map((entry, idx) => (
-                <td key={"entry-" + idx}>
+                </>
+              )}
+            />
+            <MetricCompareRow
+              label={translate("water_ratio")}
+              measures={measures}
+              render={(entry) => `${entry.water_ratio}%`}
+            />
+            <MetricCompareRow
+              label={translate("water_mass")}
+              measures={measures}
+              render={(entry) => (
+                <>
                   {UnitUtils.fromKg(
                     entry.weight * (entry.water_ratio / 100),
                     settings.weight_unit,
                   ).toFixed(1)}{" "}
                   {UnitUtils.getUnit(settings.weight_unit)}
-                </td>
-              ))}
-            </tr>
+                </>
+              )}
+            />
           </tbody>
         </table>
       </DialogContent>
