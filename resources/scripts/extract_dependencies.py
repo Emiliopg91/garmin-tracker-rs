@@ -130,7 +130,7 @@ def do_extract() -> list[str]:
     # una llamada por cada una (esto es lo que más tiempo ahorra).
     owners = package_owners(so_files)
 
-    dependencies: set[str] = set()
+    dependencies: set[str] = set('zenity')
     unowned: list[str] = []
 
     for so_file in so_files:
