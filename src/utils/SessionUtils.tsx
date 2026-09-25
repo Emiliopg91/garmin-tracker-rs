@@ -7,6 +7,7 @@ import {
 } from "./backend/models";
 import { UnitUtils } from "./UnitUtils";
 import L from "leaflet";
+import { TimeUtils } from "./TimeUtils";
 
 export interface WorkoutLoad {
   date: number;
@@ -309,9 +310,6 @@ export class SessionUtils {
     if (data.length === 0) {
       return [];
     } else {
-      const startOfDay = (d: Date) =>
-        new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
-
       const addDays = (ts: number, n: number) => {
         const d = new Date(ts);
         d.setDate(d.getDate() + n);
@@ -320,7 +318,7 @@ export class SessionUtils {
 
       const ACUTE_DAYS = 7;
       const ACWR_LOWER_RATIO = 0.9;
-      const TODAY = startOfDay(new Date());
+      const TODAY = TimeUtils.startOfDay(new Date()).getTime();
 
       const LAMBDA_ACUTE = 2 / (ACUTE_DAYS + 1); // ~0.25
       const LAMBDA_CHRONIC = 2 / (SessionUtils.CHRONIC_DAYS + 1); // ~0.069
@@ -329,7 +327,9 @@ export class SessionUtils {
         data
           .map((s) => {
             return {
-              date: startOfDay(new Date(s.timestamp * 1000)),
+              date: TimeUtils.startOfDay(
+                new Date(s.timestamp * 1000),
+              ).getTime(),
               load: s.training_load,
             };
           })

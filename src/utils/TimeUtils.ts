@@ -73,4 +73,8 @@ export class TimeUtils {
 
     return local;
   }
+
+  public static startOfDay(d: Date): Date {
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  }
 }

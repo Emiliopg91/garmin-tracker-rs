@@ -160,9 +160,6 @@ repetitions:
 fat_ratio:
   en: Fat %
   es: "% grasa"
-body_weight:
-  en: Body weight
-  es: Masa coporal
 lean_mass:
   en: Lean mass
   es: Masa magra
@@ -466,3 +463,6 @@ month_12:
 records:
   en: Records
   es: Records
+7_days_avg:
+  en: 7 days average
+  es: Media de 7 dias

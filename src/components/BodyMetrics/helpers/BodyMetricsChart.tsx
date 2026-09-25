@@ -13,10 +13,19 @@ import {
 
 type ChartDataType = {
   date: number;
-  fat: number;
-  lean: number;
-  weight: number;
+  fatAvg7: number;
+  leanAvg7: number;
+  weightAvg7: number;
 }[];
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+const SEVEN_DAYS_MS = 7 * DAY_MS;
+
+function toDayStart(ms: number): number {
+  const d = new Date(ms);
+  d.setHours(0, 0, 0, 0);
+  return d.getTime();
+}
 
 type Props = {
   metrics: BodyMetricListItem[];
@@ -40,36 +49,112 @@ export function BodyMetricsChart({ metrics }: Props) {
   const [maxDate, setMaxDate] = useState(0);
 
   useEffect(() => {
-    const newChartData: ChartDataType = [];
     const data_c = [...metrics];
     data_c.reverse();
+
+    if (data_c.length === 0) {
+      setChartData([]);
+      return;
+    }
+
     let lMinKg = 99999;
     let lMaxKg = 0;
     let lMinFat = 99999;
     let lMaxFat = 0;
     let lMinLean = 99999;
     let lMaxLean = 0;
-    data_c.forEach((data) => {
-      const date = new Date(data.date * 1000);
-      newChartData.push({
-        date: date.getTime(),
-        fat: data.fat_ratio,
-        lean: data.lean_mass,
-        weight: data.weight,
-      });
 
+    type DailyValue = {
+      fat: number;
+      lean: number;
+      weight: number;
+      count: number;
+    };
+    const dailyValues = new Map<number, DailyValue>();
+    data_c.forEach((data) => {
       lMinKg = Math.min(lMinKg, data.weight);
       lMaxKg = Math.max(lMaxKg, data.weight);
-
       lMinLean = Math.min(lMinLean, data.lean_mass);
       lMaxLean = Math.max(lMaxLean, data.lean_mass);
-
       lMinFat = Math.min(lMinFat, data.fat_ratio);
       lMaxFat = Math.max(lMaxFat, data.fat_ratio);
+
+      const day = toDayStart(data.date * 1000);
+      const entry = dailyValues.get(day) ?? {
+        fat: 0,
+        lean: 0,
+        weight: 0,
+        count: 0,
+      };
+      entry.fat += data.fat_ratio;
+      entry.lean += data.lean_mass;
+      entry.weight += data.weight;
+      entry.count += 1;
+      dailyValues.set(day, entry);
     });
-    const dates = [...newChartData].map(({ date }) => {
-      return date;
+
+    // Fill gaps between logged days by linearly interpolating between the
+    // nearest known days, so every calendar day has a value.
+    const knownDays = [...dailyValues.keys()].sort((a, b) => a - b);
+    const average = (entry: DailyValue) => ({
+      fat: entry.fat / entry.count,
+      lean: entry.lean / entry.count,
+      weight: entry.weight / entry.count,
     });
+    const interpolate = (a: number, b: number, frac: number) =>
+      a + (b - a) * frac;
+
+    const daily: { day: number; fat: number; lean: number; weight: number }[] =
+      [];
+    let k = 0;
+    for (
+      let day = knownDays[0];
+      day <= knownDays[knownDays.length - 1];
+      day += DAY_MS
+    ) {
+      while (k + 1 < knownDays.length && knownDays[k + 1] <= day) {
+        k++;
+      }
+      if (knownDays[k] === day) {
+        daily.push({ day, ...average(dailyValues.get(day)!) });
+      } else {
+        const prev = average(dailyValues.get(knownDays[k])!);
+        const next = average(dailyValues.get(knownDays[k + 1])!);
+        const frac = (day - knownDays[k]) / (knownDays[k + 1] - knownDays[k]);
+        daily.push({
+          day,
+          fat: interpolate(prev.fat, next.fat, frac),
+          lean: interpolate(prev.lean, next.lean, frac),
+          weight: interpolate(prev.weight, next.weight, frac),
+        });
+      }
+    }
+
+    const newChartData: ChartDataType = [];
+    let windowStart = 0;
+    daily.forEach((entry, i) => {
+      while (daily[windowStart].day <= entry.day - SEVEN_DAYS_MS) {
+        windowStart++;
+      }
+      let fatSum = 0;
+      let leanSum = 0;
+      let weightSum = 0;
+      const windowSize = i - windowStart + 1;
+      for (let j = windowStart; j <= i; j++) {
+        fatSum += daily[j].fat;
+        leanSum += daily[j].lean;
+        weightSum += daily[j].weight;
+      }
+
+      newChartData.push({
+        date: entry.day,
+        fatAvg7: fatSum / windowSize,
+        leanAvg7: leanSum / windowSize,
+        weightAvg7: weightSum / windowSize,
+      });
+    });
+
+    const dates = newChartData.map(({ date }) => date);
     setMinDate(Math.min(...dates));
     setMaxDate(Math.max(...dates));
     setMaxWeight(lMaxKg);
@@ -82,75 +167,83 @@ export function BodyMetricsChart({ metrics }: Props) {
   }, [metrics]);
 
   return (
-    <div className="chart-container">
-      <ResponsiveContainer width="100%" height="100%">
-        <LineChart
-          data={chartData}
-          margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
-        >
-          <CartesianGrid stroke="#80808000" strokeDasharray="5 5" />
-          <XAxis
-            dataKey="date"
-            type="number"
-            domain={[minDate, maxDate]}
-            stroke="#fff"
-            tick={false}
-            height={0}
-          />
-          <YAxis
-            yAxisId="fat"
-            stroke="#fff"
-            width={0}
-            domain={[minFat, maxFat]}
-            tick={false}
-          />
-          <YAxis
-            yAxisId="weight"
-            stroke="#fff"
-            width={0}
-            domain={[minWeight, maxWeight]}
-            tick={false}
-          />
-          <YAxis
-            yAxisId="lean"
-            stroke="#fff"
-            width={0}
-            domain={[minLean, maxLean]}
-            tick={false}
-          />
-          <Line
-            yAxisId="fat"
-            name={translate("fat_ratio")}
-            type="monotone"
-            dataKey="fat"
-            stroke="#f00"
-            dot={{ fill: "#f00" }}
-            activeDot={{ stroke: "#00ff0000" }}
-            isAnimationActive={false}
-          />
-          <Line
-            yAxisId="weight"
-            name={translate("body_weight")}
-            type="monotone"
-            dataKey="weight"
-            stroke="cyan"
-            dot={{ fill: "cyan" }}
-            activeDot={{ stroke: "#00ff0000" }}
-            isAnimationActive={false}
-          />
-          <Line
-            yAxisId="lean"
-            name={translate("lean_mass")}
-            type="monotone"
-            dataKey="lean"
-            stroke="green"
-            dot={{ fill: "green" }}
-            activeDot={{ stroke: "#00ff0000" }}
-            isAnimationActive={false}
-          />
-          <Legend />
-        </LineChart>
-      </ResponsiveContainer>
-    </div>
+    <>
+      <div style={{ textAlign: "center" }}>
+        <h4>{translate("7_days_avg")}</h4>
+      </div>
+      <div
+        className="chart-container"
+        style={{ position: "relative", top: "-40px" }}
+      >
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart
+            data={chartData}
+            margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
+          >
+            <CartesianGrid stroke="#80808000" strokeDasharray="5 5" />
+            <XAxis
+              dataKey="date"
+              type="number"
+              domain={[minDate, maxDate]}
+              stroke="#fff"
+              tick={false}
+              height={0}
+            />
+            <YAxis
+              yAxisId="fat"
+              stroke="#fff"
+              width={0}
+              domain={[minFat, maxFat]}
+              tick={false}
+            />
+            <YAxis
+              yAxisId="weight"
+              stroke="#fff"
+              width={0}
+              domain={[minWeight, maxWeight]}
+              tick={false}
+            />
+            <YAxis
+              yAxisId="lean"
+              stroke="#fff"
+              width={0}
+              domain={[minLean, maxLean]}
+              tick={false}
+            />
+            <Line
+              yAxisId="fat"
+              name={translate("fat_ratio")}
+              type="monotone"
+              dataKey="fatAvg7"
+              stroke="#f00"
+              dot={false}
+              activeDot={false}
+              isAnimationActive={false}
+            />
+            <Line
+              yAxisId="weight"
+              name={translate("weight")}
+              type="monotone"
+              dataKey="weightAvg7"
+              stroke="cyan"
+              dot={false}
+              activeDot={false}
+              isAnimationActive={false}
+            />
+            <Line
+              yAxisId="lean"
+              name={translate("lean_mass")}
+              type="monotone"
+              dataKey="leanAvg7"
+              stroke="green"
+              dot={false}
+              activeDot={false}
+              isAnimationActive={false}
+            />
+            <Legend />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+    </>
   );
 }
