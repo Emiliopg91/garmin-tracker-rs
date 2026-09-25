@@ -43,6 +43,7 @@ use rusqlite_orm::{
 };
 use tauri::{AppHandle, Emitter, Manager, State};
 use tauri_plugin_log::log::{debug, error, info, warn};
+use tokio::process::Command;
 
 /// Returns every recorded session, newest first.
 #[traced_command]
@@ -331,20 +332,29 @@ pub async fn _import_from_device(app: &AppHandle, serial: &str) -> Result<usize,
 #[traced_command]
 #[tauri::command]
 pub async fn import_from_files(app: AppHandle) -> Result<usize, String> {
-    let picked_files = rfd::AsyncFileDialog::new()
-        .add_filter("fit", &["fit"])
-        .set_directory(constants::HOME_DIR.to_path_buf())
-        .pick_files()
-        .await;
+    let output = Command::new("zenity")
+        .args([
+            "--file-selection",
+            "--multiple",
+            "--separator=\n",
+            "--file-filter=Archivos FIT (*.fit) | *.fit",
+            "--title=Selecciona archivos FIT",
+        ])
+        .output()
+        .await
+        .map_err(|e| e.to_string())?;
 
-    if let Some(picked_files) = picked_files
-        && !picked_files.is_empty()
-    {
-        let files = picked_files
-            .into_iter()
-            .map(|pf| pf.path().to_path_buf())
-            .collect::<Vec<_>>();
+    let files = if output.status.success() {
+        String::from_utf8(output.stdout)
+            .map_err(|e| e.to_string())?
+            .lines()
+            .map(PathBuf::from)
+            .collect()
+    } else {
+        Vec::new()
+    };
 
+    if !files.is_empty() {
         let res = tokio::task::spawn_blocking(move || _import_from_files(app, files.as_slice()))
             .await
             .map_err(|e| e.to_string())

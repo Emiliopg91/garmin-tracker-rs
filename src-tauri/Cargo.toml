@@ -39,7 +39,6 @@ ouroboros = "^0"
 phf = { version = "^0", features = ["macros"] }
 ratatui = "^0"
 rayon = "^1"
-rfd = "^0"
 #rusqlite_orm = { path = "../rusqlite_orm/orm", features = ["derive"] }
 rusqlite_orm = { version = "^1", features = ["derive"] }
 rustyfit = { version = "^0", features = ["serde"] }
