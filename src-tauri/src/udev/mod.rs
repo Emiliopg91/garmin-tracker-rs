@@ -50,11 +50,6 @@ zenity --password --title="Elevated permissions are required to edit device rule
                 .set_permissions(std::fs::Permissions::from_mode(0o700))
                 .map_err(UdevError::Write)?;
 
-            // Close the write fd before `sudo -A` execs this file: on Linux, execve() fails
-            // with ETXTBSY if any fd is still open for writing on the target. `into_temp_path`
-            // closes the `File` but keeps the on-disk entry, which is still removed on drop -
-            // kept alive until after `sudo` runs, whether the block below succeeds or returns
-            // early via `?`.
             let askpass_path = askpass_file.into_temp_path();
 
             let status = Command::new("sudo")
