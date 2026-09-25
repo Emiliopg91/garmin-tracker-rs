@@ -472,3 +472,6 @@ records:
 7_days_avg:
   en: 7 days average
   es: Media de 7 dias
+select_files_import:
+  en: Select files to import
+  es: Seleccione archivos a importar

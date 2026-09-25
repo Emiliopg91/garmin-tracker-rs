@@ -331,14 +331,18 @@ pub async fn _import_from_device(app: &AppHandle, serial: &str) -> Result<usize,
 /// Tauri command wrapper around `_import_from_device`; returns the number of sessions imported.
 #[traced_command]
 #[tauri::command]
-pub async fn import_from_files(app: AppHandle) -> Result<usize, String> {
+pub async fn import_from_files(
+    app: AppHandle,
+    settings: State<'_, SettingsLock>,
+) -> Result<usize, String> {
+    let lang = { settings.read().unwrap().language };
     let output = Command::new("zenity")
         .args([
             "--file-selection",
             "--multiple",
             "--separator=\n",
-            "--file-filter=Archivos FIT (*.fit) | *.fit",
-            "--title=Selecciona archivos FIT",
+            "--file-filter=FIT (*.fit) | *.fit",
+            &format!("--title={}", translate("select_files_import", lang)),
         ])
         .output()
         .await
@@ -364,6 +368,7 @@ pub async fn import_from_files(app: AppHandle) -> Result<usize, String> {
 
     Ok(0)
 }
+
 pub fn _import_from_files(app: AppHandle, files: &[PathBuf]) -> Result<usize, String> {
     let lang = app.state::<SettingsLock>().read().unwrap().language;
     let database = app.state::<DatabasePool>();
