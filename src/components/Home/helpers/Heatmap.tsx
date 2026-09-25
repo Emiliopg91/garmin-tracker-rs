@@ -1,4 +1,5 @@
 import { I18nSettingsContext } from "@/context/I18nSettingsContext";
+import { TimeUtils } from "@/utils/TimeUtils";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import {
   ResponsiveContainer,
@@ -80,7 +81,7 @@ const isValidCalendarDate = (
 // background, load >= 100 saturates at GitHub's contribution green
 const HEATMAP_ZERO_COLOR = "#000000";
 const HEATMAP_MAX_COLOR = "#00ff00";
-const HEATMAP_SCALE_MAX = 100;
+const HEATMAP_SCALE_MAX = 150;
 const HEATMAP_Y_AXIS_WIDTH = 65;
 const HEATMAP_X_AXIS_HEIGHT = 10;
 const HEATMAP_DAY_TICKS = [1, 10, 20, 30];
@@ -94,8 +95,8 @@ const hexToRgb = (hex: string): [number, number, number] => [
 
 const getHeatColor = (load: number): string => {
   if (load == 0) {
-    const [r1, g1, b1] = hexToRgb(HEATMAP_ZERO_COLOR);
-    return `rgba(${r1}, ${g1}, ${b1}, 0.1)`;
+    const [r, g, b] = hexToRgb(HEATMAP_ZERO_COLOR);
+    return `rgba(${r}, ${g}, ${b}, 0.1)`;
   } else {
     const [r1, g1, b1] = hexToRgb(HEATMAP_MAX_COLOR);
     const [r2, g2, b2] = hexToRgb(HEATMAP_MAX_COLOR);
@@ -262,9 +263,17 @@ export function Heatmap({ data }: HeatmapProps) {
               if (!props.active || !point || !isValidPoint(point)) {
                 return null;
               }
+              const year = yearForMonth(
+                point.month,
+                point.day,
+                todayMonth,
+                todayDay,
+                todayYear,
+              );
+              const date = new Date(year, point.month - 1, point.day);
               return (
                 <div className="heatmap-tooltip">
-                  <b>{`${point.day} ${translate("month_" + point.month)}`}</b>
+                  <b>{TimeUtils.formatDate(date.getTime() / 1000)}</b>
                   <br />
                   <span>{translate("workout_load") + ": " + point.load}</span>
                   <br />

@@ -1,5 +1,6 @@
 import { I18nSettingsContext } from "@/context/I18nSettingsContext";
 import { SessionSet } from "@/utils/backend/models";
+import { TimeUtils } from "@/utils/TimeUtils";
 import { useContext, useEffect, useState } from "react";
 import {
   CartesianGrid,
@@ -7,6 +8,8 @@ import {
   Line,
   LineChart,
   ResponsiveContainer,
+  Tooltip,
+  TooltipContentProps,
   XAxis,
   YAxis,
 } from "recharts";
@@ -14,6 +17,37 @@ import {
 type Props = {
   series: Record<string, SessionSet[]>;
 };
+
+function ExerciseVolumeTooltip({
+  active,
+  payload,
+  label,
+  translate,
+}: TooltipContentProps & {
+  translate: (key: string) => string;
+}) {
+  if (!active || !payload || payload.length === 0 || label == null) {
+    return null;
+  }
+  const data = payload[0].payload as {
+    date: number;
+    volume: number;
+    reps: number;
+  };
+  return (
+    <div className="chart-tooltip">
+      <div>
+        <b>{TimeUtils.formatDate(data.date)}</b>
+      </div>
+      <div>
+        {translate("volume")}: {data.volume}
+      </div>
+      <div>
+        {translate("repetitions")}: {data.reps}
+      </div>
+    </div>
+  );
+}
 
 export function ExerciseVolumeChart({ series }: Props) {
   const { translate } = useContext(I18nSettingsContext);
@@ -97,6 +131,11 @@ export function ExerciseVolumeChart({ series }: Props) {
             dot={{ fill: "#f00" }}
             activeDot={{ stroke: "#f0f0f000" }}
             isAnimationActive={false}
+          />
+          <Tooltip
+            content={(props) => (
+              <ExerciseVolumeTooltip {...props} translate={translate} />
+            )}
           />
           <Legend />
         </LineChart>

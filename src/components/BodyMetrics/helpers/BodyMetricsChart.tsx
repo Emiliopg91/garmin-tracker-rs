@@ -1,5 +1,7 @@
 import { I18nSettingsContext } from "@/context/I18nSettingsContext";
-import { BodyMetricListItem } from "@/utils/backend/models";
+import { BodyMetricListItem, WeightUnit } from "@/utils/backend/models";
+import { TimeUtils } from "@/utils/TimeUtils";
+import { UnitUtils } from "@/utils/UnitUtils";
 import { useContext, useEffect, useState } from "react";
 import {
   CartesianGrid,
@@ -7,6 +9,8 @@ import {
   Line,
   LineChart,
   ResponsiveContainer,
+  Tooltip,
+  TooltipContentProps,
   XAxis,
   YAxis,
 } from "recharts";
@@ -17,6 +21,40 @@ type ChartDataType = {
   leanAvg7: number;
   weightAvg7: number;
 }[];
+
+function ChartTooltip({
+  active,
+  payload,
+  label,
+  translate,
+  weightUnit,
+}: TooltipContentProps & {
+  translate: (key: string) => string;
+  weightUnit: WeightUnit;
+}) {
+  if (!active || !payload || payload.length === 0 || label == null) {
+    return null;
+  }
+  const data = payload[0].payload as ChartDataType[number];
+  return (
+    <div className="chart-tooltip">
+      <div>{TimeUtils.formatDate(data.date / 1000)}</div>
+      <div>
+        {translate("fat_ratio")}: {data.fatAvg7.toFixed(1)}%
+      </div>
+      <div>
+        {translate("weight")}:{" "}
+        {UnitUtils.fromKg(data.weightAvg7, weightUnit).toFixed(1)}{" "}
+        {UnitUtils.getUnit(weightUnit)}
+      </div>
+      <div>
+        {translate("lean_mass")}:{" "}
+        {UnitUtils.fromKg(data.leanAvg7, weightUnit).toFixed(1)}{" "}
+        {UnitUtils.getUnit(weightUnit)}
+      </div>
+    </div>
+  );
+}
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const SEVEN_DAYS_MS = 7 * DAY_MS;
@@ -32,7 +70,7 @@ type Props = {
 };
 
 export function BodyMetricsChart({ metrics }: Props) {
-  const { translate } = useContext(I18nSettingsContext);
+  const { translate, settings } = useContext(I18nSettingsContext);
 
   const [chartData, setChartData] = useState<ChartDataType>([]);
 
@@ -239,6 +277,15 @@ export function BodyMetricsChart({ metrics }: Props) {
               dot={false}
               activeDot={false}
               isAnimationActive={false}
+            />
+            <Tooltip
+              content={(props) => (
+                <ChartTooltip
+                  {...props}
+                  translate={translate}
+                  weightUnit={settings.weight_unit}
+                />
+              )}
             />
             <Legend />
           </LineChart>

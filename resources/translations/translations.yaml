@@ -61,6 +61,12 @@ workload:
 reference:
   en: Reference
   es: Referencia
+upper_threshold:
+  en: Upper
+  es: Superior
+lower_threshold:
+  en: Lower
+  es: Inferior
 workout:
   en: Workout
   es: Entrenamiento

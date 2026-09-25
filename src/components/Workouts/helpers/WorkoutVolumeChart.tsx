@@ -1,5 +1,6 @@
 import { I18nSettingsContext } from "@/context/I18nSettingsContext";
 import { WorkoutSession } from "@/utils/backend/models";
+import { TimeUtils } from "@/utils/TimeUtils";
 import { useContext, useEffect, useState } from "react";
 import {
   CartesianGrid,
@@ -8,6 +9,8 @@ import {
   LineChart,
   ReferenceLine,
   ResponsiveContainer,
+  Tooltip,
+  TooltipContentProps,
   XAxis,
   YAxis,
 } from "recharts";
@@ -15,6 +18,30 @@ import {
 type Props = {
   sessions: WorkoutSession[];
 };
+
+function WorkoutVolumeTooltip({
+  active,
+  payload,
+  label,
+  translate,
+}: TooltipContentProps & {
+  translate: (key: string) => string;
+}) {
+  if (!active || !payload || payload.length === 0 || label == null) {
+    return null;
+  }
+  const data = payload[0].payload as { date: number; volume: number };
+  return (
+    <div className="chart-tooltip">
+      <div>
+        <b>{TimeUtils.formatDate(data.date / 1000)}</b>
+      </div>
+      <div>
+        {translate("volume")}: {data.volume}
+      </div>
+    </div>
+  );
+}
 
 export function WorkoutVolumeChart({ sessions }: Props) {
   const { translate } = useContext(I18nSettingsContext);
@@ -83,6 +110,11 @@ export function WorkoutVolumeChart({ sessions }: Props) {
             y={(minVol + maxVol) / 2}
             stroke="#808080"
             strokeDasharray="10 5"
+          />
+          <Tooltip
+            content={(props) => (
+              <WorkoutVolumeTooltip {...props} translate={translate} />
+            )}
           />
           <Legend />
         </LineChart>

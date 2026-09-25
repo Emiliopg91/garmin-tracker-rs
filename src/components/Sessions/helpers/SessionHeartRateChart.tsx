@@ -8,6 +8,8 @@ import {
   Legend,
   ReferenceLine,
   ResponsiveContainer,
+  Tooltip,
+  TooltipContentProps,
   XAxis,
   YAxis,
 } from "recharts";
@@ -18,6 +20,35 @@ type Props = {
   zonesTimes: number[];
   totalElapsedTime: number;
 };
+
+function HeartRateTooltip({
+  active,
+  payload,
+  translate,
+  totalElapsedTime,
+  sampleCount,
+}: TooltipContentProps & {
+  translate: (key: string) => string;
+  totalElapsedTime: number;
+  sampleCount: number;
+}) {
+  if (!active || !payload || payload.length === 0) {
+    return null;
+  }
+  const data = payload[0].payload as { idx: number; hr: number };
+  const elapsed =
+    sampleCount > 0 ? (data.idx * totalElapsedTime) / sampleCount : 0;
+  return (
+    <div className="chart-tooltip">
+      <div>
+        <b>{TimeUtils.formatDuration(elapsed)}</b>
+      </div>
+      <div>
+        {translate("heart_rate")}: {data.hr}
+      </div>
+    </div>
+  );
+}
 
 export function SessionHeartRateChart({
   hrBreathData,
@@ -107,6 +138,16 @@ export function SessionHeartRateChart({
             fill="url(#hrColor)"
             fillOpacity={1}
             activeDot={false}
+          />
+          <Tooltip
+            content={(props) => (
+              <HeartRateTooltip
+                {...props}
+                translate={translate}
+                totalElapsedTime={totalElapsedTime}
+                sampleCount={hrBreathData.length}
+              />
+            )}
           />
         </AreaChart>
       </ResponsiveContainer>

@@ -1,5 +1,6 @@
 import { I18nSettingsContext } from "@/context/I18nSettingsContext";
 import { WorkoutLoad } from "@/utils/SessionUtils";
+import { TimeUtils } from "@/utils/TimeUtils";
 import { useContext } from "react";
 import {
   Area,
@@ -8,6 +9,8 @@ import {
   Legend,
   Line,
   ResponsiveContainer,
+  Tooltip,
+  TooltipContentProps,
   XAxis,
   YAxis,
 } from "recharts";
@@ -16,6 +19,36 @@ type Props = {
   workload: WorkoutLoad[];
   minDate: number;
 };
+
+function WorkloadTooltip({
+  active,
+  payload,
+  label,
+  translate,
+}: TooltipContentProps & {
+  translate: (key: string) => string;
+}) {
+  if (!active || !payload || payload.length === 0 || label == null) {
+    return null;
+  }
+  const data = payload[0].payload as WorkoutLoad;
+  return (
+    <div className="chart-tooltip">
+      <div>
+        <b>{TimeUtils.formatDate(data.date / 1000)}</b>
+      </div>
+      <div>
+        {translate("upper_threshold")}: {(data.lower + data.upper).toFixed(0)}
+      </div>
+      <div>
+        {translate("workload")}: {data.current.toFixed(0)}
+      </div>
+      <div>
+        {translate("lower_threshold")}: {data.lower.toFixed(0)}
+      </div>
+    </div>
+  );
+}
 
 export function WorkloadChart({ workload, minDate }: Props) {
   const { translate } = useContext(I18nSettingsContext);
@@ -85,6 +118,11 @@ export function WorkloadChart({ workload, minDate }: Props) {
             dot={false}
             isAnimationActive={false}
             activeDot={false}
+          />
+          <Tooltip
+            content={(props) => (
+              <WorkloadTooltip {...props} translate={translate} />
+            )}
           />
           <Legend />
         </ComposedChart>
