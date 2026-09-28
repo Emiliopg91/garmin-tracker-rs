@@ -34,12 +34,11 @@ impl TryFrom<FitParser> for DeviceSettings {
                 })?;
                 if let DecoderEvent::Message(msg) = event
                     && msg.num == MesgNum::ZONES_TARGET
+                    && !zt_parsed
                 {
-                    if !zt_parsed {
-                        let dev_set = mesgdef::ZonesTarget::from(msg);
-                        max_heart_rate = Some(dev_set.max_heart_rate);
-                        zt_parsed = true;
-                    }
+                    let dev_set = mesgdef::ZonesTarget::from(msg);
+                    max_heart_rate = Some(dev_set.max_heart_rate);
+                    zt_parsed = true;
                 }
             }
 
