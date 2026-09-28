@@ -4,7 +4,7 @@ use std::{
     io::BufWriter,
     path::{Path, PathBuf},
     sync::Mutex,
-    time::Duration,
+    time::{Duration, SystemTime, UNIX_EPOCH},
 };
 
 use crate::{
@@ -24,7 +24,7 @@ use crate::{
     },
     logic::{notifications::show_notification, report_error},
     mtp::MTP_CLIENT_INST,
-    parser::FitParser,
+    parser::{FitParser, settings::DeviceSettings},
     utils::{
         constants,
         translations::{Languages, translate, translate_and_replace},
@@ -256,24 +256,43 @@ pub async fn _import_from_device(app: &AppHandle, serial: &str) -> Result<usize,
         "Fetching from device activity files after {}...",
         latest_date
     );
-    let mut res = Ok(Vec::new());
+    let mut res: Result<Vec<i64>, DatabaseError> = Ok(Vec::new());
     let mut activities = Vec::new();
-    let mut src_dir = None;
 
-    if let Ok(Some(dst_dir)) = MTP_CLIENT_INST
-        .lock()
+    let mtp_client = MTP_CLIENT_INST.lock().await;
+
+    let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
+    let src_dir = std::env::temp_dir().join(format!(
+        "{}-{}",
+        constants::MTP_TMP_DIR_PREFIX,
+        now.as_millis()
+    ));
+
+    if mtp_client
+        .download_activities_since(serial, latest_date, src_dir.clone())
         .await
-        .download_activities_since(serial, latest_date)
-        .await
-        .map_err(|e| e.to_string())
+        .is_ok()
     {
-        src_dir = Some(dst_dir.clone());
+        let mut dev_settings = None;
+        if let Ok(Some(path)) = mtp_client
+            .download_settings_file(serial, src_dir.clone())
+            .await
+        {
+            info!("Parsing settings file {}", path.display());
+            if let Ok(parser) = FitParser::from_file(path)
+                && let Ok(settings) = DeviceSettings::try_from(parser)
+            {
+                dev_settings = Some(settings);
+            }
+        }
+
         activities = Vec::new();
 
-        if let Ok(read_dir) = fs::read_dir(dst_dir) {
+        if let Ok(read_dir) = fs::read_dir(&src_dir) {
             for entry in read_dir {
                 if let Ok(entry) = entry
                     && entry.file_type().unwrap().is_file()
+                    && entry.file_name() != "Settings.fit"
                 {
                     activities.push(entry.path());
                 }
@@ -284,10 +303,17 @@ pub async fn _import_from_device(app: &AppHandle, serial: &str) -> Result<usize,
         let app_cpy = app.clone();
         res = tokio::task::spawn_blocking(move || {
             let db = app_cpy.state::<DatabasePool>();
-            db.run_in_transaction(|tx| {
+            db.run_in_transaction(move |tx| {
                 let res = if !activities_cpy.is_empty() {
                     info!("Fetched {} activity files", activities_cpy.len());
-                    import_file_list(tx, &activities_cpy, Some(device.clone()), lang, true)
+                    import_file_list(
+                        tx,
+                        &activities_cpy,
+                        Some(device.clone()),
+                        lang,
+                        true,
+                        dev_settings.clone(),
+                    )
                 } else {
                     Ok(Vec::new())
                 }?;
@@ -304,9 +330,7 @@ pub async fn _import_from_device(app: &AppHandle, serial: &str) -> Result<usize,
 
     match res {
         Ok(res) => {
-            if res.len() == activities.len()
-                && let Some(src_dir) = src_dir
-            {
+            if res.len() == activities.len() {
                 let _ = fs::remove_dir_all(src_dir);
             }
 
@@ -373,7 +397,7 @@ pub fn _import_from_files(app: AppHandle, files: &[PathBuf]) -> Result<usize, St
     let lang = app.state::<SettingsLock>().read().unwrap().language;
     let database = app.state::<DatabasePool>();
     let res = database
-        .run_in_transaction(|tx| Ok(import_file_list(tx, files, None, lang, false)?))
+        .run_in_transaction(|tx| Ok(import_file_list(tx, files, None, lang, false, None)?))
         .map_err(|e| e.to_string());
 
     match res {
@@ -403,6 +427,7 @@ fn import_file_list<F>(
     device: Option<Device>,
     lang: Languages,
     delete: bool,
+    dev_settings: Option<DeviceSettings>,
 ) -> Result<Vec<i64>, DatabaseError>
 where
     F: AsRef<Path> + Sync,
@@ -413,10 +438,19 @@ where
     let mut sessions = files
         .par_iter()
         .filter_map(|file| {
-            info!("Parsing file {}", file.as_ref().display());
+            info!("Parsing session file {}", file.as_ref().display());
             let res = match FitParser::from_file(file) {
                 Ok(parser) => match Session::try_from(parser) {
-                    Ok(session) => Ok((session, file)),
+                    Ok(mut session) => {
+                        if let Some(mut ad) = session.additional_data.clone()
+                            && ad.heart_rates.is_some()
+                            && let Some(ds) = dev_settings.clone()
+                        {
+                            ad.max_hr = Some(ds.max_heart_rate);
+                            session.additional_data = Some(ad);
+                        }
+                        Ok((session, file))
+                    }
                     Err(e) => Err(e),
                 },
                 Err(e) => Err(e),

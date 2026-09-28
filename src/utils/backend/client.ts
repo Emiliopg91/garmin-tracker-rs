@@ -26,7 +26,7 @@ export class BackendClient {
 	}
 	
 
-	// From src-tauri/src/logic/sessions.rs:783
+	// From src-tauri/src/logic/sessions.rs:817
 	public static exportGpx(session: number): Promise<void> {
 	  return BackendClient.inner_invoke("export_gpx", { session }); 
 	}
@@ -56,7 +56,7 @@ export class BackendClient {
 	}
 	
 
-	// From src-tauri/src/logic/sessions.rs:838
+	// From src-tauri/src/logic/sessions.rs:872
 	public static getHeatmapData(): Promise<[number, number][][]> {
 	  return BackendClient.inner_invoke("get_heatmap_data"); 
 	}
@@ -104,7 +104,7 @@ export class BackendClient {
 	}
 	
 
-	// From src-tauri/src/logic/sessions.rs:334
+	// From src-tauri/src/logic/sessions.rs:358
 	public static importFromFiles(): Promise<number> {
 	  return BackendClient.inner_invoke("import_from_files"); 
 	}

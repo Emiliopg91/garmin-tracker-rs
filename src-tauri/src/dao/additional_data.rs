@@ -12,6 +12,7 @@ pub struct AdditionalData {
     pub altitudes: Option<Vec<u8>>,
     pub distance: Option<f64>,
     pub notes: Option<String>,
+    pub max_hr: Option<u8>,
 }
 
 impl AdditionalData {
@@ -31,6 +32,7 @@ impl AdditionalData {
             heart_rates: None,
             notes: None,
             speeds: None,
+            max_hr: None,
         }
     }
 

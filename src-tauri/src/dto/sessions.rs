@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     dao::{exercise::Exercise, lap::Lap, session::Session, set::Set},
+    parser::settings::DeviceSettings,
     utils::constants,
 };
 
@@ -105,6 +106,7 @@ pub struct SessionDetails {
 
     pub sets: Vec<SessionSet>,
     pub heart_rates: Vec<Option<u8>>,
+    pub max_hr: u8,
     pub coordinates: Vec<Option<(i32, i32)>>,
     pub altitudes: Vec<Option<f64>>,
     pub laps: Vec<SessionLap>,
@@ -124,6 +126,7 @@ impl From<(&Session, &[Exercise], &[Set], &[Lap])> for SessionDetails {
             .map(|dev| format!("Garmin {}", dev.model));
 
         let mut heart_rates = Vec::new();
+        let mut max_hr = DeviceSettings::default().max_heart_rate;
         let mut gps_coordinates = Vec::new();
         let mut speeds = Vec::new();
         let mut distance = None;
@@ -147,6 +150,9 @@ impl From<(&Session, &[Exercise], &[Set], &[Lap])> for SessionDetails {
             if let Some(alts) = add_data.get_altitudes() {
                 altitudes = alts
             }
+            if let Some(hr) = add_data.max_hr {
+                max_hr = hr;
+            }
         }
 
         let sets = value.2.iter().map(SessionSet::from).collect();
@@ -164,6 +170,7 @@ impl From<(&Session, &[Exercise], &[Set], &[Lap])> for SessionDetails {
             sub_sport: value.0.sub_sport,
             sets,
             heart_rates,
+            max_hr,
             device,
             laps,
             coordinates: gps_coordinates,

@@ -1,4 +1,5 @@
-pub mod session_parser;
+pub mod session;
+pub mod settings;
 
 use std::{
     fs::File,

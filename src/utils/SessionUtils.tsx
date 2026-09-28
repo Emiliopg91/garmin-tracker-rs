@@ -229,7 +229,7 @@ export class SessionUtils {
         }
       }
 
-      const maxHr = Math.max(189, ...validHrs);
+      const maxHr = Math.max(details.max_hr, ...validHrs);
 
       details.zones_times = [0, 0, 0, 0, 0];
       validHrs.forEach((hr) => {

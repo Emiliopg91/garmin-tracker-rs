@@ -1,8 +1,4 @@
-use std::{
-    path::PathBuf,
-    sync::LazyLock,
-    time::{Instant, SystemTime, UNIX_EPOCH},
-};
+use std::{path::PathBuf, sync::LazyLock, time::Instant};
 
 use mtp_rs::MtpDevice;
 use tauri_plugin_log::log::{debug, error, info};
@@ -49,7 +45,8 @@ impl MtpClient {
         &self,
         serial: &str,
         date: String,
-    ) -> Result<Option<PathBuf>> {
+        dst_dir: PathBuf,
+    ) -> Result<()> {
         let devices_info = MtpDevice::list_devices().map_err(MtpError::ListDevices)?;
         let device_info = devices_info
             .iter()
@@ -72,7 +69,7 @@ impl MtpClient {
 
         // Every fallible step below runs inside this block so that, regardless of how it
         // exits, `device.close()` below always runs exactly once.
-        let result: Result<Option<PathBuf>> = async {
+        let result: Result<()> = async {
             debug!("Entering into GARMIN folder...");
             let storages = device.storages().await.map_err(MtpError::Storage)?;
             let storage = storages
@@ -107,19 +104,13 @@ impl MtpClient {
 
             if objs.is_empty() {
                 info!("No pending files to import");
-                return Ok(None);
+                return Ok(());
             }
 
             info!("Pending {} files", objs.len());
-            let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
-            let tmp_dir = std::env::temp_dir().join(format!(
-                "{}-{}",
-                constants::MTP_TMP_DIR_PREFIX,
-                now.as_millis()
-            ));
 
-            fs::create_dir_all(&tmp_dir).await.map_err(|e| {
-                MtpError::ErrorCreatingDownloadFolder(tmp_dir.display().to_string(), e)
+            fs::create_dir_all(&dst_dir).await.map_err(|e| {
+                MtpError::ErrorCreatingDownloadFolder(dst_dir.display().to_string(), e)
             })?;
 
             info!("Downloading files...");
@@ -129,7 +120,7 @@ impl MtpClient {
             for obj in objs {
                 match storage.download_to_vec(obj.handle).await {
                     Ok(bytes) => {
-                        let path = tmp_dir.join(&obj.filename);
+                        let path = dst_dir.join(&obj.filename);
                         fs::write(&path, &bytes)
                             .await
                             .map_err(|e| MtpError::WriteData(path.display().to_string(), e))?;
@@ -149,7 +140,103 @@ impl MtpClient {
                 elapsed_secs,
                 (size / (1024 * 1024) as f64) / elapsed_secs
             );
-            Ok(Some(tmp_dir))
+            Ok(())
+        }
+        .await;
+
+        let _ = device.close().await;
+        result
+    }
+
+    /// Downloads `.FIT` activity files newer than `date` from the device's `GARMIN/Activity` folder into a temp directory, returning their local paths.
+    pub async fn download_settings_file(
+        &self,
+        serial: &str,
+        dst_dir: PathBuf,
+    ) -> Result<Option<PathBuf>> {
+        let devices_info = MtpDevice::list_devices().map_err(MtpError::ListDevices)?;
+        let device_info = devices_info
+            .iter()
+            .find(|d| {
+                d.serial_number
+                    .as_ref()
+                    .is_some_and(|serial_n| serial_n == serial)
+            })
+            .ok_or_else(|| MtpError::MissingDevice(serial.to_string()))?;
+
+        let device = MtpDevice::open_by_location(device_info.location_id)
+            .await
+            .map_err(|e| MtpError::OpenDevice(device_info.location_id, e))?;
+        info!(
+            "Found device {} {} with S/N {}",
+            device.device_info().manufacturer,
+            device.device_info().model,
+            serial
+        );
+
+        info!("Fetching settings file...");
+        let result: Result<Option<PathBuf>> = async {
+            debug!("Entering into GARMIN folder...");
+            let storages = device.storages().await.map_err(MtpError::Storage)?;
+            let storage = storages
+                .first()
+                .ok_or_else(|| MtpError::NoStorageDevice(serial.to_string()))?;
+
+            let garmin_folder = storage
+                .list_objects(None)
+                .await
+                .map_err(MtpError::ListFiles)?
+                .into_iter()
+                .find(|oi| oi.filename == constants::MTP_GARMIN_ROOT_FOLDER)
+                .ok_or_else(|| MtpError::NoStorageDevice(serial.to_string()))?;
+
+            debug!("Entering into GARMIN/Settings folder...");
+            let activity_folder = storage
+                .list_objects(Some(garmin_folder.handle))
+                .await
+                .map_err(MtpError::ListFiles)?
+                .into_iter()
+                .find(|oi| oi.filename == constants::MTP_GARMIN_SETTINGS_FOLDER)
+                .ok_or_else(|| MtpError::NoStorageDevice(serial.to_string()))?;
+
+            info!("Listing files...");
+            let mut objs = storage
+                .list_objects(Some(activity_folder.handle))
+                .await
+                .map_err(MtpError::ListFiles)?;
+
+            objs.retain(|f| f.filename == "Settings.fit");
+            if let Some(obj) = objs.first() {
+                info!("Found settings file");
+                info!("Downloading file...");
+                let t0 = Instant::now();
+                let mut size = 0_f64;
+                match storage.download_to_vec(obj.handle).await {
+                    Ok(bytes) => {
+                        let path = dst_dir.join(&obj.filename);
+                        fs::write(&path, &bytes)
+                            .await
+                            .map_err(|e| MtpError::WriteData(path.display().to_string(), e))?;
+                        size += bytes.len() as f64;
+
+                        let elapsed_secs = t0.elapsed().as_secs_f64();
+                        info!(
+                            "1 files downloaded in {:.3}s ({:.2} MB/s)",
+                            elapsed_secs,
+                            (size / (1024 * 1024) as f64) / elapsed_secs
+                        );
+
+                        Ok(Some(path))
+                    }
+                    Err(e) => {
+                        error!("Error downloading file {}: {}", obj.filename, e);
+                        Ok(None)
+                    }
+                }
+            } else {
+                info!("No settings file found");
+                Ok(None)
+            }
         }
         .await;
 

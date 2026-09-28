@@ -26,6 +26,7 @@ pub static RULE_FILE: &str = "/etc/udev/rules.d/99-garmin-tracker-rs.rules";
 pub static MTP_GARMIN_MANUFACTURER: &str = "GARMIN";
 pub static MTP_GARMIN_ROOT_FOLDER: &str = "GARMIN";
 pub static MTP_GARMIN_ACTIVITY_FOLDER: &str = "Activity";
+pub static MTP_GARMIN_SETTINGS_FOLDER: &str = "Settings";
 pub static MTP_TMP_DIR_PREFIX: &str = "garmin-tracker-rs";
 
 // Languages block

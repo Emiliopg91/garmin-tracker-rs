@@ -77,6 +77,7 @@ pub fn additional_data(session: i64) -> AdditionalData {
         altitudes: None,
         distance: None,
         notes: None,
+        max_hr: None,
     }
 }
 

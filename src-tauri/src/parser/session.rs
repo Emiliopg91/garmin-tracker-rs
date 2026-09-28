@@ -356,6 +356,7 @@ impl From<RecordAccumulator> for Option<AdditionalData> {
                 altitudes: altitudes
                     .map(|altitudes| AdditionalData::build_altitudes_blob(&altitudes)),
                 notes: None,
+                max_hr: None,
             })
         } else {
             None

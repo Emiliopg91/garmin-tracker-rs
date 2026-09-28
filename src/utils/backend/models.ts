@@ -62,7 +62,7 @@ export enum Languages {
 	English = "English",
 }
 
-// From src-tauri/src/dto/sessions.rs:91
+// From src-tauri/src/dto/sessions.rs:92
 export interface SessionDetails {
   active_time: number;
   altitudes: (number | null)[];
@@ -71,6 +71,7 @@ export interface SessionDetails {
   distance: number | null;
   heart_rates: (number | null)[];
   laps: SessionLap[];
+  max_hr: number;
   metabolic_calories: number;
   name: string;
   notes: string;
@@ -84,14 +85,14 @@ export interface SessionDetails {
   training_load: number;
 }
 
-// From src-tauri/src/dto/sessions.rs:74
+// From src-tauri/src/dto/sessions.rs:75
 export interface SessionLap {
   idx: number;
   start_latitude: number | null;
   start_longitude: number | null;
 }
 
-// From src-tauri/src/dto/sessions.rs:13
+// From src-tauri/src/dto/sessions.rs:14
 export interface SessionListItem {
   active_calories: number;
   has_record: boolean;
@@ -103,13 +104,13 @@ export interface SessionListItem {
   training_load: number;
 }
 
-// From src-tauri/src/dto/sessions.rs:186
+// From src-tauri/src/dto/sessions.rs:193
 export interface SessionLocation {
   location: string;
   session: number;
 }
 
-// From src-tauri/src/dto/sessions.rs:51
+// From src-tauri/src/dto/sessions.rs:52
 export interface SessionSet {
   ex_cat: number;
   ex_id: number;
@@ -119,7 +120,7 @@ export interface SessionSet {
   weight: number;
 }
 
-// From src-tauri/src/dto/sessions.rs:179
+// From src-tauri/src/dto/sessions.rs:186
 export interface SessionSetsUpdate {
   notes: string | null;
   sets: SessionSet[];
