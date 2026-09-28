@@ -18,6 +18,7 @@ const makeDetails = (
   device: null,
   distance: null,
   heart_rates: [],
+  max_hr: 189,
   laps: [],
   metabolic_calories: 0,
   name: "Session",
