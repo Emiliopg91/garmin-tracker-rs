@@ -5,11 +5,11 @@ node:
   '@mui/icons-material': 9.4.0
   '@mui/material': 9.4.0
   '@mui/x-date-pickers': 9.14.0
-  '@tauri-apps/api': 2.11.1
-  '@tauri-apps/cli': 2.11.5
+  '@tauri-apps/api': 2.12.0
+  '@tauri-apps/cli': 2.12.0
   '@tauri-apps/plugin-autostart': 2.5.1
-  '@tauri-apps/plugin-log': 2.9.2
-  '@tauri-apps/plugin-opener': 2.5.5
+  '@tauri-apps/plugin-log': 2.10.0
+  '@tauri-apps/plugin-opener': 2.6.0
   '@testing-library/react': 16.3.3
   '@types/leaflet': 1.9.22
   '@types/react': 19.3.0
@@ -29,7 +29,7 @@ node:
   typescript-eslint: 8.70.1
   vite: 7.3.6
   vite-plugin-checker: 0.14.5
-  vitest: 5.0.1
+  vitest: 5.0.2
 rust:
   chrono: 0.4.45
   crossterm: 0.29.0
@@ -47,17 +47,16 @@ rust:
   phf_codegen: 0.14.0
   ratatui: 0.30.2
   rayon: 1.12.0
-  rfd: 0.17.2
   rusqlite_orm: 1.0.0
   rustyfit: 0.10.3
   semver: 1.0.28
   serde: 1.0.229
   serde_json: 1.0.151
-  tauri: 2.11.6
-  tauri-build: 2.6.3
-  tauri-plugin-autostart: 2.5.1
-  tauri-plugin-log: 2.9.2
-  tauri-plugin-opener: 2.5.5
+  tauri: 2.12.0
+  tauri-build: 2.7.0
+  tauri-plugin-autostart: 2.6.0
+  tauri-plugin-log: 2.10.0
+  tauri-plugin-opener: 2.6.0
   tauri-rs-ts-ipc: 0.1.20
   tempfile: 3.27.0
   thiserror: 2.0.21
