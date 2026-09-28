@@ -42,6 +42,9 @@ fn main() {
         let paths = &args[2..];
         garmin_tracker_rs_lib::encode_files(paths);
         exit(0);
+    } else if args.len() >= 2 && args.get(1).unwrap() == "--dump" {
+        garmin_tracker_rs_lib::dump_device();
+        exit(0);
     } else {
         if std::env::var("IN_DEBUG").is_err() {
             tauri_rs_ts_ipc::build();

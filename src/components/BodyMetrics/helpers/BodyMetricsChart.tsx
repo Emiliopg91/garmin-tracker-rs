@@ -38,7 +38,9 @@ function ChartTooltip({
   const data = payload[0].payload as ChartDataType[number];
   return (
     <div className="chart-tooltip">
-      <div>{TimeUtils.formatDate(data.date / 1000)}</div>
+      <div>
+        <b>{TimeUtils.formatDate(data.date / 1000)}</b>
+      </div>
       <div>
         {translate("fat_ratio")}: {data.fatAvg7.toFixed(1)}%
       </div>
@@ -249,16 +251,6 @@ export function BodyMetricsChart({ metrics }: Props) {
               tick={false}
             />
             <Line
-              yAxisId="fat"
-              name={translate("fat_ratio")}
-              type="monotone"
-              dataKey="fatAvg7"
-              stroke="#f00"
-              dot={false}
-              activeDot={false}
-              isAnimationActive={false}
-            />
-            <Line
               yAxisId="weight"
               name={translate("weight")}
               type="monotone"
@@ -274,6 +266,16 @@ export function BodyMetricsChart({ metrics }: Props) {
               type="monotone"
               dataKey="leanAvg7"
               stroke="green"
+              dot={false}
+              activeDot={false}
+              isAnimationActive={false}
+            />
+            <Line
+              yAxisId="fat"
+              name={translate("fat_ratio")}
+              type="monotone"
+              dataKey="fatAvg7"
+              stroke="#f00"
               dot={false}
               activeDot={false}
               isAnimationActive={false}

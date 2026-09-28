@@ -8,4 +8,3 @@
 - Sync wellness data (sleep, stress, Body Battery, resting HR) in addition to activities — currently only `GARMIN/Activity` is read over MTP; wellness/monitoring files aren't imported at all.
 - Add a user height setting and compute BMI alongside body metrics (weight, fat %, lean mass, water % are tracked, but there's no height field anywhere).
 - Capture and show ambient temperature recorded during a session (the watch's internal sensor records it in the `.FIT` file, but it's not parsed anywhere).
-- Compute and show total elevation gain/loss per session (altitude is already captured for the map profile, but never aggregated into a total ascent/descent figure).

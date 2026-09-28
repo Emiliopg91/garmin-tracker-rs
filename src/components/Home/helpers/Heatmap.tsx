@@ -19,13 +19,6 @@ interface HeatMapPoint {
   records: number;
   row: number;
 }
-
-// Chronological row for the Y axis. The current month is split in two: its
-// days after today haven't happened yet this year, so the cell for that
-// (month, day) actually holds last year's data - the oldest in the 12-month
-// window - and sits at row 0 (top). Its days up to and including today hold
-// this year's data - the newest - and sit at row 12 (bottom). The other 11
-// months fill rows 1-11 in between, in chronological order.
 const monthToRow = (
   month: number,
   day: number,
@@ -45,10 +38,6 @@ const rowToMonth = (row: number, todayMonth: number): number => {
   return ((row - 1 + todayMonth) % 12) + 1;
 };
 
-// The grid only tracks month/day, not year. For the current month, days
-// after today belong to last year (this year's occurrence hasn't happened
-// yet); days up to and including today belong to this year. Months before
-// the current one belong to this year, months after it belong to last year.
 const yearForMonth = (
   month: number,
   day: number,
@@ -62,8 +51,6 @@ const yearForMonth = (
   return month < todayMonth ? todayYear : todayYear - 1;
 };
 
-// Catches both the always-invalid days (Feb 30, Apr 31, ...) and Feb 29
-// on a non-leap year - the Date constructor already knows the real rule.
 const isValidCalendarDate = (
   year: number,
   month: number,
@@ -77,8 +64,6 @@ const isValidCalendarDate = (
   );
 };
 
-// GitHub-style ramp: 0 load is a translucent black tint over the box
-// background, load >= 100 saturates at GitHub's contribution green
 const HEATMAP_ZERO_COLOR = "#000000";
 const HEATMAP_MAX_COLOR = "#00ff00";
 const HEATMAP_SCALE_MAX = 150;
@@ -94,16 +79,10 @@ const hexToRgb = (hex: string): [number, number, number] => [
 ];
 
 const getHeatColor = (load: number): string => {
-  if (load == 0) {
-    const [r, g, b] = hexToRgb(HEATMAP_ZERO_COLOR);
-    return `rgba(${r}, ${g}, ${b}, 0.1)`;
-  } else {
-    const [r1, g1, b1] = hexToRgb(HEATMAP_MAX_COLOR);
-    const [r2, g2, b2] = hexToRgb(HEATMAP_MAX_COLOR);
-    const alpha = Math.min(1, load / HEATMAP_SCALE_MAX);
-    const lerp = (a: number, b: number) => Math.round(a + (b - a) * alpha);
-    return `rgba(${lerp(r1, r2)}, ${lerp(g1, g2)}, ${lerp(b1, b2)}, ${alpha})`;
-  }
+  const [r, g, b] =
+    load == 0 ? hexToRgb(HEATMAP_ZERO_COLOR) : hexToRgb(HEATMAP_MAX_COLOR);
+  const alpha = load == 0 ? 0.07 : Math.min(1, load / HEATMAP_SCALE_MAX);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 };
 
 interface HeatmapProps {

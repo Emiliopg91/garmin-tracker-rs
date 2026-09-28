@@ -82,6 +82,14 @@ where
     }
 }
 
+/// Debug-only incremental dump of the connected Garmin device into `./dump` (`--dump-device`).
+#[cfg(debug_assertions)]
+pub fn dump_device() {
+    if let Err(e) = crate::mtp::dump::run(Path::new("dump")) {
+        eprintln!("Error dumping device: {e}");
+    }
+}
+
 pub fn check_running() -> bool {
     SingleInstance::is_app_running().0
 }

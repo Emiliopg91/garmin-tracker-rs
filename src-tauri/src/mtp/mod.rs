@@ -13,6 +13,8 @@ use crate::{
     mtp::errors::{MtpError, Result},
     utils::constants,
 };
+#[cfg(debug_assertions)]
+pub mod dump;
 pub mod errors;
 
 pub static MTP_CLIENT_INST: LazyLock<Mutex<MtpClient>> = LazyLock::new(|| Mutex::new(MtpClient {}));
