@@ -27,7 +27,7 @@ importers:
         specifier: ^2.12.0
         version: 2.12.0
       '@tauri-apps/plugin-autostart':
-        specifier: ~2.5.1
+        specifier: ^2.5.1
         version: 2.5.1
       '@tauri-apps/plugin-log':
         specifier: ^2.10.0

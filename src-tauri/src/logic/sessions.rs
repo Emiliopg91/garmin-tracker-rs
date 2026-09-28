@@ -273,19 +273,6 @@ pub async fn _import_from_device(app: &AppHandle, serial: &str) -> Result<usize,
         .await
         .is_ok()
     {
-        let mut dev_settings = None;
-        if let Ok(Some(path)) = mtp_client
-            .download_settings_file(serial, src_dir.clone())
-            .await
-        {
-            info!("Parsing settings file {}", path.display());
-            if let Ok(parser) = FitParser::from_file(path)
-                && let Ok(settings) = DeviceSettings::try_from(parser)
-            {
-                dev_settings = Some(settings);
-            }
-        }
-
         activities = Vec::new();
 
         if let Ok(read_dir) = fs::read_dir(&src_dir) {
@@ -298,6 +285,22 @@ pub async fn _import_from_device(app: &AppHandle, serial: &str) -> Result<usize,
                 }
             }
         };
+
+        let mut dev_settings = None;
+        if !activities.is_empty() {
+            if let Ok(Some(path)) = mtp_client
+                .download_settings_file(serial, src_dir.clone())
+                .await
+            {
+                info!("Parsing settings file {}", path.display());
+                if let Ok(parser) = FitParser::from_file(path)
+                    && let Ok(settings) = DeviceSettings::try_from(parser)
+                {
+                    dev_settings = Some(settings);
+                }
+            }
+            drop(mtp_client);
+        }
 
         let activities_cpy = activities.clone();
         let app_cpy = app.clone();
