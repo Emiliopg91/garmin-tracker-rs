@@ -7,7 +7,7 @@ node:
   '@mui/x-date-pickers': 9.14.0
   '@tauri-apps/api': 2.12.0
   '@tauri-apps/cli': 2.12.0
-  '@tauri-apps/plugin-autostart': 2.5.1
+  '@tauri-apps/plugin-autostart': 2.6.0
   '@tauri-apps/plugin-log': 2.10.0
   '@tauri-apps/plugin-opener': 2.6.0
   '@testing-library/react': 16.3.3
@@ -43,8 +43,8 @@ rust:
   noyalib: 0.0.51
   nusb: 0.2.7
   ouroboros: 0.18.5
-  phf: 0.14.0
-  phf_codegen: 0.14.0
+  phf: 0.13.1
+  phf_codegen: 0.13.1
   ratatui: 0.30.2
   rayon: 1.12.0
   rusqlite_orm: 1.0.0
