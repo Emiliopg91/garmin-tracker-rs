@@ -1,6 +1,13 @@
 import { I18nSettingsContext } from "@/context/I18nSettingsContext";
 import { TimeUtils } from "@/utils/TimeUtils";
-import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import {
+  memo,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import {
   ResponsiveContainer,
   Scatter,
@@ -89,7 +96,7 @@ interface HeatmapProps {
   data: [number, number][][] | undefined;
 }
 
-export function Heatmap({ data }: HeatmapProps) {
+export const Heatmap = memo(function Heatmap({ data }: HeatmapProps) {
   const { translate } = useContext(I18nSettingsContext);
 
   const [size, setSize] = useState({ width: 0, height: 0 });
@@ -266,4 +273,4 @@ export function Heatmap({ data }: HeatmapProps) {
       </ResponsiveContainer>
     </div>
   );
-}
+});

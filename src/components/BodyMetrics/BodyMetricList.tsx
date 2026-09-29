@@ -74,6 +74,7 @@ export function BodyMetricList() {
         <table>
           <thead>
             <tr>
+              <th></th>
               <th className="text-center">{translate("date")}</th>
               <th className="text-center">{translate("weight")}</th>
               <th className="text-center">{translate("fat_ratio")}</th>

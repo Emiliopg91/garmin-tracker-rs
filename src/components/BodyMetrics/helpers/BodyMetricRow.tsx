@@ -35,8 +35,8 @@ export function BodyMetricRow({
             disabled={compareDisabled}
           />
         )}
-        {TimeUtils.formatDate(measure.date)}
       </td>
+      <td>{TimeUtils.formatDate(measure.date)}</td>
       <td>
         {UnitUtils.fromKg(measure.weight, settings.weight_unit).toFixed(1)}{" "}
         {UnitUtils.getUnit(settings.weight_unit)}

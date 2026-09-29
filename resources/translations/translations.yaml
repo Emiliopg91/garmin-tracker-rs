@@ -475,3 +475,6 @@ records:
 select_files_import:
   en: Select files to import
   es: Seleccione archivos a importar
+sessions_comparaison:
+  en: Sessions comparaison
+  es: Comparación de sesiones

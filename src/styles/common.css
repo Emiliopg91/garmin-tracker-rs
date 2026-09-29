@@ -67,6 +67,8 @@
 
 .trophy-icon {
   color: gold;
+  position: relative !important;
+  top: 2px;
 }
 
 .list-action-bar {
@@ -78,6 +80,11 @@
 .list-action-bar-row {
   display: flex;
   flex-direction: row;
+}
+
+/* Fixed-width table column helpers */
+.col-30 {
+  width: 30px;
 }
 
 /* Fixed-width table column helpers */
@@ -95,6 +102,10 @@
 
 .col-150 {
   width: 150px;
+}
+
+.col-180 {
+  width: 180px;
 }
 
 .col-200 {
