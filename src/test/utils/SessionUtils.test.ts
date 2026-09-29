@@ -256,7 +256,7 @@ describe("SessionUtils.detailsFromBackend - heart rate", () => {
     ["only missing samples", [null, null, null]],
   ])(
     "keeps HR defaults with %s",
-    (_: unknown, heart_rates: [number, number, number, number, number]) => {
+    (_: unknown, heart_rates: (number | null)[]) => {
       const details = SessionUtils.detailsFromBackend(
         makeDetails({ total_elapsed_time: 30, heart_rates }),
         WeightUnit.Kilograms,
@@ -369,6 +369,7 @@ describe("SessionUtils.calculateWorkoutLoad", () => {
       timestamp: date.getTime() / 1000,
       total_elapsed_time: 0,
       training_load,
+      has_sets: false,
     };
   };
 

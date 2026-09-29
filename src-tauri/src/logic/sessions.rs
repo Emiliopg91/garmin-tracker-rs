@@ -73,7 +73,7 @@ pub fn get_sessions(
             .fetch_in(conn)?
             .iter()
             .map(
-                |m| match m.get(&set::entity::columns::SESSION.to_string()).unwrap() {
+                |m| match m.get(set::entity::columns::SESSION.as_ref()).unwrap() {
                     Value::Int64(v) => *v,
                     _ => unreachable!(),
                 },
@@ -85,7 +85,7 @@ pub fn get_sessions(
             .fetch_in(conn)?
             .iter()
             .map(
-                |m| match m.get(&set::entity::columns::SESSION.to_string()).unwrap() {
+                |m| match m.get(set::entity::columns::SESSION.as_ref()).unwrap() {
                     Value::Int64(v) => *v,
                     _ => unreachable!(),
                 },
