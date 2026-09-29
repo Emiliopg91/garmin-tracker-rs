@@ -66,7 +66,7 @@ const isValidCalendarDate = (
 
 const HEATMAP_ZERO_COLOR = "#000000";
 const HEATMAP_MAX_COLOR = "#00ff00";
-const HEATMAP_SCALE_MAX = 150;
+const HEATMAP_SCALE_MAX = 100;
 const HEATMAP_Y_AXIS_WIDTH = 65;
 const HEATMAP_X_AXIS_HEIGHT = 10;
 const HEATMAP_DAY_TICKS = [1, 10, 20, 30];

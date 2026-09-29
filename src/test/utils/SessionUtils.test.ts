@@ -254,16 +254,19 @@ describe("SessionUtils.detailsFromBackend - heart rate", () => {
   it.each([
     ["no samples", []],
     ["only missing samples", [null, null, null]],
-  ])("keeps HR defaults with %s", (_, heart_rates) => {
-    const details = SessionUtils.detailsFromBackend(
-      makeDetails({ total_elapsed_time: 30, heart_rates }),
-      WeightUnit.Kilograms,
-    );
+  ])(
+    "keeps HR defaults with %s",
+    (_: unknown, heart_rates: [number, number, number, number, number]) => {
+      const details = SessionUtils.detailsFromBackend(
+        makeDetails({ total_elapsed_time: 30, heart_rates }),
+        WeightUnit.Kilograms,
+      );
 
-    expect(details.zones_times).toEqual([0, 0, 0, 0, 0]);
-    expect(details.hrRanges).toEqual([0, 0, 0]);
-    expect(details.hrBreathData).toEqual([]);
-  });
+      expect(details.zones_times).toEqual([0, 0, 0, 0, 0]);
+      expect(details.hrRanges).toEqual([0, 0, 0]);
+      expect(details.hrBreathData).toEqual([]);
+    },
+  );
 
   it("builds per-sample chart data colored by zone", () => {
     const details = SessionUtils.detailsFromBackend(
