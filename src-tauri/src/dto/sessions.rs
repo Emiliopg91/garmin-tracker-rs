@@ -20,6 +20,7 @@ pub struct SessionListItem {
     pub sub_sport: u8,
     pub has_record: bool,
     pub total_elapsed_time: u32,
+    pub has_sets: bool,
 }
 
 impl From<&Session> for SessionListItem {
@@ -33,6 +34,7 @@ impl From<&Session> for SessionListItem {
             sub_sport: value.sub_sport,
             has_record: false,
             total_elapsed_time: value.total_elapsed_time,
+            has_sets: false,
         }
     }
 }

@@ -2,8 +2,8 @@
 
 // From src-tauri/src/dto/app.rs:5
 export enum AppEnvironment {
-  Debug = "Debug",
-  Release = "Release",
+	Debug = "Debug",
+	Release = "Release",
 }
 
 // From src-tauri/src/dto/body_metrics.rs:6
@@ -17,8 +17,8 @@ export interface BodyMetricListItem {
 
 // From src-tauri/src/rclone/providers/mod.rs:11
 export enum CloudProvider {
-  OneDrive = "OneDrive",
-  DropBox = "DropBox",
+	OneDrive = "OneDrive",
+	DropBox = "DropBox",
 }
 
 // From src-tauri/src/dto/devices.rs:7
@@ -30,8 +30,8 @@ export interface DeviceListItem {
 
 // From src-tauri/src/dao/settings.rs:179
 export enum DistanceUnit {
-  Kilometers = "Kilometers",
-  Miles = "Miles",
+	Kilometers = "Kilometers",
+	Miles = "Miles",
 }
 
 // From src-tauri/src/dto/exercises.rs:31
@@ -58,11 +58,11 @@ export interface ExerciseListItem {
 
 // From src-tauri/src/utils/translations.rs:10
 export enum Languages {
-  Spanish = "Spanish",
-  English = "English",
+	Spanish = "Spanish",
+	English = "English",
 }
 
-// From src-tauri/src/dto/sessions.rs:92
+// From src-tauri/src/dto/sessions.rs:94
 export interface SessionDetails {
   active_time: number;
   altitudes: (number | null)[];
@@ -85,7 +85,7 @@ export interface SessionDetails {
   training_load: number;
 }
 
-// From src-tauri/src/dto/sessions.rs:75
+// From src-tauri/src/dto/sessions.rs:77
 export interface SessionLap {
   idx: number;
   start_latitude: number | null;
@@ -96,6 +96,7 @@ export interface SessionLap {
 export interface SessionListItem {
   active_calories: number;
   has_record: boolean;
+  has_sets: boolean;
   name: string;
   sport: number;
   sub_sport: number;
@@ -104,13 +105,13 @@ export interface SessionListItem {
   training_load: number;
 }
 
-// From src-tauri/src/dto/sessions.rs:193
+// From src-tauri/src/dto/sessions.rs:195
 export interface SessionLocation {
   location: string;
   session: number;
 }
 
-// From src-tauri/src/dto/sessions.rs:52
+// From src-tauri/src/dto/sessions.rs:54
 export interface SessionSet {
   ex_cat: number;
   ex_id: number;
@@ -120,7 +121,7 @@ export interface SessionSet {
   weight: number;
 }
 
-// From src-tauri/src/dto/sessions.rs:186
+// From src-tauri/src/dto/sessions.rs:188
 export interface SessionSetsUpdate {
   notes: string | null;
   sets: SessionSet[];
@@ -139,8 +140,8 @@ export interface Settings {
 
 // From src-tauri/src/dao/settings.rs:207
 export enum WeightUnit {
-  Kilograms = "Kilograms",
-  Pounds = "Pounds",
+	Kilograms = "Kilograms",
+	Pounds = "Pounds",
 }
 
 // From src-tauri/src/dto/workouts.rs:32
@@ -169,3 +170,4 @@ export interface WorkoutSession {
   time: number;
   volume: number;
 }
+
