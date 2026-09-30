@@ -22,7 +22,7 @@ use crate::{
         notifications::{NotificationDefinition, NotificationKind},
         sessions::{SessionDetails, SessionListItem, SessionLocation, SessionSetsUpdate},
     },
-    logic::{notifications::show_notification, report_error},
+    logic::{notifications::show_notification, report_error, run_blocking},
     mtp::MTP_CLIENT_INST,
     parser::{FitParser, settings::DeviceSettings},
     utils::{
@@ -48,73 +48,76 @@ use tokio::process::Command;
 /// Returns every recorded session, newest first.
 #[traced_command]
 #[tauri::command]
-pub fn get_sessions(
-    database: State<'_, DatabasePool>,
+pub async fn get_sessions(
+    app: AppHandle,
     settings: State<'_, SettingsLock>,
     limit: Option<i32>,
 ) -> Result<Vec<SessionListItem>, String> {
     info!("Getting sessions list...");
-    let res = database.run_in_connection(|conn| {
-        let mut select_builder =
-            SessionRepository::select().order_by(OrderBy::Desc(session::entity::columns::DATE));
+    let res = run_blocking(app, move |database| {
+        database.run_in_connection(|conn| {
+            let mut select_builder =
+                SessionRepository::select().order_by(OrderBy::Desc(session::entity::columns::DATE));
 
-        if let Some(date_limit) = limit {
-            select_builder = select_builder.where_(Where::Gte(
-                session::entity::columns::DATE,
-                date_limit.into(),
-            ))
-        }
+            if let Some(date_limit) = limit {
+                select_builder = select_builder.where_(Where::Gte(
+                    session::entity::columns::DATE,
+                    date_limit.into(),
+                ))
+            }
 
-        let sessions = select_builder.fetch_in(conn)?;
+            let sessions = select_builder.fetch_in(conn)?;
 
-        let sessions_with_sets = SetRepository::select()
-            .distinct(&[set::entity::columns::SESSION])
-            .where_(Where::In(
-                set::entity::columns::SESSION,
-                sessions.iter().map(|s| s.date.into()).collect::<Vec<_>>(),
-            ))
-            .fetch_in(conn)?
-            .iter()
-            .map(
-                |m| match m.get(set::entity::columns::SESSION.as_ref()).unwrap() {
-                    Value::Int64(v) => *v as u32,
-                    _ => unreachable!(),
-                },
-            )
-            .collect::<HashSet<_>>();
-
-        let record_sessions = SetRepository::select()
-            .distinct(&[set::entity::columns::SESSION])
-            .where_(Where::And(vec![
-                Where::Eq(set::entity::columns::PR, true.into()),
-                Where::In(
+            let sessions_with_sets = SetRepository::select()
+                .distinct(&[set::entity::columns::SESSION])
+                .where_(Where::In(
                     set::entity::columns::SESSION,
-                    sessions_with_sets
-                        .iter()
-                        .map(|s| (*s).into())
-                        .collect::<Vec<_>>(),
-                ),
-            ]))
-            .fetch_in(conn)?
-            .iter()
-            .map(
-                |m| match m.get(set::entity::columns::SESSION.as_ref()).unwrap() {
-                    Value::Int64(v) => *v as u32,
-                    _ => unreachable!(),
-                },
-            )
-            .collect::<HashSet<_>>();
+                    sessions.iter().map(|s| s.date.into()).collect::<Vec<_>>(),
+                ))
+                .fetch_in(conn)?
+                .iter()
+                .map(
+                    |m| match m.get(set::entity::columns::SESSION.as_ref()).unwrap() {
+                        Value::Int64(v) => *v as u32,
+                        _ => unreachable!(),
+                    },
+                )
+                .collect::<HashSet<_>>();
 
-        Ok(sessions
-            .into_iter()
-            .map(|s| {
-                let mut r = SessionListItem::from(&s);
-                r.has_record = record_sessions.contains(&s.date);
-                r.has_sets = sessions_with_sets.contains(&s.date);
-                r
-            })
-            .collect::<Vec<_>>())
-    });
+            let record_sessions = SetRepository::select()
+                .distinct(&[set::entity::columns::SESSION])
+                .where_(Where::And(vec![
+                    Where::Eq(set::entity::columns::PR, true.into()),
+                    Where::In(
+                        set::entity::columns::SESSION,
+                        sessions_with_sets
+                            .iter()
+                            .map(|s| (*s).into())
+                            .collect::<Vec<_>>(),
+                    ),
+                ]))
+                .fetch_in(conn)?
+                .iter()
+                .map(
+                    |m| match m.get(set::entity::columns::SESSION.as_ref()).unwrap() {
+                        Value::Int64(v) => *v as u32,
+                        _ => unreachable!(),
+                    },
+                )
+                .collect::<HashSet<_>>();
+
+            Ok(sessions
+                .into_iter()
+                .map(|s| {
+                    let mut r = SessionListItem::from(&s);
+                    r.has_record = record_sessions.contains(&s.date);
+                    r.has_sets = sessions_with_sets.contains(&s.date);
+                    r
+                })
+                .collect::<Vec<_>>())
+        })
+    })
+    .await;
 
     match res {
         Ok(l) => {
@@ -133,8 +136,8 @@ pub fn get_sessions(
 /// Returns full details for one session (series grouped by exercise, heart rate, GPS, speeds, device).
 #[traced_command]
 #[tauri::command]
-pub fn get_session_details(
-    database: State<'_, DatabasePool>,
+pub async fn get_session_details(
+    app: AppHandle,
     settings: State<'_, SettingsLock>,
     timestamp: u32,
 ) -> Result<SessionDetails, String> {
@@ -146,42 +149,45 @@ pub fn get_session_details(
             .to_rfc3339()
     );
 
-    let res = database.run_in_connection(|conn| {
-        let mut session = SessionRepository::select_by_id_in(conn, timestamp)?.unwrap();
+    let res = run_blocking(app, move |database| {
+        database.run_in_connection(|conn| {
+            let mut session = SessionRepository::select_by_id_in(conn, timestamp)?.unwrap();
 
-        session.fetch_sets_relationship_in(conn)?;
-        if session.device.is_some() {
-            session.fetch_device_obj_relationship_in(conn)?;
-        }
-        session.fetch_additional_data_relationship_in(conn)?;
-        session.fetch_laps_relationship_in(conn)?;
+            session.fetch_sets_relationship_in(conn)?;
+            if session.device.is_some() {
+                session.fetch_device_obj_relationship_in(conn)?;
+            }
+            session.fetch_additional_data_relationship_in(conn)?;
+            session.fetch_laps_relationship_in(conn)?;
 
-        let condition_set: HashSet<(_, _)> =
-            session.sets.iter().map(|r| (r.ex_cat, r.ex_id)).collect();
+            let condition_set: HashSet<(_, _)> =
+                session.sets.iter().map(|r| (r.ex_cat, r.ex_id)).collect();
 
-        let in_conditions = condition_set
-            .into_iter()
-            .map(|(cat, id)| vec![cat.into(), id.into()])
-            .collect::<Vec<Vec<Value>>>();
+            let in_conditions = condition_set
+                .into_iter()
+                .map(|(cat, id)| vec![cat.into(), id.into()])
+                .collect::<Vec<Vec<Value>>>();
 
-        let exercises = ExerciseRepository::select()
-            .where_(Where::InMultiple(
-                vec![
-                    exercise::entity::columns::CATEGORY,
-                    exercise::entity::columns::ID,
-                ],
-                in_conditions,
-            ))
-            .fetch_in(conn)?;
-        session.laps.sort_by_key(|l| l.idx);
+            let exercises = ExerciseRepository::select()
+                .where_(Where::InMultiple(
+                    vec![
+                        exercise::entity::columns::CATEGORY,
+                        exercise::entity::columns::ID,
+                    ],
+                    in_conditions,
+                ))
+                .fetch_in(conn)?;
+            session.laps.sort_by_key(|l| l.idx);
 
-        Ok(SessionDetails::from((
-            &session,
-            exercises.as_slice(),
-            session.sets.as_slice(),
-            session.laps.as_slice(),
-        )))
-    });
+            Ok(SessionDetails::from((
+                &session,
+                exercises.as_slice(),
+                session.sets.as_slice(),
+                session.laps.as_slice(),
+            )))
+        })
+    })
+    .await;
 
     match res {
         Ok(details) => {
@@ -200,8 +206,8 @@ pub fn get_session_details(
 /// Applies user edits (reps/weight) to a session's series and recomputes personal records.
 #[traced_command]
 #[tauri::command]
-pub fn save_session_changes(
-    database: State<'_, DatabasePool>,
+pub async fn save_session_changes(
+    app: AppHandle,
     settings: State<'_, SettingsLock>,
     details: SessionSetsUpdate,
 ) -> Result<(), String> {
@@ -214,29 +220,32 @@ pub fn save_session_changes(
     );
     let lang = settings.read().unwrap().language;
 
-    let res = database.run_in_transaction(|tx| {
-        update_session_notes(tx, details.timestamp, details.notes.as_deref())?;
+    let res = run_blocking(app, move |database| {
+        database.run_in_transaction(|tx| {
+            update_session_notes(tx, details.timestamp, details.notes.as_deref())?;
 
-        let mut exercises = HashSet::new();
-        for serie in &details.sets {
-            SetRepository::update()
-                .set(entity::columns::REPS, serie.reps.into())
-                .set(entity::columns::WEIGHT, serie.weight.into())
-                .set(
-                    entity::columns::E1RM,
-                    Set::estimate_1rm(serie.weight, serie.reps).into(),
-                )
-                .where_(Where::And(vec![
-                    Where::Eq(entity::columns::SESSION, details.timestamp.into()),
-                    Where::Eq(entity::columns::IDX, serie.idx.into()),
-                ]))
-                .execute_in(tx)?;
-            exercises.insert((serie.ex_cat, serie.ex_id));
-        }
+            let mut exercises = HashSet::new();
+            for serie in &details.sets {
+                SetRepository::update()
+                    .set(entity::columns::REPS, serie.reps.into())
+                    .set(entity::columns::WEIGHT, serie.weight.into())
+                    .set(
+                        entity::columns::E1RM,
+                        Set::estimate_1rm(serie.weight, serie.reps).into(),
+                    )
+                    .where_(Where::And(vec![
+                        Where::Eq(entity::columns::SESSION, details.timestamp.into()),
+                        Where::Eq(entity::columns::IDX, serie.idx.into()),
+                    ]))
+                    .execute_in(tx)?;
+                exercises.insert((serie.ex_cat, serie.ex_id));
+            }
 
-        update_prs(tx, exercises, &[details.timestamp], Some(lang))?;
-        Ok(())
-    });
+            update_prs(tx, exercises, &[details.timestamp], Some(lang))?;
+            Ok(())
+        })
+    })
+    .await;
 
     match res {
         Ok(l) => {
@@ -270,10 +279,18 @@ pub async fn _import_from_device(app: &AppHandle, serial: &str) -> Result<usize,
     info!("Starting import from device with S/N {}", serial);
     let mut latest_date = "2026-06-08-00-00-00".to_string();
     let lang = app.state::<SettingsLock>().read().unwrap().language;
-    let db = app.state::<DatabasePool>();
-    let mut device = DeviceRepository::select_by_id(&db, serial)
+    let mut device = {
+        let app = app.clone();
+        let serial = serial.to_string();
+        tokio::task::spawn_blocking(move || {
+            let db = app.state::<DatabasePool>();
+            DeviceRepository::select_by_id(&db, &serial)
+        })
+        .await
         .map_err(|e| e.to_string())?
-        .unwrap();
+        .map_err(|e| e.to_string())?
+        .unwrap()
+    };
 
     if let Some(latest) = device.last_sync {
         let latest = Local.timestamp_opt(latest as i64, 0).unwrap();
@@ -309,18 +326,23 @@ pub async fn _import_from_device(app: &AppHandle, serial: &str) -> Result<usize,
         .await
         .is_ok()
     {
-        activities = Vec::new();
-
-        if let Ok(read_dir) = fs::read_dir(&src_dir) {
-            for entry in read_dir {
-                if let Ok(entry) = entry
-                    && entry.file_type().unwrap().is_file()
-                    && entry.file_name() != "Settings.fit"
-                {
-                    activities.push(entry.path());
+        let read_dir_path = src_dir.clone();
+        activities = tokio::task::spawn_blocking(move || {
+            let mut files = Vec::new();
+            if let Ok(read_dir) = fs::read_dir(&read_dir_path) {
+                for entry in read_dir {
+                    if let Ok(entry) = entry
+                        && entry.file_type().unwrap().is_file()
+                        && entry.file_name() != "Settings.fit"
+                    {
+                        files.push(entry.path());
+                    }
                 }
-            }
-        };
+            };
+            files
+        })
+        .await
+        .map_err(|e| e.to_string())?;
 
         let mut dev_settings = None;
         if !activities.is_empty() {
@@ -329,11 +351,13 @@ pub async fn _import_from_device(app: &AppHandle, serial: &str) -> Result<usize,
                 .await
             {
                 info!("Parsing settings file {}", path.display());
-                if let Ok(parser) = FitParser::from_file(path)
-                    && let Ok(settings) = DeviceSettings::try_from(parser)
-                {
-                    dev_settings = Some(settings);
-                }
+                dev_settings = tokio::task::spawn_blocking(move || {
+                    FitParser::from_file(path)
+                        .ok()
+                        .and_then(|parser| DeviceSettings::try_from(parser).ok())
+                })
+                .await
+                .map_err(|e| e.to_string())?;
             }
             drop(mtp_client);
         }
@@ -854,19 +878,23 @@ pub fn recalculate_e1rm(
 #[traced_command]
 #[tauri::command]
 pub async fn export_gpx(
-    database: State<'_, DatabasePool>,
+    app: AppHandle,
     settings: State<'_, SettingsLock>,
     session: u32,
 ) -> Result<(), String> {
-    let session = database
-        .run_in_connection(|conn| {
+    let session = tokio::task::spawn_blocking(move || {
+        let database = app.state::<DatabasePool>();
+        database.run_in_connection(|conn| {
             let mut session = SessionRepository::select_by_id_in(conn, session)?.unwrap();
             session.fetch_additional_data_relationship_in(conn)?;
             session.fetch_laps_relationship_in(conn)?;
 
             Ok(session)
         })
-        .map_err(|e| e.to_string())?;
+    })
+    .await
+    .map_err(|e| e.to_string())?
+    .map_err(|e| e.to_string())?;
 
     let path = constants::HOME_DIR.join(format!(
         "{}-{}.gpx",
@@ -910,8 +938,8 @@ pub async fn export_gpx(
 
 #[traced_command]
 #[tauri::command]
-pub fn get_heatmap_data(database: State<'_, DatabasePool>) -> Result<Vec<Vec<(u32, u16)>>, String> {
-    heatmap_data(&database)
+pub async fn get_heatmap_data(app: AppHandle) -> Result<Vec<Vec<(u32, u16)>>, String> {
+    run_blocking(app, heatmap_data).await
 }
 
 pub fn heatmap_data(database: &DatabasePool) -> Result<Vec<Vec<(u32, u16)>>, String> {

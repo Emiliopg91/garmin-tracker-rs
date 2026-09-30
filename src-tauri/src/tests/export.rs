@@ -12,11 +12,12 @@ use crate::{
 };
 
 fn export_json(db: &rusqlite_orm::database::DatabasePool) -> Value {
-    let json = Export::from_database(db, Languages::English)
+    let mut json = Vec::new();
+    Export::from_database(db, Languages::English)
         .unwrap()
-        .to_json()
+        .write_json(&mut json)
         .unwrap();
-    serde_json::from_str(&json).unwrap()
+    serde_json::from_slice(&json).unwrap()
 }
 
 #[test]

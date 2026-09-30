@@ -45,13 +45,14 @@ pub fn start_device_watcher(app: AppHandle) {
 /// Diffs the currently connected Garmin devices against `devices`, enrolling new ones in the DB, emitting connect/disconnect events, and triggering auto-sync for newly connected devices.
 async fn mtp_dev_check_and_sync(app: AppHandle, devices: &mut Vec<DeviceListItem>) {
     let mut devs_to_sync = Vec::new();
-    if let Ok(cur_dev) = MTP_CLIENT_INST
+    // Bind first so the MTP client guard is released before the rest of the block runs.
+    let connected = MTP_CLIENT_INST
         .lock()
         .await
         .get_connected_devices()
         .await
-        .map_err(|e| e.to_string())
-    {
+        .map_err(|e| e.to_string());
+    if let Ok(cur_dev) = connected {
         let already_known: Vec<String> = devices.iter().map(|d| d.serial_number.clone()).collect();
         let cur_dev_owned = cur_dev.clone();
 

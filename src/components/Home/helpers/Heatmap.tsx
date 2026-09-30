@@ -137,6 +137,11 @@ export const Heatmap = memo(function Heatmap({ data }: HeatmapProps) {
   const todayDay = today.getDate();
   const todayYear = today.getFullYear();
 
+  // Row 0 holds last year's days of the current month that come after today;
+  // when today is the last day of that month the row has no cells at all.
+  const isTopRowEmpty =
+    todayDay >= new Date(todayYear - 1, todayMonth, 0).getDate();
+
   const isValidPoint = (point: HeatMapPoint) =>
     isValidCalendarDate(
       yearForMonth(point.month, point.day, todayMonth, todayDay, todayYear),
@@ -233,7 +238,9 @@ export const Heatmap = memo(function Heatmap({ data }: HeatmapProps) {
             stroke="#fff"
             ticks={HEATMAP_ROW_TICKS}
             tickFormatter={(value: number) =>
-              translate("month_" + rowToMonth(value, todayMonth))
+              value === 0 && isTopRowEmpty
+                ? ""
+                : translate("month_" + rowToMonth(value, todayMonth))
             }
             tick={{ fill: "#fff", fontSize: 10 }}
             axisLine={false}

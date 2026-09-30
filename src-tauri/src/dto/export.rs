@@ -95,9 +95,9 @@ impl Export {
         })
     }
 
-    /// Serializes the export snapshot to pretty-printed JSON.
-    pub fn to_json(&self) -> Result<String, serde_json::Error> {
-        serde_json::to_string(&self)
+    /// Serializes the export snapshot as JSON straight into `writer`, avoiding a full in-memory copy.
+    pub fn write_json<W: std::io::Write>(&self, writer: W) -> Result<(), serde_json::Error> {
+        serde_json::to_writer(writer, &self)
     }
 }
 

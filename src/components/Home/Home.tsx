@@ -76,12 +76,6 @@ export function Home() {
 
         if (sessions.length > 0) {
           const workout_data = SessionUtils.calculateWorkoutLoad(sessions);
-          const overreaching = SessionUtils.isOverreaching(workout_data);
-          const lastSessDate = new Date(
-            sessions[0].timestamp * 1000,
-          ).toDateString();
-          const todayDate = new Date().toDateString();
-          setRest(overreaching || lastSessDate == todayDate);
 
           startLoading();
           BackendClient.getHeatmapData()
@@ -178,6 +172,13 @@ export function Home() {
           }
 
           setLastSession(sessions[0]);
+
+          const overreaching = SessionUtils.isOverreaching(workout_data);
+          const lastSessDate = new Date(
+            sessions[0].timestamp * 1000,
+          ).toDateString();
+          const todayDate = new Date().toDateString();
+          setRest(todayLoad > 50 || overreaching || lastSessDate == todayDate);
         }
       })
       .finally(() => {

@@ -246,7 +246,10 @@ pub fn run(log_level: LevelFilter) {
 
                         info!("Dropped {} .fit files: {:?}", paths.len(), paths);
 
-                        let _ = _import_from_files(app_handle.clone(), paths.as_slice());
+                        let app_handle = app_handle.clone();
+                        tauri::async_runtime::spawn_blocking(move || {
+                            let _ = _import_from_files(app_handle, paths.as_slice());
+                        });
                     }
                 });
             }

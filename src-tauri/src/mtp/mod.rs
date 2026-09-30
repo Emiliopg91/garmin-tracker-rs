@@ -25,6 +25,11 @@ impl MtpClient {
         let devices = MtpDevice::list_devices().map_err(MtpError::ListDevices)?;
 
         for device_info in devices {
+            // Skip non-Garmin devices without opening (claiming) them.
+            if device_info.vendor_id != constants::MTP_GARMIN_VENDOR_ID {
+                continue;
+            }
+
             let device = MtpDevice::open_by_location(device_info.location_id)
                 .await
                 .map_err(|e| MtpError::OpenDevice(device_info.location_id, e))?;

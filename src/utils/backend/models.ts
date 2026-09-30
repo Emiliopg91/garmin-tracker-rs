@@ -105,7 +105,7 @@ export interface SessionListItem {
   training_load: number;
 }
 
-// From src-tauri/src/dto/sessions.rs:195
+// From src-tauri/src/dto/sessions.rs:203
 export interface SessionLocation {
   location: string;
   session: number;
@@ -121,7 +121,7 @@ export interface SessionSet {
   weight: number;
 }
 
-// From src-tauri/src/dto/sessions.rs:188
+// From src-tauri/src/dto/sessions.rs:196
 export interface SessionSetsUpdate {
   notes: string | null;
   sets: SessionSet[];

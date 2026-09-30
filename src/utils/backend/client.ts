@@ -8,13 +8,13 @@ export class BackendClient {
 
     private static DONT_LOG_COMMANDS: string[] = [];
 
-	// From src-tauri/src/logic/body_metrics.rs:58
+	// From src-tauri/src/logic/body_metrics.rs:59
 	public static addBodyMeasures(measures: BodyMetricListItem): Promise<void> {
 	  return BackendClient.inner_invoke("add_body_measures", { measures }); 
 	}
 	
 
-	// From src-tauri/src/logic/body_metrics.rs:90
+	// From src-tauri/src/logic/body_metrics.rs:94
 	public static deleteBodyMetric(date: number): Promise<void> {
 	  return BackendClient.inner_invoke("delete_body_metric", { date }); 
 	}
@@ -26,13 +26,13 @@ export class BackendClient {
 	}
 	
 
-	// From src-tauri/src/logic/sessions.rs:856
+	// From src-tauri/src/logic/sessions.rs:880
 	public static exportGpx(session: number): Promise<void> {
 	  return BackendClient.inner_invoke("export_gpx", { session }); 
 	}
 	
 
-	// From src-tauri/src/logic/body_metrics.rs:22
+	// From src-tauri/src/logic/body_metrics.rs:20
 	public static getBodyMeasures(): Promise<BodyMetricListItem[]> {
 	  return BackendClient.inner_invoke("get_body_measures"); 
 	}
@@ -44,25 +44,25 @@ export class BackendClient {
 	}
 	
 
-	// From src-tauri/src/logic/exercises.rs:67
+	// From src-tauri/src/logic/exercises.rs:69
 	public static getExerciseDetails(category: number, id: number): Promise<ExerciseDetails> {
 	  return BackendClient.inner_invoke("get_exercise_details", { category, id }); 
 	}
 	
 
-	// From src-tauri/src/logic/exercises.rs:29
+	// From src-tauri/src/logic/exercises.rs:28
 	public static getExercises(): Promise<ExerciseListItem[]> {
 	  return BackendClient.inner_invoke("get_exercises"); 
 	}
 	
 
-	// From src-tauri/src/logic/sessions.rs:913
+	// From src-tauri/src/logic/sessions.rs:941
 	public static getHeatmapData(): Promise<[number, number][][]> {
 	  return BackendClient.inner_invoke("get_heatmap_data"); 
 	}
 	
 
-	// From src-tauri/src/logic/sessions.rs:136
+	// From src-tauri/src/logic/sessions.rs:139
 	public static getSessionDetails(timestamp: number): Promise<SessionDetails> {
 	  return BackendClient.inner_invoke("get_session_details", { timestamp }); 
 	}
@@ -80,31 +80,31 @@ export class BackendClient {
 	}
 	
 
-	// From src-tauri/src/logic/app.rs:212
+	// From src-tauri/src/logic/app.rs:214
 	public static getTranslations(): Promise<Record<string, string>> {
 	  return BackendClient.inner_invoke("get_translations"); 
 	}
 	
 
-	// From src-tauri/src/logic/workouts.rs:86
+	// From src-tauri/src/logic/workouts.rs:88
 	public static getWorkoutDetails(name: string): Promise<WorkoutDetails> {
 	  return BackendClient.inner_invoke("get_workout_details", { name }); 
 	}
 	
 
-	// From src-tauri/src/logic/workouts.rs:26
+	// From src-tauri/src/logic/workouts.rs:25
 	public static getWorkoutList(): Promise<WorkoutListItem[]> {
 	  return BackendClient.inner_invoke("get_workout_list"); 
 	}
 	
 
-	// From src-tauri/src/logic/sessions.rs:264
+	// From src-tauri/src/logic/sessions.rs:273
 	public static importFromDevice(serial: string): Promise<number> {
 	  return BackendClient.inner_invoke("import_from_device", { serial }); 
 	}
 	
 
-	// From src-tauri/src/logic/sessions.rs:397
+	// From src-tauri/src/logic/sessions.rs:421
 	public static importFromFiles(): Promise<number> {
 	  return BackendClient.inner_invoke("import_from_files"); 
 	}
@@ -116,19 +116,19 @@ export class BackendClient {
 	}
 	
 
-	// From src-tauri/src/logic/app.rs:330
+	// From src-tauri/src/logic/app.rs:332
 	public static rcloneAvailable(): Promise<boolean> {
 	  return BackendClient.inner_invoke("rclone_available"); 
 	}
 	
 
-	// From src-tauri/src/logic/sessions.rs:203
+	// From src-tauri/src/logic/sessions.rs:209
 	public static saveSessionChanges(details: SessionSetsUpdate): Promise<void> {
 	  return BackendClient.inner_invoke("save_session_changes", { details }); 
 	}
 	
 
-	// From src-tauri/src/logic/workouts.rs:164
+	// From src-tauri/src/logic/workouts.rs:170
 	public static setWorkoutStatus(workout: string, status: boolean): Promise<void> {
 	  return BackendClient.inner_invoke("set_workout_status", { workout, status }); 
 	}
@@ -140,7 +140,7 @@ export class BackendClient {
 	}
 	
 
-	// From src-tauri/src/logic/app.rs:286
+	// From src-tauri/src/logic/app.rs:288
 	public static uploadToCloud(provider: CloudProvider): Promise<void> {
 	  return BackendClient.inner_invoke("upload_to_cloud", { provider }); 
 	}

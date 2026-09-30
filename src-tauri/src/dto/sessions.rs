@@ -119,6 +119,14 @@ pub struct SessionDetails {
     pub device: Option<String>,
 }
 
+/// Rounds samples to `1 / scale` precision so their JSON form stays short (e.g. `scale = 1000.0` keeps 3 decimals).
+fn round_samples(samples: Vec<Option<f64>>, scale: f64) -> Vec<Option<f64>> {
+    samples
+        .into_iter()
+        .map(|v| v.map(|v| (v * scale).round() / scale))
+        .collect()
+}
+
 impl From<(&Session, &[Exercise], &[Set], &[Lap])> for SessionDetails {
     fn from(value: (&Session, &[Exercise], &[Set], &[Lap])) -> Self {
         let device = value
@@ -144,13 +152,13 @@ impl From<(&Session, &[Exercise], &[Set], &[Lap])> for SessionDetails {
                 gps_coordinates = coords;
             }
             if let Some(spds) = add_data.get_speeds() {
-                speeds = spds;
+                speeds = round_samples(spds, 1000.0);
             }
             if let Some(nts) = add_data.notes.clone() {
                 notes = nts
             }
             if let Some(alts) = add_data.get_altitudes() {
-                altitudes = alts
+                altitudes = round_samples(alts, 10.0)
             }
             if let Some(hr) = add_data.max_hr {
                 max_hr = hr;

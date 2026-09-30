@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fs, thread, time::Duration};
+use std::{collections::HashMap, fs, io::BufWriter, thread, time::Duration};
 
 use chrono::Local;
 use garmin_tracker_rs_macros::traced_command;
@@ -20,7 +20,7 @@ use crate::{
     },
     logic::{
         devices::start_device_watcher, notifications::show_notification, report_error,
-        sessions::update_pending_geolocation,
+        run_blocking, sessions::update_pending_geolocation,
     },
     rclone::{RCloneClient, providers::CloudProvider},
     udev::UdevManager,
@@ -161,8 +161,8 @@ pub async fn update_settings_value(app: AppHandle, name: &str, value: &str) -> R
 /// Exports the whole database to a timestamped JSON file in the user's home directory and notifies on success/failure.
 #[traced_command]
 #[tauri::command]
-pub fn export_database(
-    database: State<'_, DatabasePool>,
+pub async fn export_database(
+    app: AppHandle,
     settings: State<'_, SettingsLock>,
 ) -> Result<(), String> {
     let path = constants::HOME_DIR.join(format!(
@@ -172,16 +172,18 @@ pub fn export_database(
     ));
     info!("Exporting database to {}...", path.display());
 
-    let res = Export::from_database(&database, settings.read().unwrap().language)
-        .map_err(|e| Box::new(e) as Box<dyn std::error::Error>)
-        .and_then(|export| {
-            export
-                .to_json()
-                .map_err(|e| Box::new(e) as Box<dyn std::error::Error>)
-        })
-        .and_then(|json| {
-            fs::write(&path, json).map_err(|e| Box::new(e) as Box<dyn std::error::Error>)
-        });
+    let export_path = path.clone();
+    let export_lang = settings.read().unwrap().language;
+    let res = run_blocking(app, move |database| {
+        Export::from_database(database, export_lang)
+            .map_err(|e| Box::new(e) as Box<dyn std::error::Error + Send + Sync>)
+            .and_then(|export| {
+                let file = fs::File::create(&export_path)?;
+                export.write_json(BufWriter::new(file))?;
+                Ok(())
+            })
+    })
+    .await;
 
     let lang = settings.read().unwrap().language;
     match res {
@@ -209,7 +211,7 @@ pub fn export_database(
 /// Returns every translation key resolved to the current UI language, for the frontend's i18n bootstrap.
 #[traced_command(log_payload = false)]
 #[tauri::command]
-pub fn get_translations(
+pub async fn get_translations(
     settings: State<'_, SettingsLock>,
 ) -> Result<HashMap<String, String>, String> {
     let lang = settings.read().unwrap().language;

@@ -1,8 +1,6 @@
 use garmin_tracker_rs_macros::traced_command;
-use rusqlite_orm::{
-    dao::Repository, database::DatabasePool, errors::DatabaseError, types::order_by::OrderBy,
-};
-use tauri::State;
+use rusqlite_orm::{dao::Repository, errors::DatabaseError, types::order_by::OrderBy};
+use tauri::{AppHandle, State};
 use tauri_plugin_log::log::info;
 
 use crate::{
@@ -12,26 +10,29 @@ use crate::{
         body_metrics::BodyMetricListItem,
         notifications::{NotificationDefinition, NotificationKind},
     },
-    logic::{notifications::show_notification, report_error},
+    logic::{notifications::show_notification, report_error, run_blocking},
     utils::translations::translate,
 };
 
 /// Returns all logged body measurements, newest first.
 #[traced_command]
 #[tauri::command]
-pub fn get_body_measures(
-    database: State<'_, DatabasePool>,
+pub async fn get_body_measures(
+    app: AppHandle,
     settings: State<'_, SettingsLock>,
 ) -> Result<Vec<BodyMetricListItem>, String> {
     info!("Getting body measures list...");
 
-    let res = database.run_in_connection(|conn| {
-        let regs = BodyMetricRepository::select()
-            .order_by(OrderBy::Desc(body_metric::entity::columns::DATE))
-            .fetch_in(conn)?;
+    let res = run_blocking(app, move |database| {
+        database.run_in_connection(|conn| {
+            let regs = BodyMetricRepository::select()
+                .order_by(OrderBy::Desc(body_metric::entity::columns::DATE))
+                .fetch_in(conn)?;
 
-        Ok(regs)
-    });
+            Ok(regs)
+        })
+    })
+    .await;
 
     match res {
         Ok(regs) => {
@@ -55,20 +56,23 @@ pub fn get_body_measures(
 /// Inserts a new body measurement entry.
 #[traced_command]
 #[tauri::command]
-pub fn add_body_measures(
-    database: State<'_, DatabasePool>,
+pub async fn add_body_measures(
+    app: AppHandle,
     settings: State<'_, SettingsLock>,
     measures: BodyMetricListItem,
 ) -> Result<(), String> {
     info!("Adding body measures list...");
 
-    let res = database.run_in_transaction(|tx| {
-        BodyMetricRepository::insert()
-            .item(&mut BodyMetric::try_from(&measures).map_err(DatabaseError::Transaction)?)
-            .execute_in(tx)?;
+    let res = run_blocking(app, move |database| {
+        database.run_in_transaction(|tx| {
+            BodyMetricRepository::insert()
+                .item(&mut BodyMetric::try_from(&measures).map_err(DatabaseError::Transaction)?)
+                .execute_in(tx)?;
 
-        Ok(())
-    });
+            Ok(())
+        })
+    })
+    .await;
 
     match res {
         Ok(_) => {
@@ -87,18 +91,21 @@ pub fn add_body_measures(
 /// Deletes the body measurement logged on `date`, if any.
 #[traced_command]
 #[tauri::command]
-pub fn delete_body_metric(
-    database: State<'_, DatabasePool>,
+pub async fn delete_body_metric(
+    app: AppHandle,
     settings: State<'_, SettingsLock>,
     date: u32,
 ) -> Result<(), String> {
-    let res = database.run_in_transaction(|tx| {
-        if let Some(entry) = BodyMetricRepository::select_by_id_in(tx, date)? {
-            entry.delete_by_id_in(tx)?;
-        }
+    let res = run_blocking(app, move |database| {
+        database.run_in_transaction(|tx| {
+            if let Some(entry) = BodyMetricRepository::select_by_id_in(tx, date)? {
+                entry.delete_by_id_in(tx)?;
+            }
 
-        Ok(())
-    });
+            Ok(())
+        })
+    })
+    .await;
 
     let lang = settings.read().unwrap().language;
     match res {
