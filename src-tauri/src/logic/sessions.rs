@@ -67,9 +67,12 @@ pub fn get_sessions(
 
         let sessions = select_builder.fetch_in(conn)?;
 
-        let record_sessions = SetRepository::select()
+        let sessions_with_sets = SetRepository::select()
             .distinct(&[set::entity::columns::SESSION])
-            .where_(Where::Eq(set::entity::columns::PR, true.into()))
+            .where_(Where::In(
+                set::entity::columns::SESSION,
+                sessions.iter().map(|s| s.date.into()).collect::<Vec<_>>(),
+            ))
             .fetch_in(conn)?
             .iter()
             .map(
@@ -80,8 +83,18 @@ pub fn get_sessions(
             )
             .collect::<HashSet<_>>();
 
-        let sessions_with_sets = SetRepository::select()
+        let record_sessions = SetRepository::select()
             .distinct(&[set::entity::columns::SESSION])
+            .where_(Where::And(vec![
+                Where::Eq(set::entity::columns::PR, true.into()),
+                Where::In(
+                    set::entity::columns::SESSION,
+                    sessions_with_sets
+                        .iter()
+                        .map(|s| (*s).into())
+                        .collect::<Vec<_>>(),
+                ),
+            ]))
             .fetch_in(conn)?
             .iter()
             .map(
