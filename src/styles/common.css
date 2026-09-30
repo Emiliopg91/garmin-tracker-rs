@@ -49,6 +49,10 @@
   cursor: pointer;
 }
 
+.row-compare-selected {
+  background-color: color-mix(in srgb, var(--primary-color) 50%, transparent);
+}
+
 .text-center {
   text-align: center;
 }

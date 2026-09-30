@@ -46,15 +46,13 @@ export function BodyMetricList() {
       });
   };
 
-  const toggleSelect = (
-    event: React.MouseEvent<HTMLButtonElement>,
-    metric: BodyMetricListItem,
-  ) => {
-    event.stopPropagation();
+  const toggleSelect = (metric: BodyMetricListItem) => {
     if (toCompare.includes(metric.date)) {
       setToCompare([...toCompare].filter((date) => date != metric.date));
     } else {
-      setToCompare([...toCompare, metric.date]);
+      if (toCompare.length < 3) {
+        setToCompare([...toCompare, metric.date]);
+      }
     }
   };
 
@@ -74,7 +72,6 @@ export function BodyMetricList() {
         <table>
           <thead>
             <tr>
-              <th></th>
               <th className="text-center">{translate("date")}</th>
               <th className="text-center">{translate("weight")}</th>
               <th className="text-center">{translate("fat_ratio")}</th>
@@ -87,10 +84,7 @@ export function BodyMetricList() {
               <BodyMetricRow
                 key={idx}
                 measure={measure}
-                showCompare={bodyMetrics.length > 1}
-                compareDisabled={
-                  toCompare.length >= 3 && !toCompare.includes(measure.date)
-                }
+                selectedForCompare={toCompare.includes(measure.date)}
                 onSelect={openModal}
                 onToggleCompare={toggleSelect}
               />

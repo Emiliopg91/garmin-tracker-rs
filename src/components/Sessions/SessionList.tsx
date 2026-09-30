@@ -71,23 +71,26 @@ export function SessionsList() {
       });
   };
 
-  const toggleSelect = (
-    event: React.MouseEvent<HTMLButtonElement>,
-    session: SessionListItem,
-  ) => {
-    event.stopPropagation();
-    const was0 = toCompare.length == 0;
-    if (toCompare.includes(session.timestamp)) {
-      const toComp = [...toCompare].filter((date) => date != session.timestamp);
-      if (toComp.length == 0) {
-        setToCompareName(undefined);
-      }
-      setToCompare(toComp);
-    } else {
-      if (toCompare.length < 2) {
-        setToCompare([...toCompare, session.timestamp]);
-        if (was0) {
-          setToCompareName(session.name);
+  const toggleSelect = (session: SessionListItem) => {
+    if (
+      (session.has_sets && toCompareName === undefined) ||
+      toCompareName == session.name
+    ) {
+      const was0 = toCompare.length == 0;
+      if (toCompare.includes(session.timestamp)) {
+        const toComp = [...toCompare].filter(
+          (date) => date != session.timestamp,
+        );
+        if (toComp.length == 0) {
+          setToCompareName(undefined);
+        }
+        setToCompare(toComp);
+      } else {
+        if (toCompare.length < 2) {
+          setToCompare([...toCompare, session.timestamp]);
+          if (was0) {
+            setToCompareName(session.name);
+          }
         }
       }
     }
@@ -109,18 +112,8 @@ export function SessionsList() {
     <>
       <div id="list-layer">
         <table>
-          <colgroup>
-            <col className="col-30" />
-            <col />
-            <col />
-            <col />
-            <col />
-            <col />
-            <col />
-          </colgroup>
           <thead>
             <tr>
-              <th></th>
               <th></th>
               <th className="text-center">{translate("date")}</th>
               <th className="text-center">{translate("sport")}</th>
@@ -136,7 +129,7 @@ export function SessionsList() {
                 key={idx}
                 session={session}
                 onSelect={getSessionDetails}
-                compareName={toCompareName}
+                selectedForCompare={toCompare.includes(session.timestamp)}
                 onToggleCompare={toggleSelect}
               />
             ))}
