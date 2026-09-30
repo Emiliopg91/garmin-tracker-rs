@@ -139,7 +139,11 @@ export function SessionsCompareModal({ sessions, onClose }: Props) {
             {exercises.map((exercise) => (
               <tr
                 key={`exercise-${exercise}`}
-                style={{ borderBottom: "1px solid gray" }}
+
+                style={{
+                  textAlign: "center",
+                  borderBottom: "1px solid gray",
+                }}
               >
                 <td className="divider-bottom-white">
                   {translate("exercise_" + exercise.replace("-", "_"))}
