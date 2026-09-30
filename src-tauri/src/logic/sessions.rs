@@ -1,5 +1,5 @@
 use std::{
-    collections::HashSet,
+    collections::{HashMap, HashSet},
     fs::{self, File},
     io::BufWriter,
     path::{Path, PathBuf},
@@ -68,50 +68,16 @@ pub async fn get_sessions(
 
             let sessions = select_builder.fetch_in(conn)?;
 
-            let sessions_with_sets = SetRepository::select()
-                .distinct(&[set::entity::columns::SESSION])
-                .where_(Where::In(
-                    set::entity::columns::SESSION,
-                    sessions.iter().map(|s| s.date.into()).collect::<Vec<_>>(),
-                ))
-                .fetch_in(conn)?
-                .iter()
-                .map(
-                    |m| match m.get(set::entity::columns::SESSION.as_ref()).unwrap() {
-                        Value::Int64(v) => *v as u32,
-                        _ => unreachable!(),
-                    },
-                )
-                .collect::<HashSet<_>>();
-
-            let record_sessions = SetRepository::select()
-                .distinct(&[set::entity::columns::SESSION])
-                .where_(Where::And(vec![
-                    Where::Eq(set::entity::columns::PR, true.into()),
-                    Where::In(
-                        set::entity::columns::SESSION,
-                        sessions_with_sets
-                            .iter()
-                            .map(|s| (*s).into())
-                            .collect::<Vec<_>>(),
-                    ),
-                ]))
-                .fetch_in(conn)?
-                .iter()
-                .map(
-                    |m| match m.get(set::entity::columns::SESSION.as_ref()).unwrap() {
-                        Value::Int64(v) => *v as u32,
-                        _ => unreachable!(),
-                    },
-                )
-                .collect::<HashSet<_>>();
+            let set_flags = session_set_flags(conn, limit)?;
 
             Ok(sessions
                 .into_iter()
                 .map(|s| {
                     let mut r = SessionListItem::from(&s);
-                    r.has_record = record_sessions.contains(&s.date);
-                    r.has_sets = sessions_with_sets.contains(&s.date);
+                    if let Some(has_record) = set_flags.get(&s.date) {
+                        r.has_sets = true;
+                        r.has_record = *has_record;
+                    }
                     r
                 })
                 .collect::<Vec<_>>())
@@ -131,6 +97,43 @@ pub async fn get_sessions(
             "Error getting sessions list",
         )),
     }
+}
+
+/// Maps every session that has sets (from `min_date` on, if given) to whether any of them is a personal record.
+pub fn session_set_flags(
+    conn: &rusqlite_orm::rusqlite::Connection,
+    min_date: Option<i32>,
+) -> rusqlite_orm::errors::Result<HashMap<u32, bool>> {
+    let distinct_sessions = |only_records: bool| {
+        let mut conditions = vec![Where::Gte(
+            set::entity::columns::SESSION,
+            min_date.unwrap_or(0).into(),
+        )];
+        if only_records {
+            conditions.push(Where::Eq(set::entity::columns::PR, true.into()));
+        }
+
+        Ok::<_, DatabaseError>(
+            SetRepository::select()
+                .distinct(&[set::entity::columns::SESSION])
+                .where_(Where::And(conditions))
+                .fetch_in(conn)?
+                .iter()
+                .map(
+                    |m| match m.get(set::entity::columns::SESSION.as_ref()).unwrap() {
+                        Value::Int64(v) => *v as u32,
+                        _ => unreachable!(),
+                    },
+                )
+                .collect::<HashSet<_>>(),
+        )
+    };
+
+    let with_record = distinct_sessions(true)?;
+    Ok(distinct_sessions(false)?
+        .into_iter()
+        .map(|session| (session, with_record.contains(&session)))
+        .collect())
 }
 
 /// Returns full details for one session (series grouped by exercise, heart rate, GPS, speeds, device).
@@ -505,12 +508,11 @@ where
             let res = match FitParser::from_file(file) {
                 Ok(parser) => match Session::try_from(parser) {
                     Ok(mut session) => {
-                        if let Some(mut ad) = session.additional_data.clone()
+                        if let Some(ad) = session.additional_data.as_mut()
                             && ad.heart_rates.is_some()
                             && let Some(ds) = dev_settings.clone()
                         {
                             ad.max_hr = Some(ds.max_heart_rate);
-                            session.additional_data = Some(ad);
                         }
                         Ok((session, file))
                     }
@@ -963,6 +965,11 @@ pub fn heatmap_data(database: &DatabasePool) -> Result<Vec<Vec<(u32, u16)>>, Str
                 .fetch_in(conn)?;
             let prs = SetRepository::select_by_personal_records_in(conn, true, None)?;
 
+            let mut pr_counts: HashMap<u32, u16> = HashMap::new();
+            for pr in &prs {
+                *pr_counts.entry(pr.session).or_default() += 1;
+            }
+
             let mut res = vec![vec![(0_u32, 0_u16); 31]; 12];
             sessions.iter().for_each(|session| {
                 let dt = Local
@@ -971,7 +978,7 @@ pub fn heatmap_data(database: &DatabasePool) -> Result<Vec<Vec<(u32, u16)>>, Str
                     .unwrap();
                 let cell = &mut res[dt.month0() as usize][dt.day0() as usize];
                 cell.0 += session.training_load as u32;
-                cell.1 += prs.iter().filter(|s| s.session == session.date).count() as u16;
+                cell.1 += pr_counts.get(&session.date).copied().unwrap_or(0);
             });
 
             Ok(res)

@@ -1,6 +1,9 @@
 use chrono::{Datelike, Days, Local, TimeZone};
 
-use crate::{logic::sessions::heatmap_data, tests::common};
+use crate::{
+    logic::sessions::{heatmap_data, session_set_flags},
+    tests::common,
+};
 
 /// Builds a timestamp for `days_ago` days before today, anchored at local noon so the
 /// resulting instant never lands on a different calendar day due to DST shifts.
@@ -69,4 +72,43 @@ fn heatmap_totals_and_record_flags_match_inserted_sessions() {
             "session {i} ({date}) record count mismatch"
         );
     }
+}
+
+#[test]
+fn session_set_flags_report_sets_and_records_per_session() {
+    let db = common::test_db();
+
+    db.run_in_transaction(|tx| {
+        // No sets at all.
+        common::insert_session(tx, common::session(1_000));
+
+        // Sets, none of them a record.
+        let mut plain = common::session(2_000);
+        plain.sets = vec![common::set(2_000, 0, (0, 1), 5, 50.0)];
+        common::insert_session(tx, plain);
+
+        // Sets, one of them a record.
+        let mut record = common::session(3_000);
+        let mut pr = common::set(3_000, 1, (0, 2), 5, 60.0);
+        pr.pr = true;
+        record.sets = vec![common::set(3_000, 0, (0, 1), 5, 40.0), pr];
+        common::insert_session(tx, record);
+
+        Ok(())
+    })
+    .unwrap();
+
+    let all = db
+        .run_in_connection(|conn| Ok(session_set_flags(conn, None)?))
+        .unwrap();
+    assert_eq!(all.len(), 2);
+    assert_eq!(all.get(&2_000), Some(&false));
+    assert_eq!(all.get(&3_000), Some(&true));
+    assert!(!all.contains_key(&1_000));
+
+    let recent = db
+        .run_in_connection(|conn| Ok(session_set_flags(conn, Some(2_500))?))
+        .unwrap();
+    assert_eq!(recent.len(), 1);
+    assert_eq!(recent.get(&3_000), Some(&true));
 }
