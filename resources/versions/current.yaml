@@ -26,7 +26,7 @@ node:
   react-leaflet: 5.0.0
   recharts: 3.10.1
   typescript: 5.8.3
-  typescript-eslint: 8.70.1
+  typescript-eslint: 8.71.0
   vite: 7.3.6
   vite-plugin-checker: 0.14.5
   vitest: 5.0.2
@@ -56,7 +56,7 @@ rust:
   tauri-build: 2.7.0
   tauri-plugin-autostart: 2.6.0
   tauri-plugin-log: 2.10.0
-  tauri-plugin-opener: 2.6.0
+  tauri-plugin-opener: 2.7.0
   tauri-rs-ts-ipc: 0.1.20
   tempfile: 3.27.0
   thiserror: 2.0.21
