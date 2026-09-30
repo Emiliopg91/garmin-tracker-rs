@@ -10,7 +10,7 @@ import { BackendListener } from "@/utils/backend/listener";
 import { SessionFrontDetails, SessionUtils } from "@/utils/SessionUtils";
 import "@/styles/Sessions/SessionList.css";
 import { Button } from "@mui/material";
-import { SessionsCompareModal } from "./helpers/SessionsCompareModal";
+import { SessionsCompareModal } from "./SessionsCompareModal";
 
 export function SessionsList() {
   const { sessionsVersion } = useContext(AppContext);

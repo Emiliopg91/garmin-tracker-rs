@@ -17,13 +17,25 @@ export function SessionsCompareModal({ sessions, onClose }: Props) {
 
   useEffect(() => {
     const exercises: string[] = [];
-    for (let i = 0; i < sessions.length; i++) {
-      const session = sessions[i];
-      for (const idx in session.exercises) {
-        const exercise = session.exercises[idx];
-        if (!exercises.includes(exercise)) {
-          exercises.push(exercise);
+    let idx = 0;
+    while (true) {
+      let any = false;
+      for (let i = 0; i < sessions.length; i++) {
+        const session = sessions[i];
+        if (session.exercises.length > idx) {
+          const exercise = session.exercises[idx];
+          if (!exercises.includes(exercise)) {
+            exercises.push(exercise);
+          }
+
+          any = true;
         }
+      }
+
+      if (any) {
+        idx++;
+      } else {
+        break;
       }
     }
     setExercises(exercises);
@@ -139,7 +151,10 @@ export function SessionsCompareModal({ sessions, onClose }: Props) {
                         <span key={`session-${idx}-set-${exercise}-${idx2}`}>
                           {set.reps +
                             " x " +
-                            UnitUtils.fromKg(set.weight, settings.weight_unit) +
+                            UnitUtils.fromKg(
+                              set.weight,
+                              settings.weight_unit,
+                            ).toFixed(1) +
                             " " +
                             UnitUtils.getUnit(settings.weight_unit)}
                         </span>
