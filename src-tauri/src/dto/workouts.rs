@@ -5,7 +5,7 @@ use crate::dao::session::Session;
 #[derive(Serialize)]
 pub struct WorkoutListItem {
     pub name: String,
-    pub latest_session: i32,
+    pub latest_session: u32,
     pub sessions: u32,
     pub avg_time: u32,
     pub enabled: bool,
@@ -13,16 +13,16 @@ pub struct WorkoutListItem {
 
 #[derive(Serialize)]
 pub struct WorkoutSession {
-    pub date: i32,
-    pub volume: f64,
+    pub date: u32,
+    pub volume: f32,
     pub time: u32,
 }
 
 impl From<&Session> for WorkoutSession {
     fn from(value: &Session) -> Self {
         WorkoutSession {
-            date: value.date as i32,
-            volume: 0_f64,
+            date: value.date,
+            volume: 0_f32,
             time: value.total_elapsed_time,
         }
     }
@@ -31,10 +31,10 @@ impl From<&Session> for WorkoutSession {
 #[derive(Serialize)]
 pub struct WorkoutDetails {
     pub name: String,
-    pub latest_session: i32,
+    pub latest_session: u32,
     pub session_count: u32,
     pub avg_time: u32,
-    pub avg_volume: f64,
+    pub avg_volume: f32,
     pub sessions: Vec<WorkoutSession>,
     pub enabled: bool,
 }

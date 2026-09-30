@@ -6,5 +6,5 @@ use serde::{Deserialize, Serialize};
 pub struct Device {
     pub serial: String,
     pub model: String,
-    pub last_sync: Option<i64>,
+    pub last_sync: Option<u32>,
 }

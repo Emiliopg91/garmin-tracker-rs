@@ -13,7 +13,7 @@ use crate::{
 #[derive(Serialize, Default)]
 pub struct SessionListItem {
     pub name: String,
-    pub timestamp: i32,
+    pub timestamp: u32,
     pub active_calories: u16,
     pub training_load: u16,
     pub sport: u8,
@@ -27,7 +27,7 @@ impl From<&Session> for SessionListItem {
     fn from(value: &Session) -> Self {
         Self {
             name: value.name.clone(),
-            timestamp: value.date as i32,
+            timestamp: value.date,
             active_calories: value.total_calories - value.metabolic_calories,
             training_load: value.training_load,
             sport: value.sport,
@@ -56,7 +56,7 @@ pub struct SessionSet {
     pub ex_id: u16,
     pub idx: u8,
     pub reps: u16,
-    pub weight: f64,
+    pub weight: f32,
     pub pr: bool,
 }
 
@@ -75,7 +75,7 @@ impl From<&Set> for SessionSet {
 
 #[derive(Serialize)]
 pub struct SessionLap {
-    idx: i32,
+    idx: u16,
     start_latitude: Option<i32>,
     start_longitude: Option<i32>,
 }
@@ -94,7 +94,7 @@ impl From<&Lap> for SessionLap {
 pub struct SessionDetails {
     pub name: String,
 
-    pub timestamp: i32,
+    pub timestamp: u32,
 
     pub total_elapsed_time: u32,
     pub active_time: u32,
@@ -162,7 +162,7 @@ impl From<(&Session, &[Exercise], &[Set], &[Lap])> for SessionDetails {
 
         Self {
             name: value.0.name.clone(),
-            timestamp: value.0.date as i32,
+            timestamp: value.0.date,
             total_elapsed_time: value.0.total_elapsed_time,
             active_time: value.0.active_time,
             metabolic_calories: value.0.metabolic_calories,
@@ -186,14 +186,14 @@ impl From<(&Session, &[Exercise], &[Set], &[Lap])> for SessionDetails {
 
 #[derive(Deserialize, Serialize)]
 pub struct SessionSetsUpdate {
-    pub timestamp: i32,
+    pub timestamp: u32,
     pub sets: Vec<SessionSet>,
     pub notes: Option<String>,
 }
 
 #[derive(Serialize, Clone)]
 pub struct SessionLocation {
-    pub session: i32,
+    pub session: u32,
     pub location: String,
 }
 

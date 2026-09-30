@@ -4,7 +4,7 @@ use crate::dao::body_metric::BodyMetric;
 
 #[derive(Serialize, Deserialize)]
 pub struct BodyMetricListItem {
-    pub date: i32,
+    pub date: u32,
     pub weight: f32,
     pub fat_ratio: f32,
     pub lean_mass: f32,
@@ -14,7 +14,7 @@ pub struct BodyMetricListItem {
 impl From<&BodyMetric> for BodyMetricListItem {
     fn from(value: &BodyMetric) -> Self {
         Self {
-            date: value.date as i32,
+            date: value.date,
             weight: value.weight,
             fat_ratio: value.fat_ratio,
             lean_mass: value.lean_mass,
@@ -28,7 +28,7 @@ impl TryFrom<&BodyMetricListItem> for BodyMetric {
 
     fn try_from(value: &BodyMetricListItem) -> Result<Self, Self::Error> {
         Ok(Self {
-            date: value.date as i64,
+            date: value.date,
             weight: value.weight,
             fat_ratio: value.fat_ratio,
             lean_mass: value.lean_mass,

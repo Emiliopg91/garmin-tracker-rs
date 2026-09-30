@@ -6,9 +6,9 @@ use crate::{
     tests::common,
 };
 
-const WITH_DATA: i64 = 1;
-const WITHOUT_DATA: i64 = 2;
-const OTHER: i64 = 3;
+const WITH_DATA: u32 = 1;
+const WITHOUT_DATA: u32 = 2;
+const OTHER: u32 = 3;
 
 /// Inserts a session with an additional data row (`WITH_DATA`, `OTHER`) and one without it (`WITHOUT_DATA`).
 fn setup() -> DatabasePool {
@@ -28,16 +28,16 @@ fn setup() -> DatabasePool {
     db
 }
 
-fn save_notes(db: &DatabasePool, session: i64, notes: Option<&str>) {
+fn save_notes(db: &DatabasePool, session: u32, notes: Option<&str>) {
     db.run_in_transaction(|tx| Ok(update_session_notes(tx, session, notes)?))
         .unwrap();
 }
 
-fn additional_data(db: &DatabasePool, session: i64) -> Option<AdditionalData> {
+fn additional_data(db: &DatabasePool, session: u32) -> Option<AdditionalData> {
     AdditionalDataRepository::select_by_id(db, session).unwrap()
 }
 
-fn notes(db: &DatabasePool, session: i64) -> Option<String> {
+fn notes(db: &DatabasePool, session: u32) -> Option<String> {
     additional_data(db, session).and_then(|a| a.notes)
 }
 

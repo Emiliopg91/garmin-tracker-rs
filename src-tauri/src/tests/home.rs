@@ -4,7 +4,7 @@ use crate::{logic::sessions::heatmap_data, tests::common};
 
 /// Builds a timestamp for `days_ago` days before today, anchored at local noon so the
 /// resulting instant never lands on a different calendar day due to DST shifts.
-fn timestamp_days_ago(days_ago: u64) -> i64 {
+fn timestamp_days_ago(days_ago: u64) -> u32 {
     let date = Local::now()
         .date_naive()
         .checked_sub_days(Days::new(days_ago))
@@ -14,7 +14,7 @@ fn timestamp_days_ago(days_ago: u64) -> i64 {
         .from_local_datetime(&noon)
         .earliest()
         .unwrap()
-        .timestamp()
+        .timestamp() as u32
 }
 
 #[test]
@@ -36,7 +36,7 @@ fn heatmap_totals_and_record_flags_match_inserted_sessions() {
             session.training_load = 40 + (i as u16) * 7;
 
             if record_indices.contains(&i) {
-                let mut set = common::set(date, 0, (0, i as u16), 5, 100.0 + i as f64);
+                let mut set = common::set(date, 0, (0, i as u16), 5, 100.0 + i as f32);
                 set.pr = true;
                 session.sets = vec![set];
             }

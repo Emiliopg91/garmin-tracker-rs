@@ -41,7 +41,7 @@ pub fn get_exercises(
                 id: pr.ex_id,
                 reps: pr.reps,
                 weight: pr.weight,
-                date: pr.session as i32,
+                date: pr.session,
                 e1rm: pr.e1rm,
             })
             .collect::<Vec<_>>())
@@ -91,7 +91,7 @@ pub fn get_exercise_details(
         let pr = series.iter().find(|s| s.pr).unwrap();
         res.reps = pr.reps;
         res.weight = pr.weight;
-        res.pr_date = pr.session as i32;
+        res.pr_date = pr.session;
         res.e1rm = pr.e1rm;
 
         let mut timestamps: Vec<Value> = Vec::new();

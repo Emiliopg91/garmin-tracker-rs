@@ -16,7 +16,7 @@ use super::set::Set;
 #[primary_key(date)]
 #[index("name", (name))]
 pub struct Session {
-    pub date: i64,
+    pub date: u32,
     pub name: String,
     pub total_elapsed_time: u32,
     pub active_time: u32,

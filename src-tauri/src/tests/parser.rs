@@ -51,7 +51,7 @@ fn parse_fixture(name: &str) -> Session {
 
 struct Expected {
     fixture: &'static str,
-    date: i64,
+    date: u32,
     name: &'static str,
     total_elapsed_time: u32,
     active_time: u32,

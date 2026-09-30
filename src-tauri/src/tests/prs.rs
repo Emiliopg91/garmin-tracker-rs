@@ -15,7 +15,7 @@ use crate::{
 const SQUAT: (u16, u16) = (28, 0);
 const BENCH: (u16, u16) = (0, 0);
 
-fn pr_sets(db: &DatabasePool) -> Vec<(i64, u8, u16, u16)> {
+fn pr_sets(db: &DatabasePool) -> Vec<(u32, u8, u16, u16)> {
     db.run_in_connection(|conn| {
         Ok(SetRepository::select()
             .where_(Where::Eq(set::entity::columns::PR, true.into()))
@@ -28,7 +28,7 @@ fn pr_sets(db: &DatabasePool) -> Vec<(i64, u8, u16, u16)> {
     .unwrap()
 }
 
-fn insert_and_update(db: &DatabasePool, sessions: Vec<(i64, Vec<Set>)>) {
+fn insert_and_update(db: &DatabasePool, sessions: Vec<(u32, Vec<Set>)>) {
     db.run_in_transaction(|tx| {
         let mut exercises = HashSet::new();
         for (date, sets) in &sessions {

@@ -12,14 +12,14 @@ use super::exercise::Exercise;
 #[index("exercise", (ex_cat, ex_id))]
 #[unique("exercise_personal_record", (ex_cat, ex_id), (pr=true))]
 pub struct Set {
-    pub session: i64,
+    pub session: u32,
     pub idx: u8,
     #[column("exercise_category")]
     pub ex_cat: u16,
     #[column("exercise_id")]
     pub ex_id: u16,
     pub reps: u16,
-    pub weight: f64,
+    pub weight: f32,
     pub pr: bool,
     pub e1rm: i32,
 
@@ -34,12 +34,12 @@ impl Set {
     const MAX_ESTIMATION_REPS: u16 = 20;
 
     /// Estimates the one-rep max: Brzycki up to 10 reps, Lander from 11 to 20.
-    pub fn estimate_1rm(weight: f64, reps: u16) -> i32 {
+    pub fn estimate_1rm(weight: f32, reps: u16) -> i32 {
         if reps <= 1 {
             return weight as i32;
         }
 
-        let r = reps.min(Self::MAX_ESTIMATION_REPS) as f64;
+        let r = reps.min(Self::MAX_ESTIMATION_REPS) as f32;
 
         if r <= 10.0 {
             ((weight * 36.0) / (37.0 - r)) as i32

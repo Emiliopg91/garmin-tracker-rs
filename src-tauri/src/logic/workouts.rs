@@ -58,7 +58,7 @@ pub fn get_workout_list(
                 name: wd.0,
                 sessions: wd.1.0,
                 avg_time: wd.1.1 / wd.1.0,
-                latest_session: wd.1.2.unwrap() as i32,
+                latest_session: wd.1.2.unwrap(),
             })
             .collect::<Vec<_>>();
 
@@ -102,7 +102,7 @@ pub fn get_workout_details(
         let mut latest = sessions.first().unwrap().clone();
         let mut count = 0_u32;
         let mut time = 0_u32;
-        let mut volume = 0_f64;
+        let mut volume = 0_f32;
 
         let series = SetRepository::select()
             .where_(Where::In(
@@ -111,10 +111,10 @@ pub fn get_workout_details(
             ))
             .fetch_in(conn)?;
 
-        let mut volume_by_session: HashMap<i64, f64> = HashMap::new();
+        let mut volume_by_session = HashMap::new();
         for serie in &series {
             *volume_by_session.entry(serie.session).or_insert(0.0) +=
-                (serie.reps as f64) * serie.weight;
+                (serie.reps as f32) * serie.weight;
         }
 
         let mut session_list = Vec::new();
@@ -135,8 +135,8 @@ pub fn get_workout_details(
         let details = WorkoutDetails {
             name: name.to_string(),
             avg_time: time / (sessions.len() as u32),
-            latest_session: latest.date as i32,
-            avg_volume: volume / (sessions.len() as f64),
+            latest_session: latest.date,
+            avg_volume: volume / (sessions.len() as f32),
             session_count: count,
             sessions: session_list,
             enabled: workout.enabled,

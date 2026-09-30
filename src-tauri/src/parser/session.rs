@@ -156,13 +156,13 @@ fn handle_lap_message(
     Ok(())
 }
 
-fn handle_set_message(msg: mesgdef::Set, series_data: &mut Vec<(usize, u16, f64)>) {
+fn handle_set_message(msg: mesgdef::Set, series_data: &mut Vec<(usize, u16, f32)>) {
     if msg.repetitions != u16::MAX
         && msg.wkt_step_index.0 != u16::MAX
         && let Some(weight) = msg.weight_scaled()
     {
         let ex_idx = msg.wkt_step_index.0 as usize;
-        series_data.push((ex_idx, msg.repetitions, weight));
+        series_data.push((ex_idx, msg.repetitions, weight as f32));
     }
 }
 
@@ -190,7 +190,7 @@ fn handle_step_message(msg: mesgdef::WorkoutStep, exercises: &mut Vec<Option<Exe
 /// assignment back in `parse`.
 struct SessionAccumulator {
     workout: Option<String>,
-    timestamp: i64,
+    timestamp: u32,
     sub_sport_obj: SubSport,
     total_elapsed_time: u32,
     active_time: u32,
@@ -225,7 +225,8 @@ impl SessionAccumulator {
         self.timestamp = msg
             .timestamp
             .unix_timestamp()
-            .ok_or_else(|| ParseFitFileError::MissingField("timestamp".to_string()))?;
+            .ok_or_else(|| ParseFitFileError::MissingField("timestamp".to_string()))?
+            as u32;
 
         self.sub_sport_obj = {
             let sport_val = msg.sport;
@@ -282,7 +283,7 @@ impl SessionAccumulator {
 /// forward-filled for GPS).
 #[derive(Default)]
 struct RecordAccumulator {
-    timestamp: i64,
+    timestamp: u32,
     hrs: Vec<u8>,
     any_hr: bool,
     coords: Vec<(i32, i32)>,

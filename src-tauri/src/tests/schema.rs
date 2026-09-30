@@ -73,7 +73,7 @@ fn session_roundtrip_with_relationships() {
 
     let stored = db
         .run_in_connection(|conn| {
-            let mut s = SessionRepository::select_by_id_in(conn, 1_700_000_000_i64)?.unwrap();
+            let mut s = SessionRepository::select_by_id_in(conn, 1_700_000_000_u32)?.unwrap();
             s.fetch_sets_relationship_in(conn)?;
             s.fetch_laps_relationship_in(conn)?;
             s.fetch_additional_data_relationship_in(conn)?;

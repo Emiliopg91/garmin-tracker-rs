@@ -7,8 +7,8 @@ use crate::dao::additional_data::AdditionalData;
 #[primary_key(session, idx)]
 #[index("session", (session))]
 pub struct Lap {
-    pub session: i64,
-    pub idx: i32,
+    pub session: u32,
+    pub idx: u16,
     pub start_latitude: Option<i32>,
     pub start_longitude: Option<i32>,
 }

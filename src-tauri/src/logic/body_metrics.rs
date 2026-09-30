@@ -90,10 +90,10 @@ pub fn add_body_measures(
 pub fn delete_body_metric(
     database: State<'_, DatabasePool>,
     settings: State<'_, SettingsLock>,
-    date: i32,
+    date: u32,
 ) -> Result<(), String> {
     let res = database.run_in_transaction(|tx| {
-        if let Some(entry) = BodyMetricRepository::select_by_id_in(tx, date as i64)? {
+        if let Some(entry) = BodyMetricRepository::select_by_id_in(tx, date)? {
             entry.delete_by_id_in(tx)?;
         }
 

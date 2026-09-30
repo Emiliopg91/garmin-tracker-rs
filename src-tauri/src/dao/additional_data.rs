@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 #[entity("additional_data")]
 #[primary_key(session)]
 pub struct AdditionalData {
-    pub session: i64,
+    pub session: u32,
     pub heart_rates: Option<Vec<u8>>,
     pub coordinates: Option<Vec<u8>>,
     pub speeds: Option<Vec<u8>>,
@@ -23,7 +23,7 @@ impl AdditionalData {
 
     pub const SEMICIRCLE_TO_DEGREES: f64 = 180.0 / (2_i64.pow(31) as f64);
 
-    pub fn new(session: i64) -> Self {
+    pub fn new(session: u32) -> Self {
         Self {
             session,
             altitudes: None,

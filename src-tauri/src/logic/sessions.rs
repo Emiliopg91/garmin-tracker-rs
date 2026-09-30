@@ -77,7 +77,7 @@ pub fn get_sessions(
             .iter()
             .map(
                 |m| match m.get(set::entity::columns::SESSION.as_ref()).unwrap() {
-                    Value::Int64(v) => *v,
+                    Value::Int64(v) => *v as u32,
                     _ => unreachable!(),
                 },
             )
@@ -99,7 +99,7 @@ pub fn get_sessions(
             .iter()
             .map(
                 |m| match m.get(set::entity::columns::SESSION.as_ref()).unwrap() {
-                    Value::Int64(v) => *v,
+                    Value::Int64(v) => *v as u32,
                     _ => unreachable!(),
                 },
             )
@@ -136,12 +136,14 @@ pub fn get_sessions(
 pub fn get_session_details(
     database: State<'_, DatabasePool>,
     settings: State<'_, SettingsLock>,
-    timestamp: i32,
+    timestamp: u32,
 ) -> Result<SessionDetails, String> {
-    let timestamp = timestamp as i64;
     info!(
         "Getting details for session {}",
-        Local.timestamp_opt(timestamp, 0).unwrap().to_rfc3339()
+        Local
+            .timestamp_opt(timestamp as i64, 0)
+            .unwrap()
+            .to_rfc3339()
     );
 
     let res = database.run_in_connection(|conn| {
@@ -213,7 +215,7 @@ pub fn save_session_changes(
     let lang = settings.read().unwrap().language;
 
     let res = database.run_in_transaction(|tx| {
-        update_session_notes(tx, details.timestamp as i64, details.notes.as_deref())?;
+        update_session_notes(tx, details.timestamp, details.notes.as_deref())?;
 
         let mut exercises = HashSet::new();
         for serie in &details.sets {
@@ -232,7 +234,7 @@ pub fn save_session_changes(
             exercises.insert((serie.ex_cat, serie.ex_id));
         }
 
-        update_prs(tx, exercises, &[details.timestamp as i64], Some(lang))?;
+        update_prs(tx, exercises, &[details.timestamp], Some(lang))?;
         Ok(())
     });
 
@@ -274,7 +276,7 @@ pub async fn _import_from_device(app: &AppHandle, serial: &str) -> Result<usize,
         .unwrap();
 
     if let Some(latest) = device.last_sync {
-        let latest = Local.timestamp_opt(latest, 0).unwrap();
+        let latest = Local.timestamp_opt(latest as i64, 0).unwrap();
         latest_date = format!(
             "{:04}-{:02}-{:02}-{:02}-{:02}-{:02}",
             latest.year(),
@@ -290,7 +292,7 @@ pub async fn _import_from_device(app: &AppHandle, serial: &str) -> Result<usize,
         "Fetching from device activity files after {}...",
         latest_date
     );
-    let mut res: Result<Vec<i64>, DatabaseError> = Ok(Vec::new());
+    let mut res: Result<Vec<u32>, DatabaseError> = Ok(Vec::new());
     let mut activities = Vec::new();
 
     let mtp_client = MTP_CLIENT_INST.lock().await;
@@ -355,7 +357,7 @@ pub async fn _import_from_device(app: &AppHandle, serial: &str) -> Result<usize,
                     Ok(Vec::new())
                 }?;
 
-                device.last_sync = Some(Local::now().timestamp());
+                device.last_sync = Some(Local::now().timestamp() as u32);
                 device.update_by_id_in(tx)?;
 
                 Ok(res)
@@ -465,7 +467,7 @@ fn import_file_list<F>(
     lang: Languages,
     delete: bool,
     dev_settings: Option<DeviceSettings>,
-) -> Result<Vec<i64>, DatabaseError>
+) -> Result<Vec<u32>, DatabaseError>
 where
     F: AsRef<Path> + Sync,
 {
@@ -520,7 +522,7 @@ where
     sessions.sort_by_key(|s| s.0.date);
 
     for (session, file) in &mut sessions {
-        let formatted_time = match Local.timestamp_opt(session.date, 0) {
+        let formatted_time = match Local.timestamp_opt(session.date as i64, 0) {
             LocalResult::Single(fecha) => fecha.format("%H:%M:%S %d/%m/%Y").to_string(),
             _ => "".to_string(),
         };
@@ -625,7 +627,7 @@ where
 /// Stores the notes of a single session, creating its additional data row if needed. Blank notes are stored as `NULL`.
 pub fn update_session_notes(
     tx: &rusqlite_orm::rusqlite::Transaction,
-    session: i64,
+    session: u32,
     notes: Option<&str>,
 ) -> rusqlite_orm::errors::Result<()> {
     let notes = notes.filter(|n| !n.trim().is_empty()).map(str::to_string);
@@ -653,7 +655,7 @@ pub fn update_session_notes(
 pub fn update_prs(
     tx: &rusqlite_orm::rusqlite::Transaction,
     exercises: HashSet<(u16, u16)>,
-    sessions: &[i64],
+    sessions: &[u32],
     lang: Option<Languages>,
 ) -> rusqlite_orm::errors::Result<()> {
     let mut new_prs = false;
@@ -788,7 +790,7 @@ pub fn update_pending_geolocation(app: &AppHandle, db: &DatabasePool) {
                                                         );
                                                         let payload: SessionLocation =
                                                             SessionLocation {
-                                                                session: pending.session as i32,
+                                                                session: pending.session,
                                                                 location,
                                                             };
                                                         let _ = app.emit(
@@ -854,11 +856,11 @@ pub fn recalculate_e1rm(
 pub async fn export_gpx(
     database: State<'_, DatabasePool>,
     settings: State<'_, SettingsLock>,
-    session: i32,
+    session: u32,
 ) -> Result<(), String> {
     let session = database
         .run_in_connection(|conn| {
-            let mut session = SessionRepository::select_by_id_in(conn, session as i64)?.unwrap();
+            let mut session = SessionRepository::select_by_id_in(conn, session)?.unwrap();
             session.fetch_additional_data_relationship_in(conn)?;
             session.fetch_laps_relationship_in(conn)?;
 
@@ -869,7 +871,9 @@ pub async fn export_gpx(
     let path = constants::HOME_DIR.join(format!(
         "{}-{}.gpx",
         session.name,
-        Local.timestamp_millis_opt(session.date * 1000).unwrap()
+        Local
+            .timestamp_millis_opt(session.date as i64 * 1000)
+            .unwrap()
     ));
     let path_str = path.display().to_string();
     info!("Exporting track to {}...", path.display());
@@ -933,7 +937,10 @@ pub fn heatmap_data(database: &DatabasePool) -> Result<Vec<Vec<(u32, u16)>>, Str
 
             let mut res = vec![vec![(0_u32, 0_u16); 31]; 12];
             sessions.iter().for_each(|session| {
-                let dt = Local.timestamp_opt(session.date, 0).single().unwrap();
+                let dt = Local
+                    .timestamp_opt(session.date as i64, 0)
+                    .single()
+                    .unwrap();
                 let cell = &mut res[dt.month0() as usize][dt.day0() as usize];
                 cell.0 += session.training_load as u32;
                 cell.1 += prs.iter().filter(|s| s.session == session.date).count() as u16;

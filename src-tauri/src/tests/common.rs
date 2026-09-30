@@ -32,7 +32,7 @@ pub fn test_db() -> DatabasePool {
     database
 }
 
-pub fn session(date: i64) -> Session {
+pub fn session(date: u32) -> Session {
     Session {
         date,
         name: format!("Session {date}"),
@@ -54,7 +54,7 @@ pub fn session(date: i64) -> Session {
     }
 }
 
-pub fn set(session: i64, idx: u8, exercise: (u16, u16), reps: u16, weight: f64) -> Set {
+pub fn set(session: u32, idx: u8, exercise: (u16, u16), reps: u16, weight: f32) -> Set {
     Set {
         session,
         idx,
@@ -68,7 +68,7 @@ pub fn set(session: i64, idx: u8, exercise: (u16, u16), reps: u16, weight: f64) 
     }
 }
 
-pub fn additional_data(session: i64) -> AdditionalData {
+pub fn additional_data(session: u32) -> AdditionalData {
     AdditionalData {
         session,
         heart_rates: None,
@@ -115,7 +115,7 @@ pub fn insert_session(tx: &Transaction, mut session: Session) {
     }
 }
 
-pub fn lap(session: i64, idx: i32, position: Option<(i32, i32)>) -> Lap {
+pub fn lap(session: u32, idx: u16, position: Option<(i32, i32)>) -> Lap {
     Lap {
         session,
         idx,

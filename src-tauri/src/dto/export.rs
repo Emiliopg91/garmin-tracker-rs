@@ -44,7 +44,7 @@ impl Export {
                 .map(LapExport::from)
                 .collect::<Vec<_>>();
 
-            let mut additional_datas: HashMap<i64, AdditionalData> = HashMap::new();
+            let mut additional_datas: HashMap<u32, AdditionalData> = HashMap::new();
             AdditionalDataRepository::select()
                 .fetch_in(conn)?
                 .into_iter()
@@ -54,7 +54,7 @@ impl Export {
 
             let mut used_exercises = HashSet::new();
 
-            let mut series: HashMap<i64, Vec<Set>> = HashMap::new();
+            let mut series: HashMap<u32, Vec<Set>> = HashMap::new();
             SetRepository::select()
                 .fetch_in(conn)?
                 .into_iter()
@@ -103,7 +103,7 @@ impl Export {
 
 #[derive(Serialize)]
 pub struct SessionExport {
-    pub date: i64,
+    pub date: u32,
     pub workout: String,
     pub total_elapsed_time: u32,
     pub active_time: u32,
@@ -178,8 +178,8 @@ pub struct ExerciseExport {
 
 #[derive(Serialize)]
 pub struct LapExport {
-    pub session: i64,
-    pub idx: i32,
+    pub session: u32,
+    pub idx: u16,
     pub start_latitude: Option<f64>,
     pub start_longitude: Option<f64>,
 }
