@@ -1,8 +1,8 @@
 mod dao;
 mod dto;
+mod fit;
 mod logic;
 mod mtp;
-mod fit;
 mod rclone;
 mod udev;
 mod utils;

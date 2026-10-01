@@ -27,6 +27,7 @@ pub static MTP_GARMIN_MANUFACTURER: &str = "GARMIN";
 pub const MTP_GARMIN_VENDOR_ID: u16 = 0x091e;
 pub static MTP_GARMIN_ROOT_FOLDER: &str = "GARMIN";
 pub static MTP_GARMIN_ACTIVITY_FOLDER: &str = "Activity";
+pub static MTP_GARMIN_WORKOUTS_FOLDER: &str = "Workouts";
 pub static MTP_GARMIN_SETTINGS_FOLDER: &str = "Settings";
 pub static MTP_TMP_DIR_PREFIX: &str = "garmin-tracker-rs";
 

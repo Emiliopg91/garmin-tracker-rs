@@ -1,7 +1,7 @@
 use crate::{
     dao::{
         additional_data::AdditionalData, exercise::Exercise, session::Session, set::Set,
-        sport::Sport, sub_sport::SubSport, workout::Workout,
+        sport::Sport, sub_sport::SubSport,
     },
     fit::parser::{
         FitParser,
@@ -109,11 +109,7 @@ impl TryFrom<FitParser> for Session {
         Ok(Session {
             date: session_data.timestamp,
             name: session_data.workout.clone().unwrap_or_default(),
-            workout_obj: session_data.workout.as_ref().map(|o| Workout {
-                name: o.clone(),
-                enabled: true,
-                steps: Vec::new(),
-            }),
+            workout_obj: None,
             workout: session_data.workout,
             total_elapsed_time: session_data.total_elapsed_time,
             active_time: session_data.active_time,

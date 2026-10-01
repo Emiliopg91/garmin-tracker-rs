@@ -9,7 +9,7 @@ use rustyfit::{
     DecoderEvent, StreamingIterator,
     profile::{
         mesgdef,
-        typedef::{Intensity, MesgNum, WktStepDuration},
+        typedef::{Intensity, MesgNum, Sport, SubSport, WktStepDuration},
     },
 };
 
@@ -29,6 +29,12 @@ impl TryFrom<FitParser> for Workout {
                     match msg.num {
                         MesgNum::WORKOUT => {
                             let workout_obj = mesgdef::Workout::from(msg);
+                            if workout_obj.sport != Sport::TRAINING
+                                || workout_obj.sub_sport != SubSport::STRENGTH_TRAINING
+                            {
+                                return Err(ParseFitFileError::NotAWorkout());
+                            }
+
                             name = workout_obj.wkt_name;
                         }
                         MesgNum::WORKOUT_STEP => {
@@ -93,10 +99,14 @@ impl TryFrom<FitParser> for Workout {
             }
         }
 
-        Ok(Workout {
-            name,
-            enabled: true,
-            steps,
-        })
+        if !name.is_empty() {
+            Ok(Workout {
+                name,
+                enabled: true,
+                steps,
+            })
+        } else {
+            Err(ParseFitFileError::MissingField("name".to_string()))
+        }
     }
 }

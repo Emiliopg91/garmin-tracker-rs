@@ -15,6 +15,6 @@ pub struct Workout {
 
 impl Workout {
     pub fn get_workout_file_name(&self) -> String {
-        format!("{}.fit",self.name.replace(" ", "_"))
+        format!("{}.fit", self.name.replace(" ", "_"))
     }
 }

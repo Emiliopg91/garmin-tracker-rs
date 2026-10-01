@@ -43,11 +43,11 @@ fn step_message(step: &WorkoutStep, weight_unit: WeightUnit) -> Message {
             if let Some(id) = step.ex_id {
                 msg.exercise_name = id;
             }
-            
-                msg.weight_display_unit = match weight_unit {
-                    WeightUnit::Kilograms => FitBaseUnit::KILOGRAM,
-                    WeightUnit::Pounds => FitBaseUnit::POUND,
-                };
+
+            msg.weight_display_unit = match weight_unit {
+                WeightUnit::Kilograms => FitBaseUnit::KILOGRAM,
+                WeightUnit::Pounds => FitBaseUnit::POUND,
+            };
 
             if let Some(weight) = step.weight {
                 msg.set_exercise_weight_scaled(weight as f64);

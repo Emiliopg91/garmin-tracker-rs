@@ -17,6 +17,7 @@ use crate::{
         session::{self, Session, SessionRepository},
         set::{self, Set, SetRepository, entity},
         workout::{Workout, WorkoutRepository},
+        workout_step::{self, WorkoutStepRepository},
     },
     dto::{
         notifications::{NotificationDefinition, NotificationKind},
@@ -282,18 +283,33 @@ pub async fn _import_from_device(app: &AppHandle, serial: &str) -> Result<usize,
     info!("Starting import from device with S/N {}", serial);
     let mut latest_date = "2026-06-08-00-00-00".to_string();
     let lang = app.state::<SettingsLock>().read().unwrap().language;
-    let mut device = {
+    let (mut device, workouts_with_steps) = {
         let app = app.clone();
         let serial = serial.to_string();
         tokio::task::spawn_blocking(move || {
             let db = app.state::<DatabasePool>();
-            DeviceRepository::select_by_id(&db, &serial)
+            db.run_in_connection(|conn| {
+                let device = DeviceRepository::select_by_id_in(conn, &serial)?;
+                let workouts_with_steps = WorkoutStepRepository::select()
+                    .distinct(&[workout_step::entity::columns::WORKOUT])
+                    .fetch_in(conn)
+                    .map_err(|e| e.to_string())?
+                    .into_iter()
+                    .filter_map(
+                        |r| match r.get(workout_step::entity::columns::WORKOUT.as_ref()) {
+                            Some(Value::Text(name)) => Some(name.clone()),
+                            _ => None,
+                        },
+                    )
+                    .collect::<Vec<_>>();
+
+                Ok((device.unwrap(), workouts_with_steps))
+            })
         })
         .await
         .map_err(|e| e.to_string())?
-        .map_err(|e| e.to_string())?
-        .unwrap()
-    };
+        .map_err(|e| e.to_string())
+    }?;
 
     if let Some(latest) = device.last_sync {
         let latest = Local.timestamp_opt(latest as i64, 0).unwrap();
@@ -324,20 +340,20 @@ pub async fn _import_from_device(app: &AppHandle, serial: &str) -> Result<usize,
         now.as_millis()
     ));
 
+    let activities_folder = src_dir.join("Activities");
+    let settings_folder = src_dir.join("Settings");
+    let workouts_folder = src_dir.join("Workouts");
+
     if mtp_client
-        .download_activities_since(serial, latest_date, src_dir.clone())
+        .download_activities_since(serial, latest_date, activities_folder.clone())
         .await
         .is_ok()
     {
-        let read_dir_path = src_dir.clone();
         activities = tokio::task::spawn_blocking(move || {
             let mut files = Vec::new();
-            if let Ok(read_dir) = fs::read_dir(&read_dir_path) {
+            if let Ok(read_dir) = fs::read_dir(&activities_folder) {
                 for entry in read_dir {
-                    if let Ok(entry) = entry
-                        && entry.file_type().unwrap().is_file()
-                        && entry.file_name() != "Settings.fit"
-                    {
+                    if let Ok(entry) = entry {
                         files.push(entry.path());
                     }
                 }
@@ -347,10 +363,37 @@ pub async fn _import_from_device(app: &AppHandle, serial: &str) -> Result<usize,
         .await
         .map_err(|e| e.to_string())?;
 
+        let mut pending_workouts = HashMap::new();
+        if !workouts_with_steps.is_empty() {
+            if let Ok(()) = mtp_client
+                .download_workouts(serial, workouts_folder.clone())
+                .await
+            {
+                if let Ok(read_dir) = fs::read_dir(&workouts_folder) {
+                    for entry in read_dir {
+                        if let Ok(entry) = entry {
+                            info!("Parsing workout file {}", entry.path().display());
+                            if let Some(parsed) = FitParser::from_file(entry.path())
+                                .ok()
+                                .and_then(|parser| Workout::try_from(parser).ok())
+                            {
+                                pending_workouts.insert(parsed.name.clone(), parsed);
+                            }
+                        }
+                    }
+                };
+            }
+        }
+
+        pending_workouts = pending_workouts
+            .into_iter()
+            .filter(|w| !workouts_with_steps.contains(&w.0))
+            .collect::<HashMap<_, _>>();
+
         let mut dev_settings = None;
         if !activities.is_empty() {
             if let Ok(Some(path)) = mtp_client
-                .download_settings_file(serial, src_dir.clone())
+                .download_settings_file(serial, settings_folder)
                 .await
             {
                 info!("Parsing settings file {}", path.display());
@@ -362,9 +405,9 @@ pub async fn _import_from_device(app: &AppHandle, serial: &str) -> Result<usize,
                 .await
                 .map_err(|e| e.to_string())?;
             }
-            drop(mtp_client);
         }
 
+        drop(mtp_client);
         let activities_cpy = activities.clone();
         let app_cpy = app.clone();
         res = tokio::task::spawn_blocking(move || {
@@ -379,6 +422,7 @@ pub async fn _import_from_device(app: &AppHandle, serial: &str) -> Result<usize,
                         lang,
                         true,
                         dev_settings.clone(),
+                        pending_workouts.clone(),
                     )
                 } else {
                     Ok(Vec::new())
@@ -463,7 +507,17 @@ pub fn _import_from_files(app: AppHandle, files: &[PathBuf]) -> Result<usize, St
     let lang = app.state::<SettingsLock>().read().unwrap().language;
     let database = app.state::<DatabasePool>();
     let res = database
-        .run_in_transaction(|tx| Ok(import_file_list(tx, files, None, lang, false, None)?))
+        .run_in_transaction(|tx| {
+            Ok(import_file_list(
+                tx,
+                files,
+                None,
+                lang,
+                false,
+                None,
+                HashMap::new(),
+            )?)
+        })
         .map_err(|e| e.to_string());
 
     match res {
@@ -494,6 +548,7 @@ fn import_file_list<F>(
     lang: Languages,
     delete: bool,
     dev_settings: Option<DeviceSettings>,
+    pending_workouts: HashMap<String, Workout>,
 ) -> Result<Vec<u32>, DatabaseError>
 where
     F: AsRef<Path> + Sync,
@@ -574,6 +629,16 @@ where
                             steps: Vec::new(),
                         })
                         .execute_in(tx)?;
+
+                    if let Some(workout) = pending_workouts.get(workout) {
+                        let mut insert = WorkoutStepRepository::insert();
+                        let mut steps = workout.steps.clone();
+                        for step in &mut steps {
+                            insert = insert.item(step);
+                        }
+
+                        insert.execute_in(tx)?;
+                    }
                 }
 
                 if let Some(ref device) = device {
