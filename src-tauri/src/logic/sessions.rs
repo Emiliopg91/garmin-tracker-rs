@@ -571,6 +571,7 @@ where
                         .item(&mut Workout {
                             name: workout.to_string(),
                             enabled: true,
+                            steps: Vec::new(),
                         })
                         .execute_in(tx)?;
                 }

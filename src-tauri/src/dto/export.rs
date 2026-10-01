@@ -34,7 +34,10 @@ impl Export {
     pub fn from_database(db: &DatabasePool, lang: Languages) -> rusqlite_orm::errors::Result<Self> {
         db.run_in_connection(|conn| {
             let body_metrics = BodyMetricRepository::select().fetch_in(conn)?;
-            let workouts = WorkoutRepository::select().fetch_in(conn)?;
+            let mut workouts = WorkoutRepository::select().fetch_in(conn)?;
+            for workout in &mut workouts {
+                workout.fetch_steps_relationship_in(conn)?;
+            }
             let devices = DeviceRepository::select().fetch_in(conn)?;
             let settings = SettingsRepository::select().fetch_in(conn)?;
             let sessions = SessionRepository::select().fetch_in(conn)?;

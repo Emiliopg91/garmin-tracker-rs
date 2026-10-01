@@ -112,6 +112,7 @@ impl TryFrom<FitParser> for Session {
             workout_obj: session_data.workout.as_ref().map(|o| Workout {
                 name: o.clone(),
                 enabled: true,
+                steps: Vec::new(),
             }),
             workout: session_data.workout,
             total_elapsed_time: session_data.total_elapsed_time,

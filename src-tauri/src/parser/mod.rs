@@ -1,5 +1,6 @@
 pub mod session;
 pub mod settings;
+pub mod workout;
 
 use std::{
     fs::File,
