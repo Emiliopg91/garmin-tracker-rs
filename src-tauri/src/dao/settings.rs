@@ -203,7 +203,7 @@ impl fmt::Display for DistanceUnit {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub enum WeightUnit {
     Kilograms,
     Pounds,

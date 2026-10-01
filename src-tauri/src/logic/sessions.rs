@@ -22,9 +22,9 @@ use crate::{
         notifications::{NotificationDefinition, NotificationKind},
         sessions::{SessionDetails, SessionListItem, SessionLocation, SessionSetsUpdate},
     },
+    fit::parser::{FitParser, settings::DeviceSettings},
     logic::{notifications::show_notification, report_error, run_blocking},
     mtp::MTP_CLIENT_INST,
-    fit::parser::{FitParser, settings::DeviceSettings},
     utils::{
         constants,
         translations::{Languages, translate, translate_and_replace},

@@ -29,7 +29,7 @@ impl TryFrom<FitParser> for Workout {
                     match msg.num {
                         MesgNum::WORKOUT => {
                             let workout_obj = mesgdef::Workout::from(msg);
-                            name = Some(workout_obj.wkt_name).unwrap();
+                            name = workout_obj.wkt_name;
                         }
                         MesgNum::WORKOUT_STEP => {
                             let step_obj = mesgdef::WorkoutStep::from(msg);
@@ -65,7 +65,7 @@ impl TryFrom<FitParser> for Workout {
                                             WktStepDuration::REPS => {
                                                 Some(step_obj.duration_value as u16)
                                             }
-                                            WktStepDuration::OPEN | _ => None,
+                                            _ => None,
                                         };
                                         steps.push(WorkoutStep::exercise(
                                             &name, idx, ex_cat, ex_id, weight, reps,
@@ -94,7 +94,7 @@ impl TryFrom<FitParser> for Workout {
         }
 
         Ok(Workout {
-            name: name,
+            name,
             enabled: true,
             steps,
         })

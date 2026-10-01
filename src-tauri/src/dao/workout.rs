@@ -12,3 +12,9 @@ pub struct Workout {
     #[relationship((name, workout_step::entity::columns::WORKOUT))]
     pub steps: Vec<WorkoutStep>,
 }
+
+impl Workout {
+    pub fn get_workout_file_name(&self) -> String {
+        format!("{}.fit",self.name.replace(" ", "_"))
+    }
+}
