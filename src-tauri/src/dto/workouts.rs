@@ -1,6 +1,6 @@
 use serde::Serialize;
 
-use crate::dao::session::Session;
+use crate::dao::{session::Session, workout_step::WorkoutStep};
 
 #[derive(Serialize)]
 pub struct WorkoutListItem {
@@ -37,4 +37,5 @@ pub struct WorkoutDetails {
     pub avg_volume: f32,
     pub sessions: Vec<WorkoutSession>,
     pub enabled: bool,
+    pub steps: Vec<WorkoutStep>,
 }

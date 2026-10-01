@@ -2,7 +2,7 @@ mod dao;
 mod dto;
 mod logic;
 mod mtp;
-mod parser;
+mod fit;
 mod rclone;
 mod udev;
 mod utils;
@@ -45,7 +45,7 @@ use crate::{
 };
 
 #[cfg(debug_assertions)]
-use crate::parser::FitParser;
+use crate::fit::parser::FitParser;
 
 #[cfg(debug_assertions)]
 pub fn decode_files<P>(paths: &[P])
@@ -76,7 +76,7 @@ where
     P: AsRef<Path>,
 {
     for path in paths {
-        if let Err(e) = crate::parser::debug_encode(path) {
+        if let Err(e) = crate::fit::parser::debug_encode(path) {
             eprintln!("Error handling '{}': \n  {}", path.as_ref().display(), e)
         }
     }

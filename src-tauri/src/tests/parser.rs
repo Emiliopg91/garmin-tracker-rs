@@ -2,7 +2,7 @@ use std::fs;
 
 use crate::{
     dao::{additional_data::AdditionalData, session::Session, set::Set},
-    parser::{FitParser, errors::ParseFitFileError},
+    fit::parser::{FitParser, errors::ParseFitFileError},
     tests::common::{STRENGTH_SPORT, STRENGTH_SUB_SPORT},
 };
 

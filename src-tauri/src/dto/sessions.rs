@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     dao::{exercise::Exercise, lap::Lap, session::Session, set::Set},
-    parser::settings::DeviceSettings,
+    fit::parser::settings::DeviceSettings,
     utils::constants,
 };
 

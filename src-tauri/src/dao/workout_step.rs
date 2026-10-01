@@ -87,9 +87,9 @@ impl WorkoutStep {
             weight: None,
         }
     }
-    pub fn rest(workout: &str, idx: u16, time: u32) -> Self {
+    pub fn rest(workout: &str, idx: u16, time: Option<u32>) -> Self {
         let mut inst = Self::new(workout, idx, StepType::Rest);
-        inst.time = Some(time);
+        inst.time = time;
         inst
     }
 

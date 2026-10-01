@@ -1,6 +1,6 @@
 use crate::{
     dao::{workout::Workout, workout_step::WorkoutStep},
-    parser::{
+    fit::parser::{
         FitParser,
         errors::{self, ParseFitFileError},
     },
@@ -44,16 +44,13 @@ impl TryFrom<FitParser> for Workout {
                                     ));
                                 }
                                 _ => match step_obj.intensity {
-                                    Intensity::REST => match step_obj.duration_type {
-                                        WktStepDuration::TIME => {
-                                            steps.push(WorkoutStep::rest(
-                                                &name,
-                                                idx,
-                                                step_obj.duration_value,
-                                            ));
-                                        }
-                                        _ => {}
-                                    },
+                                    Intensity::REST => {
+                                        let duration = match step_obj.duration_type {
+                                            WktStepDuration::TIME => Some(step_obj.duration_value),
+                                            _ => None,
+                                        };
+                                        steps.push(WorkoutStep::rest(&name, idx, duration));
+                                    }
                                     Intensity::ACTIVE => {
                                         let ex_cat = step_obj.exercise_category.0;
                                         let ex_id = if step_obj.exercise_name == u16::MAX {
@@ -85,6 +82,16 @@ impl TryFrom<FitParser> for Workout {
 
             Ok(())
         })?;
+
+        steps.sort_by_key(|s| s.idx);
+        let old_idxs: Vec<u16> = steps.iter().map(|s| s.idx).collect();
+
+        for (new_idx, step) in steps.iter_mut().enumerate() {
+            step.idx = new_idx as u16;
+            if let Some(begin) = step.begin_idx {
+                step.begin_idx = Some(old_idxs.partition_point(|&old| old < begin) as u16);
+            }
+        }
 
         Ok(Workout {
             name: name,

@@ -95,7 +95,8 @@ pub async fn get_workout_details(
         database.run_in_connection(|conn| {
             info!("Getting details for workout {}", name);
 
-            let workout = WorkoutRepository::select_by_id_in(conn, &name)?.unwrap();
+            let mut workout = WorkoutRepository::select_by_id_in(conn, &name)?.unwrap();
+            workout.fetch_steps_relationship_in(conn)?;
 
             let sessions = SessionRepository::select_by_name_in(
                 conn,
@@ -144,6 +145,7 @@ pub async fn get_workout_details(
                 session_count: count,
                 sessions: session_list,
                 enabled: workout.enabled,
+                steps: workout.steps,
             };
 
             Ok(details)

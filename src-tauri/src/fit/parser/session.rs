@@ -3,7 +3,7 @@ use crate::{
         additional_data::AdditionalData, exercise::Exercise, session::Session, set::Set,
         sport::Sport, sub_sport::SubSport, workout::Workout,
     },
-    parser::{
+    fit::parser::{
         FitParser,
         errors::{self, ParseFitFileError},
     },

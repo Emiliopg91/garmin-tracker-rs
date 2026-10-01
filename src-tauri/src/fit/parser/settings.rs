@@ -1,4 +1,4 @@
-use crate::parser::{
+use crate::fit::parser::{
     FitParser,
     errors::{self, ParseFitFileError},
 };
