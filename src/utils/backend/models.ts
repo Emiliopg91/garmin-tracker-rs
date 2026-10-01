@@ -138,6 +138,13 @@ export interface Settings {
   weight_unit: WeightUnit;
 }
 
+// From src-tauri/src/dao/workout_step.rs:34
+export enum StepType {
+	Exercise = "Exercise",
+	Rest = "Rest",
+	Repeat = "Repeat",
+}
+
 // From src-tauri/src/dao/settings.rs:207
 export enum WeightUnit {
 	Kilograms = "Kilograms",
@@ -153,6 +160,7 @@ export interface WorkoutDetails {
   name: string;
   session_count: number;
   sessions: WorkoutSession[];
+  steps: WorkoutStep[];
 }
 
 // From src-tauri/src/dto/workouts.rs:6
@@ -169,5 +177,18 @@ export interface WorkoutSession {
   date: number;
   time: number;
   volume: number;
+}
+
+// From src-tauri/src/dao/workout_step.rs:13
+export interface WorkoutStep {
+  begin_idx: number | null;
+  ex_cat: number | null;
+  ex_id: number | null;
+  idx: number;
+  kind: StepType;
+  reps: number | null | null;
+  time: number | null;
+  weight: number | null;
+  workout: string;
 }
 
