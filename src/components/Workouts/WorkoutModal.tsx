@@ -14,7 +14,6 @@ import CloseIcon from "@mui/icons-material/Close";
 import { BackendClient } from "@/utils/backend/client";
 import { LoadingContext } from "@/context/LoadingContext";
 import { WorkoutVolumeChart } from "./helpers/WorkoutVolumeChart";
-import { AppContext } from "@/context/AppContext";
 import { SendWorkoutMenu } from "./helpers/SendWorkoutMenu";
 
 const NUMBER_LOCALES: Record<Languages, string> = {
@@ -37,7 +36,6 @@ export function WorkoutModal({
 }: Props) {
   const { startLoading, finishLoading } = useContext(LoadingContext);
   const { translate, settings } = useContext(I18nSettingsContext);
-  const { availableDevices } = useContext(AppContext);
   const [enabled, setEnabled] = useState(workout.enabled);
 
   const toggleEnabled = () => {
@@ -115,9 +113,11 @@ export function WorkoutModal({
               </tbody>
             </table>
           </div>
-          <div>
-            <SendWorkoutMenu workout={workout} />
-          </div>
+          {workout.steps.length > 0 && (
+            <div>
+              <SendWorkoutMenu workout={workout} />
+            </div>
+          )}
         </div>
         {workout.sessions.length > 1 && (
           <>

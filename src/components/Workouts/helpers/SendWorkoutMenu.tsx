@@ -36,7 +36,7 @@ export function SendWorkoutMenu({ workout }: Props) {
           onClick={(e) =>
             setImportMenuAnchor({ top: e.clientY, left: e.clientX })
           }
-          disabled={availableDevices.length == 0 || workout.steps.length == 0}
+          disabled={availableDevices.length == 0}
         >
           {translate("send_to")}
         </Button>
