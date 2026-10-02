@@ -11,6 +11,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, Serialize, Deserialize, Entity)]
 #[entity("workout_step")]
 pub struct WorkoutStep {
+    #[serde(skip)]
     pub workout: String,
     pub idx: u16,
     pub kind: StepType,

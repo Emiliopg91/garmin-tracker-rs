@@ -25,6 +25,7 @@ phf_codegen = "=0.11.3"
 noyalib = "^0"
 
 [dependencies]
+bytes = "^1"
 chrono = "^0"
 curl-rest = "^0"
 embedded-io-adapters = { version = "^0", features = ["std"] }

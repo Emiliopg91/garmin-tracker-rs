@@ -352,10 +352,8 @@ pub async fn _import_from_device(app: &AppHandle, serial: &str) -> Result<usize,
         activities = tokio::task::spawn_blocking(move || {
             let mut files = Vec::new();
             if let Ok(read_dir) = fs::read_dir(&activities_folder) {
-                for entry in read_dir {
-                    if let Ok(entry) = entry {
-                        files.push(entry.path());
-                    }
+                for entry in read_dir.flatten() {
+                    files.push(entry.path());
                 }
             };
             files
@@ -364,34 +362,28 @@ pub async fn _import_from_device(app: &AppHandle, serial: &str) -> Result<usize,
         .map_err(|e| e.to_string())?;
 
         let mut pending_workouts = HashMap::new();
-        if !workouts_with_steps.is_empty() {
+        let mut dev_settings = None;
+        if !activities.is_empty() {
             if let Ok(()) = mtp_client
                 .download_workouts(serial, workouts_folder.clone())
                 .await
+                && let Ok(read_dir) = fs::read_dir(&workouts_folder)
             {
-                if let Ok(read_dir) = fs::read_dir(&workouts_folder) {
-                    for entry in read_dir {
-                        if let Ok(entry) = entry {
-                            info!("Parsing workout file {}", entry.path().display());
-                            if let Some(parsed) = FitParser::from_file(entry.path())
-                                .ok()
-                                .and_then(|parser| Workout::try_from(parser).ok())
-                            {
-                                pending_workouts.insert(parsed.name.clone(), parsed);
-                            }
-                        }
+                for entry in read_dir.flatten() {
+                    info!("Parsing workout file {}", entry.path().display());
+                    if let Some(parsed) = FitParser::from_file(entry.path())
+                        .ok()
+                        .and_then(|parser| Workout::try_from(parser).ok())
+                    {
+                        pending_workouts.insert(parsed.name.clone(), parsed);
                     }
-                };
-            }
-        }
+                }
+            };
+            pending_workouts = pending_workouts
+                .into_iter()
+                .filter(|w| !workouts_with_steps.contains(&w.0))
+                .collect::<HashMap<_, _>>();
 
-        pending_workouts = pending_workouts
-            .into_iter()
-            .filter(|w| !workouts_with_steps.contains(&w.0))
-            .collect::<HashMap<_, _>>();
-
-        let mut dev_settings = None;
-        if !activities.is_empty() {
             if let Ok(Some(path)) = mtp_client
                 .download_settings_file(serial, settings_folder)
                 .await

@@ -38,7 +38,7 @@ use crate::{
             _import_from_files, export_gpx, get_heatmap_data, get_session_details, get_sessions,
             import_from_device, import_from_files, recalculate_e1rm, save_session_changes,
         },
-        workouts::{get_workout_details, get_workout_list, set_workout_status},
+        workouts::{get_workout_details, get_workout_list, send_to_device, set_workout_status},
     },
     udev::UdevManager,
     utils::{constants, single_instance::SingleInstance},
@@ -280,7 +280,8 @@ pub fn run(log_level: LevelFilter) {
             set_workout_status,
             export_gpx,
             rclone_available,
-            get_heatmap_data
+            get_heatmap_data,
+            send_to_device
         ])
         .run(tauri::generate_context!())
     {

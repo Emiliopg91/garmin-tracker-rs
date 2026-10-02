@@ -93,7 +93,8 @@ impl ToFitMessages for Workout {
         workout.sport = Sport::TRAINING;
         workout.sub_sport = SubSport::STRENGTH_TRAINING;
         workout.num_valid_steps = self.steps.len() as u16;
-        workout.wkt_name = self.name.clone();
+        // Garmin caps wkt_name at 32 bytes; cut on a char boundary to keep valid UTF-8
+        workout.wkt_name = self.name[..self.name.floor_char_boundary(32)].to_string();
 
         let mut steps: Vec<&WorkoutStep> = self.steps.iter().collect();
         steps.sort_by_key(|s| s.idx);

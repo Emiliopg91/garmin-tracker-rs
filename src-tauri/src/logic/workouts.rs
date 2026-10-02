@@ -3,10 +3,12 @@ use std::collections::HashMap;
 use garmin_tracker_rs_macros::traced_command;
 use rusqlite_orm::{
     dao::Repository,
+    database::DatabasePool,
     types::{order_by::OrderBy, value::Value, where_clause::Where},
 };
 use tauri::{AppHandle, State};
 use tauri_plugin_log::log::info;
+use tokio::fs;
 
 use crate::{
     SettingsLock,
@@ -16,7 +18,9 @@ use crate::{
         workout::{self, WorkoutRepository},
     },
     dto::workouts::{WorkoutDetails, WorkoutListItem, WorkoutSession},
+    fit::writer::FitWriter,
     logic::{report_error, run_blocking},
+    mtp::MTP_CLIENT_INST,
 };
 
 /// Returns sessions grouped/aggregated by workout name (count, average time, latest date), sorted by name.
@@ -97,6 +101,7 @@ pub async fn get_workout_details(
 
             let mut workout = WorkoutRepository::select_by_id_in(conn, &name)?.unwrap();
             workout.fetch_steps_relationship_in(conn)?;
+            workout.steps.sort_by_key(|e| e.idx);
 
             let sessions = SessionRepository::select_by_name_in(
                 conn,
@@ -180,4 +185,43 @@ pub async fn set_workout_status(app: AppHandle, workout: &str, status: bool) -> 
             .map_err(|e| e.to_string())
     })
     .await
+}
+
+#[traced_command]
+#[tauri::command]
+pub async fn send_to_device(
+    database: State<'_, DatabasePool>,
+    settings: State<'_, SettingsLock>,
+    workout: &str,
+    serial: &str,
+) -> Result<(), String> {
+    let (lang, weight_unit) = {
+        let settings = settings.read().unwrap();
+        (settings.language, settings.weight_unit)
+    };
+
+    let workout = database
+        .run_in_connection(|conn| {
+            let mut wk = WorkoutRepository::select_by_id_in(conn, workout)?.unwrap();
+            wk.fetch_steps_relationship_in(conn)?;
+
+            Ok(wk)
+        })
+        .map_err(|e| e.to_string())?;
+
+    let path = std::env::temp_dir().join(workout.get_workout_file_name());
+    FitWriter::from(&workout)
+        .write(path.clone(), lang, weight_unit)
+        .map_err(|e| e.to_string())?;
+
+    MTP_CLIENT_INST
+        .lock()
+        .await
+        .upload_workout(serial, path.clone())
+        .await
+        .map_err(|e| e.to_string())?;
+
+    let _ = fs::remove_file(path).await;
+
+    Ok(())
 }

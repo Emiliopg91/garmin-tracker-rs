@@ -4,7 +4,8 @@ use std::{
     time::Instant,
 };
 
-use mtp_rs::{MtpDevice, ObjectHandle, ObjectInfo, Storage};
+use bytes::Bytes;
+use mtp_rs::{MtpDevice, NewObjectInfo, ObjectHandle, ObjectInfo, Storage};
 use tauri_plugin_log::log::{debug, error, info};
 use tokio::{fs, sync::Mutex};
 
@@ -55,18 +56,23 @@ async fn open_device(serial: &str) -> Result<MtpDevice> {
     Ok(device)
 }
 
+/// Looks up the `GARMIN/<folder>` folder on `storage`.
+async fn find_garmin_folder(storage: &Storage, serial: &str, folder: &str) -> Result<ObjectInfo> {
+    debug!("Entering into GARMIN folder...");
+    let garmin_folder =
+        find_child(storage, None, constants::MTP_GARMIN_ROOT_FOLDER, serial).await?;
+
+    debug!("Entering into GARMIN/{} folder...", folder);
+    find_child(storage, Some(garmin_folder.handle), folder, serial).await
+}
+
 /// Lists the objects inside `GARMIN/<folder>` on `storage`.
 async fn list_garmin_folder(
     storage: &Storage,
     serial: &str,
     folder: &str,
 ) -> Result<Vec<ObjectInfo>> {
-    debug!("Entering into GARMIN folder...");
-    let garmin_folder =
-        find_child(storage, None, constants::MTP_GARMIN_ROOT_FOLDER, serial).await?;
-
-    debug!("Entering into GARMIN/{} folder...", folder);
-    let target = find_child(storage, Some(garmin_folder.handle), folder, serial).await?;
+    let target = find_garmin_folder(storage, serial, folder).await?;
 
     storage
         .list_objects(Some(target.handle))
@@ -130,6 +136,55 @@ async fn download_files(
     );
 
     Ok(paths)
+}
+
+/// Uploads the local file `src` into the folder `parent` on `storage` and returns the new handle.
+/// MTP cannot overwrite, so any file with the same name in `parent` is deleted first.
+async fn upload_file(storage: &Storage, parent: ObjectHandle, src: &Path) -> Result<ObjectHandle> {
+    let filename = src
+        .file_name()
+        .map(|n| n.to_string_lossy().into_owned())
+        .ok_or_else(|| MtpError::InvalidFileName(src.display().to_string()))?;
+    let data = fs::read(src)
+        .await
+        .map_err(|e| MtpError::ReadData(src.display().to_string(), e))?;
+
+    let existing = storage
+        .list_objects(Some(parent))
+        .await
+        .map_err(MtpError::ListFiles)?;
+    for obj in existing
+        .into_iter()
+        .filter(|o| o.is_file() && o.filename == filename)
+    {
+        info!("Replacing existing file {}", filename);
+        storage
+            .delete(obj.handle)
+            .await
+            .map_err(|e| MtpError::DeleteFile(filename.clone(), e))?;
+    }
+
+    info!("Uploading file {} ({} bytes)...", filename, data.len());
+    let t0 = Instant::now();
+    let new_info = NewObjectInfo::file(filename.clone(), data.len() as u64);
+    let stream = tokio_stream::iter([Ok(Bytes::from(data))]);
+    match storage.upload(Some(parent), new_info, stream).await {
+        Ok(handle) => {
+            info!(
+                "File {} uploaded in {:.3}s",
+                filename,
+                t0.elapsed().as_secs_f64()
+            );
+            Ok(handle)
+        }
+        Err(e) => {
+            // Don't leave a truncated file behind for the device to choke on.
+            if let Some(partial) = e.partial {
+                let _ = storage.delete(partial).await;
+            }
+            Err(MtpError::UploadFile(filename, e))
+        }
+    }
 }
 
 impl MtpClient {
@@ -264,5 +319,38 @@ impl MtpClient {
 
         let _ = device.close().await;
         result
+    }
+
+    /// Uploads the local file `src` into the device's `GARMIN/<folder>` folder, replacing any file
+    /// with the same name.
+    pub async fn upload_file(&self, serial: &str, folder: &str, src: &Path) -> Result<()> {
+        let device = open_device(serial).await?;
+
+        // Every fallible step below runs inside this block so that, regardless of how it
+        // exits, `device.close()` below always runs exactly once.
+        let result: Result<()> = async {
+            let storages = device.storages().await.map_err(MtpError::Storage)?;
+            let storage = storages
+                .first()
+                .ok_or_else(|| MtpError::NoStorageDevice(serial.to_string()))?;
+
+            let target = find_garmin_folder(storage, serial, folder).await?;
+            upload_file(storage, target.handle, src).await?;
+            Ok(())
+        }
+        .await;
+
+        let _ = device.close().await;
+        result
+    }
+
+    /// Uploads a workout `.FIT` file into `GARMIN/NewFiles`, from where the device validates and
+    /// imports it into `GARMIN/Workouts` once it is disconnected.
+    pub async fn upload_workout<P>(&self, serial: &str, src: P) -> Result<()>
+    where
+        P: AsRef<Path>,
+    {
+        self.upload_file(serial, constants::MTP_GARMIN_NEW_FILES_FOLDER, src.as_ref())
+            .await
     }
 }

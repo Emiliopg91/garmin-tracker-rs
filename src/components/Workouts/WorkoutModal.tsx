@@ -14,6 +14,8 @@ import CloseIcon from "@mui/icons-material/Close";
 import { BackendClient } from "@/utils/backend/client";
 import { LoadingContext } from "@/context/LoadingContext";
 import { WorkoutVolumeChart } from "./helpers/WorkoutVolumeChart";
+import { AppContext } from "@/context/AppContext";
+import { SendWorkoutMenu } from "./helpers/SendWorkoutMenu";
 
 const NUMBER_LOCALES: Record<Languages, string> = {
   [Languages.Spanish]: "es-ES",
@@ -35,6 +37,7 @@ export function WorkoutModal({
 }: Props) {
   const { startLoading, finishLoading } = useContext(LoadingContext);
   const { translate, settings } = useContext(I18nSettingsContext);
+  const { availableDevices } = useContext(AppContext);
   const [enabled, setEnabled] = useState(workout.enabled);
 
   const toggleEnabled = () => {
@@ -62,53 +65,60 @@ export function WorkoutModal({
       </DialogTitle>
 
       <DialogContent dividers>
-        <table id="workout-details-table">
-          <colgroup>
-            <col className="col-200" />
-            <col className="col-150" />
-            <col />
-          </colgroup>
-          <tbody>
-            <tr>
-              <td>{translate("sessions")}:</td>
-              <td>{workout.session_count}</td>
-            </tr>
-            <tr>
-              <td>{translate("latest_session")}</td>
-              <td>{TimeUtils.formatTimeDate(workout.latest_session)}</td>
-            </tr>
-            <tr>
-              <td>{translate("average_time")}</td>
-              <td>{TimeUtils.formatDuration(workout.avg_time)}</td>
-            </tr>
-            {workout.name.length > 0 && (
-              <tr>
-                <td>{translate("average_volume")}:</td>
-                <td>
-                  {UnitUtils.fromKg(
-                    workout.avg_volume,
-                    settings.weight_unit,
-                  ).toFixed(1)}{" "}
-                  {UnitUtils.getUnit(settings.weight_unit)}
-                </td>
-              </tr>
-            )}
-            {showEnable && (
-              <tr>
-                <td>{translate("enabled")}</td>
-                <td>
-                  <Switch
-                    checked={enabled}
-                    onChange={toggleEnabled}
-                    slotProps={{
-                      input: { "aria-label": translate("enabled") },
-                    }}
-                  />
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+        <div style={{ display: "flex" }}>
+          <div style={{ flex: 1 }}>
+            <table id="workout-details-table">
+              <colgroup>
+                <col className="col-200" />
+                <col className="col-150" />
+                <col />
+              </colgroup>
+              <tbody>
+                <tr>
+                  <td>{translate("sessions")}:</td>
+                  <td>{workout.session_count}</td>
+                </tr>
+                <tr>
+                  <td>{translate("latest_session")}</td>
+                  <td>{TimeUtils.formatTimeDate(workout.latest_session)}</td>
+                </tr>
+                <tr>
+                  <td>{translate("average_time")}</td>
+                  <td>{TimeUtils.formatDuration(workout.avg_time)}</td>
+                </tr>
+                {workout.name.length > 0 && (
+                  <tr>
+                    <td>{translate("average_volume")}:</td>
+                    <td>
+                      {UnitUtils.fromKg(
+                        workout.avg_volume,
+                        settings.weight_unit,
+                      ).toFixed(1)}{" "}
+                      {UnitUtils.getUnit(settings.weight_unit)}
+                    </td>
+                  </tr>
+                )}
+                {showEnable && (
+                  <tr>
+                    <td>{translate("enabled")}</td>
+                    <td>
+                      <Switch
+                        checked={enabled}
+                        onChange={toggleEnabled}
+                        slotProps={{
+                          input: { "aria-label": translate("enabled") },
+                        }}
+                      />
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+          <div>
+            <SendWorkoutMenu workout={workout} />
+          </div>
+        </div>
         {workout.sessions.length > 1 && (
           <>
             <hr />

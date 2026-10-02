@@ -478,3 +478,6 @@ select_files_import:
 sessions_comparaison:
   en: Sessions comparaison
   es: Comparación de sesiones
+send_to:
+  en: Send to...
+  es: Enviar a...

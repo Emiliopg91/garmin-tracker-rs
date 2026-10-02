@@ -1366,6 +1366,7 @@ dependencies = [
 name = "garmin-tracker-rs"
 version = "2.6.0"
 dependencies = [
+ "bytes",
  "chrono",
  "curl-rest",
  "embedded-io-adapters",

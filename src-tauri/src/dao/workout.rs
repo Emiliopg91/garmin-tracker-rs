@@ -15,6 +15,7 @@ pub struct Workout {
 
 impl Workout {
     pub fn get_workout_file_name(&self) -> String {
-        format!("{}.fit", self.name.replace(" ", "_"))
+        let name = &self.name[..self.name.floor_char_boundary(31)];
+        format!("{}_workout.fit", name.replace(' ', "_"))
     }
 }

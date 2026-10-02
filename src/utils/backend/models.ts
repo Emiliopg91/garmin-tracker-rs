@@ -138,7 +138,7 @@ export interface Settings {
   weight_unit: WeightUnit;
 }
 
-// From src-tauri/src/dao/workout_step.rs:34
+// From src-tauri/src/dao/workout_step.rs:35
 export enum StepType {
 	Exercise = "Exercise",
 	Rest = "Rest",
