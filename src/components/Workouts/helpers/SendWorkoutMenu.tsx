@@ -27,7 +27,7 @@ export function SendWorkoutMenu({ workout }: Props) {
   };
 
   return (
-    <div className="list-action-bar">
+    <div className="list-action-bar" style={{ width: "100%" }}>
       <>
         <Button
           id="send-workout"

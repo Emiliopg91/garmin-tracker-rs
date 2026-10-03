@@ -4,6 +4,7 @@ import { TimeUtils } from "@/utils/TimeUtils";
 import { UnitUtils } from "@/utils/UnitUtils";
 import { useContext, useState } from "react";
 import {
+  Button,
   Dialog,
   DialogContent,
   DialogTitle,
@@ -26,6 +27,7 @@ type Props = {
   showEnable: boolean;
   onClose: () => void;
   onUpdate?: (name: string, status: boolean) => void;
+  onOpenEdit: (workout: WorkoutDetails) => void;
 };
 
 export function WorkoutModal({
@@ -33,6 +35,7 @@ export function WorkoutModal({
   showEnable,
   onClose,
   onUpdate,
+  onOpenEdit,
 }: Props) {
   const { startLoading, finishLoading } = useContext(LoadingContext);
   const { translate, settings } = useContext(I18nSettingsContext);
@@ -115,6 +118,15 @@ export function WorkoutModal({
           </div>
           {workout.steps.length > 0 && (
             <div>
+              <Button
+                variant="contained"
+                style={{ width: "100%" }}
+                onClick={() => {
+                  onOpenEdit(workout);
+                }}
+              >
+                {translate("edit_workout")}
+              </Button>
               <SendWorkoutMenu workout={workout} />
             </div>
           )}

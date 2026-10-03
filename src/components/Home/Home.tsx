@@ -23,6 +23,7 @@ import { WorkoutModal } from "../Workouts/WorkoutModal";
 import { Heatmap } from "./helpers/Heatmap";
 import { WorkloadChart } from "./helpers/WorkloadChart";
 import { ImportSessionsMenu } from "./helpers/ImportSessionsMenu";
+import { WorkoutSetsModal } from "../Workouts/WorkoutSetsModal";
 
 export function Home() {
   const { availableDevices, sessionsVersion } = useContext(AppContext);
@@ -64,6 +65,9 @@ export function Home() {
   const [sessionDetails, setSessionDetails] = useState<
     SessionFrontDetails | undefined
   >(undefined);
+  const [workoutEdit, setWorkoutEdit] = useState<WorkoutDetails | undefined>(
+    undefined,
+  );
 
   const refresh = () => {
     startLoading();
@@ -247,6 +251,11 @@ export function Home() {
     };
   }, [sessionsVersion, adapter, day]);
 
+  const openEdit = (workout: WorkoutDetails | undefined) => {
+    setWorkoutDetails(undefined);
+    setWorkoutEdit(workout);
+  };
+
   return (
     <>
       {!availableData && (
@@ -427,6 +436,16 @@ export function Home() {
             workout={workoutDetails}
             showEnable={false}
             onClose={() => setWorkoutDetails(undefined)}
+            onOpenEdit={openEdit}
+          />
+        )}
+      </div>
+
+      <div>
+        {workoutEdit && (
+          <WorkoutSetsModal
+            workout={workoutEdit}
+            onClose={() => setWorkoutEdit(undefined)}
           />
         )}
       </div>

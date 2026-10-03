@@ -7,6 +7,7 @@ import { AppContext } from "@/context/AppContext";
 import { LoadingContext } from "@/context/LoadingContext";
 import { I18nSettingsContext } from "@/context/I18nSettingsContext";
 import "@/styles/Workouts/WorkoutLists.css";
+import { WorkoutSetsModal } from "./WorkoutSetsModal";
 
 export function WorkoutsList() {
   const { sessionsVersion } = useContext(AppContext);
@@ -17,6 +18,14 @@ export function WorkoutsList() {
   const [workoutDetails, setWorkoutDetails] = useState<
     WorkoutDetails | undefined
   >(undefined);
+  const [workoutEdit, setWorkoutEdit] = useState<WorkoutDetails | undefined>(
+    undefined,
+  );
+
+  const openEdit = (workout: WorkoutDetails | undefined) => {
+    setWorkoutDetails(undefined);
+    setWorkoutEdit(workout);
+  };
 
   const refreshList = () => {
     startLoading();
@@ -90,6 +99,16 @@ export function WorkoutsList() {
             showEnable={true}
             onClose={() => setWorkoutDetails(undefined)}
             onUpdate={setWorkoutState}
+            onOpenEdit={openEdit}
+          />
+        )}
+      </div>
+
+      <div>
+        {workoutEdit && (
+          <WorkoutSetsModal
+            workout={workoutEdit}
+            onClose={() => setEditOpen(false)}
           />
         )}
       </div>

@@ -481,3 +481,54 @@ sessions_comparaison:
 send_to:
   en: Send to...
   es: Enviar a...
+edit_workout:
+  en: Edit
+  es: Editar
+step_type_exercise:
+  en: Exercise
+  es: Ejercicio
+step_type_rest:
+  en: Rest
+  es: Descanso
+repeat:
+  en: Repeat
+  es: Repetir
+delete:
+  en: Delete
+  es: Eliminar
+add_step:
+  en: Add step
+  es: Añadir paso
+add_set:
+  en: Add set
+  es: Añadir serie
+save_workout:
+  en: Save
+  es: Guardar
+set_x:
+  en: Set {}
+  es: Serie {}
+step_type:
+  en: Type
+  es: Tipo
+move_up:
+  en: Move up
+  es: Subir
+move_down:
+  en: Move down
+  es: Bajar
+select_exercise:
+  en: Select exercise
+  es: Elige ejercicio
+step_limit_type:
+  en: Finish
+  es: Finalizar
+limit_type_lap:
+  en: Lap button
+  es: Boton Lap
+limit_type_reps:
+  en: Repetitions
+  es: Repeticiones
+limit_type_time:
+  en: Time
+  es: Tiempo
