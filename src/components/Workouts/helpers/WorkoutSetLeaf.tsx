@@ -64,7 +64,7 @@ export function WorkoutSetLeaf({
   const selected =
     exerciseCatalog.find(
       (e) => e.ex_cat == leaf.ex_cat && e.ex_id == leaf.ex_id,
-    ) ?? null;
+    ) ?? undefined;
 
   const onTypeChange = (e: SelectChangeEvent<string>) => {
     onChange({
@@ -389,6 +389,8 @@ export function WorkoutSetLeaf({
           sx={{ width: 480 }}
           options={exerciseCatalog}
           value={selected}
+          disableClearable
+          groupBy={(opt) => translate("exercise_" + opt.ex_cat)}
           getOptionKey={(opt) => `${opt.ex_cat}-${opt.ex_id}`}
           isOptionEqualToValue={(a, b) =>
             a.ex_cat == b.ex_cat && a.ex_id == b.ex_id

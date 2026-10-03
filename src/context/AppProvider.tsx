@@ -98,7 +98,13 @@ export function AppProvider({
           ex_cat: Number(m[1]),
           ex_id: Number(m[2]),
         }))
-        .sort((a, b) => a.label.localeCompare(b.label)),
+        // Sorted by category first, as Autocomplete's groupBy expects grouped options to be contiguous
+        .sort(
+          (a, b) =>
+            (translations["exercise_" + a.ex_cat] ?? "").localeCompare(
+              translations["exercise_" + b.ex_cat] ?? "",
+            ) || a.label.localeCompare(b.label),
+        ),
     [translations],
   );
 

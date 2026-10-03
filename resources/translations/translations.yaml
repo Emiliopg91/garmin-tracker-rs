@@ -46,6 +46,18 @@ error_workout_details:
 error_workout_list:
   en: Error getting workouts list
   es: Error obteniendo lista de entrenamientos
+error_workout_save:
+  en: Error saving workout
+  es: Error guardando el entrenamiento
+error_workout_send:
+  en: Error sending workout to device
+  es: Error enviando el entrenamiento al dispositivo
+ok_workout_save:
+  en: Workout saved succesfully
+  es: Entrenamiento guardado correctamente
+ok_workout_send:
+  en: Workout sent to device succesfully
+  es: Entrenamiento enviado al dispositivo correctamente
 sessions:
   en: Sessions
   es: Sesiones

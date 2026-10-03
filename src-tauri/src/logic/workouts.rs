@@ -18,10 +18,14 @@ use crate::{
         workout::{self, Workout, WorkoutRepository},
         workout_step::{self, WorkoutStepRepository},
     },
-    dto::workouts::{WorkoutDetails, WorkoutListItem, WorkoutSession},
+    dto::{
+        notifications::{NotificationDefinition, NotificationKind},
+        workouts::{WorkoutDetails, WorkoutListItem, WorkoutSession},
+    },
     fit::writer::FitWriter,
-    logic::{report_error, run_blocking},
+    logic::{notifications::show_notification, report_error, run_blocking},
     mtp::MTP_CLIENT_INST,
+    utils::translations::translate,
 };
 
 /// Returns sessions grouped/aggregated by workout name (count, average time, latest date), sorted by name.
@@ -225,36 +229,62 @@ pub async fn send_to_device(
         (settings.language, settings.weight_unit)
     };
 
-    let workout = database
-        .run_in_connection(|conn| {
-            let mut wk = WorkoutRepository::select_by_id_in(conn, workout)?.unwrap();
-            wk.fetch_steps_relationship_in(conn)?;
+    let res: Result<(), String> = async {
+        let workout = database
+            .run_in_connection(|conn| {
+                let mut wk = WorkoutRepository::select_by_id_in(conn, workout)?.unwrap();
+                wk.fetch_steps_relationship_in(conn)?;
 
-            Ok(wk)
-        })
-        .map_err(|e| e.to_string())?;
+                Ok(wk)
+            })
+            .map_err(|e| e.to_string())?;
 
-    let path = std::env::temp_dir().join(workout.get_workout_file_name());
-    FitWriter::from(&workout)
-        .write(path.clone(), lang, weight_unit)
-        .map_err(|e| e.to_string())?;
+        let path = std::env::temp_dir().join(workout.get_workout_file_name());
+        FitWriter::from(&workout)
+            .write(path.clone(), lang, weight_unit)
+            .map_err(|e| e.to_string())?;
 
-    MTP_CLIENT_INST
-        .lock()
-        .await
-        .upload_workout(serial, path.clone())
-        .await
-        .map_err(|e| e.to_string())?;
+        let upload = MTP_CLIENT_INST
+            .lock()
+            .await
+            .upload_workout(serial, path.clone())
+            .await
+            .map_err(|e| e.to_string());
 
-    let _ = fs::remove_file(path).await;
+        let _ = fs::remove_file(path).await;
 
-    Ok(())
+        upload
+    }
+    .await;
+
+    match res {
+        Ok(_) => {
+            info!("Workout '{}' sent to device {}", workout, serial);
+            show_notification(NotificationDefinition {
+                title: workout.to_string(),
+                body: translate("ok_workout_send", lang),
+                kind: NotificationKind::Temporal,
+            });
+            Ok(())
+        }
+        Err(e) => Err(report_error(
+            e,
+            lang,
+            "error_workout_send",
+            "Error sending workout to device",
+        )),
+    }
 }
 
 #[traced_command]
 #[tauri::command]
-pub async fn save_workout(app: AppHandle, workout: Workout) -> Result<(), String> {
-    run_blocking(app, move |database| {
+pub async fn save_workout(
+    app: AppHandle,
+    settings: State<'_, SettingsLock>,
+    workout: Workout,
+) -> Result<(), String> {
+    let name = workout.name.clone();
+    let res = run_blocking(app, move |database| {
         database.run_in_transaction(|tx| {
             if WorkoutRepository::select_by_id_in(tx, &workout.name)?.is_some() {
                 WorkoutStepRepository::delete()
@@ -283,6 +313,24 @@ pub async fn save_workout(app: AppHandle, workout: Workout) -> Result<(), String
             Ok(())
         })
     })
-    .await
-    .map_err(|e| e.to_string())
+    .await;
+
+    let lang = settings.read().unwrap().language;
+    match res {
+        Ok(_) => {
+            info!("Workout '{}' saved succesfully", name);
+            show_notification(NotificationDefinition {
+                title: name,
+                body: translate("ok_workout_save", lang),
+                kind: NotificationKind::Temporal,
+            });
+            Ok(())
+        }
+        Err(e) => Err(report_error(
+            e,
+            lang,
+            "error_workout_save",
+            "Error saving workout",
+        )),
+    }
 }

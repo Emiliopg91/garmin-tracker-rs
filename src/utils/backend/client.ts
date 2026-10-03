@@ -86,13 +86,13 @@ export class BackendClient {
 	}
 	
 
-	// From src-tauri/src/logic/workouts.rs:108
+	// From src-tauri/src/logic/workouts.rs:112
 	public static getWorkoutDetails(name: string): Promise<WorkoutDetails> {
 	  return BackendClient.inner_invoke("get_workout_details", { name }); 
 	}
 	
 
-	// From src-tauri/src/logic/workouts.rs:30
+	// From src-tauri/src/logic/workouts.rs:34
 	public static getWorkoutList(): Promise<WorkoutListItem[]> {
 	  return BackendClient.inner_invoke("get_workout_list"); 
 	}
@@ -128,7 +128,7 @@ export class BackendClient {
 	}
 	
 
-	// From src-tauri/src/logic/workouts.rs:260
+	// From src-tauri/src/logic/workouts.rs:281
 	public static saveWorkout(workout: Workout): Promise<void> {
 	  return BackendClient.inner_invoke("save_workout", { workout }); 
 	}
