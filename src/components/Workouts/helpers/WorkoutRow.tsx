@@ -20,9 +20,14 @@ export function WorkoutRow({ workout, onSelect }: Props) {
         {workout.name.length > 0 && <span>{workout.name}</span>}
         {workout.name.length == 0 && <span>{translate("other")}</span>}
       </td>
-      <td>{TimeUtils.formatTimeDate(workout.latest_session)}</td>
+      <td>
+        {workout.latest_session &&
+          TimeUtils.formatTimeDate(workout.latest_session)}
+      </td>
       <td>{workout.sessions}</td>
-      <td>{TimeUtils.formatDuration(workout.avg_time)}</td>
+      <td>
+        {workout.avg_time > 0 && TimeUtils.formatDuration(workout.avg_time)}
+      </td>
     </tr>
   );
 }

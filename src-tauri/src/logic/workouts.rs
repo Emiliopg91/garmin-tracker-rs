@@ -34,17 +34,32 @@ pub async fn get_workout_list(
     info!("Getting workouts list...");
     let res = run_blocking(app, move |database| {
         database.run_in_connection(|conn| {
-            let enabled_workouts = WorkoutRepository::select()
+            let workouts = WorkoutRepository::select()
                 .fetch_in(conn)?
                 .into_iter()
-                .filter_map(|w| if w.enabled { Some(w.name) } else { None })
                 .collect::<Vec<_>>();
+
             let sessions = SessionRepository::select()
                 .where_(Where::NotNull(session::entity::columns::WORKOUT))
                 .order_by(OrderBy::Desc(entity::columns::DATE))
                 .fetch_in(conn)?;
 
             let mut workout_stats = HashMap::new();
+            workouts.iter().for_each(|w| {
+                workout_stats.insert(w.name.clone(), (0, 0, None));
+            });
+
+            let enabled_workouts = workouts
+                .iter()
+                .filter_map(|w| {
+                    if w.enabled {
+                        Some(w.name.clone())
+                    } else {
+                        None
+                    }
+                })
+                .collect::<Vec<_>>();
+
             sessions.iter().for_each(|s| {
                 let entry = workout_stats
                     .entry(s.name.clone())
@@ -62,8 +77,8 @@ pub async fn get_workout_list(
                     enabled: enabled_workouts.contains(&wd.0),
                     name: wd.0,
                     sessions: wd.1.0,
-                    avg_time: wd.1.1 / wd.1.0,
-                    latest_session: wd.1.2.unwrap(),
+                    avg_time: wd.1.1.checked_div(wd.1.0).unwrap_or(0),
+                    latest_session: wd.1.2,
                 })
                 .collect::<Vec<_>>();
 
@@ -110,7 +125,7 @@ pub async fn get_workout_details(
                 Some(&[OrderBy::Desc(entity::columns::DATE)]),
             )?;
 
-            let mut latest = sessions.first().unwrap().clone();
+            let mut latest = sessions.first().map(|latest| latest.date);
             let mut count = 0_u32;
             let mut time = 0_u32;
             let mut volume = 0_f32;
@@ -130,9 +145,14 @@ pub async fn get_workout_details(
 
             let mut session_list = Vec::new();
             for session in &sessions {
-                if session.date > latest.date {
-                    latest = session.clone();
+                if latest.is_none() {
+                    latest = Some(session.date);
+                } else if let Some(latest_o) = latest
+                    && session.date > latest_o
+                {
+                    latest = Some(session.date);
                 }
+
                 count += 1;
                 time += session.total_elapsed_time;
 
@@ -145,8 +165,12 @@ pub async fn get_workout_details(
 
             let details = WorkoutDetails {
                 name: name.to_string(),
-                avg_time: time / (sessions.len() as u32),
-                latest_session: latest.date,
+                avg_time: if !sessions.is_empty() {
+                    time / (sessions.len() as u32)
+                } else {
+                    0
+                },
+                latest_session: latest,
                 avg_volume: volume / (sessions.len() as f32),
                 session_count: count,
                 sessions: session_list,

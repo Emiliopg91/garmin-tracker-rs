@@ -75,29 +75,36 @@ export function WorkoutModal({
                 <col />
               </colgroup>
               <tbody>
-                <tr>
-                  <td>{translate("sessions")}:</td>
-                  <td>{workout.session_count}</td>
-                </tr>
-                <tr>
-                  <td>{translate("latest_session")}</td>
-                  <td>{TimeUtils.formatTimeDate(workout.latest_session)}</td>
-                </tr>
-                <tr>
-                  <td>{translate("average_time")}</td>
-                  <td>{TimeUtils.formatDuration(workout.avg_time)}</td>
-                </tr>
-                {workout.name.length > 0 && (
-                  <tr>
-                    <td>{translate("average_volume")}:</td>
-                    <td>
-                      {UnitUtils.fromKg(
-                        workout.avg_volume,
-                        settings.weight_unit,
-                      ).toFixed(1)}{" "}
-                      {UnitUtils.getUnit(settings.weight_unit)}
-                    </td>
-                  </tr>
+                {workout.session_count > 0 && (
+                  <>
+                    <tr>
+                      <td>{translate("sessions")}:</td>
+                      <td>{workout.session_count}</td>
+                    </tr>
+                    <tr>
+                      <td>{translate("latest_session")}</td>
+                      <td>
+                        {workout.latest_session &&
+                          TimeUtils.formatTimeDate(workout.latest_session)}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>{translate("average_time")}</td>
+                      <td>{TimeUtils.formatDuration(workout.avg_time)}</td>
+                    </tr>
+                    {workout.name.length > 0 && (
+                      <tr>
+                        <td>{translate("average_volume")}:</td>
+                        <td>
+                          {UnitUtils.fromKg(
+                            workout.avg_volume,
+                            settings.weight_unit,
+                          ).toFixed(1)}{" "}
+                          {UnitUtils.getUnit(settings.weight_unit)}
+                        </td>
+                      </tr>
+                    )}
+                  </>
                 )}
                 {showEnable && (
                   <tr>
@@ -139,58 +146,66 @@ export function WorkoutModal({
             )}
           </>
         )}
-        <hr />
-        <table>
-          <colgroup>
-            <col className={workout.avg_volume > 0 ? "col-230" : "col-370"} />
-            <col className={workout.avg_volume > 0 ? "col-120" : "col-260"} />
-            {workout.avg_volume > 0 && <col className="col-280" />}
-          </colgroup>
-          <thead>
-            <tr>
-              <th>{translate("date")}</th>
-              <th>{translate("time")}</th>
-              {workout.avg_volume > 0 && <th>{translate("volume")}</th>}
-            </tr>
-          </thead>
-          <tbody>
-            {workout.sessions.map((session, idx) => (
-              <tr key={idx} className="divider-bottom">
-                <td className="text-center">
-                  {TimeUtils.formatTimeDate(session.date)}
-                </td>
-                <td className="text-center">
-                  {TimeUtils.formatDuration(session.time)}
-                </td>
-                {workout.avg_volume > 0 && (
-                  <td className="text-center">
-                    {UnitUtils.fromKg(
-                      session.volume,
-                      settings.weight_unit,
-                    ).toFixed(1)}{" "}
-                    {UnitUtils.getUnit(settings.weight_unit)}
-                    {idx < workout.sessions.length - 1 &&
-                      " (" +
-                        new Intl.NumberFormat(
-                          NUMBER_LOCALES[settings.language],
-                          {
-                            style: "percent",
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                            signDisplay: "always",
-                          },
-                        ).format(
-                          (workout.sessions[idx].volume -
-                            workout.sessions[idx + 1].volume) /
-                            workout.sessions[idx + 1].volume,
-                        ) +
-                        ")"}
-                  </td>
-                )}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        {workout.session_count > 0 && (
+          <>
+            <hr />
+            <table>
+              <colgroup>
+                <col
+                  className={workout.avg_volume > 0 ? "col-230" : "col-370"}
+                />
+                <col
+                  className={workout.avg_volume > 0 ? "col-120" : "col-260"}
+                />
+                {workout.avg_volume > 0 && <col className="col-280" />}
+              </colgroup>
+              <thead>
+                <tr>
+                  <th>{translate("date")}</th>
+                  <th>{translate("time")}</th>
+                  {workout.avg_volume > 0 && <th>{translate("volume")}</th>}
+                </tr>
+              </thead>
+              <tbody>
+                {workout.sessions.map((session, idx) => (
+                  <tr key={idx} className="divider-bottom">
+                    <td className="text-center">
+                      {TimeUtils.formatTimeDate(session.date)}
+                    </td>
+                    <td className="text-center">
+                      {TimeUtils.formatDuration(session.time)}
+                    </td>
+                    {workout.avg_volume > 0 && (
+                      <td className="text-center">
+                        {UnitUtils.fromKg(
+                          session.volume,
+                          settings.weight_unit,
+                        ).toFixed(1)}{" "}
+                        {UnitUtils.getUnit(settings.weight_unit)}
+                        {idx < workout.sessions.length - 1 &&
+                          " (" +
+                            new Intl.NumberFormat(
+                              NUMBER_LOCALES[settings.language],
+                              {
+                                style: "percent",
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                                signDisplay: "always",
+                              },
+                            ).format(
+                              (workout.sessions[idx].volume -
+                                workout.sessions[idx + 1].volume) /
+                                workout.sessions[idx + 1].volume,
+                            ) +
+                            ")"}
+                      </td>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </>
+        )}
       </DialogContent>
     </Dialog>
   );

@@ -5,6 +5,7 @@ import {
   DialogContent,
   DialogTitle,
   IconButton,
+  TextField,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { useContext, useEffect, useState } from "react";
@@ -21,14 +22,16 @@ import { LoadingContext } from "@/context/LoadingContext";
 
 type Props = {
   workout: WorkoutDetails;
+  isEdit: boolean;
   onClose: () => void;
 };
 
-export function WorkoutSetsModal({ workout, onClose }: Props) {
+export function WorkoutSetsModal({ workout, isEdit, onClose }: Props) {
   const { startLoading, finishLoading } = useContext(LoadingContext);
   const { translate, settings } = useContext(I18nSettingsContext);
 
   useEffect(() => {
+    console.error(isEdit);
     setName(workout.name);
   }, []);
 
@@ -88,10 +91,22 @@ export function WorkoutSetsModal({ workout, onClose }: Props) {
     }
   };
 
+  const onNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const name = e.target.value;
+    setName(name);
+  };
+
   return (
     <Dialog open={true} onClose={onClose} fullWidth maxWidth="md">
       <DialogTitle>
-        <span>{name}</span>
+        {isEdit && <span>{name}</span>}
+        {!isEdit && (
+          <TextField
+            placeholder={translate("workout_name")}
+            onChange={onNameChange}
+            value={name}
+          ></TextField>
+        )}
         <IconButton onClick={onClose} className="modal-close-button">
           <CloseIcon />
         </IconButton>

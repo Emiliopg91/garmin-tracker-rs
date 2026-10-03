@@ -5,7 +5,7 @@ use crate::dao::{session::Session, workout_step::WorkoutStep};
 #[derive(Serialize)]
 pub struct WorkoutListItem {
     pub name: String,
-    pub latest_session: u32,
+    pub latest_session: Option<u32>,
     pub sessions: u32,
     pub avg_time: u32,
     pub enabled: bool,
@@ -31,7 +31,7 @@ impl From<&Session> for WorkoutSession {
 #[derive(Serialize)]
 pub struct WorkoutDetails {
     pub name: String,
-    pub latest_session: u32,
+    pub latest_session: Option<u32>,
     pub session_count: u32,
     pub avg_time: u32,
     pub avg_volume: f32,

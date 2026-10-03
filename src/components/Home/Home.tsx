@@ -96,10 +96,14 @@ export function Home() {
               const filtered = workouts.filter((w) => w.enabled);
 
               if (!overreaching && filtered.length > 0) {
-                let oldest = filtered[0];
-                for (let i = 0; i < filtered.length; i++) {
-                  if (oldest.latest_session > filtered[i].latest_session) {
-                    oldest = filtered[i];
+                // Never-done workouts take priority, otherwise the least recent one
+                let oldest = filtered.find((w) => w.latest_session == null);
+                if (oldest === undefined) {
+                  oldest = filtered[0];
+                  for (const w of filtered) {
+                    if (oldest.latest_session! > w.latest_session!) {
+                      oldest = w;
+                    }
                   }
                 }
                 setWorkout(oldest);
@@ -404,7 +408,8 @@ export function Home() {
                           )}
                         </td>
                         <td>
-                          {TimeUtils.formatTimeDate(workout.latest_session)}
+                          {workout.latest_session &&
+                            TimeUtils.formatTimeDate(workout.latest_session)}
                         </td>
                         <td>{workout.sessions}</td>
                         <td>{TimeUtils.formatDuration(workout.avg_time)}</td>
@@ -445,6 +450,7 @@ export function Home() {
         {workoutEdit && (
           <WorkoutSetsModal
             workout={workoutEdit}
+            isEdit={true}
             onClose={() => setWorkoutEdit(undefined)}
           />
         )}

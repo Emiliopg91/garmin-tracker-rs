@@ -1,4 +1,8 @@
-import { WorkoutDetails, WorkoutListItem } from "@/utils/backend/models";
+import {
+  StepType,
+  WorkoutDetails,
+  WorkoutListItem,
+} from "@/utils/backend/models";
 import { WorkoutModal } from "./WorkoutModal";
 import { WorkoutRow } from "./helpers/WorkoutRow";
 import { BackendClient } from "@/utils/backend/client";
@@ -8,6 +12,7 @@ import { LoadingContext } from "@/context/LoadingContext";
 import { I18nSettingsContext } from "@/context/I18nSettingsContext";
 import "@/styles/Workouts/WorkoutLists.css";
 import { WorkoutSetsModal } from "./WorkoutSetsModal";
+import { Button } from "@mui/material";
 
 export function WorkoutsList() {
   const { sessionsVersion } = useContext(AppContext);
@@ -21,10 +26,50 @@ export function WorkoutsList() {
   const [workoutEdit, setWorkoutEdit] = useState<WorkoutDetails | undefined>(
     undefined,
   );
+  const [isEdit, setIsEdit] = useState(false);
 
   const openEdit = (workout: WorkoutDetails | undefined) => {
+    if (workout === undefined) {
+      setIsEdit(false);
+      const workout: WorkoutDetails = {
+        name: "",
+        avg_time: 0,
+        avg_volume: 0,
+        enabled: true,
+        latest_session: 0,
+        session_count: 0,
+        sessions: [],
+        steps: [
+          {
+            idx: 0,
+            workout: "",
+            kind: StepType.Rest,
+            time: 120000,
+            begin_idx: null,
+            ex_cat: null,
+            ex_id: null,
+            reps: null,
+            weight: null,
+          },
+          {
+            idx: 1,
+            workout: "",
+            kind: StepType.Repeat,
+            begin_idx: 0,
+            time: null,
+            ex_cat: null,
+            ex_id: null,
+            reps: 1,
+            weight: null,
+          },
+        ],
+      };
+      setWorkoutEdit(workout);
+    } else {
+      setIsEdit(true);
+      setWorkoutEdit(workout);
+    }
     setWorkoutDetails(undefined);
-    setWorkoutEdit(workout);
   };
 
   const refreshList = () => {
@@ -72,25 +117,27 @@ export function WorkoutsList() {
 
   return (
     <>
-      <table>
-        <thead>
-          <tr>
-            <th className="text-center">{translate("workout")}</th>
-            <th className="text-center">{translate("latest_session")}</th>
-            <th className="text-center">{translate("session_count")}</th>
-            <th className="text-center">{translate("average_duration")}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {workouts.map((workout, idx) => (
-            <WorkoutRow
-              key={idx}
-              workout={workout}
-              onSelect={getWorkoutDetails}
-            />
-          ))}
-        </tbody>
-      </table>
+      <div id="list-layer">
+        <table>
+          <thead>
+            <tr>
+              <th className="text-center">{translate("workout")}</th>
+              <th className="text-center">{translate("latest_session")}</th>
+              <th className="text-center">{translate("session_count")}</th>
+              <th className="text-center">{translate("average_duration")}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {workouts.map((workout, idx) => (
+              <WorkoutRow
+                key={idx}
+                workout={workout}
+                onSelect={getWorkoutDetails}
+              />
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       <div>
         {workoutDetails && (
@@ -108,9 +155,23 @@ export function WorkoutsList() {
         {workoutEdit && (
           <WorkoutSetsModal
             workout={workoutEdit}
-            onClose={() => setWorkoutEdit(undefined)}
+            isEdit={isEdit}
+            onClose={() => {
+              setWorkoutEdit(undefined);
+              refreshList();
+            }}
           />
         )}
+      </div>
+
+      <div className="list-action-bar">
+        <Button
+          className="full-width-button"
+          onClick={() => openEdit(undefined)}
+          variant="contained"
+        >
+          {translate("create_workout")}
+        </Button>
       </div>
     </>
   );

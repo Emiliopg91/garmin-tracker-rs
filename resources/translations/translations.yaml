@@ -538,3 +538,6 @@ minutes:
 seconds:
   en: Seconds
   es: Segundos
+create_workout:
+  en: New workout
+  es: Nuevo entrenamiento

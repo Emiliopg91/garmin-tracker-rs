@@ -163,7 +163,7 @@ export interface WorkoutDetails {
   avg_time: number;
   avg_volume: number;
   enabled: boolean;
-  latest_session: number;
+  latest_session: number | null;
   name: string;
   session_count: number;
   sessions: WorkoutSession[];
@@ -174,7 +174,7 @@ export interface WorkoutDetails {
 export interface WorkoutListItem {
   avg_time: number;
   enabled: boolean;
-  latest_session: number;
+  latest_session: number | null;
   name: string;
   sessions: number;
 }
