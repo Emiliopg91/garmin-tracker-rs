@@ -1,4 +1,4 @@
-import { StepType, WorkoutDetails } from "@/utils/backend/models";
+import { StepType, Workout, WorkoutDetails } from "@/utils/backend/models";
 import {
   Button,
   Dialog,
@@ -16,6 +16,8 @@ import {
 } from "@/utils/WorkoutUtils";
 import { WorkoutSetGroup } from "./helpers/WorkoutSetGroup";
 import { I18nSettingsContext } from "@/context/I18nSettingsContext";
+import { BackendClient } from "@/utils/backend/client";
+import { LoadingContext } from "@/context/LoadingContext";
 
 type Props = {
   workout: WorkoutDetails;
@@ -23,8 +25,8 @@ type Props = {
 };
 
 export function WorkoutSetsModal({ workout, onClose }: Props) {
-  //const { startLoading, finishLoading } = useContext(LoadingContext);
-  const { translate } = useContext(I18nSettingsContext);
+  const { startLoading, finishLoading } = useContext(LoadingContext);
+  const { translate, settings } = useContext(I18nSettingsContext);
 
   useEffect(() => {
     setName(workout.name);
@@ -32,7 +34,7 @@ export function WorkoutSetsModal({ workout, onClose }: Props) {
 
   const [name, setName] = useState(workout?.name);
   const [steps, setSteps] = useState(
-    WorkoutUtils.parseWorkoutSteps(workout!.steps),
+    WorkoutUtils.parseWorkoutSteps(workout!.steps, settings.weight_unit),
   );
 
   const swapPosition = (pos1: number, pos2: number) => {
@@ -66,6 +68,24 @@ export function WorkoutSetsModal({ workout, onClose }: Props) {
   const deleteGroup = (i: number) => {
     const nSteps = steps.filter((_, idx) => idx != i);
     setSteps(nSteps);
+  };
+
+  const saveWorkout = () => {
+    if (name.length > 0 && WorkoutUtils.validateSteps(steps)) {
+      const newWorkout: Workout = {
+        enabled: workout.enabled,
+        name,
+        steps: WorkoutUtils.toWorkoutSteps(steps, name, settings.weight_unit),
+      };
+      startLoading();
+      BackendClient.saveWorkout(newWorkout)
+        .then(() => {
+          onClose();
+        })
+        .finally(() => {
+          finishLoading();
+        });
+    }
   };
 
   return (
@@ -112,7 +132,7 @@ export function WorkoutSetsModal({ workout, onClose }: Props) {
           <Button variant="contained" onClick={addGroup}>
             {translate("add_set")}
           </Button>
-          <Button color="success" variant="contained">
+          <Button color="success" variant="contained" onClick={saveWorkout}>
             {translate("save_workout")}
           </Button>
         </div>

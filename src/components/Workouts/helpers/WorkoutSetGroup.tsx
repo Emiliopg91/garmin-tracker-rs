@@ -86,31 +86,38 @@ export function WorkoutSetGroup({
         <legend>
           <b>{translate("set_x", [(index + 1).toString()])}</b>
         </legend>
-        <Stack divider={<Divider flexItem />}>
-          {leafs.map((leaf, idx) => (
-            <WorkoutSetLeaf
-              key={`leaf-${idx}`}
-              leaf={leaf}
-              index={idx}
-              sameLevel={leafs.length}
-              swapPosition={swapLeafPosition}
-              onChange={(l) => updateLeaf(idx, l)}
-              onDelete={() => deleteLeaf(idx)}
-            />
-          ))}
-        </Stack>
-        <Divider />
         <Box
           sx={{
             display: "flex",
             flexWrap: "wrap",
-            justifyContent: "flex-end",
+            justifyContent: "space-between",
             alignItems: "center",
             gap: 1,
-            pt: 1,
+            pb: 1,
           }}
         >
+          <FormControl size="small" sx={{ minWidth: 100 }}>
+            <InputLabel id={lapsLabelId}>{translate("repeat")}</InputLabel>
+            <Select
+              labelId={lapsLabelId}
+              value={group.laps}
+              label={translate("repeat")}
+              onChange={onLapChanged}
+              MenuProps={{
+                slotProps: { paper: { style: { maxHeight: 300 } } },
+              }}
+            >
+              {Array.from({ length: 50 }, (_, i) => i + 1).map((n) => (
+                <MenuItem key={n} value={n}>
+                  {n}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
           <Box sx={{ display: "flex", gap: 0.5 }}>
+            <Button variant="contained" onClick={addStep}>
+              {translate("add_step")}
+            </Button>
             <Tooltip title={translate("move_up")}>
               <span>
                 <IconButton
@@ -145,28 +152,22 @@ export function WorkoutSetGroup({
               </span>
             </Tooltip>
           </Box>
-          <FormControl size="small" sx={{ minWidth: 100 }}>
-            <InputLabel id={lapsLabelId}>{translate("repeat")}</InputLabel>
-            <Select
-              labelId={lapsLabelId}
-              value={group.laps}
-              label={translate("repeat")}
-              onChange={onLapChanged}
-              MenuProps={{
-                slotProps: { paper: { style: { maxHeight: 300 } } },
-              }}
-            >
-              {Array.from({ length: 50 }, (_, i) => i + 1).map((n) => (
-                <MenuItem key={n} value={n}>
-                  {n}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <Button variant="contained" onClick={addStep}>
-            {translate("add_step")}
-          </Button>
         </Box>
+        <Divider />
+        <Stack divider={<Divider flexItem />} sx={{ px: 1 }}>
+          {leafs.map((leaf, idx) => (
+            <WorkoutSetLeaf
+              key={`leaf-${idx}`}
+              leaf={leaf}
+              index={idx}
+              sameLevel={leafs.length}
+              swapPosition={swapLeafPosition}
+              onChange={(l) => updateLeaf(idx, l)}
+              onDelete={() => deleteLeaf(idx)}
+            />
+          ))}
+        </Stack>
+        <Divider />
       </fieldset>
       <br />
     </>

@@ -108,7 +108,7 @@ export function WorkoutsList() {
         {workoutEdit && (
           <WorkoutSetsModal
             workout={workoutEdit}
-            onClose={() => setEditOpen(false)}
+            onClose={() => setWorkoutEdit(undefined)}
           />
         )}
       </div>

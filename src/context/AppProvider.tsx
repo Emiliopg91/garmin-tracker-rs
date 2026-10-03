@@ -11,7 +11,7 @@ import {
 } from "@/utils/backend/models";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { JSX } from "react/jsx-runtime";
-import { AppContext } from "./AppContext";
+import { AppContext, ExerciseOption } from "./AppContext";
 import { LoadingContext } from "./LoadingContext";
 import { I18nSettingsContext } from "./I18nSettingsContext";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -88,9 +88,23 @@ export function AppProvider({
     [translations],
   );
 
+  const exerciseCatalog = useMemo<ExerciseOption[]>(
+    () =>
+      Object.keys(translations)
+        .map((key) => key.match(/^exercise_(\d+)_(\d+)$/))
+        .filter((m) => m != null)
+        .map((m) => ({
+          label: translations[m[0]],
+          ex_cat: Number(m[1]),
+          ex_id: Number(m[2]),
+        }))
+        .sort((a, b) => a.label.localeCompare(b.label)),
+    [translations],
+  );
+
   const refreshTranslations = useCallback(() => {
     BackendClient.getTranslations().then((translations) => {
-      setTranslations(translations);
+      setTranslations(Object.freeze(translations));
     });
   }, []);
 
@@ -187,6 +201,7 @@ export function AppProvider({
       closeSettings,
       sessionsVersion,
       rcloneAvailable,
+      exerciseCatalog,
     }),
     [
       tab,
@@ -198,6 +213,7 @@ export function AppProvider({
       closeSettings,
       sessionsVersion,
       rcloneAvailable,
+      exerciseCatalog,
     ],
   );
 

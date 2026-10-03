@@ -101,7 +101,7 @@ export function WorkoutModal({
                 )}
                 {showEnable && (
                   <tr>
-                    <td>{translate("enabled")}</td>
+                    <td>{translate("enabled")}:</td>
                     <td>
                       <Switch
                         checked={enabled}

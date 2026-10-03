@@ -15,7 +15,8 @@ use crate::{
     dao::{
         session::{self, SessionRepository, entity},
         set::{self, SetRepository},
-        workout::{self, WorkoutRepository},
+        workout::{self, Workout, WorkoutRepository},
+        workout_step::{self, WorkoutStepRepository},
     },
     dto::workouts::{WorkoutDetails, WorkoutListItem, WorkoutSession},
     fit::writer::FitWriter,
@@ -224,4 +225,40 @@ pub async fn send_to_device(
     let _ = fs::remove_file(path).await;
 
     Ok(())
+}
+
+#[traced_command]
+#[tauri::command]
+pub async fn save_workout(app: AppHandle, workout: Workout) -> Result<(), String> {
+    run_blocking(app, move |database| {
+        database.run_in_transaction(|tx| {
+            if WorkoutRepository::select_by_id_in(tx, &workout.name)?.is_some() {
+                WorkoutStepRepository::delete()
+                    .where_(Where::Eq(
+                        workout_step::entity::columns::WORKOUT,
+                        workout.name.clone().into(),
+                    ))
+                    .execute_in(tx)?;
+            } else {
+                let mut item = Workout {
+                    name: workout.name.clone(),
+                    enabled: true,
+                    steps: vec![],
+                };
+                WorkoutRepository::insert().item(&mut item).execute_in(tx)?;
+            }
+
+            let mut insert = WorkoutStepRepository::insert();
+            let mut steps = workout.steps.clone();
+            for step in &mut steps {
+                step.workout = workout.name.clone();
+                insert = insert.item(step);
+            }
+            insert.execute_in(tx)?;
+
+            Ok(())
+        })
+    })
+    .await
+    .map_err(|e| e.to_string())
 }

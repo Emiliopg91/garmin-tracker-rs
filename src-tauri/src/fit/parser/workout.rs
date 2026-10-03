@@ -73,8 +73,12 @@ impl TryFrom<FitParser> for Workout {
                                             }
                                             _ => None,
                                         };
+                                        let time = match step_obj.duration_type {
+                                            WktStepDuration::TIME => Some(step_obj.duration_value),
+                                            _ => None,
+                                        };
                                         steps.push(WorkoutStep::exercise(
-                                            &name, idx, ex_cat, ex_id, weight, reps,
+                                            &name, idx, ex_cat, ex_id, weight, reps, time,
                                         ));
                                     }
                                     _ => {}

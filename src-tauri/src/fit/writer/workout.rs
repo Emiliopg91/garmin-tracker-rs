@@ -30,12 +30,17 @@ fn step_message(step: &WorkoutStep, weight_unit: WeightUnit) -> Message {
     match step.kind {
         StepType::Exercise => {
             msg.intensity = Intensity::ACTIVE;
-            match step.reps.flatten() {
-                Some(reps) => {
-                    msg.duration_type = WktStepDuration::REPS;
-                    msg.duration_value = reps as u32;
+            if let Some(Some(time)) = step.time {
+                msg.duration_type = WktStepDuration::TIME;
+                msg.duration_value = time;
+            } else {
+                match step.reps.flatten() {
+                    Some(reps) => {
+                        msg.duration_type = WktStepDuration::REPS;
+                        msg.duration_value = reps as u32;
+                    }
+                    None => msg.duration_type = WktStepDuration::OPEN,
                 }
-                None => msg.duration_type = WktStepDuration::OPEN,
             }
             if let Some(cat) = step.ex_cat {
                 msg.exercise_category = ExerciseCategory(cat);
@@ -61,11 +66,11 @@ fn step_message(step: &WorkoutStep, weight_unit: WeightUnit) -> Message {
                 WeightUnit::Pounds => FitBaseUnit::POUND,
             };
             match step.time {
-                Some(time) => {
+                Some(Some(time)) => {
                     msg.duration_type = WktStepDuration::TIME;
                     msg.duration_value = time;
                 }
-                None => msg.duration_type = WktStepDuration::OPEN,
+                _ => msg.duration_type = WktStepDuration::OPEN,
             }
         }
         StepType::Repeat => {

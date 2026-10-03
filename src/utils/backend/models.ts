@@ -151,6 +151,13 @@ export enum WeightUnit {
 	Pounds = "Pounds",
 }
 
+// From src-tauri/src/dao/workout.rs:8
+export interface Workout {
+  enabled: boolean;
+  name: string;
+  steps: WorkoutStep[];
+}
+
 // From src-tauri/src/dto/workouts.rs:32
 export interface WorkoutDetails {
   avg_time: number;
@@ -187,7 +194,7 @@ export interface WorkoutStep {
   idx: number;
   kind: StepType;
   reps: number | null | null;
-  time: number | null;
+  time: number | null | null;
   weight: number | null;
   workout: string;
 }

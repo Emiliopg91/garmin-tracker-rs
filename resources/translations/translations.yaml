@@ -532,3 +532,9 @@ limit_type_reps:
 limit_type_time:
   en: Time
   es: Tiempo
+minutes:
+  en: Minutes
+  es: Minutos
+seconds:
+  en: Seconds
+  es: Segundos
