@@ -16,7 +16,8 @@ export function SessionRow({
   onSelect,
   onToggleCompare,
 }: Props) {
-  const { translate, formatTimeDate } = useContext(I18nSettingsContext);
+  const { translate, formatTimeDate, formatNumber } =
+    useContext(I18nSettingsContext);
 
   return (
     <tr
@@ -37,8 +38,8 @@ export function SessionRow({
           translate("sport_" + session.sport + "_" + session.sub_sport)}
       </td>
       <td>{session.name}</td>
-      <td>{session.active_calories}</td>
-      <td>{session.training_load}</td>
+      <td>{formatNumber(session.active_calories, 0)}</td>
+      <td>{formatNumber(session.training_load, 0)}</td>
     </tr>
   );
 }

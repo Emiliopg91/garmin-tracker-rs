@@ -9,10 +9,28 @@ import { createContext } from "react";
 export const KG_TO_LB = 2.20462;
 export const KM_TO_MI = 0.621371;
 
+export const DEFAULT_SETTINGS: Settings = {
+  distance_unit: DistanceUnit.Kilometers,
+  weight_unit: WeightUnit.Kilograms,
+  auto_sync: true,
+  start_boot: false,
+  language: Languages.English,
+  on_device_connect: false,
+};
+
+export type ExerciseOption = {
+  label: string;
+  ex_cat: number;
+  ex_id: number;
+};
+
 interface I18nSettingsContextType {
+  i18nReady: boolean;
   settings: Settings;
+  updateSettings: (changes: Partial<Settings>) => void;
   translate: (key: string, replacements?: string[]) => string;
   refreshTranslations: () => void;
+  exerciseCatalog: ExerciseOption[];
   fromKg: (kg: number) => number;
   toKg: (value: number) => number;
   fromKm: (km: number) => number;
@@ -28,13 +46,10 @@ interface I18nSettingsContextType {
 }
 
 const defaultValue: I18nSettingsContextType = {
-  settings: {
-    distance_unit: DistanceUnit.Kilometers,
-    weight_unit: WeightUnit.Kilograms,
-    auto_sync: true,
-    start_boot: false,
-    language: Languages.English,
-    on_device_connect: false,
+  i18nReady: false,
+  settings: DEFAULT_SETTINGS,
+  updateSettings: () => {
+    /* empty */
   },
   translate: () => {
     return "";
@@ -42,6 +57,7 @@ const defaultValue: I18nSettingsContextType = {
   refreshTranslations: () => {
     /* empty */
   },
+  exerciseCatalog: [],
   fromKg: (kg: number) => {
     return kg;
   },

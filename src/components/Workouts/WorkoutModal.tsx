@@ -81,7 +81,7 @@ export function WorkoutModal({
                   <>
                     <tr>
                       <td>{translate("sessions")}:</td>
-                      <td>{workout.session_count}</td>
+                      <td>{formatNumber(workout.session_count, 0)}</td>
                     </tr>
                     <tr>
                       <td>{translate("latest_session")}</td>

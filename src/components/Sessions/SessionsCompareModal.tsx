@@ -89,17 +89,21 @@ export function SessionsCompareModal({ sessions, onClose }: Props) {
             <tr>
               <td>{translate("calories")}</td>
               <td>
-                {sessions[0].total_calories -
-                  sessions[0].metabolic_calories +
+                {formatNumber(
+                  sessions[0].total_calories - sessions[0].metabolic_calories,
+                  0,
+                ) +
                   " / " +
-                  sessions[0].total_calories}{" "}
+                  formatNumber(sessions[0].total_calories, 0)}{" "}
                 Kcal
               </td>
               <td>
-                {sessions[1].total_calories -
-                  sessions[1].metabolic_calories +
+                {formatNumber(
+                  sessions[1].total_calories - sessions[1].metabolic_calories,
+                  0,
+                ) +
                   " / " +
-                  sessions[1].total_calories}{" "}
+                  formatNumber(sessions[1].total_calories, 0)}{" "}
                 Kcal
               </td>
             </tr>
@@ -114,8 +118,8 @@ export function SessionsCompareModal({ sessions, onClose }: Props) {
             </tr>
             <tr>
               <td>{translate("workout_load")}</td>
-              <td>{sessions[0].training_load}</td>
-              <td>{sessions[1].training_load}</td>
+              <td>{formatNumber(sessions[0].training_load, 0)}</td>
+              <td>{formatNumber(sessions[1].training_load, 0)}</td>
             </tr>
             <tr
               style={{

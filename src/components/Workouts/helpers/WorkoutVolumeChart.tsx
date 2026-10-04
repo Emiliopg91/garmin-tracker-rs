@@ -19,7 +19,8 @@ type Props = {
 };
 
 function WorkoutVolumeTooltip({ active, payload, label }: TooltipContentProps) {
-  const { translate, formatDate } = useContext(I18nSettingsContext);
+  const { translate, formatDate, formatNumber } =
+    useContext(I18nSettingsContext);
 
   if (!active || !payload || payload.length === 0 || label == null) {
     return null;
@@ -31,7 +32,7 @@ function WorkoutVolumeTooltip({ active, payload, label }: TooltipContentProps) {
         <b>{formatDate(data.date / 1000)}</b>
       </div>
       <div>
-        {translate("volume")}: {data.volume}
+        {translate("volume")}: {formatNumber(data.volume, 0)}
       </div>
     </div>
   );

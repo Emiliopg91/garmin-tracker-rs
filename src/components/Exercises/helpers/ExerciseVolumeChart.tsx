@@ -22,7 +22,8 @@ function ExerciseVolumeTooltip({
   payload,
   label,
 }: TooltipContentProps) {
-  const { translate, formatDate } = useContext(I18nSettingsContext);
+  const { translate, formatDate, formatNumber } =
+    useContext(I18nSettingsContext);
 
   if (!active || !payload || payload.length === 0 || label == null) {
     return null;
@@ -38,10 +39,10 @@ function ExerciseVolumeTooltip({
         <b>{formatDate(data.date)}</b>
       </div>
       <div>
-        {translate("volume")}: {data.volume}
+        {translate("volume")}: {formatNumber(data.volume, 0)}
       </div>
       <div>
-        {translate("repetitions")}: {data.reps}
+        {translate("repetitions")}: {formatNumber(data.reps, 0)}
       </div>
     </div>
   );

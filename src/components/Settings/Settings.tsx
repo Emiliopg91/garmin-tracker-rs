@@ -28,7 +28,7 @@ type Props = {
 export function Settings({ onClose }: Props) {
   const { environment, rcloneAvailable } = useContext(AppContext);
   const { startLoading, finishLoading } = useContext(LoadingContext);
-  const { settings, translate, refreshTranslations } =
+  const { settings, updateSettings, translate, refreshTranslations } =
     useContext(I18nSettingsContext);
 
   const [weightUnit, setWeightUnit] = useState(settings.weight_unit);
@@ -45,7 +45,7 @@ export function Settings({ onClose }: Props) {
     BackendClient.updateSettingsValue("weight_unit", value)
       .then(() => {
         setWeightUnit(value);
-        settings.weight_unit = value;
+        updateSettings({ weight_unit: value });
       })
       .finally(() => {
         finishLoading();
@@ -57,7 +57,7 @@ export function Settings({ onClose }: Props) {
     BackendClient.updateSettingsValue("distance_unit", value)
       .then(() => {
         setDistanceUnit(value);
-        settings.distance_unit = value;
+        updateSettings({ distance_unit: value });
       })
       .finally(() => {
         finishLoading();
@@ -69,7 +69,7 @@ export function Settings({ onClose }: Props) {
     BackendClient.updateSettingsValue("auto_sync", value ? "true" : "false")
       .then(() => {
         setAutoSync(value);
-        settings.auto_sync = value;
+        updateSettings({ auto_sync: value });
       })
       .finally(() => {
         finishLoading();
@@ -81,7 +81,7 @@ export function Settings({ onClose }: Props) {
     BackendClient.updateSettingsValue("start_boot", value ? "true" : "false")
       .then(() => {
         setStartOnBoot(value);
-        settings.start_boot = value;
+        updateSettings({ start_boot: value });
       })
       .finally(() => {
         finishLoading();
@@ -93,7 +93,7 @@ export function Settings({ onClose }: Props) {
     BackendClient.updateSettingsValue("language", value)
       .then(() => {
         setLanguage(value);
-        settings.language = value;
+        updateSettings({ language: value });
         refreshTranslations();
       })
       .finally(() => {
@@ -109,7 +109,7 @@ export function Settings({ onClose }: Props) {
     )
       .then(() => {
         setOnDeviceConnect(value);
-        settings.on_device_connect = value;
+        updateSettings({ on_device_connect: value });
       })
       .finally(() => {
         finishLoading();

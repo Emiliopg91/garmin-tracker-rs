@@ -27,7 +27,7 @@ import { WorkoutSetsModal } from "../Workouts/WorkoutSetsModal";
 export function Home() {
   const { availableDevices, sessionsVersion } = useContext(AppContext);
   const { startLoading, finishLoading } = useContext(LoadingContext);
-  const { translate, fromKg, formatDuration, formatTimeDate } =
+  const { translate, fromKg, formatDuration, formatTimeDate, formatNumber } =
     useContext(I18nSettingsContext);
   const adapter = usePickerAdapter();
 
@@ -296,10 +296,10 @@ export function Home() {
                 <tbody>
                   <tr>
                     <td>{translate("workout_load")}</td>
-                    <td>{todayLoad}</td>
-                    <td>{thisWeekLoad}</td>
-                    <td>{weekLoad}</td>
-                    <td>{monthLoad}</td>
+                    <td>{formatNumber(todayLoad, 0)}</td>
+                    <td>{formatNumber(thisWeekLoad, 0)}</td>
+                    <td>{formatNumber(weekLoad, 0)}</td>
+                    <td>{formatNumber(monthLoad, 0)}</td>
                   </tr>
                 </tbody>
                 <tbody>
@@ -314,10 +314,10 @@ export function Home() {
                 <tbody>
                   <tr>
                     <td>{translate("active_calories")}</td>
-                    <td>{todayKcal} Kcal</td>
-                    <td>{thisWeekKcal} Kcal</td>
-                    <td>{weekKcal} Kcal</td>
-                    <td>{monthKcal} Kcal</td>
+                    <td>{formatNumber(todayKcal, 0)} Kcal</td>
+                    <td>{formatNumber(thisWeekKcal, 0)} Kcal</td>
+                    <td>{formatNumber(weekKcal, 0)} Kcal</td>
+                    <td>{formatNumber(monthKcal, 0)} Kcal</td>
                   </tr>
                 </tbody>
               </table>
@@ -359,8 +359,8 @@ export function Home() {
                           )}
                       </td>
                       <td>{session!.name}</td>
-                      <td>{session!.active_calories}</td>
-                      <td>{session!.training_load}</td>
+                      <td>{formatNumber(session!.active_calories, 0)}</td>
+                      <td>{formatNumber(session!.training_load, 0)}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -409,7 +409,7 @@ export function Home() {
                           {workout.latest_session &&
                             formatTimeDate(workout.latest_session)}
                         </td>
-                        <td>{workout.sessions}</td>
+                        <td>{formatNumber(workout.sessions, 0)}</td>
                         <td>{formatDuration(workout.avg_time)}</td>
                       </tr>
                     </tbody>

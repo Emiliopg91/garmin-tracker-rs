@@ -96,7 +96,8 @@ interface HeatmapProps {
 }
 
 export const Heatmap = memo(function Heatmap({ data }: HeatmapProps) {
-  const { translate, formatDate } = useContext(I18nSettingsContext);
+  const { translate, formatDate, formatNumber } =
+    useContext(I18nSettingsContext);
 
   const [size, setSize] = useState({ width: 0, height: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
@@ -267,9 +268,17 @@ export const Heatmap = memo(function Heatmap({ data }: HeatmapProps) {
                 <div className="heatmap-tooltip">
                   <b>{formatDate(date.getTime() / 1000)}</b>
                   <br />
-                  <span>{translate("workout_load") + ": " + point.load}</span>
+                  <span>
+                    {translate("workout_load") +
+                      ": " +
+                      formatNumber(point.load, 0)}
+                  </span>
                   <br />
-                  <span>{translate("records") + ": " + point.records}</span>
+                  <span>
+                    {translate("records") +
+                      ": " +
+                      formatNumber(point.records, 0)}
+                  </span>
                 </div>
               );
             }}

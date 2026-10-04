@@ -2,12 +2,6 @@ import { Tabs } from "@/models/tabs";
 import { AppEnvironment, DeviceListItem } from "@/utils/backend/models";
 import { createContext } from "react";
 
-export type ExerciseOption = {
-  label: string;
-  ex_cat: number;
-  ex_id: number;
-};
-
 interface AppContexType {
   appReady: boolean;
   tab: Tabs;
@@ -19,7 +13,6 @@ interface AppContexType {
   settingsOpened: boolean;
   sessionsVersion: number;
   rcloneAvailable: boolean;
-  exerciseCatalog: ExerciseOption[];
 }
 
 const defaultValue: AppContexType = {
@@ -39,7 +32,6 @@ const defaultValue: AppContexType = {
   },
   sessionsVersion: 0,
   rcloneAvailable: false,
-  exerciseCatalog: [],
 };
 
 export const AppContext = createContext(defaultValue);

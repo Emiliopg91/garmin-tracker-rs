@@ -2,8 +2,6 @@ import ReactDOM from "react-dom/client";
 import App from "@/components/App/App";
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { theme } from "@/theme";
 
 import "leaflet/dist/leaflet.css";
@@ -15,6 +13,8 @@ import markerShadow from "leaflet/dist/images/marker-shadow.png";
 import "@/styles/main.css";
 import "@/styles/common.css";
 import { AppProvider } from "./context/AppProvider";
+import { I18nSettingsProvider } from "./context/I18nSettingsProvider";
+import { LoadingProvider } from "./context/LoadingProvider";
 
 delete (L.Icon.Default.prototype as unknown as { _getIconUrl?: unknown })
   ._getIconUrl;
@@ -27,10 +27,12 @@ L.Icon.Default.mergeOptions({
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <ThemeProvider theme={theme}>
     <CssBaseline />
-    <LocalizationProvider dateAdapter={AdapterDateFns}>
-      <AppProvider>
-        <App />
-      </AppProvider>
-    </LocalizationProvider>
+    <LoadingProvider>
+      <I18nSettingsProvider>
+        <AppProvider>
+          <App />
+        </AppProvider>
+      </I18nSettingsProvider>
+    </LoadingProvider>
   </ThemeProvider>,
 );

@@ -8,7 +8,7 @@ type Props = {
 };
 
 export function WorkoutRow({ workout, onSelect }: Props) {
-  const { translate, formatDuration, formatTimeDate } =
+  const { translate, formatDuration, formatTimeDate, formatNumber } =
     useContext(I18nSettingsContext);
 
   return (
@@ -23,7 +23,7 @@ export function WorkoutRow({ workout, onSelect }: Props) {
       <td>
         {workout.latest_session && formatTimeDate(workout.latest_session)}
       </td>
-      <td>{workout.sessions}</td>
+      <td>{formatNumber(workout.sessions, 0)}</td>
       <td>{workout.avg_time > 0 && formatDuration(workout.avg_time)}</td>
     </tr>
   );

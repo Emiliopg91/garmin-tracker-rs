@@ -1,4 +1,7 @@
-import { I18nSettingsContext } from "@/context/I18nSettingsContext";
+import {
+  ExerciseOption,
+  I18nSettingsContext,
+} from "@/context/I18nSettingsContext";
 import { StepType } from "@/utils/backend/models";
 import { LeafStep } from "@/utils/WorkoutUtils";
 import {
@@ -17,7 +20,6 @@ import { useContext, useId, useState } from "react";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import ClearIcon from "@mui/icons-material/Clear";
-import { AppContext, ExerciseOption } from "@/context/AppContext";
 
 type Props = {
   leaf: LeafStep;
@@ -42,8 +44,8 @@ export function WorkoutSetLeaf({
   swapPosition,
   onChange,
 }: Props) {
-  const { translate, getWeightUnit } = useContext(I18nSettingsContext);
-  const { exerciseCatalog } = useContext(AppContext);
+  const { translate, getWeightUnit, exerciseCatalog } =
+    useContext(I18nSettingsContext);
   const typeLabelId = useId();
   const limitLabelId = useId();
   const [timeInput, setTimeInput] = useState<string | null>(null);

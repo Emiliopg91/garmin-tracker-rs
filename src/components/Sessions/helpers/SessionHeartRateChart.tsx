@@ -29,7 +29,8 @@ function HeartRateTooltip({
   totalElapsedTime: number;
   sampleCount: number;
 }) {
-  const { translate, formatDuration } = useContext(I18nSettingsContext);
+  const { translate, formatDuration, formatNumber } =
+    useContext(I18nSettingsContext);
 
   if (!active || !payload || payload.length === 0) {
     return null;
@@ -43,7 +44,7 @@ function HeartRateTooltip({
         <b>{formatDuration(elapsed)}</b>
       </div>
       <div>
-        {translate("heart_rate")}: {data.hr}
+        {translate("heart_rate")}: {formatNumber(data.hr, 0)}
       </div>
     </div>
   );

@@ -42,10 +42,12 @@ export function SessionDetailsTable({ session }: Props) {
         <tr>
           <td>{translate("calories")}:</td>
           <td>
-            {session.total_calories -
-              session.metabolic_calories +
+            {formatNumber(
+              session.total_calories - session.metabolic_calories,
+              0,
+            ) +
               " / " +
-              session.total_calories}{" "}
+              formatNumber(session.total_calories, 0)}{" "}
             Kcal
           </td>
         </tr>
@@ -79,9 +81,9 @@ export function SessionDetailsTable({ session }: Props) {
           <tr>
             <td>{translate("elevations")}:</td>
             <td>
-              {Math.round(session.elevations[0]) +
+              {formatNumber(session.elevations[0], 0) +
                 " ↑   ↓ " +
-                Math.round(session.elevations[1])}
+                formatNumber(session.elevations[1], 0)}
             </td>
           </tr>
         )}
@@ -95,7 +97,7 @@ export function SessionDetailsTable({ session }: Props) {
         )}
         <tr>
           <td>{translate("workout_load")}:</td>
-          <td>{session.training_load}</td>
+          <td>{formatNumber(session.training_load, 0)}</td>
         </tr>
         {session.device && (
           <tr>
