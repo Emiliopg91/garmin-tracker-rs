@@ -227,6 +227,17 @@ fn parses_strength_sessions() {
         assert_eq!(session.workout.as_deref(), Some(expected.name));
         assert!(session.laps.is_empty(), "{}", expected.fixture);
 
+        let workout = session.workout_obj.as_ref().unwrap();
+        assert_eq!(workout.name, expected.name, "{}", expected.fixture);
+        assert!(!workout.steps.is_empty(), "{}", expected.fixture);
+        for (idx, step) in workout.steps.iter().enumerate() {
+            assert_eq!(step.workout, expected.name, "{}", expected.fixture);
+            assert_eq!(step.idx as usize, idx, "{}", expected.fixture);
+            if let Some(begin) = step.begin_idx {
+                assert!(begin < step.idx, "{}", expected.fixture);
+            }
+        }
+
         for (idx, set) in session.sets.iter().enumerate() {
             assert_eq!(set.session, expected.date);
             assert_eq!(set.idx as usize, idx);

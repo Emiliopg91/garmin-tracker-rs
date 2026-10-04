@@ -31,7 +31,6 @@ export function WorkoutSetsModal({ workout, isEdit, onClose }: Props) {
   const { translate, settings } = useContext(I18nSettingsContext);
 
   useEffect(() => {
-    console.error(isEdit);
     setName(workout.name);
   }, []);
 

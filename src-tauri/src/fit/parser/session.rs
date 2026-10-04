@@ -6,6 +6,7 @@ use crate::{
     fit::parser::{
         FitParser,
         errors::{self, ParseFitFileError},
+        workout::WorkoutAccumulator,
     },
 };
 use rustyfit::{
@@ -21,6 +22,7 @@ impl TryFrom<FitParser> for Session {
         let mut exercises = Vec::new();
         let mut series_data = Vec::new();
         let mut laps = Vec::new();
+        let mut workout = WorkoutAccumulator::default();
 
         let path_string = value.borrow_path().display().to_string();
 
@@ -33,6 +35,8 @@ impl TryFrom<FitParser> for Session {
                     match msg.num {
                         MesgNum::WORKOUT => {
                             let workout_obj = mesgdef::Workout::from(msg);
+                            // A non-strength workout only leaves the session without workout_obj
+                            let _ = workout.set_workout(&workout_obj);
                             session_data.set_workout(workout_obj);
                         }
                         MesgNum::SESSION => {
@@ -41,8 +45,9 @@ impl TryFrom<FitParser> for Session {
                             session_data.set_session(session_obj)?;
                         }
                         MesgNum::WORKOUT_STEP => {
-                            let record_obj = mesgdef::WorkoutStep::from(msg);
-                            handle_step_message(record_obj, &mut exercises)
+                            let step_obj = mesgdef::WorkoutStep::from(msg);
+                            workout.push_step(&step_obj);
+                            handle_step_message(&step_obj, &mut exercises)
                         }
                         MesgNum::RECORD => {
                             let record_obj = mesgdef::Record::from(msg);
@@ -109,7 +114,7 @@ impl TryFrom<FitParser> for Session {
         Ok(Session {
             date: session_data.timestamp,
             name: session_data.workout.clone().unwrap_or_default(),
-            workout_obj: None,
+            workout_obj: workout.build().ok(),
             workout: session_data.workout,
             total_elapsed_time: session_data.total_elapsed_time,
             active_time: session_data.active_time,
@@ -163,7 +168,7 @@ fn handle_set_message(msg: mesgdef::Set, series_data: &mut Vec<(usize, u16, f32)
     }
 }
 
-fn handle_step_message(msg: mesgdef::WorkoutStep, exercises: &mut Vec<Option<Exercise>>) {
+fn handle_step_message(msg: &mesgdef::WorkoutStep, exercises: &mut Vec<Option<Exercise>>) {
     if msg.exercise_category.0 != u16::MAX {
         let ex_cat = msg.exercise_category.0;
         let ex_id = if msg.exercise_name == u16::MAX {

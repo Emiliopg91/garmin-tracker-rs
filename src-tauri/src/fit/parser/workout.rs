@@ -17,8 +17,7 @@ impl TryFrom<FitParser> for Workout {
     type Error = errors::ParseFitFileError;
     fn try_from(mut value: FitParser) -> Result<Self, Self::Error> {
         let path_string = value.borrow_path().display().to_string();
-        let mut name = "".to_string();
-        let mut steps = Vec::new();
+        let mut workout = WorkoutAccumulator::default();
 
         value.with_stream_mut(|stream| -> errors::Result<()> {
             while let Some(event) = stream.next() {
@@ -28,62 +27,10 @@ impl TryFrom<FitParser> for Workout {
                 if let DecoderEvent::Message(msg) = event {
                     match msg.num {
                         MesgNum::WORKOUT => {
-                            let workout_obj = mesgdef::Workout::from(msg);
-                            if workout_obj.sport != Sport::TRAINING
-                                || workout_obj.sub_sport != SubSport::STRENGTH_TRAINING
-                            {
-                                return Err(ParseFitFileError::NotAWorkout());
-                            }
-
-                            name = workout_obj.wkt_name;
+                            workout.set_workout(&mesgdef::Workout::from(msg))?;
                         }
                         MesgNum::WORKOUT_STEP => {
-                            let step_obj = mesgdef::WorkoutStep::from(msg);
-                            let idx = step_obj.message_index.0;
-                            match step_obj.duration_type {
-                                WktStepDuration::REPEAT_UNTIL_STEPS_CMPLT => {
-                                    steps.push(WorkoutStep::repeat(
-                                        &name,
-                                        idx,
-                                        step_obj.duration_value as u16,
-                                        step_obj.target_value as u16,
-                                    ));
-                                }
-                                _ => match step_obj.intensity {
-                                    Intensity::REST => {
-                                        let duration = match step_obj.duration_type {
-                                            WktStepDuration::TIME => Some(step_obj.duration_value),
-                                            _ => None,
-                                        };
-                                        steps.push(WorkoutStep::rest(&name, idx, duration));
-                                    }
-                                    Intensity::ACTIVE => {
-                                        let ex_cat = step_obj.exercise_category.0;
-                                        let ex_id = if step_obj.exercise_name == u16::MAX {
-                                            1
-                                        } else {
-                                            step_obj.exercise_name
-                                        };
-                                        let weight =
-                                            step_obj.exercise_weight_scaled().unwrap_or(0_f64)
-                                                as f32;
-                                        let reps = match step_obj.duration_type {
-                                            WktStepDuration::REPS => {
-                                                Some(step_obj.duration_value as u16)
-                                            }
-                                            _ => None,
-                                        };
-                                        let time = match step_obj.duration_type {
-                                            WktStepDuration::TIME => Some(step_obj.duration_value),
-                                            _ => None,
-                                        };
-                                        steps.push(WorkoutStep::exercise(
-                                            &name, idx, ex_cat, ex_id, weight, reps, time,
-                                        ));
-                                    }
-                                    _ => {}
-                                },
-                            }
+                            workout.push_step(&mesgdef::WorkoutStep::from(msg));
                         }
                         _ => (),
                     }
@@ -93,24 +40,102 @@ impl TryFrom<FitParser> for Workout {
             Ok(())
         })?;
 
-        steps.sort_by_key(|s| s.idx);
-        let old_idxs: Vec<u16> = steps.iter().map(|s| s.idx).collect();
+        workout.build()
+    }
+}
 
-        for (new_idx, step) in steps.iter_mut().enumerate() {
+/// Accumulates the `workout` and `workout_step` FIT messages as they stream in, so both the
+/// workout and the session parsers can build a [`Workout`] from them.
+#[derive(Default)]
+pub(super) struct WorkoutAccumulator {
+    name: String,
+    /// `None` until the `workout` message is seen, then whether it is a strength workout
+    is_strength: Option<bool>,
+    steps: Vec<WorkoutStep>,
+}
+
+impl WorkoutAccumulator {
+    pub(super) fn set_workout(&mut self, msg: &mesgdef::Workout) -> errors::Result<()> {
+        let is_strength =
+            msg.sport == Sport::TRAINING && msg.sub_sport == SubSport::STRENGTH_TRAINING;
+        self.is_strength = Some(is_strength);
+        if !is_strength {
+            return Err(ParseFitFileError::NotAWorkout());
+        }
+
+        self.name = msg.wkt_name.clone();
+        Ok(())
+    }
+
+    pub(super) fn push_step(&mut self, msg: &mesgdef::WorkoutStep) {
+        let name = &self.name;
+        let idx = msg.message_index.0;
+        match msg.duration_type {
+            WktStepDuration::REPEAT_UNTIL_STEPS_CMPLT => {
+                self.steps.push(WorkoutStep::repeat(
+                    name,
+                    idx,
+                    msg.duration_value as u16,
+                    msg.target_value as u16,
+                ));
+            }
+            _ => match msg.intensity {
+                Intensity::REST => {
+                    let duration = match msg.duration_type {
+                        WktStepDuration::TIME => Some(msg.duration_value),
+                        _ => None,
+                    };
+                    self.steps.push(WorkoutStep::rest(name, idx, duration));
+                }
+                Intensity::ACTIVE => {
+                    let ex_cat = msg.exercise_category.0;
+                    let ex_id = if msg.exercise_name == u16::MAX {
+                        1
+                    } else {
+                        msg.exercise_name
+                    };
+                    let weight = msg.exercise_weight_scaled().unwrap_or(0_f64) as f32;
+                    let reps = match msg.duration_type {
+                        WktStepDuration::REPS => Some(msg.duration_value as u16),
+                        _ => None,
+                    };
+                    let time = match msg.duration_type {
+                        WktStepDuration::TIME => Some(msg.duration_value),
+                        _ => None,
+                    };
+                    self.steps.push(WorkoutStep::exercise(
+                        name, idx, ex_cat, ex_id, weight, reps, time,
+                    ));
+                }
+                _ => {}
+            },
+        }
+    }
+
+    pub(super) fn build(mut self) -> errors::Result<Workout> {
+        match self.is_strength {
+            None => return Err(ParseFitFileError::MissingField("name".to_string())),
+            Some(false) => return Err(ParseFitFileError::NotAWorkout()),
+            Some(true) => {}
+        }
+        if self.name.is_empty() {
+            return Err(ParseFitFileError::MissingField("name".to_string()));
+        }
+
+        self.steps.sort_by_key(|s| s.idx);
+        let old_idxs: Vec<u16> = self.steps.iter().map(|s| s.idx).collect();
+
+        for (new_idx, step) in self.steps.iter_mut().enumerate() {
             step.idx = new_idx as u16;
             if let Some(begin) = step.begin_idx {
                 step.begin_idx = Some(old_idxs.partition_point(|&old| old < begin) as u16);
             }
         }
 
-        if !name.is_empty() {
-            Ok(Workout {
-                name,
-                enabled: true,
-                steps,
-            })
-        } else {
-            Err(ParseFitFileError::MissingField("name".to_string()))
-        }
+        Ok(Workout {
+            name: self.name,
+            enabled: true,
+            steps: self.steps,
+        })
     }
 }

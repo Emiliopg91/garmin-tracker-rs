@@ -4,18 +4,19 @@ import { TimeUtils } from "@/utils/TimeUtils";
 import { UnitUtils } from "@/utils/UnitUtils";
 import { useContext, useState } from "react";
 import {
-  Button,
   Dialog,
   DialogContent,
   DialogTitle,
   IconButton,
   Switch,
+  Tooltip,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { BackendClient } from "@/utils/backend/client";
 import { LoadingContext } from "@/context/LoadingContext";
 import { WorkoutVolumeChart } from "./helpers/WorkoutVolumeChart";
 import { SendWorkoutMenu } from "./helpers/SendWorkoutMenu";
+import EditIcon from "@mui/icons-material/Edit";
 
 const NUMBER_LOCALES: Record<Languages, string> = {
   [Languages.Spanish]: "es-ES",
@@ -125,15 +126,15 @@ export function WorkoutModal({
           </div>
           {workout.steps.length > 0 && (
             <div>
-              <Button
-                variant="contained"
-                style={{ width: "100%" }}
-                onClick={() => {
-                  onOpenEdit(workout);
-                }}
-              >
-                {translate("edit_workout")}
-              </Button>
+              <Tooltip title={translate("edit_workout")}>
+                <IconButton
+                  onClick={() => {
+                    onOpenEdit(workout);
+                  }}
+                >
+                  <EditIcon />
+                </IconButton>
+              </Tooltip>
               <SendWorkoutMenu workout={workout} />
             </div>
           )}

@@ -138,7 +138,7 @@ export interface Settings {
   weight_unit: WeightUnit;
 }
 
-// From src-tauri/src/dao/workout_step.rs:35
+// From src-tauri/src/dao/workout_step.rs:36
 export enum StepType {
 	Exercise = "Exercise",
 	Rest = "Rest",
@@ -186,7 +186,7 @@ export interface WorkoutSession {
   volume: number;
 }
 
-// From src-tauri/src/dao/workout_step.rs:13
+// From src-tauri/src/dao/workout_step.rs:14
 export interface WorkoutStep {
   begin_idx: number | null;
   ex_cat: number | null;

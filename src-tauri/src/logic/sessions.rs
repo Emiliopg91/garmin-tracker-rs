@@ -17,7 +17,7 @@ use crate::{
         session::{self, Session, SessionRepository},
         set::{self, Set, SetRepository, entity},
         workout::{Workout, WorkoutRepository},
-        workout_step::{self, WorkoutStepRepository},
+        workout_step::WorkoutStepRepository,
     },
     dto::{
         notifications::{NotificationDefinition, NotificationKind},
@@ -283,27 +283,15 @@ pub async fn _import_from_device(app: &AppHandle, serial: &str) -> Result<usize,
     info!("Starting import from device with S/N {}", serial);
     let mut latest_date = "2026-06-08-00-00-00".to_string();
     let lang = app.state::<SettingsLock>().read().unwrap().language;
-    let (mut device, workouts_with_steps) = {
+    let mut device = {
         let app = app.clone();
         let serial = serial.to_string();
         tokio::task::spawn_blocking(move || {
             let db = app.state::<DatabasePool>();
             db.run_in_connection(|conn| {
                 let device = DeviceRepository::select_by_id_in(conn, &serial)?;
-                let workouts_with_steps = WorkoutStepRepository::select()
-                    .distinct(&[workout_step::entity::columns::WORKOUT])
-                    .fetch_in(conn)
-                    .map_err(|e| e.to_string())?
-                    .into_iter()
-                    .filter_map(
-                        |r| match r.get(workout_step::entity::columns::WORKOUT.as_ref()) {
-                            Some(Value::Text(name)) => Some(name.clone()),
-                            _ => None,
-                        },
-                    )
-                    .collect::<Vec<_>>();
 
-                Ok((device.unwrap(), workouts_with_steps))
+                Ok(device.unwrap())
             })
         })
         .await
@@ -342,7 +330,6 @@ pub async fn _import_from_device(app: &AppHandle, serial: &str) -> Result<usize,
 
     let activities_folder = src_dir.join("Activities");
     let settings_folder = src_dir.join("Settings");
-    let workouts_folder = src_dir.join("Workouts");
 
     if mtp_client
         .download_activities_since(serial, latest_date, activities_folder.clone())
@@ -361,42 +348,20 @@ pub async fn _import_from_device(app: &AppHandle, serial: &str) -> Result<usize,
         .await
         .map_err(|e| e.to_string())?;
 
-        let mut pending_workouts = HashMap::new();
         let mut dev_settings = None;
-        if !activities.is_empty() {
-            if let Ok(()) = mtp_client
-                .download_workouts(serial, workouts_folder.clone())
-                .await
-                && let Ok(read_dir) = fs::read_dir(&workouts_folder)
-            {
-                for entry in read_dir.flatten() {
-                    info!("Parsing workout file {}", entry.path().display());
-                    if let Some(parsed) = FitParser::from_file(entry.path())
-                        .ok()
-                        .and_then(|parser| Workout::try_from(parser).ok())
-                    {
-                        pending_workouts.insert(parsed.name.clone(), parsed);
-                    }
-                }
-            };
-            pending_workouts = pending_workouts
-                .into_iter()
-                .filter(|w| !workouts_with_steps.contains(&w.0))
-                .collect::<HashMap<_, _>>();
-
-            if let Ok(Some(path)) = mtp_client
+        if !activities.is_empty()
+            && let Ok(Some(path)) = mtp_client
                 .download_settings_file(serial, settings_folder)
                 .await
-            {
-                info!("Parsing settings file {}", path.display());
-                dev_settings = tokio::task::spawn_blocking(move || {
-                    FitParser::from_file(path)
-                        .ok()
-                        .and_then(|parser| DeviceSettings::try_from(parser).ok())
-                })
-                .await
-                .map_err(|e| e.to_string())?;
-            }
+        {
+            info!("Parsing settings file {}", path.display());
+            dev_settings = tokio::task::spawn_blocking(move || {
+                FitParser::from_file(path)
+                    .ok()
+                    .and_then(|parser| DeviceSettings::try_from(parser).ok())
+            })
+            .await
+            .map_err(|e| e.to_string())?;
         }
 
         drop(mtp_client);
@@ -414,7 +379,6 @@ pub async fn _import_from_device(app: &AppHandle, serial: &str) -> Result<usize,
                         lang,
                         true,
                         dev_settings.clone(),
-                        pending_workouts.clone(),
                     )
                 } else {
                     Ok(Vec::new())
@@ -499,17 +463,7 @@ pub fn _import_from_files(app: AppHandle, files: &[PathBuf]) -> Result<usize, St
     let lang = app.state::<SettingsLock>().read().unwrap().language;
     let database = app.state::<DatabasePool>();
     let res = database
-        .run_in_transaction(|tx| {
-            Ok(import_file_list(
-                tx,
-                files,
-                None,
-                lang,
-                false,
-                None,
-                HashMap::new(),
-            )?)
-        })
+        .run_in_transaction(|tx| Ok(import_file_list(tx, files, None, lang, false, None)?))
         .map_err(|e| e.to_string());
 
     match res {
@@ -540,7 +494,6 @@ fn import_file_list<F>(
     lang: Languages,
     delete: bool,
     dev_settings: Option<DeviceSettings>,
-    pending_workouts: HashMap<String, Workout>,
 ) -> Result<Vec<u32>, DatabaseError>
 where
     F: AsRef<Path> + Sync,
@@ -612,17 +565,17 @@ where
                 let mut laps = std::mem::take(&mut session.laps);
                 let add_data = session.additional_data.take();
 
-                if let Some(workout) = &session.workout {
+                if let Some(workout) = &session.workout_obj {
                     WorkoutRepository::insert()
                         .or_ignore()
                         .item(&mut Workout {
-                            name: workout.to_string(),
+                            name: workout.name.clone(),
                             enabled: true,
                             steps: Vec::new(),
                         })
                         .execute_in(tx)?;
 
-                    if let Some(workout) = pending_workouts.get(workout) {
+                    if WorkoutStepRepository::count_by_workout_in(tx, &workout.name)? == 0 {
                         let mut insert = WorkoutStepRepository::insert();
                         let mut steps = workout.steps.clone();
                         for step in &mut steps {

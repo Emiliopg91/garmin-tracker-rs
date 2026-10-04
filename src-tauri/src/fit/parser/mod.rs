@@ -1,6 +1,5 @@
 pub mod session;
 pub mod settings;
-pub mod workout;
 
 use std::{
     fs::File,
@@ -15,6 +14,7 @@ use rustyfit::{Decoder, StreamDecoder};
 use self::errors::ParseFitFileError;
 
 pub mod errors;
+pub mod workout;
 
 #[self_referencing]
 pub struct FitParser {
