@@ -1,7 +1,6 @@
 import { I18nSettingsContext } from "@/context/I18nSettingsContext";
 import { ExerciseDetails } from "@/utils/backend/models";
 import { TimeUtils } from "@/utils/TimeUtils";
-import { UnitUtils } from "@/utils/UnitUtils";
 import { useContext } from "react";
 import { Dialog, DialogContent, DialogTitle, IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
@@ -13,7 +12,7 @@ type Props = {
 };
 
 export function ExerciseModal({ exercise, onClose }: Props) {
-  const { translate, settings } = useContext(I18nSettingsContext);
+  const { translate, fromKg, getWeightUnit } = useContext(I18nSettingsContext);
 
   return (
     <Dialog open={true} onClose={onClose} fullWidth maxWidth="sm">
@@ -38,23 +37,16 @@ export function ExerciseModal({ exercise, onClose }: Props) {
             </tr>
             <tr>
               <td>{translate("rm")}:</td>
-              <td>
-                {UnitUtils.fromKg(exercise.e1rm, settings.weight_unit) +
-                  " " +
-                  UnitUtils.getUnit(settings.weight_unit)}
-              </td>
+              <td>{fromKg(exercise.e1rm) + " " + getWeightUnit()}</td>
             </tr>
             <tr>
               <td>{translate("personal_record")}:</td>
               <td>
                 {exercise.reps +
                   "x" +
-                  UnitUtils.fromKg(
-                    exercise.weight,
-                    settings.weight_unit,
-                  ).toFixed(1) +
+                  fromKg(exercise.weight).toFixed(1) +
                   " " +
-                  UnitUtils.getUnit(settings.weight_unit)}
+                  getWeightUnit()}
               </td>
             </tr>
             <tr>
@@ -106,12 +98,8 @@ export function ExerciseModal({ exercise, onClose }: Props) {
                         : ""
                     }`}
                   >
-                    {serie.reps}x
-                    {UnitUtils.fromKg(
-                      serie.weight,
-                      settings.weight_unit,
-                    ).toFixed(1)}{" "}
-                    {UnitUtils.getUnit(settings.weight_unit)}
+                    {serie.reps}x{fromKg(serie.weight).toFixed(1)}{" "}
+                    {getWeightUnit()}
                   </td>
                 </tr>
               )),

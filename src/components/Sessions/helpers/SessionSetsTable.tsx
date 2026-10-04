@@ -1,6 +1,5 @@
 import { I18nSettingsContext } from "@/context/I18nSettingsContext";
 import { SessionSet } from "@/utils/backend/models";
-import { UnitUtils } from "@/utils/UnitUtils";
 import { useContext } from "react";
 import { TextField } from "@mui/material";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
@@ -21,7 +20,7 @@ export function SessionSetsTable({
   groupedSeries,
   onUpdateSerie,
 }: Props) {
-  const { translate, settings } = useContext(I18nSettingsContext);
+  const { translate, getWeightUnit } = useContext(I18nSettingsContext);
 
   const updateSerieReps = (exercise: string, idx: number, newVal: string) => {
     let reps = parseInt(newVal);
@@ -94,12 +93,7 @@ export function SessionSetsTable({
                     }}
                   />
                   <TextField
-                    label={
-                      translate("weight") +
-                      " (" +
-                      UnitUtils.getUnit(settings.weight_unit) +
-                      ")"
-                    }
+                    label={translate("weight") + " (" + getWeightUnit() + ")"}
                     type="number"
                     size="small"
                     sx={{ width: 100, px: 1 }}

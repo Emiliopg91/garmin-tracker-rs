@@ -6,10 +6,19 @@ import {
 } from "@/utils/backend/models";
 import { createContext } from "react";
 
+export const KG_TO_LB = 2.20462;
+export const KM_TO_MI = 0.621371;
+
 interface I18nSettingsContextType {
   settings: Settings;
   translate: (key: string, replacements?: string[]) => string;
   refreshTranslations: () => void;
+  fromKg: (kg: number) => number;
+  toKg: (value: number) => number;
+  fromKm: (km: number) => number;
+  toKm: (value: number) => number;
+  getDistanceUnit: () => string;
+  getWeightUnit: () => string;
 }
 
 const defaultValue: I18nSettingsContextType = {
@@ -26,6 +35,24 @@ const defaultValue: I18nSettingsContextType = {
   },
   refreshTranslations: () => {
     /* empty */
+  },
+  fromKg: (kg: number) => {
+    return kg;
+  },
+  toKg: (value: number) => {
+    return value;
+  },
+  fromKm: (km: number) => {
+    return km;
+  },
+  toKm: (value: number) => {
+    return value;
+  },
+  getDistanceUnit: () => {
+    return "";
+  },
+  getWeightUnit: () => {
+    return "";
   },
 };
 

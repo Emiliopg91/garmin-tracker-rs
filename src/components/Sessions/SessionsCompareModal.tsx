@@ -4,7 +4,6 @@ import { Dialog, DialogContent, DialogTitle, IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { TimeUtils } from "@/utils/TimeUtils";
 import { SessionFrontDetails } from "@/utils/SessionUtils";
-import { UnitUtils } from "@/utils/UnitUtils";
 
 type Props = {
   sessions: SessionFrontDetails[];
@@ -12,7 +11,7 @@ type Props = {
 };
 
 export function SessionsCompareModal({ sessions, onClose }: Props) {
-  const { translate, settings } = useContext(I18nSettingsContext);
+  const { translate, fromKg, getWeightUnit } = useContext(I18nSettingsContext);
   const [exercises, setExercises] = useState<string[]>([]);
 
   useEffect(() => {
@@ -101,18 +100,10 @@ export function SessionsCompareModal({ sessions, onClose }: Props) {
             <tr>
               <td>{translate("volume")}</td>
               <td>
-                {UnitUtils.fromKg(
-                  sessions[0].volume,
-                  settings.weight_unit,
-                ).toFixed(1)}{" "}
-                {UnitUtils.getUnit(settings.weight_unit)}
+                {fromKg(sessions[0].volume).toFixed(1)} {getWeightUnit()}
               </td>
               <td>
-                {UnitUtils.fromKg(
-                  sessions[1].volume,
-                  settings.weight_unit,
-                ).toFixed(1)}{" "}
-                {UnitUtils.getUnit(settings.weight_unit)}
+                {fromKg(sessions[1].volume).toFixed(1)} {getWeightUnit()}
               </td>
             </tr>
             <tr>
@@ -155,12 +146,9 @@ export function SessionsCompareModal({ sessions, onClose }: Props) {
                         <span key={`session-${idx}-set-${exercise}-${idx2}`}>
                           {set.reps +
                             " x " +
-                            UnitUtils.fromKg(
-                              set.weight,
-                              settings.weight_unit,
-                            ).toFixed(1) +
+                            fromKg(set.weight).toFixed(1) +
                             " " +
-                            UnitUtils.getUnit(settings.weight_unit)}
+                            getWeightUnit()}
                         </span>
                         <br />
                       </>

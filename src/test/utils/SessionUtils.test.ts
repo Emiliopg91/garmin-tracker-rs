@@ -4,8 +4,11 @@ import {
   SessionDetails,
   SessionListItem,
   SessionSet,
-  WeightUnit,
 } from "@/utils/backend/models";
+import { KG_TO_LB } from "@/context/I18nSettingsContext";
+
+const kgToKg = (kg: number) => kg;
+const kgToLb = (kg: number) => kg * KG_TO_LB;
 
 /** Degrees expressed in Garmin semicircles. */
 const semicircles = (degrees: number) => (degrees * 2 ** 31) / 180;
@@ -55,7 +58,7 @@ describe("SessionUtils.detailsFromBackend - sets", () => {
           makeSet({ idx: 2, ex_cat: 1, ex_id: 2, reps: 5, weight: 70 }),
         ],
       }),
-      WeightUnit.Kilograms,
+      kgToKg,
     );
 
     expect(details.volume).toBe(10 * 60 + 8 * 40 + 5 * 70);
@@ -67,7 +70,7 @@ describe("SessionUtils.detailsFromBackend - sets", () => {
   it("converts weights to the selected unit rounded to one decimal", () => {
     const details = SessionUtils.detailsFromBackend(
       makeDetails({ sets: [makeSet({ reps: 2, weight: 100 })] }),
-      WeightUnit.Pounds,
+      kgToLb,
     );
 
     expect(details.sets[0].weight).toBe(220.5);
@@ -77,17 +80,14 @@ describe("SessionUtils.detailsFromBackend - sets", () => {
   it("rounds kilograms to one decimal", () => {
     const details = SessionUtils.detailsFromBackend(
       makeDetails({ sets: [makeSet({ weight: 62.46 })] }),
-      WeightUnit.Kilograms,
+      kgToKg,
     );
 
     expect(details.sets[0].weight).toBe(62.5);
   });
 
   it("leaves defaults when there are no sets", () => {
-    const details = SessionUtils.detailsFromBackend(
-      makeDetails(),
-      WeightUnit.Kilograms,
-    );
+    const details = SessionUtils.detailsFromBackend(makeDetails(), kgToKg);
 
     expect(details.volume).toBe(0);
     expect(details.exercises).toEqual([]);
@@ -108,7 +108,7 @@ describe("SessionUtils.detailsFromBackend - laps", () => {
           { idx: 1, start_latitude: null, start_longitude: null },
         ],
       }),
-      WeightUnit.Kilograms,
+      kgToKg,
     );
 
     expect(details.laps[0].start_latitude).toBeCloseTo(40, 10);
@@ -131,7 +131,7 @@ describe("SessionUtils.detailsFromBackend - GPS", () => {
           null,
         ],
       }),
-      WeightUnit.Kilograms,
+      kgToKg,
     );
 
     expect(details.start_point[0]).toBeCloseTo(40, 10);
@@ -150,7 +150,7 @@ describe("SessionUtils.detailsFromBackend - GPS", () => {
           [semicircles(1), semicircles(0)],
         ],
       }),
-      WeightUnit.Kilograms,
+      kgToKg,
     );
 
     expect(details.distance).toBe(5);
@@ -166,7 +166,7 @@ describe("SessionUtils.detailsFromBackend - GPS", () => {
           [semicircles(2), semicircles(0)],
         ],
       }),
-      WeightUnit.Kilograms,
+      kgToKg,
     );
 
     expect(details.gps_segments).toHaveLength(2);
@@ -190,7 +190,7 @@ describe("SessionUtils.detailsFromBackend - GPS", () => {
         ],
         speeds: [1, 2, 3],
       }),
-      WeightUnit.Kilograms,
+      kgToKg,
     );
 
     expect(details.gps_segments.map((s) => s.color)).toEqual([
@@ -208,7 +208,7 @@ describe("SessionUtils.detailsFromBackend - heart rate", () => {
         total_elapsed_time: 100,
         heart_rates: [100, 150, 180, null],
       }),
-      WeightUnit.Kilograms,
+      kgToKg,
     );
 
     // 100 & missing -> Z1, 150 (79%) -> Z3, 180 (95%) -> Z5
@@ -218,7 +218,7 @@ describe("SessionUtils.detailsFromBackend - heart rate", () => {
   it("uses the observed max HR when it is above 189", () => {
     const details = SessionUtils.detailsFromBackend(
       makeDetails({ total_elapsed_time: 20, heart_rates: [200, 100] }),
-      WeightUnit.Kilograms,
+      kgToKg,
     );
 
     expect(details.zones_times).toEqual([10, 0, 0, 0, 10]);
@@ -231,7 +231,7 @@ describe("SessionUtils.detailsFromBackend - heart rate", () => {
         total_elapsed_time: 10,
         heart_rates: [100, 120, 150, 160],
       }),
-      WeightUnit.Kilograms,
+      kgToKg,
     );
 
     // Each zone rounds 2.5 up to 3, so Z1 absorbs the -2 difference
@@ -245,7 +245,7 @@ describe("SessionUtils.detailsFromBackend - heart rate", () => {
         total_elapsed_time: 4,
         heart_rates: [100, null, 150, 180],
       }),
-      WeightUnit.Kilograms,
+      kgToKg,
     );
 
     expect(details.hrRanges).toEqual([100, 143, 180]);
@@ -259,7 +259,7 @@ describe("SessionUtils.detailsFromBackend - heart rate", () => {
     (_: unknown, heart_rates: (number | null)[]) => {
       const details = SessionUtils.detailsFromBackend(
         makeDetails({ total_elapsed_time: 30, heart_rates }),
-        WeightUnit.Kilograms,
+        kgToKg,
       );
 
       expect(details.zones_times).toEqual([0, 0, 0, 0, 0]);
@@ -274,7 +274,7 @@ describe("SessionUtils.detailsFromBackend - heart rate", () => {
         total_elapsed_time: 5,
         heart_rates: [100, 125, 150, 165, 180],
       }),
-      WeightUnit.Kilograms,
+      kgToKg,
     );
 
     expect(details.hrBreathData).toEqual([
@@ -310,7 +310,7 @@ describe("SessionUtils.detailsFromBackend - input", () => {
     const back = backDetails();
     const snapshot = structuredClone(back);
 
-    SessionUtils.detailsFromBackend(back, WeightUnit.Pounds);
+    SessionUtils.detailsFromBackend(back, kgToLb);
 
     expect(back).toEqual(snapshot);
   });
@@ -318,8 +318,8 @@ describe("SessionUtils.detailsFromBackend - input", () => {
   it("gives the same result when called twice with the same details", () => {
     const back = backDetails();
 
-    const first = SessionUtils.detailsFromBackend(back, WeightUnit.Pounds);
-    const second = SessionUtils.detailsFromBackend(back, WeightUnit.Pounds);
+    const first = SessionUtils.detailsFromBackend(back, kgToLb);
+    const second = SessionUtils.detailsFromBackend(back, kgToLb);
 
     expect(second).toEqual(first);
   });

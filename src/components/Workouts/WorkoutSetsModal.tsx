@@ -23,7 +23,7 @@ type Props = {
 
 export function WorkoutSetsModal({ workout, isEdit, onClose }: Props) {
   const { startLoading, finishLoading } = useContext(LoadingContext);
-  const { translate, settings } = useContext(I18nSettingsContext);
+  const { translate, fromKg, toKg } = useContext(I18nSettingsContext);
 
   useEffect(() => {
     setName(workout.name);
@@ -31,7 +31,7 @@ export function WorkoutSetsModal({ workout, isEdit, onClose }: Props) {
 
   const [name, setName] = useState(workout?.name);
   const [steps, setSteps] = useState(
-    WorkoutUtils.parseWorkoutSteps(workout!.steps, settings.weight_unit),
+    WorkoutUtils.parseWorkoutSteps(workout!.steps, fromKg),
   );
   const valid = name.length > 0 && WorkoutUtils.validateSteps(steps);
 
@@ -61,7 +61,7 @@ export function WorkoutSetsModal({ workout, isEdit, onClose }: Props) {
       const newWorkout: Workout = {
         enabled: workout.enabled,
         name,
-        steps: WorkoutUtils.toWorkoutSteps(steps, name, settings.weight_unit),
+        steps: WorkoutUtils.toWorkoutSteps(steps, name, toKg),
       };
       startLoading();
       BackendClient.saveWorkout(newWorkout)

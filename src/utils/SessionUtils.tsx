@@ -1,13 +1,9 @@
 import { Marker } from "react-leaflet";
-import {
-  SessionDetails,
-  SessionListItem,
-  SessionSet,
-  WeightUnit,
-} from "./backend/models";
-import { UnitUtils } from "./UnitUtils";
+import { SessionDetails, SessionListItem, SessionSet } from "./backend/models";
 import L from "leaflet";
 import { TimeUtils } from "./TimeUtils";
+
+const SEMICIRCLE_TO_DEGREES = 180.0 / 2 ** 31;
 
 export interface WorkoutLoad {
   date: number;
@@ -42,7 +38,7 @@ export interface SessionFrontDetails extends SessionDetails {
 export class SessionUtils {
   public static detailsFromBackend(
     backDetails: SessionDetails,
-    weightUnit: WeightUnit,
+    fromKg: (weight: number) => number,
   ): SessionFrontDetails {
     // Deep copy: the handlers below convert sets, coordinates and laps in place
     const details: SessionFrontDetails = {
@@ -60,7 +56,7 @@ export class SessionUtils {
       grouped_series: {},
     };
 
-    SessionUtils.handleSeries(details, weightUnit);
+    SessionUtils.handleSeries(details, fromKg);
     SessionUtils.handleAltitude(details);
     SessionUtils.handleLaps(details);
     SessionUtils.handleGpsCoordiates(details);
@@ -89,14 +85,12 @@ export class SessionUtils {
 
   private static handleSeries(
     details: SessionFrontDetails,
-    weightUnit: WeightUnit,
+    fromKg: (weight: number) => number,
   ) {
     if (details.sets) {
       details.sets.forEach((_, idx) => {
         const copy = { ...details.sets[idx] };
-        copy.weight = Number(
-          UnitUtils.fromKg(copy.weight, weightUnit).toFixed(1),
-        );
+        copy.weight = Number(fromKg(copy.weight).toFixed(1));
         details.sets[idx] = copy;
         details.volume += copy.reps * copy.weight;
 
@@ -131,9 +125,9 @@ export class SessionUtils {
       for (let i = 0; i < details.coordinates.length; i++) {
         if (details.coordinates[i]) {
           details.coordinates[i]![0] =
-            details.coordinates[i]![0] * UnitUtils.SEMICIRCLE_TO_DEGREES;
+            details.coordinates[i]![0] * SEMICIRCLE_TO_DEGREES;
           details.coordinates[i]![1] =
-            details.coordinates[i]![1] * UnitUtils.SEMICIRCLE_TO_DEGREES;
+            details.coordinates[i]![1] * SEMICIRCLE_TO_DEGREES;
           details.valid_points.push(details.coordinates[i]!);
         }
       }
@@ -207,10 +201,9 @@ export class SessionUtils {
             details.laps[i].start_longitude
           ) {
             details.laps[i].start_latitude =
-              details.laps[i].start_latitude! * UnitUtils.SEMICIRCLE_TO_DEGREES;
+              details.laps[i].start_latitude! * SEMICIRCLE_TO_DEGREES;
             details.laps[i].start_longitude =
-              details.laps[i].start_longitude! *
-              UnitUtils.SEMICIRCLE_TO_DEGREES;
+              details.laps[i].start_longitude! * SEMICIRCLE_TO_DEGREES;
           }
         }
       }

@@ -1,7 +1,6 @@
 import { I18nSettingsContext } from "@/context/I18nSettingsContext";
 import { ExerciseListItem } from "@/utils/backend/models";
 import { TimeUtils } from "@/utils/TimeUtils";
-import { UnitUtils } from "@/utils/UnitUtils";
 import { useContext } from "react";
 
 type Props = {
@@ -10,7 +9,7 @@ type Props = {
 };
 
 export function ExerciseRow({ exercise, onSelect }: Props) {
-  const { translate, settings } = useContext(I18nSettingsContext);
+  const { translate, fromKg, getWeightUnit } = useContext(I18nSettingsContext);
 
   return (
     <tr
@@ -23,15 +22,11 @@ export function ExerciseRow({ exercise, onSelect }: Props) {
       <td>
         {exercise.reps +
           "x" +
-          UnitUtils.fromKg(exercise.weight, settings.weight_unit).toFixed(1) +
+          fromKg(exercise.weight).toFixed(1) +
           " " +
-          UnitUtils.getUnit(settings.weight_unit)}
+          getWeightUnit()}
       </td>
-      <td>
-        {UnitUtils.fromKg(exercise.e1rm, settings.weight_unit) +
-          " " +
-          UnitUtils.getUnit(settings.weight_unit)}
-      </td>
+      <td>{fromKg(exercise.e1rm) + " " + getWeightUnit()}</td>
       <td>{TimeUtils.formatDate(exercise.date)}</td>
     </tr>
   );

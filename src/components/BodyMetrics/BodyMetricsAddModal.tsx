@@ -1,7 +1,6 @@
 import { I18nSettingsContext } from "@/context/I18nSettingsContext";
 import { BackendClient } from "@/utils/backend/client";
 import { BodyMetricListItem } from "@/utils/backend/models";
-import { UnitUtils } from "@/utils/UnitUtils";
 import { useContext, useState } from "react";
 import {
   Button,
@@ -31,7 +30,7 @@ type BodyMetricsListItemForm = Omit<
 };
 
 export function BodyMetricsAddModal({ latest, onClose }: Props) {
-  const { translate, settings } = useContext(I18nSettingsContext);
+  const { translate, toKg } = useContext(I18nSettingsContext);
   const [data, setData] = useState<BodyMetricsListItemForm>(
     latest
       ? {
@@ -74,12 +73,9 @@ export function BodyMetricsAddModal({ latest, onClose }: Props) {
   const onSave = () => {
     BackendClient.addBodyMeasures({
       date: Math.floor(data.date.getTime() / 1000),
-      weight: UnitUtils.toKg(parseFloat(data.weight), settings.weight_unit),
+      weight: toKg(parseFloat(data.weight)),
       fat_ratio: parseFloat(data.fat_ratio),
-      lean_mass: UnitUtils.toKg(
-        parseFloat(data.lean_mass),
-        settings.weight_unit,
-      ),
+      lean_mass: toKg(parseFloat(data.lean_mass)),
       water_ratio: parseFloat(data.water_ratio),
     }).then(() => {
       onClose();

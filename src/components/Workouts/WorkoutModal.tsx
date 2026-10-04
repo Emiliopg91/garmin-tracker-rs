@@ -1,7 +1,6 @@
 import { I18nSettingsContext } from "@/context/I18nSettingsContext";
 import { Languages, WorkoutDetails } from "@/utils/backend/models";
 import { TimeUtils } from "@/utils/TimeUtils";
-import { UnitUtils } from "@/utils/UnitUtils";
 import { useContext, useState } from "react";
 import {
   Dialog,
@@ -39,7 +38,8 @@ export function WorkoutModal({
   onOpenEdit,
 }: Props) {
   const { startLoading, finishLoading } = useContext(LoadingContext);
-  const { translate, settings } = useContext(I18nSettingsContext);
+  const { translate, settings, fromKg, getWeightUnit } =
+    useContext(I18nSettingsContext);
   const [enabled, setEnabled] = useState(workout.enabled);
 
   const toggleEnabled = () => {
@@ -97,11 +97,8 @@ export function WorkoutModal({
                       <tr>
                         <td>{translate("average_volume")}:</td>
                         <td>
-                          {UnitUtils.fromKg(
-                            workout.avg_volume,
-                            settings.weight_unit,
-                          ).toFixed(1)}{" "}
-                          {UnitUtils.getUnit(settings.weight_unit)}
+                          {fromKg(workout.avg_volume).toFixed(1)}{" "}
+                          {getWeightUnit()}
                         </td>
                       </tr>
                     )}
@@ -178,11 +175,7 @@ export function WorkoutModal({
                     </td>
                     {workout.avg_volume > 0 && (
                       <td className="text-center">
-                        {UnitUtils.fromKg(
-                          session.volume,
-                          settings.weight_unit,
-                        ).toFixed(1)}{" "}
-                        {UnitUtils.getUnit(settings.weight_unit)}
+                        {fromKg(session.volume).toFixed(1)} {getWeightUnit()}
                         {idx < workout.sessions.length - 1 &&
                           " (" +
                             new Intl.NumberFormat(

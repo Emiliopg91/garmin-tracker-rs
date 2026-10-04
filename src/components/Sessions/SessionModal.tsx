@@ -12,7 +12,6 @@ import {
   TextareaAutosize,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import { UnitUtils } from "@/utils/UnitUtils";
 import { SessionFrontDetails } from "@/utils/SessionUtils";
 import { SessionMap } from "./helpers/SessionMap";
 import { SessionDetailsTable } from "./helpers/SessionDetailsTable";
@@ -28,7 +27,7 @@ type Props = {
 
 export function SessionModal({ session, onClose, onUpdate }: Props) {
   const { startLoading, finishLoading } = useContext(LoadingContext);
-  const { translate, settings } = useContext(I18nSettingsContext);
+  const { translate, toKg } = useContext(I18nSettingsContext);
   const [originalSession] = useState(session);
   const [localSession, setLocalSession] = useState({ ...session });
   const [changed, setChanged] = useState(false);
@@ -94,7 +93,7 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
       ) {
         update.sets.push({
           ...serie,
-          weight: UnitUtils.toKg(serie.weight, settings.weight_unit),
+          weight: toKg(serie.weight),
         });
       }
     });

@@ -1,7 +1,6 @@
 import { I18nSettingsContext } from "@/context/I18nSettingsContext";
-import { BodyMetricListItem, WeightUnit } from "@/utils/backend/models";
+import { BodyMetricListItem } from "@/utils/backend/models";
 import { TimeUtils } from "@/utils/TimeUtils";
-import { UnitUtils } from "@/utils/UnitUtils";
 import { useContext, useEffect, useState } from "react";
 import {
   CartesianGrid,
@@ -22,16 +21,9 @@ type ChartDataType = {
   weightAvg7: number;
 }[];
 
-function ChartTooltip({
-  active,
-  payload,
-  label,
-  translate,
-  weightUnit,
-}: TooltipContentProps & {
-  translate: (key: string) => string;
-  weightUnit: WeightUnit;
-}) {
+function ChartTooltip({ active, payload, label }: TooltipContentProps) {
+  const { translate, fromKg, getWeightUnit } = useContext(I18nSettingsContext);
+
   if (!active || !payload || payload.length === 0 || label == null) {
     return null;
   }
@@ -45,14 +37,12 @@ function ChartTooltip({
         {translate("fat_ratio")}: {data.fatAvg7.toFixed(1)}%
       </div>
       <div>
-        {translate("weight")}:{" "}
-        {UnitUtils.fromKg(data.weightAvg7, weightUnit).toFixed(1)}{" "}
-        {UnitUtils.getUnit(weightUnit)}
+        {translate("weight")}: {fromKg(data.weightAvg7).toFixed(1)}{" "}
+        {getWeightUnit()}
       </div>
       <div>
-        {translate("lean_mass")}:{" "}
-        {UnitUtils.fromKg(data.leanAvg7, weightUnit).toFixed(1)}{" "}
-        {UnitUtils.getUnit(weightUnit)}
+        {translate("lean_mass")}: {fromKg(data.leanAvg7).toFixed(1)}{" "}
+        {getWeightUnit()}
       </div>
     </div>
   );
@@ -72,7 +62,7 @@ type Props = {
 };
 
 export function BodyMetricsChart({ metrics }: Props) {
-  const { translate, settings } = useContext(I18nSettingsContext);
+  const { translate } = useContext(I18nSettingsContext);
 
   const [chartData, setChartData] = useState<ChartDataType>([]);
 
@@ -280,15 +270,7 @@ export function BodyMetricsChart({ metrics }: Props) {
               activeDot={false}
               isAnimationActive={false}
             />
-            <Tooltip
-              content={(props) => (
-                <ChartTooltip
-                  {...props}
-                  translate={translate}
-                  weightUnit={settings.weight_unit}
-                />
-              )}
-            />
+            <Tooltip content={(props) => <ChartTooltip {...props} />} />
             <Legend />
           </LineChart>
         </ResponsiveContainer>

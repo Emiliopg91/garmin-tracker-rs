@@ -1,5 +1,4 @@
-import { StepType, WeightUnit, WorkoutStep } from "./backend/models";
-import { UnitUtils } from "./UnitUtils";
+import { StepType, WorkoutStep } from "./backend/models";
 
 export type LeafStep = Omit<WorkoutStep, "begin_idx" | "idx" | "workout">;
 
@@ -17,7 +16,7 @@ export class WorkoutUtils {
 
   public static parseWorkoutSteps(
     steps: WorkoutStep[],
-    weightUnit: WeightUnit,
+    fromKg: (kg: number) => number,
   ): WorkoutStepData[] {
     const elements: WorkoutStepData[] = [];
 
@@ -30,7 +29,7 @@ export class WorkoutUtils {
         const laps = elem.reps!;
         const wrapped = localSteps
           .filter((ws) => ws.idx >= elem.begin_idx! && ws.idx < elem.idx)
-          .map((e) => WorkoutUtils.workoutStepToLeafStep(e, weightUnit));
+          .map((e) => WorkoutUtils.workoutStepToLeafStep(e, fromKg));
         const element: StepGroup = {
           laps,
           wrapped,
@@ -38,7 +37,7 @@ export class WorkoutUtils {
         elements.push(element);
         localSteps = localSteps.filter((ws) => ws.idx < elem.begin_idx!);
       } else {
-        elements.push(WorkoutUtils.workoutStepToLeafStep(elem, weightUnit));
+        elements.push(WorkoutUtils.workoutStepToLeafStep(elem, fromKg));
         localSteps.pop();
       }
     }
@@ -48,7 +47,7 @@ export class WorkoutUtils {
 
   private static workoutStepToLeafStep(
     step: WorkoutStep,
-    weightUnit: WeightUnit,
+    fromKg: (kg: number) => number,
   ): LeafStep {
     if (step.kind == StepType.Rest) {
       return {
@@ -74,7 +73,7 @@ export class WorkoutUtils {
         ex_id: step.ex_id,
         weight:
           step.weight != null
-            ? Math.round(UnitUtils.fromKg(step.weight, weightUnit) * 10) / 10
+            ? Math.round(fromKg(step.weight) * 10) / 10
             : null,
       };
     }
@@ -112,7 +111,7 @@ export class WorkoutUtils {
   public static toWorkoutSteps(
     steps: WorkoutStepData[],
     workout: string,
-    weightUnit: WeightUnit,
+    toKg: (value: number) => number,
   ): WorkoutStep[] {
     const result: WorkoutStep[] = [];
 
@@ -121,12 +120,7 @@ export class WorkoutUtils {
         const begin = result.length;
         for (const leaf of step.wrapped) {
           result.push(
-            WorkoutUtils.leafToWorkoutStep(
-              leaf,
-              workout,
-              result.length,
-              weightUnit,
-            ),
+            WorkoutUtils.leafToWorkoutStep(leaf, workout, result.length, toKg),
           );
         }
         result.push({
@@ -142,12 +136,7 @@ export class WorkoutUtils {
         });
       } else {
         result.push(
-          WorkoutUtils.leafToWorkoutStep(
-            step,
-            workout,
-            result.length,
-            weightUnit,
-          ),
+          WorkoutUtils.leafToWorkoutStep(step, workout, result.length, toKg),
         );
       }
     }
@@ -159,7 +148,7 @@ export class WorkoutUtils {
     leaf: LeafStep,
     workout: string,
     idx: number,
-    weightUnit: WeightUnit,
+    toKg: (value: number) => number,
   ): WorkoutStep {
     if (leaf.kind == StepType.Rest) {
       return {
@@ -183,9 +172,7 @@ export class WorkoutUtils {
         ex_id: leaf.ex_id,
         reps: leaf.reps,
         weight:
-          leaf.weight != null
-            ? Math.round(UnitUtils.toKg(leaf.weight, weightUnit) * 10) / 10
-            : null,
+          leaf.weight != null ? Math.round(toKg(leaf.weight) * 10) / 10 : null,
         begin_idx: null,
       };
     }

@@ -13,7 +13,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { JSX } from "react/jsx-runtime";
 import { AppContext, ExerciseOption } from "./AppContext";
 import { LoadingContext } from "./LoadingContext";
-import { I18nSettingsContext } from "./I18nSettingsContext";
+import { I18nSettingsContext, KG_TO_LB, KM_TO_MI } from "./I18nSettingsContext";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { enUS, es, type Locale } from "date-fns/locale";
@@ -67,6 +67,72 @@ export function AppProvider({
   }, []);
 
   const loading = loadingCount > 0;
+
+  const toKm = useCallback(
+    (value: number) => {
+      switch (settings.distance_unit) {
+        case DistanceUnit.Miles:
+          return value / KM_TO_MI;
+        default:
+          return value;
+      }
+    },
+    [settings],
+  );
+
+  const fromKm = useCallback(
+    (km: number) => {
+      switch (settings.distance_unit) {
+        case DistanceUnit.Miles:
+          return km * KM_TO_MI;
+        default:
+          return km;
+      }
+    },
+    [settings],
+  );
+
+  const toKg = useCallback(
+    (value: number) => {
+      switch (settings.weight_unit) {
+        case WeightUnit.Pounds:
+          return value / KG_TO_LB;
+        default:
+          return value;
+      }
+    },
+    [settings],
+  );
+
+  const fromKg = useCallback(
+    (kg: number) => {
+      switch (settings.weight_unit) {
+        case WeightUnit.Pounds:
+          return kg * KG_TO_LB;
+        default:
+          return kg;
+      }
+    },
+    [settings],
+  );
+
+  const getDistanceUnit = useCallback(() => {
+    switch (settings.distance_unit) {
+      case DistanceUnit.Kilometers:
+        return "Km";
+      case DistanceUnit.Miles:
+        return "Mi";
+    }
+  }, [settings]);
+
+  const getWeightUnit = useCallback(() => {
+    switch (settings.weight_unit) {
+      case WeightUnit.Kilograms:
+        return "Kg";
+      case WeightUnit.Pounds:
+        return "Lb";
+    }
+  }, [settings]);
 
   const translate = useCallback(
     (key: string, replacements?: string[]) => {
@@ -224,8 +290,28 @@ export function AppProvider({
   );
 
   const i18nSettingsValue = useMemo(
-    () => ({ settings, translate, refreshTranslations }),
-    [settings, translate, refreshTranslations],
+    () => ({
+      settings,
+      translate,
+      refreshTranslations,
+      toKg,
+      fromKg,
+      toKm,
+      fromKm,
+      getDistanceUnit,
+      getWeightUnit,
+    }),
+    [
+      settings,
+      translate,
+      refreshTranslations,
+      toKg,
+      fromKg,
+      toKm,
+      fromKm,
+      getDistanceUnit,
+      getWeightUnit,
+    ],
   );
 
   return (

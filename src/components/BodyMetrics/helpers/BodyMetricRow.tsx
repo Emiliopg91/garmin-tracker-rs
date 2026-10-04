@@ -1,7 +1,6 @@
 import { I18nSettingsContext } from "@/context/I18nSettingsContext";
 import { BodyMetricListItem } from "@/utils/backend/models";
 import { TimeUtils } from "@/utils/TimeUtils";
-import { UnitUtils } from "@/utils/UnitUtils";
 import { useContext } from "react";
 
 type Props = {
@@ -17,7 +16,7 @@ export function BodyMetricRow({
   onSelect,
   onToggleCompare,
 }: Props) {
-  const { settings } = useContext(I18nSettingsContext);
+  const { fromKg, getWeightUnit } = useContext(I18nSettingsContext);
 
   return (
     <tr
@@ -30,13 +29,11 @@ export function BodyMetricRow({
     >
       <td>{TimeUtils.formatDate(measure.date)}</td>
       <td>
-        {UnitUtils.fromKg(measure.weight, settings.weight_unit).toFixed(1)}{" "}
-        {UnitUtils.getUnit(settings.weight_unit)}
+        {fromKg(measure.weight).toFixed(1)} {getWeightUnit()}
       </td>
       <td>{measure.fat_ratio.toFixed(1)}%</td>
       <td>
-        {UnitUtils.fromKg(measure.lean_mass, settings.weight_unit).toFixed(1)}{" "}
-        {UnitUtils.getUnit(settings.weight_unit)}
+        {fromKg(measure.lean_mass).toFixed(1)} {getWeightUnit()}
       </td>
       <td>{measure.water_ratio.toFixed(1)}%</td>
     </tr>

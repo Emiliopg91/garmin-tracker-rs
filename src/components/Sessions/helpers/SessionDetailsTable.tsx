@@ -1,6 +1,5 @@
 import { I18nSettingsContext } from "@/context/I18nSettingsContext";
 import { TimeUtils } from "@/utils/TimeUtils";
-import { UnitUtils } from "@/utils/UnitUtils";
 import { SessionFrontDetails } from "@/utils/SessionUtils";
 import { useContext } from "react";
 
@@ -9,7 +8,8 @@ type Props = {
 };
 
 export function SessionDetailsTable({ session }: Props) {
-  const { translate, settings } = useContext(I18nSettingsContext);
+  const { translate, toKm, fromKm, fromKg, getDistanceUnit, getWeightUnit } =
+    useContext(I18nSettingsContext);
 
   return (
     <table id="session-details-table">
@@ -46,28 +46,20 @@ export function SessionDetailsTable({ session }: Props) {
             <tr>
               <td>{translate("distance")}:</td>
               <td>
-                {UnitUtils.fromKm(
-                  session.distance,
-                  settings.distance_unit,
-                ).toFixed(2)}{" "}
-                {UnitUtils.getUnit(settings.distance_unit)}
+                {fromKm(session.distance).toFixed(2)} {getDistanceUnit()}
               </td>
             </tr>
             <tr>
               <td>{translate("speed")}:</td>
               <td>
-                {UnitUtils.fromKm(
+                {fromKm(
                   session.distance / (session.total_elapsed_time / 3600),
-                  settings.distance_unit,
                 ).toFixed(2)}{" "}
-                {UnitUtils.getUnit(settings.distance_unit)}/h (
+                {getDistanceUnit()}/h (
                 {TimeUtils.formatDuration(
-                  UnitUtils.toKm(
-                    session.total_elapsed_time / session.distance,
-                    settings.distance_unit,
-                  ),
+                  toKm(session.total_elapsed_time / session.distance),
                 )}{" "}
-                min/{UnitUtils.getUnit(settings.distance_unit)}){" "}
+                min/{getDistanceUnit()}){" "}
               </td>
             </tr>
           </>
@@ -86,10 +78,7 @@ export function SessionDetailsTable({ session }: Props) {
           <tr>
             <td>{translate("volume")}:</td>
             <td>
-              {UnitUtils.fromKg(session.volume, settings.weight_unit).toFixed(
-                1,
-              )}{" "}
-              {UnitUtils.getUnit(settings.weight_unit)}
+              {fromKg(session.volume).toFixed(1)} {getWeightUnit()}
             </td>
           </tr>
         )}

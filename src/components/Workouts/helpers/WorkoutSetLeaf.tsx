@@ -17,7 +17,6 @@ import { useContext, useId, useState } from "react";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import ClearIcon from "@mui/icons-material/Clear";
-import { UnitUtils } from "@/utils/UnitUtils";
 import { AppContext, ExerciseOption } from "@/context/AppContext";
 
 type Props = {
@@ -43,7 +42,7 @@ export function WorkoutSetLeaf({
   swapPosition,
   onChange,
 }: Props) {
-  const { translate, settings } = useContext(I18nSettingsContext);
+  const { translate, getWeightUnit } = useContext(I18nSettingsContext);
   const { exerciseCatalog } = useContext(AppContext);
   const typeLabelId = useId();
   const limitLabelId = useId();
@@ -241,12 +240,7 @@ export function WorkoutSetLeaf({
 
       {isExercise && (
         <TextField
-          label={
-            translate("weight") +
-            " (" +
-            UnitUtils.getUnit(settings.weight_unit) +
-            ")"
-          }
+          label={translate("weight") + " (" + getWeightUnit() + ")"}
           type="number"
           size="small"
           sx={{ width: 100 }}

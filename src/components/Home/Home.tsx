@@ -28,7 +28,7 @@ import { WorkoutSetsModal } from "../Workouts/WorkoutSetsModal";
 export function Home() {
   const { availableDevices, sessionsVersion } = useContext(AppContext);
   const { startLoading, finishLoading } = useContext(LoadingContext);
-  const { translate, settings } = useContext(I18nSettingsContext);
+  const { translate, fromKg } = useContext(I18nSettingsContext);
   const adapter = usePickerAdapter();
 
   const [day, setDay] = useState(() => new Date().toDateString());
@@ -198,9 +198,7 @@ export function Home() {
     startLoading();
     BackendClient.getSessionDetails(timestamp)
       .then((details) => {
-        setSessionDetails(
-          SessionUtils.detailsFromBackend(details, settings.weight_unit),
-        );
+        setSessionDetails(SessionUtils.detailsFromBackend(details, fromKg));
       })
       .finally(() => {
         finishLoading();

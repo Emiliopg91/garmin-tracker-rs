@@ -15,7 +15,7 @@ import { SessionsCompareModal } from "./SessionsCompareModal";
 export function SessionsList() {
   const { sessionsVersion } = useContext(AppContext);
   const { startLoading, finishLoading } = useContext(LoadingContext);
-  const { translate, settings } = useContext(I18nSettingsContext);
+  const { translate, fromKg } = useContext(I18nSettingsContext);
   const [sessions, setSessions] = useState<SessionListItem[]>([]);
   const [sessionDetails, setSessionDetails] = useState<
     SessionFrontDetails | undefined
@@ -62,9 +62,7 @@ export function SessionsList() {
     startLoading();
     BackendClient.getSessionDetails(timestamp)
       .then((details) => {
-        setSessionDetails(
-          SessionUtils.detailsFromBackend(details, settings.weight_unit),
-        );
+        setSessionDetails(SessionUtils.detailsFromBackend(details, fromKg));
       })
       .finally(() => {
         finishLoading();
@@ -101,7 +99,7 @@ export function SessionsList() {
     for (const d of [...toCompare].sort((a, b) => a - b)) {
       const frontDetails = SessionUtils.detailsFromBackend(
         await BackendClient.getSessionDetails(d),
-        settings.weight_unit,
+        fromKg,
       );
       details.push(frontDetails);
     }

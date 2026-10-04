@@ -14,7 +14,7 @@ import { WorkoutUtils } from "@/utils/WorkoutUtils";
 export function WorkoutsList() {
   const { sessionsVersion } = useContext(AppContext);
   const { startLoading, finishLoading } = useContext(LoadingContext);
-  const { translate, settings } = useContext(I18nSettingsContext);
+  const { translate, toKg } = useContext(I18nSettingsContext);
 
   const [workouts, setWorkouts] = useState<WorkoutListItem[]>([]);
   const [workoutDetails, setWorkoutDetails] = useState<
@@ -39,7 +39,7 @@ export function WorkoutsList() {
         steps: WorkoutUtils.toWorkoutSteps(
           [structuredClone(WorkoutUtils.DEFAULT_GROUP)],
           "",
-          settings.weight_unit,
+          toKg,
         ),
       };
       setWorkoutEdit(workout);
