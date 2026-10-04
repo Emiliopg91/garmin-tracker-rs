@@ -190,4 +190,30 @@ export class WorkoutUtils {
       };
     }
   }
+
+  public static DEFAULT_REST: LeafStep = {
+    kind: StepType.Rest,
+    time: 120,
+    ex_cat: null,
+    ex_id: null,
+    reps: null,
+    weight: null,
+  };
+
+  public static DEFAULT_EXERCISE: LeafStep = {
+    kind: StepType.Exercise,
+    time: null,
+    ex_cat: null,
+    ex_id: null,
+    reps: 1,
+    weight: 0,
+  };
+
+  public static DEFAULT_GROUP: StepGroup = {
+    laps: 3,
+    wrapped: [
+      { ...WorkoutUtils.DEFAULT_EXERCISE },
+      { ...WorkoutUtils.DEFAULT_REST },
+    ],
+  };
 }

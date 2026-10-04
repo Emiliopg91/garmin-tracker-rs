@@ -530,11 +530,11 @@ move_down:
   en: Move down
   es: Bajar
 select_exercise:
-  en: Select exercise
-  es: Elige ejercicio
+  en: Exercise
+  es: Ejercicio
 step_limit_type:
-  en: Finish
-  es: Finalizar
+  en: Target
+  es: Objetivo
 limit_type_lap:
   en: Lap button
   es: Boton Lap
@@ -544,12 +544,6 @@ limit_type_reps:
 limit_type_time:
   en: Time
   es: Tiempo
-minutes:
-  en: Minutes
-  es: Minutos
-seconds:
-  en: Seconds
-  es: Segundos
 create_workout:
   en: New workout
   es: Nuevo entrenamiento

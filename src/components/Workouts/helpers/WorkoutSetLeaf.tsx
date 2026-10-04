@@ -47,7 +47,7 @@ export function WorkoutSetLeaf({
   const { exerciseCatalog } = useContext(AppContext);
   const typeLabelId = useId();
   const limitLabelId = useId();
-  const [secondsInput, setSecondsInput] = useState<string | null>(null);
+  const [timeInput, setTimeInput] = useState<string | null>(null);
   const [weightInput, setWeightInput] = useState<string | null>(null);
   const isExercise = leaf.kind == StepType.Exercise;
   const limit = isExercise
@@ -59,8 +59,10 @@ export function WorkoutSetLeaf({
     : leaf.time != null
       ? LimitType.Time
       : LimitType.Lap;
-  const minutes = leaf.time != null ? Math.floor(leaf.time / 60) : 0;
-  const seconds = leaf.time != null ? leaf.time % 60 : 0;
+  const formattedTime =
+    leaf.time != null
+      ? `${String(Math.floor(leaf.time / 60)).padStart(2, "0")}:${String(leaf.time % 60).padStart(2, "0")}`
+      : "";
   const selected =
     exerciseCatalog.find(
       (e) => e.ex_cat == leaf.ex_cat && e.ex_id == leaf.ex_id,
@@ -127,37 +129,21 @@ export function WorkoutSetLeaf({
     });
   };
 
-  const onMinutesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const minutes = parseInt(e.target.value) || 0;
+  // Accepts "MM:SS", "M:S" or bare minutes. Keystrokes that break the pattern
+  // (including seconds over 59) are dropped
+  const onTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (!/^\d{0,3}(:([0-5]\d?)?)?$/.test(value)) {
+      return;
+    }
+    setTimeInput(value);
+    const [minutes, seconds = 0] = value
+      .split(":")
+      .map((p) => parseInt(p) || 0);
     onChange({
       ...leaf,
       time: minutes * 60 + seconds,
     });
-  };
-
-  // Keep the raw value while typing; values over 59 are carried into minutes on blur
-  const onSecondsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSecondsInput(e.target.value);
-    const seconds = parseInt(e.target.value) || 0;
-    if (seconds < 60) {
-      onChange({
-        ...leaf,
-        time: minutes * 60 + seconds,
-      });
-    }
-  };
-
-  const onSecondsBlur = () => {
-    if (secondsInput != null) {
-      const seconds = parseInt(secondsInput) || 0;
-      if (seconds >= 60) {
-        onChange({
-          ...leaf,
-          time: minutes * 60 + seconds,
-        });
-      }
-      setSecondsInput(null);
-    }
   };
 
   const onExerciseChange = (opt: ExerciseOption) => {
@@ -237,42 +223,20 @@ export function WorkoutSetLeaf({
         />
       )}
       {limit == LimitType.Time && (
-        <>
-          <TextField
-            label={translate("minutes")}
-            type="number"
-            size="small"
-            sx={{ width: 100 }}
-            value={minutes ?? ""}
-            slotProps={{
-              htmlInput: {
-                className: "no-spinner",
-                inputMode: "decimal",
-                min: 0,
-                step: 1,
-              },
-            }}
-            onChange={onMinutesChange}
-          />
-          <TextField
-            label={translate("seconds")}
-            type="number"
-            size="small"
-            sx={{ width: 100 }}
-            value={secondsInput ?? seconds}
-            slotProps={{
-              htmlInput: {
-                className: "no-spinner",
-                inputMode: "decimal",
-                min: 0,
-                max: 59,
-                step: 1,
-              },
-            }}
-            onChange={onSecondsChange}
-            onBlur={onSecondsBlur}
-          />
-        </>
+        <TextField
+          label={translate("time") + " (MM:SS)"}
+          size="small"
+          sx={{ width: 120 }}
+          value={timeInput ?? formattedTime}
+          placeholder="00:00"
+          slotProps={{
+            htmlInput: {
+              inputMode: "numeric",
+            },
+          }}
+          onChange={onTimeChange}
+          onBlur={() => setTimeInput(null)}
+        />
       )}
 
       {isExercise && (
@@ -361,7 +325,7 @@ export function WorkoutSetLeaf({
           alignItems: "center",
           gap: 0.5,
           px: 2,
-          py: 1,
+          py: 2,
         }}
       >
         <Box sx={{ marginRight: "20px" }}>{typeSelect}</Box>

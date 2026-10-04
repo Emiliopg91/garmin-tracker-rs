@@ -1,4 +1,4 @@
-import { LeafStep, StepGroup } from "@/utils/WorkoutUtils";
+import { LeafStep, StepGroup, WorkoutUtils } from "@/utils/WorkoutUtils";
 import { WorkoutSetLeaf } from "./WorkoutSetLeaf";
 import {
   Box,
@@ -18,7 +18,6 @@ import { I18nSettingsContext } from "@/context/I18nSettingsContext";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import ClearIcon from "@mui/icons-material/Clear";
-import { StepType } from "@/utils/backend/models";
 
 type Props = {
   group: StepGroup;
@@ -65,17 +64,7 @@ export function WorkoutSetGroup({
   };
 
   const addStep = () => {
-    setLeafs([
-      ...leafs,
-      {
-        kind: StepType.Rest,
-        time: 60,
-        ex_cat: null,
-        ex_id: null,
-        reps: null,
-        weight: null,
-      },
-    ]);
+    setLeafs([...leafs, structuredClone(WorkoutUtils.DEFAULT_EXERCISE)]);
   };
 
   return (

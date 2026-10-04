@@ -1,4 +1,4 @@
-import { StepType, Workout, WorkoutDetails } from "@/utils/backend/models";
+import { Workout, WorkoutDetails } from "@/utils/backend/models";
 import {
   Button,
   Dialog,
@@ -9,12 +9,7 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { useContext, useEffect, useState } from "react";
-import {
-  LeafStep,
-  StepGroup,
-  WorkoutStepData,
-  WorkoutUtils,
-} from "@/utils/WorkoutUtils";
+import { WorkoutStepData, WorkoutUtils } from "@/utils/WorkoutUtils";
 import { WorkoutSetGroup } from "./helpers/WorkoutSetGroup";
 import { I18nSettingsContext } from "@/context/I18nSettingsContext";
 import { BackendClient } from "@/utils/backend/client";
@@ -38,6 +33,7 @@ export function WorkoutSetsModal({ workout, isEdit, onClose }: Props) {
   const [steps, setSteps] = useState(
     WorkoutUtils.parseWorkoutSteps(workout!.steps, settings.weight_unit),
   );
+  const valid = name.length > 0 && WorkoutUtils.validateSteps(steps);
 
   const swapPosition = (pos1: number, pos2: number) => {
     const tmp = steps[pos1];
@@ -52,19 +48,7 @@ export function WorkoutSetsModal({ workout, isEdit, onClose }: Props) {
   };
 
   const addGroup = () => {
-    const defaultLeaf: LeafStep = {
-      kind: StepType.Rest,
-      time: 120,
-      ex_cat: null,
-      ex_id: null,
-      reps: null,
-      weight: null,
-    };
-    const group: StepGroup = {
-      laps: 1,
-      wrapped: [defaultLeaf],
-    };
-    setSteps([...steps, group]);
+    setSteps([...steps, structuredClone(WorkoutUtils.DEFAULT_GROUP)]);
   };
 
   const deleteGroup = (i: number) => {
@@ -73,7 +57,7 @@ export function WorkoutSetsModal({ workout, isEdit, onClose }: Props) {
   };
 
   const saveWorkout = () => {
-    if (name.length > 0 && WorkoutUtils.validateSteps(steps)) {
+    if (valid) {
       const newWorkout: Workout = {
         enabled: workout.enabled,
         name,
@@ -146,7 +130,12 @@ export function WorkoutSetsModal({ workout, isEdit, onClose }: Props) {
           <Button variant="contained" onClick={addGroup}>
             {translate("add_set")}
           </Button>
-          <Button color="success" variant="contained" onClick={saveWorkout}>
+          <Button
+            color="success"
+            variant="contained"
+            onClick={saveWorkout}
+            disabled={!valid}
+          >
             {translate("save_workout")}
           </Button>
         </div>

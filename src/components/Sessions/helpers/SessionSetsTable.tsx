@@ -43,8 +43,8 @@ export function SessionSetsTable({
     <div className="session-sets-container">
       <table>
         <colgroup>
-          <col className="col-350" />
-          <col className="col-200" />
+          <col className="col-330" />
+          <col className="col-230" />
         </colgroup>
 
         <thead>
@@ -77,27 +77,37 @@ export function SessionSetsTable({
                     .join(" ")}
                 >
                   <TextField
-                    variant="standard"
+                    label={translate("repetitions")}
                     type="number"
+                    size="small"
                     value={serie.reps}
+                    sx={{ width: 100 }}
+                    style={{ marginTop: "5px" }}
                     slotProps={{
                       htmlInput: {
-                        className: "no-spinner session-sets-reps-input",
+                        className: "no-spinner",
                         min: 0,
                       },
                     }}
                     onChange={(e) => {
                       updateSerieReps(exercise, idx, e.target.value);
                     }}
-                  />{" "}
-                  x{" "}
+                  />
                   <TextField
-                    variant="standard"
+                    label={
+                      translate("weight") +
+                      " (" +
+                      UnitUtils.getUnit(settings.weight_unit) +
+                      ")"
+                    }
                     type="number"
+                    size="small"
+                    sx={{ width: 100, px: 1 }}
+                    style={{ marginTop: "5px" }}
                     value={serie.weight?.toString()}
                     slotProps={{
                       htmlInput: {
-                        className: "no-spinner session-sets-weight-input",
+                        className: "no-spinner",
                         min: 0,
                       },
                     }}
@@ -105,8 +115,12 @@ export function SessionSetsTable({
                       updateSerieWeight(exercise, idx, e.target.value);
                     }}
                   />
-                  {" " + UnitUtils.getUnit(settings.weight_unit) + " "}
-                  {serie.pr && <EmojiEventsIcon className="trophy-icon" />}
+                  {serie.pr && (
+                    <EmojiEventsIcon
+                      className="trophy-icon"
+                      style={{ marginTop: "15px" }}
+                    />
+                  )}
                 </td>
               </tr>
             )),
