@@ -1,6 +1,5 @@
 import { I18nSettingsContext } from "@/context/I18nSettingsContext";
 import { BodyMetricListItem } from "@/utils/backend/models";
-import { TimeUtils } from "@/utils/TimeUtils";
 import { useContext } from "react";
 
 type Props = {
@@ -16,7 +15,8 @@ export function BodyMetricRow({
   onSelect,
   onToggleCompare,
 }: Props) {
-  const { fromKg, getWeightUnit } = useContext(I18nSettingsContext);
+  const { fromKg, getWeightUnit, formatDate, formatNumber, formatPercent } =
+    useContext(I18nSettingsContext);
 
   return (
     <tr
@@ -27,15 +27,15 @@ export function BodyMetricRow({
       }}
       className={`clickable-row ${selectedForCompare ? "row-compare-selected" : ""}`}
     >
-      <td>{TimeUtils.formatDate(measure.date)}</td>
+      <td>{formatDate(measure.date)}</td>
       <td>
-        {fromKg(measure.weight).toFixed(1)} {getWeightUnit()}
+        {formatNumber(fromKg(measure.weight), 1)} {getWeightUnit()}
       </td>
-      <td>{measure.fat_ratio.toFixed(1)}%</td>
+      <td>{formatPercent(measure.fat_ratio / 100, 1)}</td>
       <td>
-        {fromKg(measure.lean_mass).toFixed(1)} {getWeightUnit()}
+        {formatNumber(fromKg(measure.lean_mass), 1)} {getWeightUnit()}
       </td>
-      <td>{measure.water_ratio.toFixed(1)}%</td>
+      <td>{formatPercent(measure.water_ratio / 100, 1)}</td>
     </tr>
   );
 }

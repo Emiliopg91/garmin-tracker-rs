@@ -1,6 +1,5 @@
 import { I18nSettingsContext } from "@/context/I18nSettingsContext";
 import { ExerciseDetails } from "@/utils/backend/models";
-import { TimeUtils } from "@/utils/TimeUtils";
 import { useContext } from "react";
 import { Dialog, DialogContent, DialogTitle, IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
@@ -12,7 +11,8 @@ type Props = {
 };
 
 export function ExerciseModal({ exercise, onClose }: Props) {
-  const { translate, fromKg, getWeightUnit } = useContext(I18nSettingsContext);
+  const { translate, fromKg, getWeightUnit, formatTimeDate, formatNumber } =
+    useContext(I18nSettingsContext);
 
   return (
     <Dialog open={true} onClose={onClose} fullWidth maxWidth="sm">
@@ -44,14 +44,14 @@ export function ExerciseModal({ exercise, onClose }: Props) {
               <td>
                 {exercise.reps +
                   "x" +
-                  fromKg(exercise.weight).toFixed(1) +
+                  formatNumber(fromKg(exercise.weight), 1) +
                   " " +
                   getWeightUnit()}
               </td>
             </tr>
             <tr>
               <td>{translate("record_date")}:</td>
-              <td>{TimeUtils.formatTimeDate(exercise.pr_date)}</td>
+              <td>{formatTimeDate(exercise.pr_date)}</td>
             </tr>
           </tbody>
         </table>
@@ -85,9 +85,7 @@ export function ExerciseModal({ exercise, onClose }: Props) {
                     >
                       {workout.split("\n")[0] +
                         " @ " +
-                        TimeUtils.formatTimeDate(
-                          parseInt(workout.split("\n")[1]),
-                        )}
+                        formatTimeDate(parseInt(workout.split("\n")[1]))}
                     </td>
                   )}
 
@@ -98,7 +96,7 @@ export function ExerciseModal({ exercise, onClose }: Props) {
                         : ""
                     }`}
                   >
-                    {serie.reps}x{fromKg(serie.weight).toFixed(1)}{" "}
+                    {serie.reps}x{formatNumber(fromKg(serie.weight), 1)}{" "}
                     {getWeightUnit()}
                   </td>
                 </tr>

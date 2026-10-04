@@ -1,6 +1,5 @@
 import { I18nSettingsContext } from "@/context/I18nSettingsContext";
-import { Languages, WorkoutDetails } from "@/utils/backend/models";
-import { TimeUtils } from "@/utils/TimeUtils";
+import { WorkoutDetails } from "@/utils/backend/models";
 import { useContext, useState } from "react";
 import {
   Dialog,
@@ -16,11 +15,6 @@ import { LoadingContext } from "@/context/LoadingContext";
 import { WorkoutVolumeChart } from "./helpers/WorkoutVolumeChart";
 import { SendWorkoutMenu } from "./helpers/SendWorkoutMenu";
 import EditIcon from "@mui/icons-material/Edit";
-
-const NUMBER_LOCALES: Record<Languages, string> = {
-  [Languages.Spanish]: "es-ES",
-  [Languages.English]: "en-US",
-};
 
 type Props = {
   workout: WorkoutDetails;
@@ -38,8 +32,15 @@ export function WorkoutModal({
   onOpenEdit,
 }: Props) {
   const { startLoading, finishLoading } = useContext(LoadingContext);
-  const { translate, settings, fromKg, getWeightUnit } =
-    useContext(I18nSettingsContext);
+  const {
+    translate,
+    fromKg,
+    getWeightUnit,
+    formatDuration,
+    formatTimeDate,
+    formatNumber,
+    formatPercent,
+  } = useContext(I18nSettingsContext);
   const [enabled, setEnabled] = useState(workout.enabled);
 
   const toggleEnabled = () => {
@@ -86,18 +87,18 @@ export function WorkoutModal({
                       <td>{translate("latest_session")}</td>
                       <td>
                         {workout.latest_session &&
-                          TimeUtils.formatTimeDate(workout.latest_session)}
+                          formatTimeDate(workout.latest_session)}
                       </td>
                     </tr>
                     <tr>
                       <td>{translate("average_time")}</td>
-                      <td>{TimeUtils.formatDuration(workout.avg_time)}</td>
+                      <td>{formatDuration(workout.avg_time)}</td>
                     </tr>
                     {workout.name.length > 0 && (
                       <tr>
                         <td>{translate("average_volume")}:</td>
                         <td>
-                          {fromKg(workout.avg_volume).toFixed(1)}{" "}
+                          {formatNumber(fromKg(workout.avg_volume), 1)}{" "}
                           {getWeightUnit()}
                         </td>
                       </tr>
@@ -168,28 +169,23 @@ export function WorkoutModal({
                 {workout.sessions.map((session, idx) => (
                   <tr key={idx} className="divider-bottom">
                     <td className="text-center">
-                      {TimeUtils.formatTimeDate(session.date)}
+                      {formatTimeDate(session.date)}
                     </td>
                     <td className="text-center">
-                      {TimeUtils.formatDuration(session.time)}
+                      {formatDuration(session.time)}
                     </td>
                     {workout.avg_volume > 0 && (
                       <td className="text-center">
-                        {fromKg(session.volume).toFixed(1)} {getWeightUnit()}
+                        {formatNumber(fromKg(session.volume), 1)}{" "}
+                        {getWeightUnit()}
                         {idx < workout.sessions.length - 1 &&
                           " (" +
-                            new Intl.NumberFormat(
-                              NUMBER_LOCALES[settings.language],
-                              {
-                                style: "percent",
-                                minimumFractionDigits: 2,
-                                maximumFractionDigits: 2,
-                                signDisplay: "always",
-                              },
-                            ).format(
+                            formatPercent(
                               (workout.sessions[idx].volume -
                                 workout.sessions[idx + 1].volume) /
                                 workout.sessions[idx + 1].volume,
+                              2,
+                              true,
                             ) +
                             ")"}
                       </td>

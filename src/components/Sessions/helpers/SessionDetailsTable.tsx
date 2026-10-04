@@ -1,5 +1,4 @@
 import { I18nSettingsContext } from "@/context/I18nSettingsContext";
-import { TimeUtils } from "@/utils/TimeUtils";
 import { SessionFrontDetails } from "@/utils/SessionUtils";
 import { useContext } from "react";
 
@@ -8,8 +7,17 @@ type Props = {
 };
 
 export function SessionDetailsTable({ session }: Props) {
-  const { translate, toKm, fromKm, fromKg, getDistanceUnit, getWeightUnit } =
-    useContext(I18nSettingsContext);
+  const {
+    translate,
+    toKm,
+    fromKm,
+    fromKg,
+    getDistanceUnit,
+    getWeightUnit,
+    formatDuration,
+    formatTimeDate,
+    formatNumber,
+  } = useContext(I18nSettingsContext);
 
   return (
     <table id="session-details-table">
@@ -21,14 +29,14 @@ export function SessionDetailsTable({ session }: Props) {
       <tbody>
         <tr>
           <td>{translate("date")}:</td>
-          <td>{TimeUtils.formatTimeDate(session.timestamp)}</td>
+          <td>{formatTimeDate(session.timestamp)}</td>
         </tr>
         <tr>
           <td>{translate("time")}:</td>
           <td>
             {(session.active_time > 0
-              ? TimeUtils.formatDuration(session.active_time) + " / "
-              : "") + TimeUtils.formatDuration(session.total_elapsed_time)}
+              ? formatDuration(session.active_time) + " / "
+              : "") + formatDuration(session.total_elapsed_time)}
           </td>
         </tr>
         <tr>
@@ -46,17 +54,20 @@ export function SessionDetailsTable({ session }: Props) {
             <tr>
               <td>{translate("distance")}:</td>
               <td>
-                {fromKm(session.distance).toFixed(2)} {getDistanceUnit()}
+                {formatNumber(fromKm(session.distance), 2)} {getDistanceUnit()}
               </td>
             </tr>
             <tr>
               <td>{translate("speed")}:</td>
               <td>
-                {fromKm(
-                  session.distance / (session.total_elapsed_time / 3600),
-                ).toFixed(2)}{" "}
+                {formatNumber(
+                  fromKm(
+                    session.distance / (session.total_elapsed_time / 3600),
+                  ),
+                  2,
+                )}{" "}
                 {getDistanceUnit()}/h (
-                {TimeUtils.formatDuration(
+                {formatDuration(
                   toKm(session.total_elapsed_time / session.distance),
                 )}{" "}
                 min/{getDistanceUnit()}){" "}
@@ -78,7 +89,7 @@ export function SessionDetailsTable({ session }: Props) {
           <tr>
             <td>{translate("volume")}:</td>
             <td>
-              {fromKg(session.volume).toFixed(1)} {getWeightUnit()}
+              {formatNumber(fromKg(session.volume), 1)} {getWeightUnit()}
             </td>
           </tr>
         )}

@@ -1,6 +1,5 @@
 import { I18nSettingsContext } from "@/context/I18nSettingsContext";
 import { WorkoutLoad } from "@/utils/SessionUtils";
-import { TimeUtils } from "@/utils/TimeUtils";
 import { memo, useContext } from "react";
 import {
   Area,
@@ -20,14 +19,10 @@ type Props = {
   minDate: number;
 };
 
-function WorkloadTooltip({
-  active,
-  payload,
-  label,
-  translate,
-}: TooltipContentProps & {
-  translate: (key: string) => string;
-}) {
+function WorkloadTooltip({ active, payload, label }: TooltipContentProps) {
+  const { translate, formatDate, formatNumber } =
+    useContext(I18nSettingsContext);
+
   if (!active || !payload || payload.length === 0 || label == null) {
     return null;
   }
@@ -35,16 +30,17 @@ function WorkloadTooltip({
   return (
     <div className="chart-tooltip">
       <div>
-        <b>{TimeUtils.formatDate(data.date / 1000)}</b>
+        <b>{formatDate(data.date / 1000)}</b>
       </div>
       <div>
-        {translate("upper_threshold")}: {(data.lower + data.upper).toFixed(0)}
+        {translate("upper_threshold")}:{" "}
+        {formatNumber(data.lower + data.upper, 0)}
       </div>
       <div>
-        {translate("workload")}: {data.current.toFixed(0)}
+        {translate("workload")}: {formatNumber(data.current, 0)}
       </div>
       <div>
-        {translate("lower_threshold")}: {data.lower.toFixed(0)}
+        {translate("lower_threshold")}: {formatNumber(data.lower, 0)}
       </div>
     </div>
   );
@@ -122,11 +118,7 @@ export const WorkloadChart = memo(function WorkloadChart({
             isAnimationActive={false}
             activeDot={false}
           />
-          <Tooltip
-            content={(props) => (
-              <WorkloadTooltip {...props} translate={translate} />
-            )}
-          />
+          <Tooltip content={(props) => <WorkloadTooltip {...props} />} />
           <Legend />
         </ComposedChart>
       </ResponsiveContainer>

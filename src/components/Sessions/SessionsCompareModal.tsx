@@ -2,7 +2,6 @@ import { I18nSettingsContext } from "@/context/I18nSettingsContext";
 import { useContext, useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogTitle, IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import { TimeUtils } from "@/utils/TimeUtils";
 import { SessionFrontDetails } from "@/utils/SessionUtils";
 
 type Props = {
@@ -11,7 +10,14 @@ type Props = {
 };
 
 export function SessionsCompareModal({ sessions, onClose }: Props) {
-  const { translate, fromKg, getWeightUnit } = useContext(I18nSettingsContext);
+  const {
+    translate,
+    fromKg,
+    getWeightUnit,
+    formatDuration,
+    formatTimeDate,
+    formatNumber,
+  } = useContext(I18nSettingsContext);
   const [exercises, setExercises] = useState<string[]>([]);
 
   useEffect(() => {
@@ -61,23 +67,23 @@ export function SessionsCompareModal({ sessions, onClose }: Props) {
             <tr>
               <td style={{ borderBottom: "1px solid white" }}></td>
               <td style={{ borderBottom: "1px solid white" }}>
-                <b>{TimeUtils.formatTimeDate(sessions[0].timestamp)}</b>
+                <b>{formatTimeDate(sessions[0].timestamp)}</b>
               </td>
               <td style={{ borderBottom: "1px solid white" }}>
-                <b>{TimeUtils.formatTimeDate(sessions[1].timestamp)}</b>
+                <b>{formatTimeDate(sessions[1].timestamp)}</b>
               </td>
             </tr>
             <tr>
               <td>{translate("time")}</td>
               <td>
-                {TimeUtils.formatDuration(sessions[0].active_time) +
+                {formatDuration(sessions[0].active_time) +
                   " / " +
-                  TimeUtils.formatDuration(sessions[0].total_elapsed_time)}
+                  formatDuration(sessions[0].total_elapsed_time)}
               </td>
               <td>
-                {TimeUtils.formatDuration(sessions[1].active_time) +
+                {formatDuration(sessions[1].active_time) +
                   " / " +
-                  TimeUtils.formatDuration(sessions[1].total_elapsed_time)}
+                  formatDuration(sessions[1].total_elapsed_time)}
               </td>
             </tr>
             <tr>
@@ -100,10 +106,10 @@ export function SessionsCompareModal({ sessions, onClose }: Props) {
             <tr>
               <td>{translate("volume")}</td>
               <td>
-                {fromKg(sessions[0].volume).toFixed(1)} {getWeightUnit()}
+                {formatNumber(fromKg(sessions[0].volume), 1)} {getWeightUnit()}
               </td>
               <td>
-                {fromKg(sessions[1].volume).toFixed(1)} {getWeightUnit()}
+                {formatNumber(fromKg(sessions[1].volume), 1)} {getWeightUnit()}
               </td>
             </tr>
             <tr>
@@ -146,7 +152,7 @@ export function SessionsCompareModal({ sessions, onClose }: Props) {
                         <span key={`session-${idx}-set-${exercise}-${idx2}`}>
                           {set.reps +
                             " x " +
-                            fromKg(set.weight).toFixed(1) +
+                            formatNumber(fromKg(set.weight), 1) +
                             " " +
                             getWeightUnit()}
                         </span>

@@ -24,6 +24,11 @@ const DATE_LOCALES: Record<Languages, Locale> = {
   [Languages.English]: enUS,
 };
 
+const NUMBER_LOCALES: Record<Languages, string> = {
+  [Languages.Spanish]: "es-ES",
+  [Languages.English]: "en-US",
+};
+
 export function AppProvider({
   children,
 }: {
@@ -133,6 +138,118 @@ export function AppProvider({
         return "Lb";
     }
   }, [settings]);
+
+  const formatNumber = useCallback(
+    (value: number, decimals: number) =>
+      new Intl.NumberFormat(NUMBER_LOCALES[settings.language], {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals,
+      }).format(value),
+    [settings],
+  );
+
+  const formatPercent = useCallback(
+    (ratio: number, decimals: number, signed = false) =>
+      new Intl.NumberFormat(NUMBER_LOCALES[settings.language], {
+        style: "percent",
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals,
+        signDisplay: signed ? "always" : "auto",
+      }).format(ratio),
+    [settings],
+  );
+
+  const formatDuration = useCallback((seconds: number) => {
+    if (seconds == 0) {
+      return "0:00";
+    }
+
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = Math.floor(seconds % 60);
+
+    let res: string;
+    if (h > 0) {
+      res = `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+    } else {
+      res = `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+    }
+
+    while (res.startsWith("0") && !res.startsWith("0:")) {
+      res = res.slice(1);
+    }
+
+    return res;
+  }, []);
+
+  const formatDate = useCallback(
+    (date: number) => {
+      const datetime = new Date(date * 1000);
+
+      const day = String(datetime.getDate()).padStart(2, "0");
+      const month = String(datetime.getMonth() + 1).padStart(2, "0");
+      const year = String(datetime.getFullYear()).padStart(4, "0");
+
+      switch (settings.language) {
+        case Languages.English:
+          return `${month}/${day}/${year}`;
+        default:
+          return `${day}/${month}/${year}`;
+      }
+    },
+    [settings],
+  );
+
+  const formatTimeDate = useCallback(
+    (date: number) => {
+      const datetime = new Date(date * 1000);
+
+      const hours = String(datetime.getHours()).padStart(2, "0");
+      const minutes = String(datetime.getMinutes()).padStart(2, "0");
+
+      return `${hours}:${minutes} ${formatDate(date)}`;
+    },
+    [formatDate],
+  );
+
+  const parseLocalDateTime = useCallback(
+    (dateStr: string) => {
+      const match = dateStr.match(
+        /^(\d{2}):(\d{2}) (\d{2})\/(\d{2})\/(\d{4})$/,
+      );
+
+      if (!match) {
+        throw new Error("Wrong date format");
+      }
+
+      const [, hourStr, minStr, firstStr, secondStr, yearStr] = match;
+      const [dayStr, monthStr] =
+        settings.language == Languages.English
+          ? [secondStr, firstStr]
+          : [firstStr, secondStr];
+
+      const hour = Number(hourStr);
+      const minute = Number(minStr);
+      const day = Number(dayStr);
+      const month = Number(monthStr);
+      const year = Number(yearStr);
+
+      const local = new Date(year, month - 1, day, hour, minute, 0);
+
+      if (
+        local.getFullYear() !== year ||
+        local.getMonth() !== month - 1 ||
+        local.getDate() !== day ||
+        local.getHours() !== hour ||
+        local.getMinutes() !== minute
+      ) {
+        throw new Error("Wrong date format");
+      }
+
+      return local;
+    },
+    [settings],
+  );
 
   const translate = useCallback(
     (key: string, replacements?: string[]) => {
@@ -300,6 +417,12 @@ export function AppProvider({
       fromKm,
       getDistanceUnit,
       getWeightUnit,
+      formatDuration,
+      formatDate,
+      formatTimeDate,
+      parseLocalDateTime,
+      formatNumber,
+      formatPercent,
     }),
     [
       settings,
@@ -311,6 +434,12 @@ export function AppProvider({
       fromKm,
       getDistanceUnit,
       getWeightUnit,
+      formatDuration,
+      formatDate,
+      formatTimeDate,
+      parseLocalDateTime,
+      formatNumber,
+      formatPercent,
     ],
   );
 

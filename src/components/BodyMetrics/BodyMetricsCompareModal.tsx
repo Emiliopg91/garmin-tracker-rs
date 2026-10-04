@@ -3,7 +3,6 @@ import { BodyMetricListItem } from "@/utils/backend/models";
 import { useContext } from "react";
 import { Dialog, DialogContent, DialogTitle, IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import { TimeUtils } from "@/utils/TimeUtils";
 import { MetricCompareRow } from "./helpers/MetricCompareRow";
 
 type Props = {
@@ -12,7 +11,14 @@ type Props = {
 };
 
 export function BodyMetricsCompareModal({ measures, onClose }: Props) {
-  const { translate, fromKg, getWeightUnit } = useContext(I18nSettingsContext);
+  const {
+    translate,
+    fromKg,
+    getWeightUnit,
+    formatDate,
+    formatNumber,
+    formatPercent,
+  } = useContext(I18nSettingsContext);
 
   return (
     <Dialog open={true} onClose={onClose}>
@@ -36,7 +42,7 @@ export function BodyMetricsCompareModal({ measures, onClose }: Props) {
               <td className="divider-bottom-white"></td>
               {measures.map((entry, idx) => (
                 <td key={"entry-" + idx} className="divider-bottom-white">
-                  <b>{TimeUtils.formatDate(entry.date)}</b>
+                  <b>{formatDate(entry.date)}</b>
                 </td>
               ))}
             </tr>
@@ -47,21 +53,24 @@ export function BodyMetricsCompareModal({ measures, onClose }: Props) {
               measures={measures}
               render={(entry) => (
                 <>
-                  {fromKg(entry.weight).toFixed(1)} {getWeightUnit()}
+                  {formatNumber(fromKg(entry.weight), 1)} {getWeightUnit()}
                 </>
               )}
             />
             <MetricCompareRow
               label={translate("fat_ratio")}
               measures={measures}
-              render={(entry) => `${entry.fat_ratio}%`}
+              render={(entry) => formatPercent(entry.fat_ratio / 100, 1)}
             />
             <MetricCompareRow
               label={translate("fat_mass")}
               measures={measures}
               render={(entry) => (
                 <>
-                  {fromKg(entry.weight * (entry.fat_ratio / 100)).toFixed(1)}{" "}
+                  {formatNumber(
+                    fromKg(entry.weight * (entry.fat_ratio / 100)),
+                    1,
+                  )}{" "}
                   {getWeightUnit()}
                 </>
               )}
@@ -71,21 +80,24 @@ export function BodyMetricsCompareModal({ measures, onClose }: Props) {
               measures={measures}
               render={(entry) => (
                 <>
-                  {fromKg(entry.lean_mass).toFixed(1)} {getWeightUnit()}
+                  {formatNumber(fromKg(entry.lean_mass), 1)} {getWeightUnit()}
                 </>
               )}
             />
             <MetricCompareRow
               label={translate("water_ratio")}
               measures={measures}
-              render={(entry) => `${entry.water_ratio}%`}
+              render={(entry) => formatPercent(entry.water_ratio / 100, 1)}
             />
             <MetricCompareRow
               label={translate("water_mass")}
               measures={measures}
               render={(entry) => (
                 <>
-                  {fromKg(entry.weight * (entry.water_ratio / 100)).toFixed(1)}{" "}
+                  {formatNumber(
+                    fromKg(entry.weight * (entry.water_ratio / 100)),
+                    1,
+                  )}{" "}
                   {getWeightUnit()}
                 </>
               )}

@@ -1,6 +1,5 @@
 import { I18nSettingsContext } from "@/context/I18nSettingsContext";
 import { SessionListItem } from "@/utils/backend/models";
-import { TimeUtils } from "@/utils/TimeUtils";
 import { useContext } from "react";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 
@@ -17,7 +16,7 @@ export function SessionRow({
   onSelect,
   onToggleCompare,
 }: Props) {
-  const { translate } = useContext(I18nSettingsContext);
+  const { translate, formatTimeDate } = useContext(I18nSettingsContext);
 
   return (
     <tr
@@ -31,7 +30,7 @@ export function SessionRow({
       <td>
         {session.has_record && <EmojiEventsIcon className="trophy-icon" />}
       </td>
-      <td>{TimeUtils.formatTimeDate(session.timestamp)}</td>
+      <td>{formatTimeDate(session.timestamp)}</td>
       <td>
         {translate("sport_" + session.sport) +
           " - " +

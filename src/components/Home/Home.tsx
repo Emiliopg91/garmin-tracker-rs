@@ -11,7 +11,6 @@ import { usePickerAdapter } from "@mui/x-date-pickers/hooks";
 import { useContext, useEffect, useState } from "react";
 import "@/styles/Home/Home.css";
 import "@/styles/Sessions/SessionModal.css";
-import { TimeUtils } from "@/utils/TimeUtils";
 import {
   SessionListItem,
   WorkoutDetails,
@@ -28,7 +27,8 @@ import { WorkoutSetsModal } from "../Workouts/WorkoutSetsModal";
 export function Home() {
   const { availableDevices, sessionsVersion } = useContext(AppContext);
   const { startLoading, finishLoading } = useContext(LoadingContext);
-  const { translate, fromKg } = useContext(I18nSettingsContext);
+  const { translate, fromKg, formatDuration, formatTimeDate } =
+    useContext(I18nSettingsContext);
   const adapter = usePickerAdapter();
 
   const [day, setDay] = useState(() => new Date().toDateString());
@@ -305,10 +305,10 @@ export function Home() {
                 <tbody>
                   <tr>
                     <td>{translate("active_time")}</td>
-                    <td>{TimeUtils.formatDuration(todayTime)}</td>
-                    <td>{TimeUtils.formatDuration(thisWeekTime)}</td>
-                    <td>{TimeUtils.formatDuration(weekTime)}</td>
-                    <td>{TimeUtils.formatDuration(monthTime)}</td>
+                    <td>{formatDuration(todayTime)}</td>
+                    <td>{formatDuration(thisWeekTime)}</td>
+                    <td>{formatDuration(weekTime)}</td>
+                    <td>{formatDuration(monthTime)}</td>
                   </tr>
                 </tbody>
                 <tbody>
@@ -347,7 +347,7 @@ export function Home() {
                       className="clickable-row"
                       onClick={() => getSessionDetails(session!.timestamp)}
                     >
-                      <td>{TimeUtils.formatTimeDate(session!.timestamp)}</td>
+                      <td>{formatTimeDate(session!.timestamp)}</td>
                       <td>
                         {translate("sport_" + session!.sport) +
                           " - " +
@@ -407,10 +407,10 @@ export function Home() {
                         </td>
                         <td>
                           {workout.latest_session &&
-                            TimeUtils.formatTimeDate(workout.latest_session)}
+                            formatTimeDate(workout.latest_session)}
                         </td>
                         <td>{workout.sessions}</td>
-                        <td>{TimeUtils.formatDuration(workout.avg_time)}</td>
+                        <td>{formatDuration(workout.avg_time)}</td>
                       </tr>
                     </tbody>
                   </table>

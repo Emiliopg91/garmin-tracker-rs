@@ -1,6 +1,5 @@
 import { I18nSettingsContext } from "@/context/I18nSettingsContext";
 import { BodyMetricListItem } from "@/utils/backend/models";
-import { TimeUtils } from "@/utils/TimeUtils";
 import { useContext, useEffect, useState } from "react";
 import {
   CartesianGrid,
@@ -22,7 +21,14 @@ type ChartDataType = {
 }[];
 
 function ChartTooltip({ active, payload, label }: TooltipContentProps) {
-  const { translate, fromKg, getWeightUnit } = useContext(I18nSettingsContext);
+  const {
+    translate,
+    fromKg,
+    getWeightUnit,
+    formatDate,
+    formatNumber,
+    formatPercent,
+  } = useContext(I18nSettingsContext);
 
   if (!active || !payload || payload.length === 0 || label == null) {
     return null;
@@ -31,17 +37,17 @@ function ChartTooltip({ active, payload, label }: TooltipContentProps) {
   return (
     <div className="chart-tooltip">
       <div>
-        <b>{TimeUtils.formatDate(data.date / 1000)}</b>
+        <b>{formatDate(data.date / 1000)}</b>
       </div>
       <div>
-        {translate("fat_ratio")}: {data.fatAvg7.toFixed(1)}%
+        {translate("fat_ratio")}: {formatPercent(data.fatAvg7 / 100, 1)}
       </div>
       <div>
-        {translate("weight")}: {fromKg(data.weightAvg7).toFixed(1)}{" "}
+        {translate("weight")}: {formatNumber(fromKg(data.weightAvg7), 1)}{" "}
         {getWeightUnit()}
       </div>
       <div>
-        {translate("lean_mass")}: {fromKg(data.leanAvg7).toFixed(1)}{" "}
+        {translate("lean_mass")}: {formatNumber(fromKg(data.leanAvg7), 1)}{" "}
         {getWeightUnit()}
       </div>
     </div>

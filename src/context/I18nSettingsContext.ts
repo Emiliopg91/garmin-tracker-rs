@@ -19,6 +19,12 @@ interface I18nSettingsContextType {
   toKm: (value: number) => number;
   getDistanceUnit: () => string;
   getWeightUnit: () => string;
+  formatDuration: (seconds: number) => string;
+  formatDate: (date: number) => string;
+  formatTimeDate: (date: number) => string;
+  parseLocalDateTime: (dateStr: string) => Date;
+  formatNumber: (value: number, decimals: number) => string;
+  formatPercent: (ratio: number, decimals: number, signed?: boolean) => string;
 }
 
 const defaultValue: I18nSettingsContextType = {
@@ -53,6 +59,24 @@ const defaultValue: I18nSettingsContextType = {
   },
   getWeightUnit: () => {
     return "";
+  },
+  formatDuration: () => {
+    return "";
+  },
+  formatDate: () => {
+    return "";
+  },
+  formatTimeDate: () => {
+    return "";
+  },
+  parseLocalDateTime: () => {
+    return new Date();
+  },
+  formatNumber: (value: number, decimals: number) => {
+    return value.toFixed(decimals);
+  },
+  formatPercent: (ratio: number, decimals: number) => {
+    return `${(ratio * 100).toFixed(decimals)}%`;
   },
 };
 

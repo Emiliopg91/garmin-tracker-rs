@@ -1,5 +1,4 @@
 import { I18nSettingsContext } from "@/context/I18nSettingsContext";
-import { TimeUtils } from "@/utils/TimeUtils";
 import { useContext, useMemo } from "react";
 import {
   Area,
@@ -24,14 +23,14 @@ type Props = {
 function HeartRateTooltip({
   active,
   payload,
-  translate,
   totalElapsedTime,
   sampleCount,
 }: TooltipContentProps & {
-  translate: (key: string) => string;
   totalElapsedTime: number;
   sampleCount: number;
 }) {
+  const { translate, formatDuration } = useContext(I18nSettingsContext);
+
   if (!active || !payload || payload.length === 0) {
     return null;
   }
@@ -41,7 +40,7 @@ function HeartRateTooltip({
   return (
     <div className="chart-tooltip">
       <div>
-        <b>{TimeUtils.formatDuration(elapsed)}</b>
+        <b>{formatDuration(elapsed)}</b>
       </div>
       <div>
         {translate("heart_rate")}: {data.hr}
@@ -56,7 +55,8 @@ export function SessionHeartRateChart({
   zonesTimes,
   totalElapsedTime,
 }: Props) {
-  const { translate } = useContext(I18nSettingsContext);
+  const { translate, formatDuration, formatPercent } =
+    useContext(I18nSettingsContext);
 
   const hrGradientStops = useMemo(
     () =>
@@ -102,10 +102,10 @@ export function SessionHeartRateChart({
                           key={"zone-" + zone}
                           className={`session-hr-zone session-hr-zone-${zone + 1}`}
                         >
-                          {TimeUtils.formatDuration(time) +
+                          {formatDuration(time) +
                             " (" +
-                            Math.round(100 * (time / totalElapsedTime)) +
-                            "%)"}
+                            formatPercent(time / totalElapsedTime, 0) +
+                            ")"}
                         </span>
                       ),
                   )}
@@ -143,7 +143,6 @@ export function SessionHeartRateChart({
             content={(props) => (
               <HeartRateTooltip
                 {...props}
-                translate={translate}
                 totalElapsedTime={totalElapsedTime}
                 sampleCount={hrBreathData.length}
               />

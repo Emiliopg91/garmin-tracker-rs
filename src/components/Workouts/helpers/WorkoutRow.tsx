@@ -1,6 +1,5 @@
 import { I18nSettingsContext } from "@/context/I18nSettingsContext";
 import { WorkoutListItem } from "@/utils/backend/models";
-import { TimeUtils } from "@/utils/TimeUtils";
 import { useContext } from "react";
 
 type Props = {
@@ -9,7 +8,8 @@ type Props = {
 };
 
 export function WorkoutRow({ workout, onSelect }: Props) {
-  const { translate } = useContext(I18nSettingsContext);
+  const { translate, formatDuration, formatTimeDate } =
+    useContext(I18nSettingsContext);
 
   return (
     <tr
@@ -21,13 +21,10 @@ export function WorkoutRow({ workout, onSelect }: Props) {
         {workout.name.length == 0 && <span>{translate("other")}</span>}
       </td>
       <td>
-        {workout.latest_session &&
-          TimeUtils.formatTimeDate(workout.latest_session)}
+        {workout.latest_session && formatTimeDate(workout.latest_session)}
       </td>
       <td>{workout.sessions}</td>
-      <td>
-        {workout.avg_time > 0 && TimeUtils.formatDuration(workout.avg_time)}
-      </td>
+      <td>{workout.avg_time > 0 && formatDuration(workout.avg_time)}</td>
     </tr>
   );
 }

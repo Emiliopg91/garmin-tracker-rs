@@ -1,9 +1,11 @@
 import { Marker } from "react-leaflet";
 import { SessionDetails, SessionListItem, SessionSet } from "./backend/models";
 import L from "leaflet";
-import { TimeUtils } from "./TimeUtils";
 
 const SEMICIRCLE_TO_DEGREES = 180.0 / 2 ** 31;
+
+const startOfDay = (d: Date) =>
+  new Date(d.getFullYear(), d.getMonth(), d.getDate());
 
 export interface WorkoutLoad {
   date: number;
@@ -311,7 +313,7 @@ export class SessionUtils {
 
       const ACUTE_DAYS = 7;
       const ACWR_LOWER_RATIO = 0.9;
-      const TODAY = TimeUtils.startOfDay(new Date()).getTime();
+      const TODAY = startOfDay(new Date()).getTime();
 
       const LAMBDA_ACUTE = 2 / (ACUTE_DAYS + 1); // ~0.25
       const LAMBDA_CHRONIC = 2 / (SessionUtils.CHRONIC_DAYS + 1); // ~0.069
@@ -320,9 +322,7 @@ export class SessionUtils {
         data
           .map((s) => {
             return {
-              date: TimeUtils.startOfDay(
-                new Date(s.timestamp * 1000),
-              ).getTime(),
+              date: startOfDay(new Date(s.timestamp * 1000)).getTime(),
               load: s.training_load,
             };
           })

@@ -1,6 +1,5 @@
 import { I18nSettingsContext } from "@/context/I18nSettingsContext";
 import { SessionSet } from "@/utils/backend/models";
-import { TimeUtils } from "@/utils/TimeUtils";
 import { useContext, useEffect, useState } from "react";
 import {
   CartesianGrid,
@@ -22,10 +21,9 @@ function ExerciseVolumeTooltip({
   active,
   payload,
   label,
-  translate,
-}: TooltipContentProps & {
-  translate: (key: string) => string;
-}) {
+}: TooltipContentProps) {
+  const { translate, formatDate } = useContext(I18nSettingsContext);
+
   if (!active || !payload || payload.length === 0 || label == null) {
     return null;
   }
@@ -37,7 +35,7 @@ function ExerciseVolumeTooltip({
   return (
     <div className="chart-tooltip">
       <div>
-        <b>{TimeUtils.formatDate(data.date)}</b>
+        <b>{formatDate(data.date)}</b>
       </div>
       <div>
         {translate("volume")}: {data.volume}
@@ -132,11 +130,7 @@ export function ExerciseVolumeChart({ series }: Props) {
             activeDot={{ stroke: "#f0f0f000" }}
             isAnimationActive={false}
           />
-          <Tooltip
-            content={(props) => (
-              <ExerciseVolumeTooltip {...props} translate={translate} />
-            )}
-          />
+          <Tooltip content={(props) => <ExerciseVolumeTooltip {...props} />} />
           <Legend />
         </LineChart>
       </ResponsiveContainer>
