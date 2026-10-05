@@ -9,6 +9,14 @@ export interface StepGroup {
 
 export type WorkoutStepData = LeafStep | StepGroup;
 
+// Per-field flags for a leaf, true when that field would block saving
+export interface LeafErrors {
+  time: boolean;
+  exercise: boolean;
+  weight: boolean;
+  reps: boolean;
+}
+
 export class WorkoutUtils {
   public static isStepGroup(step: WorkoutStepData): step is StepGroup {
     return "wrapped" in step;
@@ -93,19 +101,18 @@ export class WorkoutUtils {
   }
 
   // Leftover fields on rest steps are not checked here, they're dropped before sending to the backend
+  public static leafErrors(leaf: LeafStep): LeafErrors {
+    const isExercise = leaf.kind == StepType.Exercise;
+    return {
+      time: leaf.time != null && leaf.time <= 0,
+      exercise: isExercise && (leaf.ex_cat == null || leaf.ex_id == null),
+      weight: isExercise && leaf.weight != null && leaf.weight < 0,
+      reps: isExercise && leaf.reps != null && leaf.reps < 1,
+    };
+  }
+
   private static validateLeaf(leaf: LeafStep): boolean {
-    if (leaf.time != null && leaf.time <= 0) {
-      return false;
-    }
-    if (leaf.kind == StepType.Rest) {
-      return true;
-    }
-    return (
-      leaf.ex_cat != null &&
-      leaf.ex_id != null &&
-      (leaf.weight == null || leaf.weight >= 0) &&
-      (leaf.reps == null || leaf.reps >= 1)
-    );
+    return !Object.values(WorkoutUtils.leafErrors(leaf)).some(Boolean);
   }
 
   public static toWorkoutSteps(
@@ -172,7 +179,11 @@ export class WorkoutUtils {
         ex_id: leaf.ex_id,
         reps: leaf.reps,
         weight:
-          leaf.weight != null ? Math.round(toKg(leaf.weight) * 10) / 10 : null,
+          leaf.weight != null
+            ? leaf.weight > 0
+              ? Math.round(toKg(leaf.weight) * 10) / 10
+              : null
+            : null,
         begin_idx: null,
       };
     }

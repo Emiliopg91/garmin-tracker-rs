@@ -158,7 +158,7 @@ export interface Workout {
   steps: WorkoutStep[];
 }
 
-// From src-tauri/src/dto/workouts.rs:32
+// From src-tauri/src/dto/workouts.rs:33
 export interface WorkoutDetails {
   avg_time: number;
   avg_volume: number;
@@ -174,12 +174,13 @@ export interface WorkoutDetails {
 export interface WorkoutListItem {
   avg_time: number;
   enabled: boolean;
+  has_steps: boolean;
   latest_session: number | null;
   name: string;
   sessions: number;
 }
 
-// From src-tauri/src/dto/workouts.rs:15
+// From src-tauri/src/dto/workouts.rs:16
 export interface WorkoutSession {
   date: number;
   time: number;

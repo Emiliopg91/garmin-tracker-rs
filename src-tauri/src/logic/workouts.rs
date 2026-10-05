@@ -75,9 +75,22 @@ pub async fn get_workout_list(
                 }
             });
 
+            let with_steps = WorkoutStepRepository::select()
+                .distinct(&[workout_step::entity::columns::WORKOUT])
+                .fetch_in(conn)?
+                .iter()
+                .filter_map(
+                    |r| match r.get(workout_step::entity::columns::WORKOUT.as_ref()) {
+                        Some(Value::Text(name)) => Some(name.clone()),
+                        _ => None,
+                    },
+                )
+                .collect::<Vec<_>>();
+
             let mut res = workout_stats
                 .into_iter()
                 .map(|wd| WorkoutListItem {
+                    has_steps: with_steps.contains(&wd.0),
                     enabled: enabled_workouts.contains(&wd.0),
                     name: wd.0,
                     sessions: wd.1.0,
@@ -281,12 +294,13 @@ pub async fn send_to_device(
 pub async fn save_workout(
     app: AppHandle,
     settings: State<'_, SettingsLock>,
+    edit: bool,
     workout: Workout,
 ) -> Result<(), String> {
     let name = workout.name.clone();
     let res = run_blocking(app, move |database| {
         database.run_in_transaction(|tx| {
-            if WorkoutRepository::select_by_id_in(tx, &workout.name)?.is_some() {
+            if edit && WorkoutRepository::select_by_id_in(tx, &workout.name)?.is_some() {
                 WorkoutStepRepository::delete()
                     .where_(Where::Eq(
                         workout_step::entity::columns::WORKOUT,
@@ -294,11 +308,7 @@ pub async fn save_workout(
                     ))
                     .execute_in(tx)?;
             } else {
-                let mut item = Workout {
-                    name: workout.name.clone(),
-                    enabled: true,
-                    steps: vec![],
-                };
+                let mut item = workout.clone();
                 WorkoutRepository::insert().item(&mut item).execute_in(tx)?;
             }
 

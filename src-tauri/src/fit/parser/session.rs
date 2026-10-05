@@ -62,11 +62,9 @@ impl TryFrom<FitParser> for Session {
                             let lap_obj = mesgdef::Lap::from(msg);
                             handle_lap_message(lap_obj, &mut laps)?;
                         }
-                        MesgNum::TIME_IN_ZONE => {
-                            if max_heart_rate.is_none() {
-                                let zones_obj = mesgdef::TimeInZone::from(msg);
-                                max_heart_rate = Some(zones_obj.max_heart_rate);
-                            }
+                        MesgNum::TIME_IN_ZONE if max_heart_rate.is_none() => {
+                            let zones_obj = mesgdef::TimeInZone::from(msg);
+                            max_heart_rate = Some(zones_obj.max_heart_rate);
                         }
                         _ => {}
                     }

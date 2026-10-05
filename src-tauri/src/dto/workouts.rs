@@ -9,6 +9,7 @@ pub struct WorkoutListItem {
     pub sessions: u32,
     pub avg_time: u32,
     pub enabled: bool,
+    pub has_steps: bool,
 }
 
 #[derive(Serialize)]

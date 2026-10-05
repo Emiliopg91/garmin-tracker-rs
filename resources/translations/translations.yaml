@@ -496,6 +496,9 @@ send_to:
 edit_workout:
   en: Edit
   es: Editar
+actions:
+  en: Actions
+  es: Acciones
 step_type_exercise:
   en: Exercise
   es: Ejercicio

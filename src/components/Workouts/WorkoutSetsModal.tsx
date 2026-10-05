@@ -30,10 +30,16 @@ export function WorkoutSetsModal({ workout, isEdit, onClose }: Props) {
   }, []);
 
   const [name, setName] = useState(workout?.name);
+  const [originalSteps] = useState(() =>
+    JSON.stringify(WorkoutUtils.parseWorkoutSteps(workout!.steps, fromKg)),
+  );
   const [steps, setSteps] = useState(
     WorkoutUtils.parseWorkoutSteps(workout!.steps, fromKg),
   );
   const valid = name.length > 0 && WorkoutUtils.validateSteps(steps);
+  const changed =
+    name != workout.name || JSON.stringify(steps) != originalSteps;
+  const canSave = valid && (!isEdit || changed);
 
   const swapPosition = (pos1: number, pos2: number) => {
     const tmp = steps[pos1];
@@ -57,14 +63,14 @@ export function WorkoutSetsModal({ workout, isEdit, onClose }: Props) {
   };
 
   const saveWorkout = () => {
-    if (valid) {
+    if (canSave) {
       const newWorkout: Workout = {
         enabled: workout.enabled,
         name,
         steps: WorkoutUtils.toWorkoutSteps(steps, name, toKg),
       };
       startLoading();
-      BackendClient.saveWorkout(newWorkout)
+      BackendClient.saveWorkout(isEdit, newWorkout)
         .then(() => {
           onClose();
         })
@@ -85,7 +91,8 @@ export function WorkoutSetsModal({ workout, isEdit, onClose }: Props) {
         {isEdit && <span>{name}</span>}
         {!isEdit && (
           <TextField
-            placeholder={translate("workout_name")}
+            placeholder={translate("workout")}
+            error={name.length == 0}
             onChange={onNameChange}
             value={name}
           ></TextField>
@@ -134,7 +141,7 @@ export function WorkoutSetsModal({ workout, isEdit, onClose }: Props) {
             color="success"
             variant="contained"
             onClick={saveWorkout}
-            disabled={!valid}
+            disabled={!canSave}
           >
             {translate("save_workout")}
           </Button>

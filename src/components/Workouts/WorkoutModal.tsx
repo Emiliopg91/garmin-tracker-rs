@@ -1,20 +1,20 @@
 import { I18nSettingsContext } from "@/context/I18nSettingsContext";
 import { WorkoutDetails } from "@/utils/backend/models";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
+  Box,
   Dialog,
   DialogContent,
   DialogTitle,
   IconButton,
   Switch,
-  Tooltip,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { BackendClient } from "@/utils/backend/client";
 import { LoadingContext } from "@/context/LoadingContext";
 import { WorkoutVolumeChart } from "./helpers/WorkoutVolumeChart";
-import { SendWorkoutMenu } from "./helpers/SendWorkoutMenu";
-import EditIcon from "@mui/icons-material/Edit";
+import { WorkoutActionsMenu } from "./helpers/WorkoutActionsMenu";
+import { BackendListener } from "@/utils/backend/listener";
 
 type Props = {
   workout: WorkoutDetails;
@@ -25,7 +25,7 @@ type Props = {
 };
 
 export function WorkoutModal({
-  workout,
+  workout: initialWorkout,
   showEnable,
   onClose,
   onUpdate,
@@ -41,7 +41,20 @@ export function WorkoutModal({
     formatNumber,
     formatPercent,
   } = useContext(I18nSettingsContext);
-  const [enabled, setEnabled] = useState(workout.enabled);
+  const [workout, setWorkout] = useState(initialWorkout);
+  const [enabled, setEnabled] = useState(initialWorkout.enabled);
+
+  useEffect(() => {
+    setWorkout(initialWorkout);
+  }, [initialWorkout]);
+
+  useEffect(() => {
+    return BackendListener.onAddedWorkoutSteps((names) => {
+      if (names.includes(initialWorkout.name)) {
+        BackendClient.getWorkoutDetails(initialWorkout.name).then(setWorkout);
+      }
+    });
+  }, [initialWorkout.name]);
 
   const toggleEnabled = () => {
     startLoading();
@@ -62,6 +75,15 @@ export function WorkoutModal({
       <DialogTitle>
         {workout.name.length > 0 && <span>{workout.name}</span>}
         {workout.name.length == 0 && <span>{translate("other")}</span>}
+        {workout.name.length > 0 && workout.steps.length > 0 && (
+          // Positioned like .modal-close-button, just to its left
+          <Box sx={{ position: "absolute", right: "48px", top: "8px" }}>
+            <WorkoutActionsMenu
+              workoutName={workout.name}
+              onOpenEdit={() => onOpenEdit(workout)}
+            />
+          </Box>
+        )}
         <IconButton onClick={onClose} className="modal-close-button">
           <CloseIcon />
         </IconButton>
@@ -122,20 +144,6 @@ export function WorkoutModal({
               </tbody>
             </table>
           </div>
-          {workout.steps.length > 0 && (
-            <div>
-              <Tooltip title={translate("edit_workout")}>
-                <IconButton
-                  onClick={() => {
-                    onOpenEdit(workout);
-                  }}
-                >
-                  <EditIcon />
-                </IconButton>
-              </Tooltip>
-              <SendWorkoutMenu workout={workout} />
-            </div>
-          )}
         </div>
         {workout.sessions.length > 1 && (
           <>

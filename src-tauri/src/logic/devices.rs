@@ -72,14 +72,13 @@ async fn mtp_dev_check_and_sync(app: AppHandle, devices: &mut Vec<DeviceListItem
 
     if let Ok(cur_dev) = connected {
         let already_known: Vec<String> = devices.iter().map(|d| d.serial_number.clone()).collect();
-        let cur_dev_owned = cur_dev.clone();
 
         let db = app.state::<DatabasePool>();
 
         let newly_enrolled = db
             .run_in_transaction(|tx| {
                 let mut enrolled = Vec::new();
-                for device in &cur_dev_owned {
+                for device in &cur_dev {
                     if !already_known.contains(&device.serial_number) {
                         let enrol_err =
                             match DeviceRepository::select_by_id_in(tx, &device.serial_number) {
@@ -119,79 +118,7 @@ async fn mtp_dev_check_and_sync(app: AppHandle, devices: &mut Vec<DeviceListItem
             );
             devices.push(device.clone());
 
-            let dst_dir = std::env::temp_dir().join(format!(
-                "{}-{}",
-                constants::MTP_TMP_DIR_PREFIX,
-                SystemTime::now()
-                    .duration_since(UNIX_EPOCH)
-                    .unwrap()
-                    .as_millis()
-            ));
-
-            let mtp_client = MTP_CLIENT_INST.lock().await;
-            let _ = db.run_in_transaction(|tx| {
-                let pending_workouts = WorkoutRepository::select()
-                    .columns(&[workout::entity::columns::NAME])
-                    .where_(Where::And(vec![
-                        Where::NotInSub(
-                            workout::entity::columns::NAME,
-                            WorkoutStepRepository::select()
-                                .distinct(&[workout_step::entity::columns::WORKOUT])
-                                .to_subquery(),
-                        ),
-                        Where::InSub(
-                            workout::entity::columns::NAME,
-                            SessionRepository::select()
-                                .distinct(&[session::entity::columns::WORKOUT])
-                                .where_(Where::Eq(
-                                    session::entity::columns::DEVICE,
-                                    device.serial_number.clone().into(),
-                                ))
-                                .to_subquery(),
-                        ),
-                    ]))
-                    .fetch_in(tx)?
-                    .iter()
-                    .filter_map(|r| match r.get(workout::entity::columns::NAME.as_ref()) {
-                        Some(Value::Text(name)) => Some(name.clone()),
-                        _ => None,
-                    })
-                    .collect::<Vec<_>>();
-
-                if !pending_workouts.is_empty() {
-                    // The transaction closure is sync: block on the async download without stalling the runtime.
-                    let _ = tokio::task::block_in_place(|| {
-                        tokio::runtime::Handle::current().block_on(
-                            mtp_client.download_workouts(&device.serial_number, dst_dir.clone()),
-                        )
-                    });
-
-                    let mut workouts_to_insert = Vec::new();
-                    if let Ok(read_dir) = fs::read_dir(&dst_dir) {
-                        for entry in read_dir.flatten() {
-                            let file = entry.path();
-                            if let Ok(parser) = FitParser::from_file(file)
-                                && let Ok(workout) = Workout::try_from(parser)
-                                && pending_workouts.contains(&workout.name)
-                            {
-                                workouts_to_insert.push(workout);
-                            }
-                        }
-                    }
-
-                    let mut insert = WorkoutStepRepository::insert();
-                    for workout in &mut workouts_to_insert {
-                        for step in &mut workout.steps {
-                            insert = insert.item(step);
-                        }
-                    }
-                    insert.execute_in(tx)?;
-
-                    let _ = fs::remove_dir_all(&dst_dir);
-                }
-                Ok(())
-            });
-            drop(mtp_client);
+            download_pending_workouts(&app, &db, device).await;
 
             let payload: DeviceListItem = device.clone();
             let _ = app.emit("device_connected", payload);
@@ -252,4 +179,109 @@ async fn mtp_dev_check_and_sync(app: AppHandle, devices: &mut Vec<DeviceListItem
             let _ = app.emit("sessions_added", ());
         }
     }
+}
+
+/// Downloads from `device` the step definitions of workouts that have sessions recorded on it but no steps stored yet.
+async fn download_pending_workouts(app: &AppHandle, db: &DatabasePool, device: &DeviceListItem) {
+    let pending_workouts = match db.run_in_connection(|conn| {
+        let rows = WorkoutRepository::select()
+            .columns(&[workout::entity::columns::NAME])
+            .where_(Where::And(vec![
+                Where::NotInSub(
+                    workout::entity::columns::NAME,
+                    WorkoutStepRepository::select()
+                        .distinct(&[workout_step::entity::columns::WORKOUT])
+                        .to_subquery(),
+                ),
+                Where::InSub(
+                    workout::entity::columns::NAME,
+                    SessionRepository::select()
+                        .distinct(&[session::entity::columns::WORKOUT])
+                        .where_(Where::Eq(
+                            session::entity::columns::DEVICE,
+                            device.serial_number.clone().into(),
+                        ))
+                        .to_subquery(),
+                ),
+            ]))
+            .fetch_in(conn)?;
+        Ok(rows)
+    }) {
+        Ok(rows) => rows
+            .iter()
+            .filter_map(|r| match r.get(workout::entity::columns::NAME.as_ref()) {
+                Some(Value::Text(name)) => Some(name.clone()),
+                _ => None,
+            })
+            .collect::<Vec<_>>(),
+        Err(e) => {
+            error!(
+                "Error listing pending workouts for {}: {e}",
+                device.serial_number
+            );
+            return;
+        }
+    };
+    if pending_workouts.is_empty() {
+        return;
+    }
+
+    let dst_dir = std::env::temp_dir().join(format!(
+        "{}-{}",
+        constants::MTP_TMP_DIR_PREFIX,
+        SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_millis()
+    ));
+
+    // Locked only for the download, so a concurrent sync is not held back by DB work.
+    let downloaded = MTP_CLIENT_INST
+        .lock()
+        .await
+        .download_workouts(&device.serial_number, dst_dir.clone())
+        .await;
+
+    match downloaded {
+        Ok(()) => {
+            let mut workouts_to_insert = Vec::new();
+            if let Ok(read_dir) = fs::read_dir(&dst_dir) {
+                for entry in read_dir.flatten() {
+                    if let Ok(parser) = FitParser::from_file(entry.path())
+                        && let Ok(workout) = Workout::try_from(parser)
+                        && !workout.steps.is_empty()
+                        && pending_workouts.contains(&workout.name)
+                    {
+                        workouts_to_insert.push(workout);
+                    }
+                }
+            }
+
+            let mut insert = WorkoutStepRepository::insert();
+            let mut workout_names: Vec<String> = Vec::new();
+            for workout in &mut workouts_to_insert {
+                for step in &mut workout.steps {
+                    insert = insert.item(step);
+                }
+                workout_names.push(workout.name.clone());
+            }
+
+            if !workout_names.is_empty() {
+                if let Err(e) = insert.execute(db) {
+                    error!(
+                        "Error storing workout steps from {}: {e}",
+                        device.serial_number
+                    );
+                } else {
+                    let _ = app.emit("added_workout_steps", workout_names);
+                }
+            }
+        }
+        Err(e) => error!(
+            "Error downloading workouts from {}: {e}",
+            device.serial_number
+        ),
+    }
+
+    let _ = fs::remove_dir_all(&dst_dir);
 }

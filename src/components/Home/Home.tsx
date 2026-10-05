@@ -246,10 +246,21 @@ export function Home() {
       },
     );
 
+    const unregisterAddedSteps = BackendListener.onAddedWorkoutSteps(
+      (names) => {
+        setWorkout((prev) =>
+          prev && names.includes(prev.name)
+            ? { ...prev, has_steps: true }
+            : prev,
+        );
+      },
+    );
+
     refresh();
 
     return () => {
       unregisterSessionLocation();
+      unregisterAddedSteps();
     };
   }, [sessionsVersion, adapter, day]);
 

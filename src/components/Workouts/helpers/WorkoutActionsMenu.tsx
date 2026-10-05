@@ -1,0 +1,102 @@
+import { I18nSettingsContext } from "@/context/I18nSettingsContext";
+import { LoadingContext } from "@/context/LoadingContext";
+import { BackendClient } from "@/utils/backend/client";
+import { useContext, useState } from "react";
+import {
+  IconButton,
+  ListItemText,
+  Menu,
+  MenuItem,
+  Tooltip,
+} from "@mui/material";
+import { AppContext } from "@/context/AppContext";
+import MenuIcon from "@mui/icons-material/Menu";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+
+type Props = {
+  workoutName: string;
+  onOpenEdit: () => void;
+  dense?: boolean;
+};
+
+export function WorkoutActionsMenu({
+  workoutName,
+  onOpenEdit,
+  dense = false,
+}: Props) {
+  const { startLoading, finishLoading } = useContext(LoadingContext);
+  const { translate } = useContext(I18nSettingsContext);
+  const { availableDevices } = useContext(AppContext);
+  const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null);
+  const [sendMenuAnchor, setSendMenuAnchor] = useState<HTMLElement | null>(
+    null,
+  );
+
+  const closeMenus = () => {
+    setSendMenuAnchor(null);
+    setMenuAnchor(null);
+  };
+
+  const sendToDevice = (serial: string) => {
+    startLoading();
+    BackendClient.sendToDevice(workoutName, serial).finally(() => {
+      finishLoading();
+    });
+  };
+
+  return (
+    <>
+      <Tooltip title={translate("actions")}>
+        <IconButton
+          size={dense ? "small" : "medium"}
+          sx={dense ? { padding: 0 } : undefined}
+          onClick={(e) => setMenuAnchor(e.currentTarget)}
+        >
+          <MenuIcon fontSize={dense ? "small" : "medium"} />
+        </IconButton>
+      </Tooltip>
+      <Menu
+        anchorEl={menuAnchor}
+        open={Boolean(menuAnchor)}
+        onClose={closeMenus}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        transformOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <MenuItem
+          onClick={() => {
+            closeMenus();
+            onOpenEdit();
+          }}
+        >
+          <ListItemText>{translate("edit_workout")}</ListItemText>
+        </MenuItem>
+        <MenuItem
+          onClick={(e) => setSendMenuAnchor(e.currentTarget)}
+          disabled={availableDevices.length == 0}
+        >
+          <ListItemText>{translate("send_to")}</ListItemText>
+          <ChevronRightIcon fontSize="small" />
+        </MenuItem>
+      </Menu>
+      <Menu
+        anchorEl={sendMenuAnchor}
+        open={Boolean(sendMenuAnchor)}
+        onClose={() => setSendMenuAnchor(null)}
+        anchorOrigin={{ vertical: "top", horizontal: "left" }}
+        transformOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        {availableDevices.map((device, idx) => (
+          <MenuItem
+            key={"dev-" + idx}
+            onClick={() => {
+              closeMenus();
+              sendToDevice(device.serial_number);
+            }}
+          >
+            {device.manufacturer + " " + device.model}
+          </MenuItem>
+        ))}
+      </Menu>
+    </>
+  );
+}

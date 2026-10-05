@@ -1,13 +1,15 @@
 import { I18nSettingsContext } from "@/context/I18nSettingsContext";
 import { WorkoutListItem } from "@/utils/backend/models";
 import { useContext } from "react";
+import { WorkoutActionsMenu } from "./WorkoutActionsMenu";
 
 type Props = {
   workout: WorkoutListItem;
   onSelect: (name: string) => void;
+  onOpenEdit: (name: string) => void;
 };
 
-export function WorkoutRow({ workout, onSelect }: Props) {
+export function WorkoutRow({ workout, onSelect, onOpenEdit }: Props) {
   const { translate, formatDuration, formatTimeDate, formatNumber } =
     useContext(I18nSettingsContext);
 
@@ -25,6 +27,16 @@ export function WorkoutRow({ workout, onSelect }: Props) {
       </td>
       <td>{formatNumber(workout.sessions, 0)}</td>
       <td>{workout.avg_time > 0 && formatDuration(workout.avg_time)}</td>
+      {/* Menu is portaled but React events still bubble to the row */}
+      <td onClick={(e) => e.stopPropagation()}>
+        {workout.has_steps && (
+          <WorkoutActionsMenu
+            workoutName={workout.name}
+            onOpenEdit={() => onOpenEdit(workout.name)}
+            dense
+          />
+        )}
+      </td>
     </tr>
   );
 }

@@ -3,7 +3,7 @@ import {
   I18nSettingsContext,
 } from "@/context/I18nSettingsContext";
 import { StepType } from "@/utils/backend/models";
-import { LeafStep } from "@/utils/WorkoutUtils";
+import { LeafStep, WorkoutUtils } from "@/utils/WorkoutUtils";
 import {
   Autocomplete,
   Box,
@@ -51,6 +51,7 @@ export function WorkoutSetLeaf({
   const [timeInput, setTimeInput] = useState<string | null>(null);
   const [weightInput, setWeightInput] = useState<string | null>(null);
   const isExercise = leaf.kind == StepType.Exercise;
+  const errors = WorkoutUtils.leafErrors(leaf);
   const limit = isExercise
     ? leaf.reps != null
       ? LimitType.Reps
@@ -207,6 +208,7 @@ export function WorkoutSetLeaf({
       {isExercise && limit == LimitType.Reps && (
         <TextField
           label={translate("repetitions")}
+          error={errors.reps}
           type="number"
           size="small"
           sx={{ width: 100 }}
@@ -226,6 +228,7 @@ export function WorkoutSetLeaf({
       {limit == LimitType.Time && (
         <TextField
           label={translate("time") + " (MM:SS)"}
+          error={errors.time}
           size="small"
           sx={{ width: 120 }}
           value={timeInput ?? formattedTime}
@@ -243,6 +246,7 @@ export function WorkoutSetLeaf({
       {isExercise && (
         <TextField
           label={translate("weight") + " (" + getWeightUnit() + ")"}
+          error={errors.weight}
           type="number"
           size="small"
           sx={{ width: 100 }}
@@ -357,7 +361,11 @@ export function WorkoutSetLeaf({
           }
           onChange={(_, opt) => onExerciseChange(opt!)}
           renderInput={(params) => (
-            <TextField {...params} label={translate("select_exercise")} />
+            <TextField
+              {...params}
+              label={translate("select_exercise")}
+              error={errors.exercise}
+            />
           )}
         />
       </Box>

@@ -10,6 +10,7 @@ import "@/styles/Workouts/WorkoutLists.css";
 import { WorkoutSetsModal } from "./WorkoutSetsModal";
 import { Button } from "@mui/material";
 import { WorkoutUtils } from "@/utils/WorkoutUtils";
+import { BackendListener } from "@/utils/backend/listener";
 
 export function WorkoutsList() {
   const { sessionsVersion } = useContext(AppContext);
@@ -76,10 +77,24 @@ export function WorkoutsList() {
     refreshList();
   }, [sessionsVersion]);
 
+  useEffect(() => {
+    return BackendListener.onAddedWorkoutSteps((names) => {
+      setWorkouts((prev) =>
+        prev.map((w) =>
+          names.includes(w.name) ? { ...w, has_steps: true } : w,
+        ),
+      );
+    });
+  }, []);
+
   const getWorkoutDetails = (name: string) => {
     BackendClient.getWorkoutDetails(name).then((details) => {
       setWorkoutDetails(details);
     });
+  };
+
+  const openEditByName = (name: string) => {
+    BackendClient.getWorkoutDetails(name).then(openEdit);
   };
 
   const setWorkoutState = (name: string, status: boolean) => {
@@ -103,6 +118,7 @@ export function WorkoutsList() {
               <th className="text-center">{translate("latest_session")}</th>
               <th className="text-center">{translate("session_count")}</th>
               <th className="text-center">{translate("average_duration")}</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
@@ -111,6 +127,7 @@ export function WorkoutsList() {
                 key={idx}
                 workout={workout}
                 onSelect={getWorkoutDetails}
+                onOpenEdit={openEditByName}
               />
             ))}
           </tbody>

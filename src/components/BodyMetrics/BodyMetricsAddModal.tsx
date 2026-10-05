@@ -3,6 +3,7 @@ import { BackendClient } from "@/utils/backend/client";
 import { BodyMetricListItem } from "@/utils/backend/models";
 import { useContext, useState } from "react";
 import {
+  Box,
   Button,
   Dialog,
   DialogContent,
@@ -29,15 +30,18 @@ type BodyMetricsListItemForm = Omit<
   water_ratio: string;
 };
 
+type NumericField = Exclude<keyof BodyMetricsListItemForm, "date">;
+
 export function BodyMetricsAddModal({ latest, onClose }: Props) {
-  const { translate, toKg } = useContext(I18nSettingsContext);
+  const { translate, toKg, fromKg, getWeightUnit } =
+    useContext(I18nSettingsContext);
   const [data, setData] = useState<BodyMetricsListItemForm>(
     latest
       ? {
           date: new Date(),
-          weight: String(latest.weight),
+          weight: String(Math.round(fromKg(latest.weight) * 10) / 10),
           fat_ratio: String(latest.fat_ratio),
-          lean_mass: String(latest.lean_mass),
+          lean_mass: String(Math.round(fromKg(latest.lean_mass) * 10) / 10),
           water_ratio: String(latest.water_ratio),
         }
       : {
@@ -49,25 +53,24 @@ export function BodyMetricsAddModal({ latest, onClose }: Props) {
         },
   );
 
-  const onPropChange = <K extends keyof BodyMetricsListItemForm>(
-    e: string | Date,
-    prop: K,
-  ) => {
-    if (prop != "date") {
-      if (typeof e !== "string") return;
-      if (!/^[0-9]*[,.]?[0-9]*$/.test(e)) return;
+  const isInvalid = (prop: NumericField) => data[prop] == "";
+  const hasErrors = (
+    ["weight", "fat_ratio", "lean_mass", "water_ratio"] as NumericField[]
+  ).some(isInvalid);
 
-      const str = e.replace(",", ".");
-      const normalized = parseFloat(e.replace(",", "."));
-      if (!isNaN(normalized)) {
-        setData((prev) => ({ ...prev, [prop]: str }));
-      }
-    } else {
-      setData((prev) => ({
-        ...prev,
-        date: e instanceof Date ? e : prev["date"],
-      }));
+  // Invalid input is reverted on the spot. The DOM value is reset by hand because a
+  // number input reports "" for things like "-", which React would not overwrite
+  const onNumberChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    prop: NumericField,
+    max: number,
+  ) => {
+    const value = parseFloat(e.target.value);
+    if (e.target.validity.badInput || value < 0 || value > max) {
+      e.target.value = data[prop];
+      return;
     }
+    setData((prev) => ({ ...prev, [prop]: e.target.value }));
   };
 
   const onSave = () => {
@@ -82,6 +85,29 @@ export function BodyMetricsAddModal({ latest, onClose }: Props) {
     });
   };
 
+  const numberField = (prop: NumericField, label: string, max: number) => (
+    <TextField
+      label={label}
+      error={isInvalid(prop)}
+      type="number"
+      size="small"
+      fullWidth
+      value={data[prop]}
+      slotProps={{
+        htmlInput: {
+          className: "no-spinner",
+          inputMode: "decimal",
+          min: 0,
+          max,
+          step: 0.1,
+        },
+      }}
+      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+        onNumberChange(e, prop, max)
+      }
+    />
+  );
+
   return (
     <Dialog open={true} onClose={onClose}>
       <DialogTitle>
@@ -92,88 +118,45 @@ export function BodyMetricsAddModal({ latest, onClose }: Props) {
       </DialogTitle>
 
       <DialogContent dividers>
-        <table id="workout-details-table">
-          <colgroup>
-            <col className="col-150 align-right" />
-            <col />
-          </colgroup>
-          <tbody>
-            <tr>
-              <td>{translate("date")}:</td>
-              <td>
-                <DatePicker
-                  value={data.date}
-                  onChange={(value) => {
-                    if (value != null) {
-                      onPropChange(value, "date");
-                    }
-                  }}
-                  format="dd/MM/yyyy"
-                  slotProps={{ textField: { size: "small" } }}
-                />
-              </td>
-            </tr>
-            <tr>
-              <td>{translate("weight")}:</td>
-              <td>
-                <TextField
-                  size="small"
-                  fullWidth
-                  value={data.weight}
-                  slotProps={{ htmlInput: { inputMode: "decimal" } }}
-                  onChange={(e) => {
-                    onPropChange(e.target.value, "weight");
-                  }}
-                />
-              </td>
-            </tr>
-            <tr>
-              <td>{translate("fat_ratio")}:</td>
-              <td>
-                <TextField
-                  size="small"
-                  fullWidth
-                  value={data.fat_ratio}
-                  onChange={(e) => {
-                    onPropChange(e.target.value, "fat_ratio");
-                  }}
-                />
-              </td>
-            </tr>
-            <tr>
-              <td>{translate("lean_mass")}:</td>
-              <td>
-                <TextField
-                  size="small"
-                  fullWidth
-                  value={data.lean_mass}
-                  onChange={(e) => {
-                    onPropChange(e.target.value, "lean_mass");
-                  }}
-                />
-              </td>
-            </tr>
-            <tr>
-              <td>{translate("water_ratio")}:</td>
-              <td>
-                <TextField
-                  size="small"
-                  fullWidth
-                  value={data.water_ratio}
-                  onChange={(e) => {
-                    onPropChange(e.target.value, "water_ratio");
-                  }}
-                />
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 2,
+            pt: 1,
+          }}
+        >
+          <DatePicker
+            label={translate("date")}
+            value={data.date}
+            onChange={(value) => {
+              if (value != null) {
+                setData((prev) => ({ ...prev, date: value }));
+              }
+            }}
+            format="dd/MM/yyyy"
+            slotProps={{ textField: { size: "small", fullWidth: true } }}
+          />
+          {numberField(
+            "weight",
+            translate("weight") + " (" + getWeightUnit() + ")",
+            999,
+          )}
+          {numberField("fat_ratio", translate("fat_ratio"), 100)}
+          {numberField(
+            "lean_mass",
+            translate("lean_mass") + " (" + getWeightUnit() + ")",
+            999,
+          )}
+          {numberField("water_ratio", translate("water_ratio"), 100)}
+        </Box>
         <hr />
         <div>
           <Button
             id="save-measure-button"
             variant="contained"
             className="full-width-button"
+            disabled={hasErrors}
             onClick={onSave}
           >
             {translate("save")}
