@@ -18,6 +18,7 @@ use crate::{
     SettingsLock,
     dao::{
         device::{Device, DeviceRepository},
+        session::{self, SessionRepository},
         workout::{self, Workout, WorkoutRepository},
         workout_step::{self, WorkoutStepRepository},
     },
@@ -62,37 +63,21 @@ pub fn start_device_watcher(app: AppHandle) {
 /// Diffs the currently connected Garmin devices against `devices`, enrolling new ones in the DB, emitting connect/disconnect events, and triggering auto-sync for newly connected devices.
 async fn mtp_dev_check_and_sync(app: AppHandle, devices: &mut Vec<DeviceListItem>) {
     let mut devs_to_sync = Vec::new();
-    // Held across device enrolment and workout download; must be dropped before auto-sync,
-    // since `_import_from_device` locks the MTP client again.
     let mtp_client = MTP_CLIENT_INST.lock().await;
     let connected = mtp_client
         .get_connected_devices()
         .await
         .map_err(|e| e.to_string());
+    drop(mtp_client);
+
     if let Ok(cur_dev) = connected {
         let already_known: Vec<String> = devices.iter().map(|d| d.serial_number.clone()).collect();
         let cur_dev_owned = cur_dev.clone();
 
         let db = app.state::<DatabasePool>();
 
-        let (newly_enrolled, pending_workouts) = db
+        let newly_enrolled = db
             .run_in_transaction(|tx| {
-                let pending_workouts = WorkoutRepository::select()
-                    .columns(&[workout::entity::columns::NAME])
-                    .where_(Where::NotInSub(
-                        workout::entity::columns::NAME,
-                        WorkoutStepRepository::select()
-                            .distinct(&[workout_step::entity::columns::WORKOUT])
-                            .to_subquery(),
-                    ))
-                    .fetch_in(tx)?
-                    .iter()
-                    .filter_map(|r| match r.get(workout::entity::columns::NAME.as_ref()) {
-                        Some(Value::Text(name)) => Some(name.clone()),
-                        _ => None,
-                    })
-                    .collect::<Vec<_>>();
-
                 let mut enrolled = Vec::new();
                 for device in &cur_dev_owned {
                     if !already_known.contains(&device.serial_number) {
@@ -117,51 +102,10 @@ async fn mtp_dev_check_and_sync(app: AppHandle, devices: &mut Vec<DeviceListItem
                         }
                     }
                 }
-                Ok((enrolled, pending_workouts))
+
+                Ok(enrolled)
             })
             .unwrap_or_default();
-
-        if !pending_workouts.is_empty() {
-            let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
-            let src_dir = std::env::temp_dir().join(format!(
-                "{}-{}",
-                constants::MTP_TMP_DIR_PREFIX,
-                now.as_millis()
-            ));
-
-            let dst_dir = src_dir.join("Activities");
-            for device in &newly_enrolled {
-                let _ = mtp_client
-                    .download_workouts(&device.serial_number, dst_dir.clone())
-                    .await;
-            }
-
-            let mut workouts_to_insert = Vec::new();
-            if let Ok(read_dir) = fs::read_dir(&dst_dir) {
-                for entry in read_dir.flatten() {
-                    let file = entry.path();
-                    if let Ok(parser) = FitParser::from_file(file)
-                        && let Ok(workout) = Workout::try_from(parser)
-                        && pending_workouts.contains(&workout.name)
-                    {
-                        workouts_to_insert.push(workout);
-                    }
-                }
-            }
-
-            let _ = db.run_in_transaction(|tx| {
-                let mut insert = WorkoutStepRepository::insert();
-                for workout in &mut workouts_to_insert {
-                    for step in &mut workout.steps {
-                        insert = insert.item(step);
-                    }
-                }
-                Ok(insert.execute_in(tx)?)
-            });
-
-            let _ = fs::remove_dir_all(&src_dir);
-        }
-        drop(mtp_client);
 
         let (lang, auto_sync) = {
             let settings_state = app.state::<SettingsLock>();
@@ -174,6 +118,80 @@ async fn mtp_dev_check_and_sync(app: AppHandle, devices: &mut Vec<DeviceListItem
                 device.manufacturer, device.model, device.serial_number
             );
             devices.push(device.clone());
+
+            let dst_dir = std::env::temp_dir().join(format!(
+                "{}-{}",
+                constants::MTP_TMP_DIR_PREFIX,
+                SystemTime::now()
+                    .duration_since(UNIX_EPOCH)
+                    .unwrap()
+                    .as_millis()
+            ));
+
+            let mtp_client = MTP_CLIENT_INST.lock().await;
+            let _ = db.run_in_transaction(|tx| {
+                let pending_workouts = WorkoutRepository::select()
+                    .columns(&[workout::entity::columns::NAME])
+                    .where_(Where::And(vec![
+                        Where::NotInSub(
+                            workout::entity::columns::NAME,
+                            WorkoutStepRepository::select()
+                                .distinct(&[workout_step::entity::columns::WORKOUT])
+                                .to_subquery(),
+                        ),
+                        Where::InSub(
+                            workout::entity::columns::NAME,
+                            SessionRepository::select()
+                                .distinct(&[session::entity::columns::WORKOUT])
+                                .where_(Where::Eq(
+                                    session::entity::columns::DEVICE,
+                                    device.serial_number.clone().into(),
+                                ))
+                                .to_subquery(),
+                        ),
+                    ]))
+                    .fetch_in(tx)?
+                    .iter()
+                    .filter_map(|r| match r.get(workout::entity::columns::NAME.as_ref()) {
+                        Some(Value::Text(name)) => Some(name.clone()),
+                        _ => None,
+                    })
+                    .collect::<Vec<_>>();
+
+                if !pending_workouts.is_empty() {
+                    // The transaction closure is sync: block on the async download without stalling the runtime.
+                    let _ = tokio::task::block_in_place(|| {
+                        tokio::runtime::Handle::current().block_on(
+                            mtp_client.download_workouts(&device.serial_number, dst_dir.clone()),
+                        )
+                    });
+
+                    let mut workouts_to_insert = Vec::new();
+                    if let Ok(read_dir) = fs::read_dir(&dst_dir) {
+                        for entry in read_dir.flatten() {
+                            let file = entry.path();
+                            if let Ok(parser) = FitParser::from_file(file)
+                                && let Ok(workout) = Workout::try_from(parser)
+                                && pending_workouts.contains(&workout.name)
+                            {
+                                workouts_to_insert.push(workout);
+                            }
+                        }
+                    }
+
+                    let mut insert = WorkoutStepRepository::insert();
+                    for workout in &mut workouts_to_insert {
+                        for step in &mut workout.steps {
+                            insert = insert.item(step);
+                        }
+                    }
+                    insert.execute_in(tx)?;
+
+                    let _ = fs::remove_dir_all(&dst_dir);
+                }
+                Ok(())
+            });
+            drop(mtp_client);
 
             let payload: DeviceListItem = device.clone();
             let _ = app.emit("device_connected", payload);

@@ -1,5 +1,4 @@
 pub mod session;
-pub mod settings;
 
 use std::{
     fs::File,

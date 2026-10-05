@@ -6,7 +6,6 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     dao::{exercise::Exercise, lap::Lap, session::Session, set::Set},
-    fit::parser::settings::DeviceSettings,
     utils::constants,
 };
 
@@ -136,7 +135,7 @@ impl From<(&Session, &[Exercise], &[Set], &[Lap])> for SessionDetails {
             .map(|dev| format!("Garmin {}", dev.model));
 
         let mut heart_rates = Vec::new();
-        let mut max_hr = DeviceSettings::default().max_heart_rate;
+        let mut max_hr = 189;
         let mut gps_coordinates = Vec::new();
         let mut speeds = Vec::new();
         let mut distance = None;

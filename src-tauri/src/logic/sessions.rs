@@ -23,7 +23,7 @@ use crate::{
         notifications::{NotificationDefinition, NotificationKind},
         sessions::{SessionDetails, SessionListItem, SessionLocation, SessionSetsUpdate},
     },
-    fit::parser::{FitParser, settings::DeviceSettings},
+    fit::parser::FitParser,
     logic::{notifications::show_notification, report_error, run_blocking},
     mtp::MTP_CLIENT_INST,
     utils::{
@@ -329,7 +329,6 @@ pub async fn _import_from_device(app: &AppHandle, serial: &str) -> Result<usize,
     ));
 
     let activities_folder = src_dir.join("Activities");
-    let settings_folder = src_dir.join("Settings");
 
     if mtp_client
         .download_activities_since(serial, latest_date, activities_folder.clone())
@@ -348,22 +347,6 @@ pub async fn _import_from_device(app: &AppHandle, serial: &str) -> Result<usize,
         .await
         .map_err(|e| e.to_string())?;
 
-        let mut dev_settings = None;
-        if !activities.is_empty()
-            && let Ok(Some(path)) = mtp_client
-                .download_settings_file(serial, settings_folder)
-                .await
-        {
-            info!("Parsing settings file {}", path.display());
-            dev_settings = tokio::task::spawn_blocking(move || {
-                FitParser::from_file(path)
-                    .ok()
-                    .and_then(|parser| DeviceSettings::try_from(parser).ok())
-            })
-            .await
-            .map_err(|e| e.to_string())?;
-        }
-
         drop(mtp_client);
         let activities_cpy = activities.clone();
         let app_cpy = app.clone();
@@ -372,14 +355,7 @@ pub async fn _import_from_device(app: &AppHandle, serial: &str) -> Result<usize,
             db.run_in_transaction(move |tx| {
                 let res = if !activities_cpy.is_empty() {
                     info!("Fetched {} activity files", activities_cpy.len());
-                    import_file_list(
-                        tx,
-                        &activities_cpy,
-                        Some(device.clone()),
-                        lang,
-                        true,
-                        dev_settings.clone(),
-                    )
+                    import_file_list(tx, &activities_cpy, Some(device.clone()), lang, true)
                 } else {
                     Ok(Vec::new())
                 }?;
@@ -463,7 +439,7 @@ pub fn _import_from_files(app: AppHandle, files: &[PathBuf]) -> Result<usize, St
     let lang = app.state::<SettingsLock>().read().unwrap().language;
     let database = app.state::<DatabasePool>();
     let res = database
-        .run_in_transaction(|tx| Ok(import_file_list(tx, files, None, lang, false, None)?))
+        .run_in_transaction(|tx| Ok(import_file_list(tx, files, None, lang, false)?))
         .map_err(|e| e.to_string());
 
     match res {
@@ -493,7 +469,6 @@ fn import_file_list<F>(
     device: Option<Device>,
     lang: Languages,
     delete: bool,
-    dev_settings: Option<DeviceSettings>,
 ) -> Result<Vec<u32>, DatabaseError>
 where
     F: AsRef<Path> + Sync,
@@ -507,15 +482,7 @@ where
             info!("Parsing session file {}", file.as_ref().display());
             let res = match FitParser::from_file(file) {
                 Ok(parser) => match Session::try_from(parser) {
-                    Ok(mut session) => {
-                        if let Some(ad) = session.additional_data.as_mut()
-                            && ad.heart_rates.is_some()
-                            && let Some(ds) = dev_settings.clone()
-                        {
-                            ad.max_hr = Some(ds.max_heart_rate);
-                        }
-                        Ok((session, file))
-                    }
+                    Ok(session) => Ok((session, file)),
                     Err(e) => Err(e),
                 },
                 Err(e) => Err(e),

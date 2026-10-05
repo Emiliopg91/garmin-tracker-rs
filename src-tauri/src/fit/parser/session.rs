@@ -23,6 +23,7 @@ impl TryFrom<FitParser> for Session {
         let mut series_data = Vec::new();
         let mut laps = Vec::new();
         let mut workout = WorkoutAccumulator::default();
+        let mut max_heart_rate = None;
 
         let path_string = value.borrow_path().display().to_string();
 
@@ -60,6 +61,12 @@ impl TryFrom<FitParser> for Session {
                         MesgNum::LAP => {
                             let lap_obj = mesgdef::Lap::from(msg);
                             handle_lap_message(lap_obj, &mut laps)?;
+                        }
+                        MesgNum::TIME_IN_ZONE => {
+                            if max_heart_rate.is_none() {
+                                let zones_obj = mesgdef::TimeInZone::from(msg);
+                                max_heart_rate = Some(zones_obj.max_heart_rate);
+                            }
                         }
                         _ => {}
                     }
@@ -109,7 +116,12 @@ impl TryFrom<FitParser> for Session {
             .collect();
 
         records.timestamp = session_data.timestamp;
-        let additional_data: Option<AdditionalData> = records.into();
+        let mut additional_data: Option<AdditionalData> = records.into();
+        if let Some(ad) = additional_data.as_mut()
+            && ad.heart_rates.is_some()
+        {
+            ad.max_hr = max_heart_rate;
+        }
 
         Ok(Session {
             date: session_data.timestamp,

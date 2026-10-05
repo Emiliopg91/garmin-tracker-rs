@@ -256,43 +256,6 @@ impl MtpClient {
         result
     }
 
-    /// Downloads `.FIT` activity files newer than `date` from the device's `GARMIN/Activity` folder into a temp directory, returning their local paths.
-    pub async fn download_settings_file(
-        &self,
-        serial: &str,
-        dst_dir: PathBuf,
-    ) -> Result<Option<PathBuf>> {
-        let device = open_device(serial).await?;
-
-        info!("Fetching settings file...");
-        let result: Result<Option<PathBuf>> = async {
-            let storages = device.storages().await.map_err(MtpError::Storage)?;
-            let storage = storages
-                .first()
-                .ok_or_else(|| MtpError::NoStorageDevice(serial.to_string()))?;
-
-            info!("Listing files...");
-            let mut objs =
-                list_garmin_folder(storage, serial, constants::MTP_GARMIN_SETTINGS_FOLDER).await?;
-
-            objs.retain(|f| is_fit_file(f) && f.filename == "Settings.fit");
-            if objs.is_empty() {
-                info!("No settings file found");
-                return Ok(None);
-            }
-
-            info!("Found settings file");
-            Ok(download_files(storage, objs, &dst_dir)
-                .await?
-                .into_iter()
-                .next())
-        }
-        .await;
-
-        let _ = device.close().await;
-        result
-    }
-
     /// Downloads `.FIT` workout files.
     pub async fn download_workouts(&self, serial: &str, dst_dir: PathBuf) -> Result<()> {
         let device = open_device(serial).await?;
