@@ -15,7 +15,7 @@ use crate::{
         exercise::{self, ExerciseRepository},
         lap::LapRepository,
         session::{self, Session, SessionRepository},
-        set::{self, Set, SetRepository, entity},
+        set::{self, SetRepository, entity},
         workout::{Workout, WorkoutRepository},
         workout_step::WorkoutStepRepository,
     },
@@ -233,10 +233,6 @@ pub async fn save_session_changes(
                 SetRepository::update()
                     .set(entity::columns::REPS, serie.reps.into())
                     .set(entity::columns::WEIGHT, serie.weight.into())
-                    .set(
-                        entity::columns::E1RM,
-                        Set::estimate_1rm(serie.weight, serie.reps).into(),
-                    )
                     .where_(Where::And(vec![
                         Where::Eq(entity::columns::SESSION, details.timestamp.into()),
                         Where::Eq(entity::columns::IDX, serie.idx.into()),
@@ -849,7 +845,6 @@ pub fn recalculate_e1rm(
     debug!("Recalculating e1RM...");
     let mut sets = SetRepository::select().fetch_in(tx)?;
     for set in &mut sets {
-        set.e1rm = Set::estimate_1rm(set.weight, set.reps);
         set.update_by_id_in(tx)?;
     }
     Ok(())

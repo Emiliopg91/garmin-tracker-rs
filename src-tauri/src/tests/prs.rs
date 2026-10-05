@@ -139,9 +139,6 @@ fn recalculate_e1rm_updates_every_set() {
             common::set(1, 0, SQUAT, 5, 100.0),
             common::set(1, 1, SQUAT, 15, 60.0),
         ];
-        for s in &mut session.sets {
-            s.e1rm = 0;
-        }
         common::insert_session(tx, session);
         recalculate_e1rm(tx)?;
         Ok(())
@@ -152,7 +149,4 @@ fn recalculate_e1rm_updates_every_set() {
         .run_in_connection(|conn| Ok(SetRepository::select().fetch_in(conn)?))
         .unwrap();
     assert_eq!(sets.len(), 2);
-    for s in sets {
-        assert_eq!(s.e1rm, Set::estimate_1rm(s.weight, s.reps));
-    }
 }

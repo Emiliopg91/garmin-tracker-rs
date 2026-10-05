@@ -23,10 +23,12 @@ describe("BackendListener", () => {
     handlers = new Map();
     unlistenFn = vi.fn<UnlistenFn>();
     listenMock.mockReset();
-    listenMock.mockImplementation(async (event, handler) => {
-      handlers.set(event, handler as EventCallback<unknown>);
-      return unlistenFn;
-    });
+    listenMock.mockImplementation(
+      async (event: string, handler: EventCallback<unknown>) => {
+        handlers.set(event, handler);
+        return unlistenFn;
+      },
+    );
     vi.spyOn(console, "debug").mockImplementation(() => undefined);
     vi.spyOn(console, "error").mockImplementation(() => undefined);
   });
@@ -44,6 +46,18 @@ describe("BackendListener", () => {
     );
     emit("device_connected", device);
     expect(callback).toHaveBeenCalledWith(device);
+  });
+
+  it("forwards the workout names of added_workout_steps", () => {
+    const callback = vi.fn();
+    BackendListener.onAddedWorkoutSteps(callback);
+
+    expect(listenMock).toHaveBeenCalledWith(
+      "added_workout_steps",
+      expect.any(Function),
+    );
+    emit("added_workout_steps", ["Push", "Pull"]);
+    expect(callback).toHaveBeenCalledWith(["Push", "Pull"]);
   });
 
   it("invokes payload-less callbacks", () => {

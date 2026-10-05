@@ -1,7 +1,7 @@
 use std::fs;
 
 use crate::{
-    dao::{additional_data::AdditionalData, session::Session, set::Set},
+    dao::{additional_data::AdditionalData, session::Session},
     fit::parser::{FitParser, errors::ParseFitFileError},
     tests::common::{STRENGTH_SPORT, STRENGTH_SUB_SPORT},
 };
@@ -241,7 +241,6 @@ fn parses_strength_sessions() {
         for (idx, set) in session.sets.iter().enumerate() {
             assert_eq!(set.session, expected.date);
             assert_eq!(set.idx as usize, idx);
-            assert_eq!(set.e1rm, Set::estimate_1rm(set.weight, set.reps));
             assert!(set.exercise.is_some());
         }
 

@@ -63,7 +63,6 @@ pub fn set(session: u32, idx: u8, exercise: (u16, u16), reps: u16, weight: f32) 
         reps,
         weight,
         pr: false,
-        e1rm: Set::estimate_1rm(weight, reps),
         exercise: None,
     }
 }
