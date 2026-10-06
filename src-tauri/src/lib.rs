@@ -30,7 +30,7 @@ use crate::{
     logic::{
         app::{
             get_environment, get_settings, get_translations, notify_frontend_ready,
-            rclone_available, update_settings_value,
+            update_settings_value,
         },
         body_metrics::{add_body_measures, delete_body_metric, get_body_measures},
         devices::{get_registered_devices, import_from_device, send_to_device},
@@ -284,7 +284,6 @@ pub fn run(log_level: LevelFilter) {
             get_settings,
             update_settings_value,
             get_translations,
-            rclone_available,
             //Body Metrics
             get_body_measures,
             add_body_measures,

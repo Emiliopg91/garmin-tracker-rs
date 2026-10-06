@@ -25,7 +25,6 @@ export function AppProvider({
   const [appReady, setAppReady] = useState(false);
   const [settingsOpened, setSettingsOpened] = useState(false);
   const [tab, setTab] = useState(Tabs.HOME);
-  const [rcloneAvailable, setRcloneAvailable] = useState(false);
   const [availableDevices, setAvailableDevices] = useState<DeviceListItem[]>(
     [],
   );
@@ -90,13 +89,7 @@ export function AppProvider({
             }
           })
           .finally(() => {
-            BackendClient.rcloneAvailable()
-              .then((available) => {
-                setRcloneAvailable(available);
-              })
-              .finally(() => {
-                setBackendReady(true);
-              });
+            setBackendReady(true);
           });
       });
 
@@ -128,7 +121,6 @@ export function AppProvider({
       showSettings,
       closeSettings,
       sessionsVersion,
-      rcloneAvailable,
     }),
     [
       tab,
@@ -140,7 +132,6 @@ export function AppProvider({
       showSettings,
       closeSettings,
       sessionsVersion,
-      rcloneAvailable,
     ],
   );
 

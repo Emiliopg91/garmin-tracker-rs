@@ -38,7 +38,7 @@ export class BackendClient {
 	}
 	
 
-	// From src-tauri/src/logic/app.rs:65
+	// From src-tauri/src/logic/app.rs:64
 	public static getEnvironment(): Promise<AppEnvironment> {
 	  return BackendClient.inner_invoke("get_environment"); 
 	}
@@ -80,13 +80,13 @@ export class BackendClient {
 	}
 	
 
-	// From src-tauri/src/logic/app.rs:32
+	// From src-tauri/src/logic/app.rs:31
 	public static getSettings(): Promise<Settings> {
 	  return BackendClient.inner_invoke("get_settings"); 
 	}
 	
 
-	// From src-tauri/src/logic/app.rs:162
+	// From src-tauri/src/logic/app.rs:161
 	public static getTranslations(): Promise<Record<string, string>> {
 	  return BackendClient.inner_invoke("get_translations"); 
 	}
@@ -116,15 +116,9 @@ export class BackendClient {
 	}
 	
 
-	// From src-tauri/src/logic/app.rs:39
+	// From src-tauri/src/logic/app.rs:38
 	public static notifyFrontendReady(): Promise<void> {
 	  return BackendClient.inner_invoke("notify_frontend_ready"); 
-	}
-	
-
-	// From src-tauri/src/logic/app.rs:236
-	public static rcloneAvailable(): Promise<boolean> {
-	  return BackendClient.inner_invoke("rclone_available"); 
 	}
 	
 
@@ -152,7 +146,7 @@ export class BackendClient {
 	}
 	
 
-	// From src-tauri/src/logic/app.rs:76
+	// From src-tauri/src/logic/app.rs:75
 	public static updateSettingsValue(name: string, value: string): Promise<void> {
 	  return BackendClient.inner_invoke("update_settings_value", { name, value }); 
 	}

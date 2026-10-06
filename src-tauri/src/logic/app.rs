@@ -20,7 +20,6 @@ use crate::{
         devices::start_device_watcher, notifications::show_notification, report_error,
         sessions::update_pending_geolocation,
     },
-    rclone::RCloneClient,
     udev::UdevManager,
     utils::translations::{Languages, TRANSLATIONS, translate, translate_and_replace},
 };
@@ -229,10 +228,4 @@ fn check_for_update(app: AppHandle) {
         }
         thread::sleep(Duration::from_hours(1));
     }
-}
-
-#[traced_command]
-#[tauri::command]
-pub async fn rclone_available() -> bool {
-    RCloneClient::is_available().await
 }

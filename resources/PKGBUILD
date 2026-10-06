@@ -15,15 +15,21 @@ sha256sums=(
   'SKIP'
 )
 
-depends=('webkit2gtk-4.1' 'zlib-ng-compat')
-optdepends=('rclone: cloud backup upload')
+depends=(
+  'libnotify' 
+  'rclone' 
+  'systemd' 
+  'webkit2gtk-4.1' 
+  'zlib-ng-compat' 
+  'zenity')
+
 makedepends=(
-  'rust'
   'mold'
   'npm'
   'pnpm'
   'python-toml'
   'python-yaml'
+  'rust'
   'sccache'
 )
 

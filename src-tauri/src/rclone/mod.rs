@@ -11,16 +11,6 @@ pub struct RCloneClient<T> {
     _marker: PhantomData<T>,
 }
 
-impl RCloneClient<()> {
-    pub async fn is_available() -> bool {
-        let result = Command::new("which").arg("rclone").status().await;
-        match result {
-            Ok(status) => status.success(),
-            Err(_) => false,
-        }
-    }
-}
-
 impl<T> Default for RCloneClient<T> {
     fn default() -> Self {
         Self {

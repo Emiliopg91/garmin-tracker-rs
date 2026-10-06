@@ -26,7 +26,7 @@ type Props = {
 };
 
 export function Settings({ onClose }: Props) {
-  const { environment, rcloneAvailable } = useContext(AppContext);
+  const { environment } = useContext(AppContext);
   const { startLoading, finishLoading } = useContext(LoadingContext);
   const { settings, updateSettings, translate, refreshTranslations } =
     useContext(I18nSettingsContext);
@@ -292,13 +292,11 @@ export function Settings({ onClose }: Props) {
                             </Button>
                           </td>
                         </tr>
-                        {rcloneAvailable && (
-                          <tr>
-                            <td>
-                              <UploadToCloudMenu />
-                            </td>
-                          </tr>
-                        )}
+                        <tr>
+                          <td>
+                            <UploadToCloudMenu />
+                          </td>
+                        </tr>
                       </tbody>
                     </table>
                   </td>
