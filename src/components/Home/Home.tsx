@@ -23,6 +23,7 @@ import { Heatmap } from "./helpers/Heatmap";
 import { WorkloadChart } from "./helpers/WorkloadChart";
 import { ImportSessionsMenu } from "./helpers/ImportSessionsMenu";
 import { WorkoutSetsModal } from "../Workouts/WorkoutSetsModal";
+import { WorkoutActionsMenu } from "../Workouts/helpers/WorkoutActionsMenu";
 
 export function Home() {
   const { availableDevices, sessionsVersion } = useContext(AppContext);
@@ -205,9 +206,14 @@ export function Home() {
       });
   };
   const getWorkoutDetails = (name: string) => {
-    BackendClient.getWorkoutDetails(name).then((details) => {
-      setWorkoutDetails(details);
-    });
+    startLoading();
+    BackendClient.getWorkoutDetails(name)
+      .then((details) => {
+        setWorkoutDetails(details);
+      })
+      .finally(() => {
+        finishLoading();
+      });
   };
 
   useEffect(() => {
@@ -264,9 +270,16 @@ export function Home() {
     };
   }, [sessionsVersion, adapter, day]);
 
-  const openEdit = (workout: WorkoutDetails | undefined) => {
-    setWorkoutDetails(undefined);
-    setWorkoutEdit(workout);
+  const openEdit = (workout: string) => {
+    startLoading();
+    BackendClient.getWorkoutDetails(workout)
+      .then((details) => {
+        setWorkoutDetails(undefined);
+        setWorkoutEdit(details);
+      })
+      .finally(() => {
+        finishLoading();
+      });
   };
 
   return (
@@ -401,6 +414,7 @@ export function Home() {
                         <th className="text-center">
                           {translate("average_duration")}
                         </th>
+                        <th></th>
                       </tr>
                     </thead>
                     <tbody>
@@ -422,6 +436,15 @@ export function Home() {
                         </td>
                         <td>{formatNumber(workout.sessions, 0)}</td>
                         <td>{formatDuration(workout.avg_time)}</td>
+                        <td onClick={(e) => e.stopPropagation()}>
+                          {workout.has_steps && (
+                            <WorkoutActionsMenu
+                              workoutName={workout.name}
+                              onOpenEdit={() => openEdit(workout.name)}
+                              dense
+                            />
+                          )}
+                        </td>
                       </tr>
                     </tbody>
                   </table>
@@ -450,7 +473,9 @@ export function Home() {
             workout={workoutDetails}
             showEnable={false}
             onClose={() => setWorkoutDetails(undefined)}
-            onOpenEdit={openEdit}
+            onOpenEdit={() => {
+              openEdit(workoutDetails.name);
+            }}
           />
         )}
       </div>

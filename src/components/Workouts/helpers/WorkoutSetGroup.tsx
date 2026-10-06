@@ -18,6 +18,7 @@ import { I18nSettingsContext } from "@/context/I18nSettingsContext";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import ClearIcon from "@mui/icons-material/Clear";
+import AddCircleOutlineRoundedIcon from "@mui/icons-material/AddCircleOutlineRounded";
 
 type Props = {
   group: StepGroup;
@@ -104,9 +105,6 @@ export function WorkoutSetGroup({
             </Select>
           </FormControl>
           <Box sx={{ display: "flex", gap: 0.5 }}>
-            <Button variant="contained" onClick={addStep}>
-              {translate("add_step")}
-            </Button>
             <Tooltip title={translate("move_up")}>
               <span>
                 <IconButton
@@ -128,6 +126,11 @@ export function WorkoutSetGroup({
                   <ArrowDownwardIcon />
                 </IconButton>
               </span>
+            </Tooltip>
+            <Tooltip title={translate("add_step")}>
+              <IconButton onClick={addStep}>
+                <AddCircleOutlineRoundedIcon />
+              </IconButton>
             </Tooltip>
             <Tooltip title={translate("delete")}>
               <span>
