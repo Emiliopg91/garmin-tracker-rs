@@ -36,9 +36,11 @@ export function Settings({ onClose }: Props) {
   const [autoSync, setAutoSync] = useState(settings.auto_sync);
   const [startOnBoot, setStartOnBoot] = useState(settings.start_boot);
   const [language, setLanguage] = useState(settings.language);
-  const [onDeviceCOnnect, setOnDeviceConnect] = useState(
+  const [onDeviceConnect, setOnDeviceConnect] = useState(
     settings.on_device_connect,
   );
+  const [startIntoTray, setStartIntoTray] = useState(settings.start_into_tray);
+  const [closeToTray, setCloseToTray] = useState(settings.close_to_tray);
 
   const updateWeightUnit = (value: WeightUnit) => {
     startLoading();
@@ -110,6 +112,33 @@ export function Settings({ onClose }: Props) {
       .then(() => {
         setOnDeviceConnect(value);
         updateSettings({ on_device_connect: value });
+      })
+      .finally(() => {
+        finishLoading();
+      });
+  };
+
+  const updateCloseToTray = (value: boolean) => {
+    startLoading();
+    BackendClient.updateSettingsValue("close_to_tray", value ? "true" : "false")
+      .then(() => {
+        setCloseToTray(value);
+        updateSettings({ close_to_tray: value });
+      })
+      .finally(() => {
+        finishLoading();
+      });
+  };
+
+  const updateStartIntoTray = (value: boolean) => {
+    startLoading();
+    BackendClient.updateSettingsValue(
+      "start_into_tray",
+      value ? "true" : "false",
+    )
+      .then(() => {
+        setStartIntoTray(value);
+        updateSettings({ start_into_tray: value });
       })
       .finally(() => {
         finishLoading();
@@ -236,12 +265,44 @@ export function Settings({ onClose }: Props) {
                   </td>
                 </tr>
                 <tr>
+                  <td>{translate("start_into_tray")}</td>
+                  <td>
+                    <Select
+                      size="small"
+                      fullWidth
+                      value={startIntoTray ? "true" : "false"}
+                      onChange={(e) =>
+                        updateStartIntoTray(e.target.value === "true")
+                      }
+                    >
+                      <MenuItem value="false">{translate("no")}</MenuItem>
+                      <MenuItem value="true">{translate("yes")}</MenuItem>
+                    </Select>
+                  </td>
+                </tr>
+                <tr>
+                  <td>{translate("close_to_tray")}</td>
+                  <td>
+                    <Select
+                      size="small"
+                      fullWidth
+                      value={closeToTray ? "true" : "false"}
+                      onChange={(e) =>
+                        updateCloseToTray(e.target.value === "true")
+                      }
+                    >
+                      <MenuItem value="false">{translate("no")}</MenuItem>
+                      <MenuItem value="true">{translate("yes")}</MenuItem>
+                    </Select>
+                  </td>
+                </tr>
+                <tr>
                   <td>{translate("on_device_connect")}</td>
                   <td>
                     <Select
                       size="small"
                       fullWidth
-                      value={onDeviceCOnnect ? "true" : "false"}
+                      value={onDeviceConnect ? "true" : "false"}
                       onChange={(e) =>
                         updateOnDeviceConnect(e.target.value === "true")
                       }

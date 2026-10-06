@@ -14,6 +14,8 @@ pub mod settings_keys {
     pub const WEIGHT_UNIT: &str = "weight_unit";
     pub const ON_DEVICE_CONNECT: &str = "on_device_connect";
     pub const VERSION: &str = "version";
+    pub const START_INTO_TRAY: &str = "start_into_tray";
+    pub const CLOSE_TO_TRAY: &str = "close_to_tray";
 }
 
 #[derive(Entity, Serialize, Deserialize)]
@@ -147,6 +149,46 @@ impl Settings {
             .or_replace()
             .item(&mut Settings {
                 name: settings_keys::START_ON_BOOT.to_string(),
+                value: value.to_string(),
+            })
+            .execute(db)
+            .map(|_| ())
+    }
+
+    /// Reads whether close to tray is enabled, defaulting to `false` if unset.
+    pub fn get_close_to_tray(db: &DatabasePool) -> bool {
+        SettingsRepository::select_by_id(db, settings_keys::CLOSE_TO_TRAY)
+            .ok()
+            .flatten()
+            .and_then(|r| r.value.parse().ok())
+            .unwrap_or(false)
+    }
+    /// Persists the close to tray setting.
+    pub fn set_close_to_tray(db: &DatabasePool, value: bool) -> rusqlite_orm::errors::Result<()> {
+        SettingsRepository::insert()
+            .or_replace()
+            .item(&mut Settings {
+                name: settings_keys::CLOSE_TO_TRAY.to_string(),
+                value: value.to_string(),
+            })
+            .execute(db)
+            .map(|_| ())
+    }
+
+    /// Reads whether start into tray is enabled, defaulting to `false` if unset.
+    pub fn get_start_into_tray(db: &DatabasePool) -> bool {
+        SettingsRepository::select_by_id(db, settings_keys::START_INTO_TRAY)
+            .ok()
+            .flatten()
+            .and_then(|r| r.value.parse().ok())
+            .unwrap_or(false)
+    }
+    /// Persists the start into tray setting.
+    pub fn set_start_into_tray(db: &DatabasePool, value: bool) -> rusqlite_orm::errors::Result<()> {
+        SettingsRepository::insert()
+            .or_replace()
+            .item(&mut Settings {
+                name: settings_keys::START_INTO_TRAY.to_string(),
                 value: value.to_string(),
             })
             .execute(db)

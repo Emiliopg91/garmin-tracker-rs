@@ -19,7 +19,11 @@ use rusqlite_orm::database::{
     builder::{DatabaseConnectionBuilder, JournalMode},
 };
 use rusqlite_orm::ddls;
-use tauri::{Manager, WindowEvent};
+use tauri::{
+    Manager, WindowEvent,
+    menu::{Menu, MenuItem, PredefinedMenuItem},
+    tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
+};
 use tauri_plugin_log::{
     Target, TargetKind,
     log::{LevelFilter, debug, error, info},
@@ -29,8 +33,8 @@ use crate::{
     dto::app::Settings,
     logic::{
         app::{
-            get_environment, get_settings, get_translations, notify_frontend_ready,
-            update_settings_value,
+            get_environment, get_settings, get_translations, hide_main_window,
+            notify_frontend_ready, show_main_window, update_settings_value,
         },
         body_metrics::{add_body_measures, delete_body_metric, get_body_measures},
         devices::{get_registered_devices, import_from_device, send_to_device},
@@ -43,7 +47,7 @@ use crate::{
         workouts::{get_workout_details, get_workout_list, save_workout, set_workout_status},
     },
     udev::UdevManager,
-    utils::{constants, single_instance::SingleInstance},
+    utils::{constants, single_instance::SingleInstance, translations::translate},
 };
 
 #[cfg(debug_assertions)]
@@ -167,7 +171,7 @@ fn schema_ddls() -> Vec<DdlVersion> {
 pub fn run(log_level: LevelFilter) {
     SingleInstance::acquire();
 
-    if let Err(e) = tauri::Builder::default()
+    tauri::Builder::default()
         .plugin(tauri_plugin_autostart::Builder::new().build())
         .plugin(
             tauri_plugin_log::Builder::new()
@@ -230,14 +234,21 @@ pub fn run(log_level: LevelFilter) {
 
             let (database, settings) = initialize();
 
-            app.manage(database);
-            app.manage(SettingsLock::new(settings));
-
             let app_handle = app.handle().clone();
             let window = app_handle.get_webview_window("main");
             if let Some(window) = window {
                 window.on_window_event(move |event| {
-                    if let WindowEvent::DragDrop(event) = event
+                    if let WindowEvent::CloseRequested { api, .. } = event {
+                        if app_handle
+                            .state::<SettingsLock>()
+                            .read()
+                            .unwrap()
+                            .close_to_tray
+                        {
+                            api.prevent_close();
+                            let _ = hide_main_window(&app_handle);
+                        }
+                    } else if let WindowEvent::DragDrop(event) = event
                         && let tauri::DragDropEvent::Drop { paths, position: _ } = event
                     {
                         let paths = paths
@@ -255,6 +266,49 @@ pub fn run(log_level: LevelFilter) {
                     }
                 });
             }
+
+            let open = MenuItem::with_id(
+                app,
+                "open",
+                translate("open", settings.language),
+                true,
+                None::<&str>,
+            )?;
+            let separator = PredefinedMenuItem::separator(app)?;
+            let exit = MenuItem::with_id(
+                app,
+                "exit",
+                translate("exit", settings.language),
+                true,
+                None::<&str>,
+            )?;
+            let menu = Menu::with_items(app, &[&open, &separator, &exit])?;
+            TrayIconBuilder::new()
+                .icon(app.default_window_icon().unwrap().clone())
+                .tooltip("Mi app")
+                .menu(&menu)
+                .show_menu_on_left_click(false) // el menú solo aparece con clic derecho
+                .on_menu_event(|app, event| match event.id.as_ref() {
+                    "open" => {
+                        let _ = show_main_window(&app);
+                    }
+                    "exit" => app.exit(0),
+                    _ => {}
+                })
+                .on_tray_icon_event(|tray, event| {
+                    if let TrayIconEvent::Click {
+                        button: MouseButton::Left,
+                        button_state: MouseButtonState::Up,
+                        ..
+                    } = event
+                    {
+                        let _ = show_main_window(tray.app_handle());
+                    }
+                })
+                .build(app)?;
+
+            app.manage(database);
+            app.manage(SettingsLock::new(settings));
 
             debug!("Setup finished");
             Ok(())
@@ -293,9 +347,17 @@ pub fn run(log_level: LevelFilter) {
             upload_to_cloud,
             export_gpx,
         ])
-        .run(tauri::generate_context!())
-    {
-        eprintln!("Error while running tauri application {}", e);
-        exit(constants::ExitCodes::TauriError.into())
-    }
+        .build(tauri::generate_context!())
+        .unwrap_or_else(|e| {
+            eprintln!("Error while running tauri application {}", e);
+            exit(constants::ExitCodes::TauriError.into())
+        })
+        .run(|app, event| {
+            if let tauri::RunEvent::ExitRequested { api, code, .. } = event {
+                if code.is_none() && app.state::<SettingsLock>().read().unwrap().close_to_tray {
+                    api.prevent_exit();
+                    let _ = hide_main_window(app);
+                }
+            }
+        });
 }

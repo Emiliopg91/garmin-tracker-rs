@@ -4,13 +4,14 @@ use garmin_tracker_rs_macros::traced_command;
 use rusqlite_orm::database::DatabasePool;
 use semver::Version;
 use serde_json::Value;
-use tauri::{AppHandle, Manager, State, WebviewWindow};
+use tauri::{AppHandle, Manager, State, WebviewWindowBuilder};
 use tauri_plugin_autostart::ManagerExt;
 
 use crate::{
     SettingsLock, constants,
     dao::settings::settings_keys::{
-        AUTO_SYNC, DISTANCE_UNIT, LANGUAGE, ON_DEVICE_CONNECT, START_ON_BOOT, WEIGHT_UNIT,
+        AUTO_SYNC, CLOSE_TO_TRAY, DISTANCE_UNIT, LANGUAGE, ON_DEVICE_CONNECT, START_INTO_TRAY,
+        START_ON_BOOT, WEIGHT_UNIT,
     },
     dto::{
         app::{AppEnvironment, Settings},
@@ -35,18 +36,14 @@ pub async fn get_settings(settings: State<'_, SettingsLock>) -> Result<Settings,
 /// Called once the frontend has mounted: starts the USB device watcher and reveals the main window.
 #[traced_command]
 #[tauri::command]
-pub async fn notify_frontend_ready(app: AppHandle, webview_window: WebviewWindow) {
+pub async fn notify_frontend_ready(app: AppHandle) {
     info!("UI ready");
 
     start_device_watcher(app.clone());
 
-    info!("Showing up main window...");
-    let _ = webview_window.set_title(&format!(
-        "{} v{}",
-        webview_window.title().unwrap(),
-        *constants::APP_VERSION
-    ));
-    let _ = webview_window.show();
+    if !app.state::<SettingsLock>().read().unwrap().start_into_tray {
+        let _ = show_main_window(&app);
+    }
 
     let app_cl = app.clone();
     std::thread::spawn(move || {
@@ -56,6 +53,36 @@ pub async fn notify_frontend_ready(app: AppHandle, webview_window: WebviewWindow
 
     let app_cl = app.clone();
     std::thread::spawn(|| check_for_update(app_cl));
+}
+
+pub fn show_main_window(app: &AppHandle) -> tauri::Result<()> {
+    if let Some(w) = app.get_webview_window("main") {
+        w.show()?;
+        w.unminimize()?;
+        w.set_focus()?;
+        return Ok(());
+    }
+
+    let config = app
+        .config()
+        .app
+        .windows
+        .iter()
+        .find(|w| w.label == "main")
+        .expect("no hay ventana 'main' en tauri.conf.json")
+        .clone();
+
+    let w = WebviewWindowBuilder::from_config(app, &config)?.build()?;
+    w.set_focus()?;
+    Ok(())
+}
+
+pub fn hide_main_window(app: &AppHandle) -> tauri::Result<()> {
+    if let Some(w) = app.get_webview_window("main") {
+        w.hide()?;
+        return Ok(());
+    }
+    Ok(())
 }
 
 /// Reports whether this is a debug or release build.
@@ -105,6 +132,18 @@ pub async fn update_settings_value(app: AppHandle, name: &str, value: &str) -> R
                 }
                 .map_err(|e| e.to_string())?;
                 settings.write().unwrap().start_boot = value;
+            }
+            START_INTO_TRAY => {
+                let value = value == "true";
+                crate::dao::settings::Settings::set_start_into_tray(&database, value)
+                    .map_err(|e| e.to_string())?;
+                settings.write().unwrap().start_into_tray = value;
+            }
+            CLOSE_TO_TRAY => {
+                let value = value == "true";
+                crate::dao::settings::Settings::set_close_to_tray(&database, value)
+                    .map_err(|e| e.to_string())?;
+                settings.write().unwrap().close_to_tray = value;
             }
             WEIGHT_UNIT => {
                 let value = value.as_str().try_into()?;
