@@ -2,7 +2,6 @@ import { LeafStep, StepGroup, WorkoutUtils } from "@/utils/WorkoutUtils";
 import { WorkoutSetLeaf } from "./WorkoutSetLeaf";
 import {
   Box,
-  Button,
   Divider,
   FormControl,
   IconButton,
