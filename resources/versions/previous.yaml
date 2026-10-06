@@ -46,7 +46,7 @@ rust:
   phf: 0.13.1
   phf_codegen: 0.13.1
   rayon: 1.12.0
-  rusqlite_orm: 1.0.0
+  rusqlite_orm: 1.0.1
   rustyfit: 0.10.3
   semver: 1.0.28
   serde: 1.0.229
