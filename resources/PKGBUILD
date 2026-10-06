@@ -13,25 +13,10 @@ sha256sums=(
   'SKIP'
 )
 
-depends=('webkit2gtk-4.1' 
-  'zlib-ng-compat'
-  'libnotify' 
-  'rclone' 
-  'systemd' 
-  'webkit2gtk-4.1' 
-  'zlib-ng-compat' 
-  'zenity'
+depends=('webkit2gtk-4.1' 'zlib-ng-compat' 'libnotify' 'rclone' 'systemd' 'webkit2gtk-4.1' 'zlib-ng-compat' 'zenity'
 )
 
-makedepends=(
-  'mold'
-  'npm'
-  'pnpm'
-  'python-toml'
-  'python-yaml'
-  'rust'
-  'sccache'
-)
+makedepends=( 'mold' 'npm' 'pnpm' 'python-toml' 'python-yaml' 'rust' 'sccache'
 
 install=${pkgname}.install
 
