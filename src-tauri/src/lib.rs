@@ -290,7 +290,7 @@ pub fn run(log_level: LevelFilter) {
                 .show_menu_on_left_click(false) // el menú solo aparece con clic derecho
                 .on_menu_event(|app, event| match event.id.as_ref() {
                     "open" => {
-                        let _ = show_main_window(&app);
+                        let _ = show_main_window(app);
                     }
                     "exit" => app.exit(0),
                     _ => {}
@@ -353,11 +353,12 @@ pub fn run(log_level: LevelFilter) {
             exit(constants::ExitCodes::TauriError.into())
         })
         .run(|app, event| {
-            if let tauri::RunEvent::ExitRequested { api, code, .. } = event {
-                if code.is_none() && app.state::<SettingsLock>().read().unwrap().close_to_tray {
-                    api.prevent_exit();
-                    let _ = hide_main_window(app);
-                }
+            if let tauri::RunEvent::ExitRequested { api, code, .. } = event
+                && code.is_none()
+                && app.state::<SettingsLock>().read().unwrap().close_to_tray
+            {
+                api.prevent_exit();
+                let _ = hide_main_window(app);
             }
         });
 }
