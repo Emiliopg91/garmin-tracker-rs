@@ -3,15 +3,18 @@ use std::{
     time::{SystemTime, UNIX_EPOCH},
 };
 
+use chrono::{Datelike, Local, TimeZone, Timelike};
+use garmin_tracker_rs_macros::traced_command;
 use nusb::hotplug::HotplugEvent;
 use rusqlite_orm::{
     dao::Repository,
     database::DatabasePool,
+    errors::DatabaseError,
     types::{value::Value, where_clause::Where},
 };
 use tokio_stream::StreamExt;
 
-use tauri::{AppHandle, Emitter, Manager};
+use tauri::{AppHandle, Emitter, Manager, State};
 use tauri_plugin_log::log::{error, info};
 
 use crate::{
@@ -19,19 +22,25 @@ use crate::{
     dao::{
         device::{Device, DeviceRepository},
         session::{self, SessionRepository},
+        settings::WeightUnit,
         workout::{self, Workout, WorkoutRepository},
+        workout_device::{self, WorkoutDevice, WorkoutDeviceRepository},
         workout_step::{self, WorkoutStepRepository},
     },
     dto::{
         devices::DeviceListItem,
         notifications::{NotificationDefinition, NotificationKind},
     },
-    fit::parser::FitParser,
-    logic::{notifications::show_notification, sessions::_import_from_device},
+    fit::{parser::FitParser, writer::FitWriter},
+    logic::{
+        notifications::show_notification,
+        report_error, run_blocking,
+        sessions::{import_file_list, update_pending_geolocation},
+    },
     mtp::MTP_CLIENT_INST,
     utils::{
         constants,
-        translations::{translate, translate_and_replace},
+        translations::{Languages, translate, translate_and_replace},
     },
 };
 
@@ -118,7 +127,8 @@ async fn mtp_dev_check_and_sync(app: AppHandle, devices: &mut Vec<DeviceListItem
             );
             devices.push(device.clone());
 
-            download_pending_workouts(&app, &db, device).await;
+            download_pending_workouts(&app, &device.serial_number).await;
+            push_pending_workouts(&app, &device.serial_number).await;
 
             let payload: DeviceListItem = device.clone();
             let _ = app.emit("device_connected", payload);
@@ -181,32 +191,111 @@ async fn mtp_dev_check_and_sync(app: AppHandle, devices: &mut Vec<DeviceListItem
     }
 }
 
+/// Uploads to `device` the workouts queued while it was disconnected, removing each queue entry once sent.
+async fn push_pending_workouts(app: &AppHandle, serial: &str) {
+    let serial = serial.to_string();
+    let serial_q = serial.clone();
+    let pending = match run_blocking(app.clone(), move |db| {
+        db.run_in_connection(|conn| {
+            Ok(WorkoutDeviceRepository::select()
+                .columns(&[workout_device::entity::columns::WORKOUT])
+                .where_(Where::Eq(
+                    workout_device::entity::columns::DEVICE,
+                    serial_q.clone().into(),
+                ))
+                .fetch_in(conn)?
+                .iter()
+                .filter_map(
+                    |r| match r.get(workout_device::entity::columns::WORKOUT.as_ref()) {
+                        Some(Value::Text(name)) => Some(name.clone()),
+                        _ => None,
+                    },
+                )
+                .collect::<Vec<_>>())
+        })
+    })
+    .await
+    {
+        Ok(pending) => pending,
+        Err(e) => {
+            error!("Error fetching pending workouts for pushing to {serial}: {e}");
+            return;
+        }
+    };
+    if pending.is_empty() {
+        return;
+    }
+
+    let (lang, weight_unit) = {
+        let state = app.state::<SettingsLock>();
+        let settings = state.read().unwrap();
+        (settings.language, settings.weight_unit)
+    };
+    for workout in pending {
+        if let Err(e) =
+            send_workout_to_device(app.clone(), lang, weight_unit, &workout, &serial).await
+        {
+            error!("Error pushing pending workout '{workout}' to {serial}: {e}");
+            continue;
+        }
+        info!("Pending workout '{workout}' sent to device {serial}");
+
+        let device = serial.clone();
+        if let Err(e) = run_blocking(app.clone(), move |db| {
+            db.run_in_transaction(|tx| {
+                Ok(WorkoutDeviceRepository::delete()
+                    .where_(Where::And(vec![
+                        Where::Eq(
+                            workout_device::entity::columns::WORKOUT,
+                            workout.clone().into(),
+                        ),
+                        Where::Eq(
+                            workout_device::entity::columns::DEVICE,
+                            device.clone().into(),
+                        ),
+                    ]))
+                    .execute_in(tx)?)
+            })
+        })
+        .await
+        {
+            error!("Error clearing pending upload entry for {serial}: {e}");
+        }
+    }
+}
+
 /// Downloads from `device` the step definitions of workouts that have sessions recorded on it but no steps stored yet.
-async fn download_pending_workouts(app: &AppHandle, db: &DatabasePool, device: &DeviceListItem) {
-    let pending_workouts = match db.run_in_connection(|conn| {
-        let rows = WorkoutRepository::select()
-            .columns(&[workout::entity::columns::NAME])
-            .where_(Where::And(vec![
-                Where::NotInSub(
-                    workout::entity::columns::NAME,
-                    WorkoutStepRepository::select()
-                        .distinct(&[workout_step::entity::columns::WORKOUT])
-                        .to_subquery(),
-                ),
-                Where::InSub(
-                    workout::entity::columns::NAME,
-                    SessionRepository::select()
-                        .distinct(&[session::entity::columns::WORKOUT])
-                        .where_(Where::Eq(
-                            session::entity::columns::DEVICE,
-                            device.serial_number.clone().into(),
-                        ))
-                        .to_subquery(),
-                ),
-            ]))
-            .fetch_in(conn)?;
-        Ok(rows)
-    }) {
+async fn download_pending_workouts(app: &AppHandle, serial: &str) {
+    let serial = serial.to_string();
+    let serial_q = serial.clone();
+    let pending_workouts = match run_blocking(app.clone(), move |db| {
+        db.run_in_connection(|conn| {
+            let rows = WorkoutRepository::select()
+                .columns(&[workout::entity::columns::NAME])
+                .where_(Where::And(vec![
+                    Where::NotInSub(
+                        workout::entity::columns::NAME,
+                        WorkoutStepRepository::select()
+                            .distinct(&[workout_step::entity::columns::WORKOUT])
+                            .to_subquery(),
+                    ),
+                    Where::InSub(
+                        workout::entity::columns::NAME,
+                        SessionRepository::select()
+                            .distinct(&[session::entity::columns::WORKOUT])
+                            .where_(Where::Eq(
+                                session::entity::columns::DEVICE,
+                                serial_q.clone().into(),
+                            ))
+                            .to_subquery(),
+                    ),
+                ]))
+                .fetch_in(conn)?;
+            Ok(rows)
+        })
+    })
+    .await
+    {
         Ok(rows) => rows
             .iter()
             .filter_map(|r| match r.get(workout::entity::columns::NAME.as_ref()) {
@@ -215,10 +304,7 @@ async fn download_pending_workouts(app: &AppHandle, db: &DatabasePool, device: &
             })
             .collect::<Vec<_>>(),
         Err(e) => {
-            error!(
-                "Error listing pending workouts for {}: {e}",
-                device.serial_number
-            );
+            error!("Error listing pending workouts for {}: {e}", serial);
             return;
         }
     };
@@ -239,49 +325,306 @@ async fn download_pending_workouts(app: &AppHandle, db: &DatabasePool, device: &
     let downloaded = MTP_CLIENT_INST
         .lock()
         .await
-        .download_workouts(&device.serial_number, dst_dir.clone())
+        .download_workouts(&serial, dst_dir.clone())
         .await;
 
     match downloaded {
         Ok(()) => {
-            let mut workouts_to_insert = Vec::new();
-            if let Ok(read_dir) = fs::read_dir(&dst_dir) {
-                for entry in read_dir.flatten() {
-                    if let Ok(parser) = FitParser::from_file(entry.path())
-                        && let Ok(workout) = Workout::try_from(parser)
-                        && !workout.steps.is_empty()
-                        && pending_workouts.contains(&workout.name)
-                    {
-                        workouts_to_insert.push(workout);
+            let src_dir = dst_dir.clone();
+            let (workout_names, stored) = run_blocking(app.clone(), move |db| {
+                let mut workouts_to_insert = Vec::new();
+                if let Ok(read_dir) = fs::read_dir(&src_dir) {
+                    for entry in read_dir.flatten() {
+                        if let Ok(parser) = FitParser::from_file(entry.path())
+                            && let Ok(workout) = Workout::try_from(parser)
+                            && !workout.steps.is_empty()
+                            && pending_workouts.contains(&workout.name)
+                        {
+                            workouts_to_insert.push(workout);
+                        }
                     }
                 }
-            }
 
-            let mut insert = WorkoutStepRepository::insert();
-            let mut workout_names: Vec<String> = Vec::new();
-            for workout in &mut workouts_to_insert {
-                for step in &mut workout.steps {
-                    insert = insert.item(step);
+                let mut insert = WorkoutStepRepository::insert();
+                let mut workout_names: Vec<String> = Vec::new();
+                for workout in &mut workouts_to_insert {
+                    for step in &mut workout.steps {
+                        insert = insert.item(step);
+                    }
+                    workout_names.push(workout.name.clone());
                 }
-                workout_names.push(workout.name.clone());
-            }
+
+                let stored = if workout_names.is_empty() {
+                    Ok(())
+                } else {
+                    insert.execute(db).map(|_| ())
+                };
+
+                (workout_names, stored)
+            })
+            .await;
 
             if !workout_names.is_empty() {
-                if let Err(e) = insert.execute(db) {
-                    error!(
-                        "Error storing workout steps from {}: {e}",
-                        device.serial_number
-                    );
+                if let Err(e) = stored {
+                    error!("Error storing workout steps from {}: {e}", serial);
                 } else {
                     let _ = app.emit("added_workout_steps", workout_names);
                 }
             }
         }
-        Err(e) => error!(
-            "Error downloading workouts from {}: {e}",
-            device.serial_number
-        ),
+        Err(e) => error!("Error downloading workouts from {}: {e}", serial),
     }
 
     let _ = fs::remove_dir_all(&dst_dir);
+}
+
+#[traced_command]
+#[tauri::command]
+pub async fn send_to_device(
+    app: AppHandle,
+    settings: State<'_, SettingsLock>,
+    workout: &str,
+    serial: &str,
+) -> Result<(), String> {
+    let (lang, weight_unit) = {
+        let settings = settings.read().unwrap();
+        (settings.language, settings.weight_unit)
+    };
+
+    let connected = MTP_CLIENT_INST
+        .lock()
+        .await
+        .is_device_connected(serial)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    let res: Result<bool, String> = if connected {
+        send_workout_to_device(app, lang, weight_unit, workout, serial)
+            .await
+            .map(|_| true)
+    } else {
+        let mut entry = WorkoutDevice {
+            device: serial.to_string(),
+            workout: workout.to_string(),
+        };
+
+        run_blocking(app, move |database| {
+            database.run_in_transaction(|tx| {
+                Ok(WorkoutDeviceRepository::insert()
+                    .or_ignore()
+                    .item(&mut entry)
+                    .execute_in(tx)?)
+            })
+        })
+        .await
+        .map_err(|e| e.to_string())?;
+
+        Ok(false)
+    };
+
+    match res {
+        Ok(true) => {
+            info!("Workout '{}' sent to device {}", workout, serial);
+            show_notification(NotificationDefinition {
+                title: workout.to_string(),
+                body: translate("ok_workout_send", lang),
+                kind: NotificationKind::Temporal,
+            });
+            Ok(())
+        }
+        Ok(false) => {
+            info!(
+                "Workout '{}' pending to be sent to device {}",
+                workout, serial
+            );
+            show_notification(NotificationDefinition {
+                title: workout.to_string(),
+                body: translate("pending_workout_send", lang),
+                kind: NotificationKind::Temporal,
+            });
+            Ok(())
+        }
+        Err(e) => Err(report_error(
+            e,
+            lang,
+            "error_workout_send",
+            "Error sending workout to device",
+        )),
+    }
+}
+
+async fn send_workout_to_device(
+    app: AppHandle,
+    lang: Languages,
+    weight_unit: WeightUnit,
+    workout: &str,
+    serial: &str,
+) -> Result<(), String> {
+    let name = workout.to_string();
+    let workout = run_blocking(app, move |database| {
+        database.run_in_connection(|conn| {
+            let mut wk = WorkoutRepository::select_by_id_in(conn, &name)?.unwrap();
+            wk.fetch_steps_relationship_in(conn)?;
+
+            Ok(wk)
+        })
+    })
+    .await
+    .map_err(|e| e.to_string())?;
+
+    let path = std::env::temp_dir().join(workout.get_workout_file_name());
+    FitWriter::from(&workout)
+        .write(path.clone(), lang, weight_unit)
+        .map_err(|e| e.to_string())?;
+
+    let upload = MTP_CLIENT_INST
+        .lock()
+        .await
+        .upload_workout(serial, path.clone())
+        .await
+        .map_err(|e| e.to_string());
+
+    let _ = tokio::fs::remove_file(path).await;
+
+    upload
+}
+
+/// Tauri command wrapper around `_import_from_device`; returns the number of sessions imported.
+#[traced_command]
+#[tauri::command]
+pub async fn import_from_device(app: AppHandle, serial: &str) -> Result<usize, String> {
+    _import_from_device(&app, serial).await
+}
+
+/// Downloads new activity files from the given device since its last sync and imports them.
+pub async fn _import_from_device(app: &AppHandle, serial: &str) -> Result<usize, String> {
+    info!("Starting import from device with S/N {}", serial);
+    let mut latest_date = "2026-06-08-00-00-00".to_string();
+    let lang = app.state::<SettingsLock>().read().unwrap().language;
+    let mut device = {
+        let app = app.clone();
+        let serial = serial.to_string();
+        tokio::task::spawn_blocking(move || {
+            let db = app.state::<DatabasePool>();
+            db.run_in_connection(|conn| {
+                let device = DeviceRepository::select_by_id_in(conn, &serial)?;
+
+                Ok(device.unwrap())
+            })
+        })
+        .await
+        .map_err(|e| e.to_string())?
+        .map_err(|e| e.to_string())
+    }?;
+
+    if let Some(latest) = device.last_sync {
+        let latest = Local.timestamp_opt(latest as i64, 0).unwrap();
+        latest_date = format!(
+            "{:04}-{:02}-{:02}-{:02}-{:02}-{:02}",
+            latest.year(),
+            latest.month(),
+            latest.day(),
+            latest.hour(),
+            latest.minute(),
+            latest.second(),
+        );
+    }
+
+    info!(
+        "Fetching from device activity files after {}...",
+        latest_date
+    );
+    let mut res: Result<Vec<u32>, DatabaseError> = Ok(Vec::new());
+    let mut activities = Vec::new();
+
+    let mtp_client = MTP_CLIENT_INST.lock().await;
+
+    let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
+    let src_dir = std::env::temp_dir().join(format!(
+        "{}-{}",
+        constants::MTP_TMP_DIR_PREFIX,
+        now.as_millis()
+    ));
+
+    let activities_folder = src_dir.join("Activities");
+
+    if mtp_client
+        .download_activities_since(serial, latest_date, activities_folder.clone())
+        .await
+        .is_ok()
+    {
+        activities = tokio::task::spawn_blocking(move || {
+            let mut files = Vec::new();
+            if let Ok(read_dir) = fs::read_dir(&activities_folder) {
+                for entry in read_dir.flatten() {
+                    files.push(entry.path());
+                }
+            };
+            files
+        })
+        .await
+        .map_err(|e| e.to_string())?;
+
+        drop(mtp_client);
+        let activities_cpy = activities.clone();
+        let app_cpy = app.clone();
+        res = tokio::task::spawn_blocking(move || {
+            let db = app_cpy.state::<DatabasePool>();
+            db.run_in_transaction(move |tx| {
+                let res = if !activities_cpy.is_empty() {
+                    info!("Fetched {} activity files", activities_cpy.len());
+                    import_file_list(tx, &activities_cpy, Some(device.clone()), lang, true)
+                } else {
+                    Ok(Vec::new())
+                }?;
+
+                device.last_sync = Some(Local::now().timestamp() as u32);
+                device.update_by_id_in(tx)?;
+
+                Ok(res)
+            })
+        })
+        .await
+        .expect("blocking DB task panicked");
+    }
+
+    match res {
+        Ok(res) => {
+            if res.len() == activities.len() {
+                let _ = fs::remove_dir_all(src_dir);
+            }
+
+            if !res.is_empty() {
+                let app = app.clone();
+                std::thread::spawn(move || {
+                    let db = app.state::<DatabasePool>();
+                    update_pending_geolocation(&app, &db);
+                });
+            }
+            Ok(res.len())
+        }
+        Err(e) => Err(report_error(
+            e,
+            lang,
+            "error_import_sessions",
+            "Error importing sessions",
+        )),
+    }
+}
+
+#[traced_command]
+#[tauri::command]
+pub async fn get_registered_devices(app: AppHandle) -> Result<Vec<DeviceListItem>, String> {
+    Ok(run_blocking(app, |database| {
+        database.run_in_connection(|conn| Ok(DeviceRepository::select().fetch_in(conn)?))
+    })
+    .await
+    .map_err(|e| e.to_string())?
+    .into_iter()
+    .map(|d| DeviceListItem {
+        serial_number: d.serial,
+        manufacturer: "Garmin".to_string(),
+        model: d.model,
+    })
+    .collect())
 }

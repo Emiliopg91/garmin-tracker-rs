@@ -215,6 +215,16 @@ impl MtpClient {
         Ok(res)
     }
 
+    /// True if a device with serial number `serial` is currently connected over USB. Does not
+    /// open (claim) the device.
+    pub async fn is_device_connected(&self, serial: &str) -> Result<bool> {
+        let devices = MtpDevice::list_devices().map_err(MtpError::ListDevices)?;
+
+        Ok(devices
+            .iter()
+            .any(|d| d.serial_number.as_deref() == Some(serial)))
+    }
+
     /// Downloads `.FIT` activity files newer than `date` from the device's `GARMIN/Activity` folder into a temp directory, returning their local paths.
     pub async fn download_activities_since(
         &self,

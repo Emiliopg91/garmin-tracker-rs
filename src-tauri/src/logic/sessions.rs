@@ -1,17 +1,16 @@
 use std::{
     collections::{HashMap, HashSet},
-    fs::{self, File},
-    io::BufWriter,
+    fs::{self},
     path::{Path, PathBuf},
     sync::Mutex,
-    time::{Duration, SystemTime, UNIX_EPOCH},
+    time::Duration,
 };
 
 use crate::{
     SettingsLock,
     dao::{
         additional_data::{self, AdditionalData, AdditionalDataRepository},
-        device::{Device, DeviceRepository},
+        device::Device,
         exercise::{self, ExerciseRepository},
         lap::LapRepository,
         session::{self, Session, SessionRepository},
@@ -25,16 +24,11 @@ use crate::{
     },
     fit::parser::FitParser,
     logic::{notifications::show_notification, report_error, run_blocking},
-    mtp::MTP_CLIENT_INST,
-    utils::{
-        constants,
-        translations::{Languages, translate, translate_and_replace},
-    },
+    utils::translations::{Languages, translate, translate_and_replace},
 };
-use chrono::{Datelike, Days, Local, Months, TimeZone, Timelike, offset::LocalResult};
+use chrono::{Datelike, Days, Local, Months, TimeZone, offset::LocalResult};
 use curl_rest::StatusCode;
 use garmin_tracker_rs_macros::traced_command;
-use gpx::Gpx;
 use rayon::prelude::*;
 use rusqlite_orm::{
     dao::Repository,
@@ -270,129 +264,6 @@ pub async fn save_session_changes(
 /// Tauri command wrapper around `_import_from_device`; returns the number of sessions imported.
 #[traced_command]
 #[tauri::command]
-pub async fn import_from_device(app: AppHandle, serial: &str) -> Result<usize, String> {
-    _import_from_device(&app, serial).await
-}
-
-/// Downloads new activity files from the given device since its last sync and imports them.
-pub async fn _import_from_device(app: &AppHandle, serial: &str) -> Result<usize, String> {
-    info!("Starting import from device with S/N {}", serial);
-    let mut latest_date = "2026-06-08-00-00-00".to_string();
-    let lang = app.state::<SettingsLock>().read().unwrap().language;
-    let mut device = {
-        let app = app.clone();
-        let serial = serial.to_string();
-        tokio::task::spawn_blocking(move || {
-            let db = app.state::<DatabasePool>();
-            db.run_in_connection(|conn| {
-                let device = DeviceRepository::select_by_id_in(conn, &serial)?;
-
-                Ok(device.unwrap())
-            })
-        })
-        .await
-        .map_err(|e| e.to_string())?
-        .map_err(|e| e.to_string())
-    }?;
-
-    if let Some(latest) = device.last_sync {
-        let latest = Local.timestamp_opt(latest as i64, 0).unwrap();
-        latest_date = format!(
-            "{:04}-{:02}-{:02}-{:02}-{:02}-{:02}",
-            latest.year(),
-            latest.month(),
-            latest.day(),
-            latest.hour(),
-            latest.minute(),
-            latest.second(),
-        );
-    }
-
-    info!(
-        "Fetching from device activity files after {}...",
-        latest_date
-    );
-    let mut res: Result<Vec<u32>, DatabaseError> = Ok(Vec::new());
-    let mut activities = Vec::new();
-
-    let mtp_client = MTP_CLIENT_INST.lock().await;
-
-    let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
-    let src_dir = std::env::temp_dir().join(format!(
-        "{}-{}",
-        constants::MTP_TMP_DIR_PREFIX,
-        now.as_millis()
-    ));
-
-    let activities_folder = src_dir.join("Activities");
-
-    if mtp_client
-        .download_activities_since(serial, latest_date, activities_folder.clone())
-        .await
-        .is_ok()
-    {
-        activities = tokio::task::spawn_blocking(move || {
-            let mut files = Vec::new();
-            if let Ok(read_dir) = fs::read_dir(&activities_folder) {
-                for entry in read_dir.flatten() {
-                    files.push(entry.path());
-                }
-            };
-            files
-        })
-        .await
-        .map_err(|e| e.to_string())?;
-
-        drop(mtp_client);
-        let activities_cpy = activities.clone();
-        let app_cpy = app.clone();
-        res = tokio::task::spawn_blocking(move || {
-            let db = app_cpy.state::<DatabasePool>();
-            db.run_in_transaction(move |tx| {
-                let res = if !activities_cpy.is_empty() {
-                    info!("Fetched {} activity files", activities_cpy.len());
-                    import_file_list(tx, &activities_cpy, Some(device.clone()), lang, true)
-                } else {
-                    Ok(Vec::new())
-                }?;
-
-                device.last_sync = Some(Local::now().timestamp() as u32);
-                device.update_by_id_in(tx)?;
-
-                Ok(res)
-            })
-        })
-        .await
-        .expect("blocking DB task panicked");
-    }
-
-    match res {
-        Ok(res) => {
-            if res.len() == activities.len() {
-                let _ = fs::remove_dir_all(src_dir);
-            }
-
-            if !res.is_empty() {
-                let app = app.clone();
-                std::thread::spawn(move || {
-                    let db = app.state::<DatabasePool>();
-                    update_pending_geolocation(&app, &db);
-                });
-            }
-            Ok(res.len())
-        }
-        Err(e) => Err(report_error(
-            e,
-            lang,
-            "error_import_sessions",
-            "Error importing sessions",
-        )),
-    }
-}
-
-/// Tauri command wrapper around `_import_from_device`; returns the number of sessions imported.
-#[traced_command]
-#[tauri::command]
 pub async fn import_from_files(
     app: AppHandle,
     settings: State<'_, SettingsLock>,
@@ -459,7 +330,7 @@ pub fn _import_from_files(app: AppHandle, files: &[PathBuf]) -> Result<usize, St
 }
 
 /// Parses a batch of `.FIT` files in parallel and inserts each new session (plus its exercises/series/heart rate/GPS/speeds) in the given transaction, then refreshes personal records.
-fn import_file_list<F>(
+pub fn import_file_list<F>(
     tx: &mut rusqlite_orm::rusqlite::Transaction,
     files: &[F],
     device: Option<Device>,
@@ -848,67 +719,6 @@ pub fn recalculate_e1rm(
         set.update_by_id_in(tx)?;
     }
     Ok(())
-}
-
-#[traced_command]
-#[tauri::command]
-pub async fn export_gpx(
-    app: AppHandle,
-    settings: State<'_, SettingsLock>,
-    session: u32,
-) -> Result<(), String> {
-    let session = tokio::task::spawn_blocking(move || {
-        let database = app.state::<DatabasePool>();
-        database.run_in_connection(|conn| {
-            let mut session = SessionRepository::select_by_id_in(conn, session)?.unwrap();
-            session.fetch_additional_data_relationship_in(conn)?;
-            session.fetch_laps_relationship_in(conn)?;
-
-            Ok(session)
-        })
-    })
-    .await
-    .map_err(|e| e.to_string())?
-    .map_err(|e| e.to_string())?;
-
-    let path = constants::HOME_DIR.join(format!(
-        "{}-{}.gpx",
-        session.name,
-        Local
-            .timestamp_millis_opt(session.date as i64 * 1000)
-            .unwrap()
-    ));
-    let path_str = path.display().to_string();
-    info!("Exporting track to {}...", path.display());
-
-    let gpx = Gpx::from(session);
-    let res = tokio::task::spawn_blocking(move || {
-        let file = File::create(&path).map_err(|e| e.to_string())?;
-        let writer = BufWriter::new(file);
-        gpx::write(&gpx, writer).map_err(|e| e.to_string())?;
-        Ok::<(), String>(())
-    })
-    .await
-    .map_err(|e| e.to_string())
-    .flatten();
-
-    let lang = settings.read().unwrap().language;
-    match res {
-        Ok(()) => {
-            show_notification(NotificationDefinition {
-                title: translate("ok_on_track_export", lang),
-                body: translate_and_replace("export_file_path", &[&path_str], lang),
-                kind: NotificationKind::Temporal,
-            });
-            Ok(())
-        }
-        Err(e) => Err(report_error(
-            e,
-            lang,
-            "error_on_export",
-            "Error exporting track",
-        )),
-    }
 }
 
 #[traced_command]

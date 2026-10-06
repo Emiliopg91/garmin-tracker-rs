@@ -6,6 +6,7 @@ interface AppContexType {
   appReady: boolean;
   tab: Tabs;
   setTab: (category: Tabs) => void;
+  registeredDevices: DeviceListItem[];
   availableDevices: DeviceListItem[];
   environment: AppEnvironment;
   showSettings: () => void;
@@ -21,6 +22,7 @@ const defaultValue: AppContexType = {
   setTab: () => {
     /* empty */
   },
+  registeredDevices: [],
   availableDevices: [],
   environment: AppEnvironment.Release,
   settingsOpened: false,

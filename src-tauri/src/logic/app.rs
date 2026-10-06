@@ -1,6 +1,5 @@
-use std::{collections::HashMap, fs, io::BufWriter, thread, time::Duration};
+use std::{collections::HashMap, thread, time::Duration};
 
-use chrono::Local;
 use garmin_tracker_rs_macros::traced_command;
 use rusqlite_orm::database::DatabasePool;
 use semver::Version;
@@ -15,14 +14,13 @@ use crate::{
     },
     dto::{
         app::{AppEnvironment, Settings},
-        export::Export,
         notifications::{NotificationDefinition, NotificationKind},
     },
     logic::{
         devices::start_device_watcher, notifications::show_notification, report_error,
-        run_blocking, sessions::update_pending_geolocation,
+        sessions::update_pending_geolocation,
     },
-    rclone::{RCloneClient, providers::CloudProvider},
+    rclone::RCloneClient,
     udev::UdevManager,
     utils::translations::{Languages, TRANSLATIONS, translate, translate_and_replace},
 };
@@ -158,56 +156,6 @@ pub async fn update_settings_value(app: AppHandle, name: &str, value: &str) -> R
     }
 }
 
-/// Exports the whole database to a timestamped JSON file in the user's home directory and notifies on success/failure.
-#[traced_command]
-#[tauri::command]
-pub async fn export_database(
-    app: AppHandle,
-    settings: State<'_, SettingsLock>,
-) -> Result<(), String> {
-    let path = constants::HOME_DIR.join(format!(
-        "{}-{}.json",
-        *constants::APP_NAME,
-        Local::now().format("%Y-%m-%d-%H-%M-%S")
-    ));
-    info!("Exporting database to {}...", path.display());
-
-    let export_path = path.clone();
-    let export_lang = settings.read().unwrap().language;
-    let res = run_blocking(app, move |database| {
-        Export::from_database(database, export_lang)
-            .map_err(|e| Box::new(e) as Box<dyn std::error::Error + Send + Sync>)
-            .and_then(|export| {
-                let file = fs::File::create(&export_path)?;
-                export.write_json(BufWriter::new(file))?;
-                Ok(())
-            })
-    })
-    .await;
-
-    let lang = settings.read().unwrap().language;
-    match res {
-        Ok(()) => {
-            show_notification(NotificationDefinition {
-                title: translate("ok_on_export", lang),
-                body: translate_and_replace(
-                    "export_file_path",
-                    &[&path.display().to_string()],
-                    lang,
-                ),
-                kind: NotificationKind::Temporal,
-            });
-            Ok(())
-        }
-        Err(e) => Err(report_error(
-            e,
-            lang,
-            "error_on_export",
-            "Error exporting database",
-        )),
-    }
-}
-
 /// Returns every translation key resolved to the current UI language, for the frontend's i18n bootstrap.
 #[traced_command(log_payload = false)]
 #[tauri::command]
@@ -280,50 +228,6 @@ fn check_for_update(app: AppHandle) {
             }
         }
         thread::sleep(Duration::from_hours(1));
-    }
-}
-
-#[traced_command]
-#[tauri::command]
-pub async fn upload_to_cloud(
-    settings: State<'_, SettingsLock>,
-    provider: CloudProvider,
-) -> Result<(), String> {
-    let lang = settings.read().unwrap().language;
-
-    let res: Result<(), String> = async {
-        let configured = provider.is_configured().await.map_err(|e| e.to_string())?;
-
-        if !configured {
-            provider.configure().await.map_err(|e| e.to_string())?;
-        }
-
-        provider
-            .upload(constants::DB_FILE.to_path_buf())
-            .await
-            .map_err(|e| e.to_string())?;
-
-        Ok(())
-    }
-    .await;
-
-    match res {
-        Ok(l) => {
-            info!("File uploaded succesfully");
-            show_notification(NotificationDefinition {
-                title: translate("upload_succesful", lang),
-                body: "".to_string(),
-                kind: NotificationKind::Temporal,
-            });
-
-            Ok(l)
-        }
-        Err(e) => Err(report_error(
-            e,
-            lang,
-            "upload_error",
-            "Error uploading file",
-        )),
     }
 }
 

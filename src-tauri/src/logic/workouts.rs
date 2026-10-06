@@ -3,12 +3,10 @@ use std::collections::HashMap;
 use garmin_tracker_rs_macros::traced_command;
 use rusqlite_orm::{
     dao::Repository,
-    database::DatabasePool,
     types::{order_by::OrderBy, value::Value, where_clause::Where},
 };
 use tauri::{AppHandle, State};
 use tauri_plugin_log::log::info;
-use tokio::fs;
 
 use crate::{
     SettingsLock,
@@ -22,9 +20,7 @@ use crate::{
         notifications::{NotificationDefinition, NotificationKind},
         workouts::{WorkoutDetails, WorkoutListItem, WorkoutSession},
     },
-    fit::writer::FitWriter,
     logic::{notifications::show_notification, report_error, run_blocking},
-    mtp::MTP_CLIENT_INST,
     utils::translations::translate,
 };
 
@@ -227,66 +223,6 @@ pub async fn set_workout_status(app: AppHandle, workout: &str, status: bool) -> 
             .map_err(|e| e.to_string())
     })
     .await
-}
-
-#[traced_command]
-#[tauri::command]
-pub async fn send_to_device(
-    database: State<'_, DatabasePool>,
-    settings: State<'_, SettingsLock>,
-    workout: &str,
-    serial: &str,
-) -> Result<(), String> {
-    let (lang, weight_unit) = {
-        let settings = settings.read().unwrap();
-        (settings.language, settings.weight_unit)
-    };
-
-    let res: Result<(), String> = async {
-        let workout = database
-            .run_in_connection(|conn| {
-                let mut wk = WorkoutRepository::select_by_id_in(conn, workout)?.unwrap();
-                wk.fetch_steps_relationship_in(conn)?;
-
-                Ok(wk)
-            })
-            .map_err(|e| e.to_string())?;
-
-        let path = std::env::temp_dir().join(workout.get_workout_file_name());
-        FitWriter::from(&workout)
-            .write(path.clone(), lang, weight_unit)
-            .map_err(|e| e.to_string())?;
-
-        let upload = MTP_CLIENT_INST
-            .lock()
-            .await
-            .upload_workout(serial, path.clone())
-            .await
-            .map_err(|e| e.to_string());
-
-        let _ = fs::remove_file(path).await;
-
-        upload
-    }
-    .await;
-
-    match res {
-        Ok(_) => {
-            info!("Workout '{}' sent to device {}", workout, serial);
-            show_notification(NotificationDefinition {
-                title: workout.to_string(),
-                body: translate("ok_workout_send", lang),
-                kind: NotificationKind::Temporal,
-            });
-            Ok(())
-        }
-        Err(e) => Err(report_error(
-            e,
-            lang,
-            "error_workout_send",
-            "Error sending workout to device",
-        )),
-    }
 }
 
 #[traced_command]

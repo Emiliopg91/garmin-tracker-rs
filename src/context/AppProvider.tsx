@@ -29,6 +29,9 @@ export function AppProvider({
   const [availableDevices, setAvailableDevices] = useState<DeviceListItem[]>(
     [],
   );
+  const [registeredDevices, setRegisteredDevices] = useState<DeviceListItem[]>(
+    [],
+  );
   const availableDevicesRef = useRef<DeviceListItem[]>([]);
   const [sessionsVersion, setSessionsVersion] = useState(0);
 
@@ -47,6 +50,12 @@ export function AppProvider({
 
       availableDevicesRef.current = devices;
       setAvailableDevices(devices);
+
+      setRegisteredDevices((prev) =>
+        prev.some((d) => d.serial_number === device.serial_number)
+          ? prev
+          : [...prev, device],
+      );
     });
 
     const unregisterDisconnection = BackendListener.onDeviceDisconnected(
@@ -65,23 +74,29 @@ export function AppProvider({
       setSessionsVersion((previous) => previous + 1);
     });
 
-    BackendClient.getEnvironment()
-      .then((env) => {
-        setEnvironment(env);
-
-        if (env == AppEnvironment.Release) {
-          document.addEventListener("contextmenu", (e) => {
-            e.preventDefault();
-          });
-        }
+    BackendClient.getRegisteredDevices()
+      .then((devices) => {
+        setRegisteredDevices(devices);
       })
       .finally(() => {
-        BackendClient.rcloneAvailable()
-          .then((available) => {
-            setRcloneAvailable(available);
+        BackendClient.getEnvironment()
+          .then((env) => {
+            setEnvironment(env);
+
+            if (env == AppEnvironment.Release) {
+              document.addEventListener("contextmenu", (e) => {
+                e.preventDefault();
+              });
+            }
           })
           .finally(() => {
-            setBackendReady(true);
+            BackendClient.rcloneAvailable()
+              .then((available) => {
+                setRcloneAvailable(available);
+              })
+              .finally(() => {
+                setBackendReady(true);
+              });
           });
       });
 
@@ -107,6 +122,7 @@ export function AppProvider({
       setTab,
       appReady,
       environment,
+      registeredDevices,
       availableDevices,
       settingsOpened,
       showSettings,
@@ -118,6 +134,7 @@ export function AppProvider({
       tab,
       appReady,
       environment,
+      registeredDevices,
       availableDevices,
       settingsOpened,
       showSettings,

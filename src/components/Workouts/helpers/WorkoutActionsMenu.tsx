@@ -26,7 +26,7 @@ export function WorkoutActionsMenu({
 }: Props) {
   const { startLoading, finishLoading } = useContext(LoadingContext);
   const { translate } = useContext(I18nSettingsContext);
-  const { availableDevices } = useContext(AppContext);
+  const { registeredDevices } = useContext(AppContext);
   const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null);
   const [sendMenuAnchor, setSendMenuAnchor] = useState<HTMLElement | null>(
     null,
@@ -72,7 +72,7 @@ export function WorkoutActionsMenu({
         </MenuItem>
         <MenuItem
           onClick={(e) => setSendMenuAnchor(e.currentTarget)}
-          disabled={availableDevices.length == 0}
+          disabled={registeredDevices.length == 0}
         >
           <ListItemText>{translate("send_to")}</ListItemText>
           <ChevronRightIcon fontSize="small" />
@@ -85,7 +85,7 @@ export function WorkoutActionsMenu({
         anchorOrigin={{ vertical: "top", horizontal: "left" }}
         transformOrigin={{ vertical: "top", horizontal: "right" }}
       >
-        {availableDevices.map((device, idx) => (
+        {registeredDevices.map((device, idx) => (
           <MenuItem
             key={"dev-" + idx}
             onClick={() => {

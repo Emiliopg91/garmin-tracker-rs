@@ -29,18 +29,18 @@ use crate::{
     dto::app::Settings,
     logic::{
         app::{
-            export_database, get_environment, get_settings, get_translations,
-            notify_frontend_ready, rclone_available, update_settings_value, upload_to_cloud,
+            get_environment, get_settings, get_translations, notify_frontend_ready,
+            rclone_available, update_settings_value,
         },
         body_metrics::{add_body_measures, delete_body_metric, get_body_measures},
+        devices::{get_registered_devices, import_from_device, send_to_device},
         exercises::{get_exercise_details, get_exercises},
+        export::{export_database, export_gpx, upload_to_cloud},
         sessions::{
-            _import_from_files, export_gpx, get_heatmap_data, get_session_details, get_sessions,
-            import_from_device, import_from_files, recalculate_e1rm, save_session_changes,
+            _import_from_files, get_heatmap_data, get_session_details, get_sessions,
+            import_from_files, recalculate_e1rm, save_session_changes,
         },
-        workouts::{
-            get_workout_details, get_workout_list, save_workout, send_to_device, set_workout_status,
-        },
+        workouts::{get_workout_details, get_workout_list, save_workout, set_workout_status},
     },
     udev::UdevManager,
     utils::{constants, single_instance::SingleInstance},
@@ -260,31 +260,39 @@ pub fn run(log_level: LevelFilter) {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            //Sessions
             get_sessions,
             get_session_details,
             save_session_changes,
+            import_from_files,
+            get_heatmap_data,
+            //Exercises
             get_exercises,
             get_exercise_details,
+            //Workouts
             get_workout_list,
             get_workout_details,
+            set_workout_status,
+            save_workout,
+            //Devices
             import_from_device,
+            send_to_device,
+            get_registered_devices,
+            //App
             notify_frontend_ready,
-            get_body_measures,
-            add_body_measures,
             get_environment,
-            delete_body_metric,
             get_settings,
             update_settings_value,
-            export_database,
             get_translations,
-            upload_to_cloud,
-            import_from_files,
-            set_workout_status,
-            export_gpx,
             rclone_available,
-            get_heatmap_data,
-            send_to_device,
-            save_workout
+            //Body Metrics
+            get_body_measures,
+            add_body_measures,
+            delete_body_metric,
+            //Export
+            export_database,
+            upload_to_cloud,
+            export_gpx,
         ])
         .run(tauri::generate_context!())
     {
