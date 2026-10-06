@@ -285,7 +285,7 @@ pub fn run(log_level: LevelFilter) {
             let menu = Menu::with_items(app, &[&open, &separator, &exit])?;
             TrayIconBuilder::new()
                 .icon(app.default_window_icon().unwrap().clone())
-                .tooltip("Mi app")
+                .tooltip(constants::APP_TITLE)
                 .menu(&menu)
                 .show_menu_on_left_click(false) // el menú solo aparece con clic derecho
                 .on_menu_event(|app, event| match event.id.as_ref() {

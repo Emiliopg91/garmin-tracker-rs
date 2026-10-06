@@ -22,6 +22,7 @@ Garmin Tracker is a Linux desktop application built with [Tauri](https://tauri.a
 - **Activities and training tracking** — Review/edit sessions, notes and sets, with 1RM estimation.
 - **Strength session comparison** — Compare sessions and their exercises side by side.
 - **Workouts** — Create and edit strength workouts, upload them to the device, and import their steps from it.
+- **Workout upload queue** — Workouts sent while a device is disconnected are queued and pushed automatically on its next connection.
 - **Training load heatmap** — Daily load overview with records on the home page.
 - **GPS route tracking with laps** — Interactive map, speed-colored track, satellite/street toggle, reverse-geocoded naming, GPX export with elevation.
 - **Heart-rate zones** — Color-coded HR chart and time-in-zone breakdown.
@@ -30,7 +31,8 @@ Garmin Tracker is a Linux desktop application built with [Tauri](https://tauri.a
 - **Database export to JSON** — Full database export for backup or analysis.
 - **Cloud backup** — One-click backup upload to OneDrive or Dropbox via `rclone`.
 - **Update check** — Notifies you when a new release is available.
-- **Configurable settings** — Language, units, launch on boot, auto-sync — applied live.
+- **System tray icon** — Open or quit from the tray, optionally start minimized and keep running in the background when the window is closed.
+- **Configurable settings** — Language, units, launch on boot, auto-sync, tray behavior — applied live.
 - **Local database** — SQLite with versioned, auto-applied migrations.
 - **Desktop notifications** — Native, localized alerts for background events.
 - **Single instance** — Prevents multiple app copies from corrupting the database.
