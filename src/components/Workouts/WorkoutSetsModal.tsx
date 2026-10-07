@@ -30,6 +30,8 @@ export function WorkoutSetsModal({ workout, isEdit, onClose }: Props) {
   }, []);
 
   const [name, setName] = useState(workout?.name);
+  const [notes, setNotes] = useState(workout?.notes);
+  const [originalNotes] = useState(() => workout?.notes);
   const [originalSteps] = useState(() =>
     JSON.stringify(WorkoutUtils.parseWorkoutSteps(workout!.steps, fromKg)),
   );
@@ -38,7 +40,9 @@ export function WorkoutSetsModal({ workout, isEdit, onClose }: Props) {
   );
   const valid = name.length > 0 && WorkoutUtils.validateSteps(steps);
   const changed =
-    name != workout.name || JSON.stringify(steps) != originalSteps;
+    name != workout.name ||
+    (notes ?? "") != (originalNotes ?? "") ||
+    JSON.stringify(steps) != originalSteps;
   const canSave = valid && (!isEdit || changed);
 
   const swapPosition = (pos1: number, pos2: number) => {
@@ -68,6 +72,7 @@ export function WorkoutSetsModal({ workout, isEdit, onClose }: Props) {
         enabled: workout.enabled,
         name,
         steps: WorkoutUtils.toWorkoutSteps(steps, name, toKg),
+        notes,
       };
       startLoading();
       BackendClient.saveWorkout(isEdit, newWorkout)
@@ -103,6 +108,21 @@ export function WorkoutSetsModal({ workout, isEdit, onClose }: Props) {
       </DialogTitle>
 
       <DialogContent dividers>
+        <TextField
+          label={translate("notes")}
+          type="text"
+          maxRows={1}
+          size="small"
+          sx={{ width: 685, marginBottom: "20px" }}
+          value={notes ?? ""}
+          slotProps={{
+            htmlInput: {
+              maxLength: 200,
+            },
+          }}
+          onChange={(e) => setNotes(e.target.value)}
+        />
+        <br />
         {steps.map((step, idx) =>
           WorkoutUtils.isStepGroup(step) ? (
             <WorkoutSetGroup

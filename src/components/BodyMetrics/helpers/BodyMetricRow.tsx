@@ -33,9 +33,17 @@ export function BodyMetricRow({
       </td>
       <td>{formatPercent(measure.fat_ratio / 100, 1)}</td>
       <td>
+        {formatNumber(fromKg((measure.fat_ratio / 100) * measure.weight), 1)}{" "}
+        {getWeightUnit()}
+      </td>
+      <td>
         {formatNumber(fromKg(measure.lean_mass), 1)} {getWeightUnit()}
       </td>
       <td>{formatPercent(measure.water_ratio / 100, 1)}</td>
+      <td>
+        {formatNumber(fromKg((measure.water_ratio / 100) * measure.weight), 1)}{" "}
+        {getWeightUnit()}
+      </td>
     </tr>
   );
 }

@@ -267,6 +267,29 @@ export function WorkoutSetLeaf({
     </>
   );
 
+  const notesBlk = (
+    <Box
+      sx={{
+        py: 1,
+      }}
+    >
+      <TextField
+        label={translate("notes")}
+        type="text"
+        maxRows={1}
+        size="small"
+        sx={{ width: 340 }}
+        value={leaf.notes ?? ""}
+        slotProps={{
+          htmlInput: {
+            maxLength: 200,
+          },
+        }}
+        onChange={(e) => onChange({ ...leaf, notes: e.target.value })}
+      />
+    </Box>
+  );
+
   const actions = (
     <Box
       sx={{
@@ -330,6 +353,7 @@ export function WorkoutSetLeaf({
       >
         <Box sx={{ marginRight: "20px" }}>{typeSelect}</Box>
         {limitControls}
+        {notesBlk}
         {actions}
       </Box>
     );
@@ -381,6 +405,7 @@ export function WorkoutSetLeaf({
         }}
       >
         {limitControls}
+        {notesBlk}
         {actions}
       </Box>
     </>

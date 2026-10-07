@@ -188,6 +188,7 @@ pub async fn get_workout_details(
                 session_count: count,
                 sessions: session_list,
                 enabled: workout.enabled,
+                notes: workout.notes,
                 steps: workout.steps,
             };
 
@@ -237,6 +238,20 @@ pub async fn save_workout(
     let res = run_blocking(app, move |database| {
         database.run_in_transaction(|tx| {
             if edit && WorkoutRepository::select_by_id_in(tx, &workout.name)?.is_some() {
+                WorkoutRepository::update()
+                    .set(
+                        workout::entity::columns::NOTES,
+                        (if let Some(note) = workout.notes.clone()
+                            && !note.is_empty()
+                        {
+                            Some(note)
+                        } else {
+                            None
+                        })
+                        .into(),
+                    )
+                    .execute_in(tx)?;
+
                 WorkoutStepRepository::delete()
                     .where_(Where::Eq(
                         workout_step::entity::columns::WORKOUT,

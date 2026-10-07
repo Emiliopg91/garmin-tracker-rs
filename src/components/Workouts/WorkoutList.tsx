@@ -37,6 +37,7 @@ export function WorkoutsList() {
         latest_session: 0,
         session_count: 0,
         sessions: [],
+        notes: null,
         steps: WorkoutUtils.toWorkoutSteps(
           [structuredClone(WorkoutUtils.DEFAULT_GROUP)],
           "",

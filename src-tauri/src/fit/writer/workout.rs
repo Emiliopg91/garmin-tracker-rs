@@ -21,6 +21,11 @@ use crate::{
     utils::translations::{Languages, translate},
 };
 
+/// Cuts `s` to at most `max` bytes on a char boundary to keep valid UTF-8
+fn truncate_utf8(s: &str, max: usize) -> String {
+    s[..s.floor_char_boundary(max)].to_string()
+}
+
 /// Inverse of the mapping done in `TryFrom<FitParser> for Workout`.
 fn step_message(step: &WorkoutStep, weight_unit: WeightUnit) -> Message {
     let mut msg = FitWorkoutStep::new();
@@ -53,6 +58,7 @@ fn step_message(step: &WorkoutStep, weight_unit: WeightUnit) -> Message {
                 WeightUnit::Kilograms => FitBaseUnit::KILOGRAM,
                 WeightUnit::Pounds => FitBaseUnit::POUND,
             };
+            msg.notes = truncate_utf8(step.notes.as_deref().unwrap_or_default(), 200);
 
             if let Some(weight) = step.weight {
                 msg.set_exercise_weight_scaled(weight as f64);
@@ -65,6 +71,8 @@ fn step_message(step: &WorkoutStep, weight_unit: WeightUnit) -> Message {
                 WeightUnit::Kilograms => FitBaseUnit::KILOGRAM,
                 WeightUnit::Pounds => FitBaseUnit::POUND,
             };
+            msg.notes = truncate_utf8(step.notes.as_deref().unwrap_or_default(), 200);
+
             match step.time {
                 Some(Some(time)) => {
                     msg.duration_type = WktStepDuration::TIME;
@@ -99,7 +107,8 @@ impl ToFitMessages for Workout {
         workout.sub_sport = SubSport::STRENGTH_TRAINING;
         workout.num_valid_steps = self.steps.len() as u16;
         // Garmin caps wkt_name at 32 bytes; cut on a char boundary to keep valid UTF-8
-        workout.wkt_name = self.name[..self.name.floor_char_boundary(32)].to_string();
+        workout.wkt_name = truncate_utf8(&self.name, 32);
+        workout.wkt_description = truncate_utf8(self.notes.as_deref().unwrap_or_default(), 200);
 
         let mut steps: Vec<&WorkoutStep> = self.steps.iter().collect();
         steps.sort_by_key(|s| s.idx);

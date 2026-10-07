@@ -308,6 +308,7 @@ async fn download_pending_workouts(app: &AppHandle, serial: &str) {
             return;
         }
     };
+
     if pending_workouts.is_empty() {
         return;
     }
@@ -331,7 +332,8 @@ async fn download_pending_workouts(app: &AppHandle, serial: &str) {
     match downloaded {
         Ok(()) => {
             let src_dir = dst_dir.clone();
-            let (workout_names, stored) = run_blocking(app.clone(), move |db| {
+            let app_cl: AppHandle = app.clone();
+            run_blocking(app.clone(), move |db| {
                 let mut workouts_to_insert = Vec::new();
                 if let Ok(read_dir) = fs::read_dir(&src_dir) {
                     for entry in read_dir.flatten() {
@@ -345,32 +347,45 @@ async fn download_pending_workouts(app: &AppHandle, serial: &str) {
                     }
                 }
 
-                let mut insert = WorkoutStepRepository::insert();
                 let mut workout_names: Vec<String> = Vec::new();
                 for workout in &mut workouts_to_insert {
-                    for step in &mut workout.steps {
-                        insert = insert.item(step);
+                    let res = db.run_in_transaction(|tx| {
+                        WorkoutRepository::update()
+                            .set(
+                                workout::entity::columns::NOTES,
+                                workout.notes.clone().into(),
+                            )
+                            .where_(Where::Eq(
+                                workout::entity::columns::NAME,
+                                workout.name.clone().into(),
+                            ))
+                            .execute_in(tx)?;
+
+                        let mut insert = WorkoutStepRepository::insert();
+                        for step in &mut workout.steps {
+                            insert = insert.item(step);
+                        }
+
+                        insert.execute_in(tx)?;
+
+                        Ok(())
+                    });
+
+                    if let Err(e) = res {
+                        error!(
+                            "Error storing workout {} from {}: {}",
+                            workout.name, serial, e
+                        );
+                    } else {
+                        workout_names.push(workout.name.clone());
                     }
-                    workout_names.push(workout.name.clone());
                 }
 
-                let stored = if workout_names.is_empty() {
-                    Ok(())
-                } else {
-                    insert.execute(db).map(|_| ())
-                };
-
-                (workout_names, stored)
+                if !workout_names.is_empty() {
+                    let _ = app_cl.emit("added_workout_steps", workout_names);
+                }
             })
             .await;
-
-            if !workout_names.is_empty() {
-                if let Err(e) = stored {
-                    error!("Error storing workout steps from {}: {e}", serial);
-                } else {
-                    let _ = app.emit("added_workout_steps", workout_names);
-                }
-            }
         }
         Err(e) => error!("Error downloading workouts from {}: {e}", serial),
     }

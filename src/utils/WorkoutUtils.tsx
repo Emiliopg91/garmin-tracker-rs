@@ -15,6 +15,7 @@ export interface LeafErrors {
   exercise: boolean;
   weight: boolean;
   reps: boolean;
+  notes: string;
 }
 
 export class WorkoutUtils {
@@ -68,6 +69,7 @@ export class WorkoutUtils {
         ex_cat: null,
         ex_id: null,
         weight: null,
+        notes: step.notes && step.notes!.length > 0 ? step.notes : "",
       };
     } else {
       return {
@@ -83,6 +85,7 @@ export class WorkoutUtils {
           step.weight != null
             ? Math.round(fromKg(step.weight) * 10) / 10
             : null,
+        notes: step.notes && step.notes!.length > 0 ? step.notes : "",
       };
     }
   }
@@ -108,6 +111,7 @@ export class WorkoutUtils {
       exercise: isExercise && (leaf.ex_cat == null || leaf.ex_id == null),
       weight: isExercise && leaf.weight != null && leaf.weight < 0,
       reps: isExercise && leaf.reps != null && leaf.reps < 1,
+      notes: "",
     };
   }
 
@@ -140,6 +144,7 @@ export class WorkoutUtils {
           ex_id: null,
           time: null,
           weight: null,
+          notes: "",
         });
       } else {
         result.push(
@@ -168,6 +173,7 @@ export class WorkoutUtils {
         ex_id: null,
         reps: null,
         weight: null,
+        notes: leaf.notes !== null && leaf.notes.length > 0 ? leaf.notes : null,
       };
     } else {
       return {
@@ -185,6 +191,7 @@ export class WorkoutUtils {
               : null
             : null,
         begin_idx: null,
+        notes: leaf.notes !== null && leaf.notes.length > 0 ? leaf.notes : null,
       };
     }
   }
@@ -196,6 +203,7 @@ export class WorkoutUtils {
     ex_id: null,
     reps: null,
     weight: null,
+    notes: "",
   };
 
   public static DEFAULT_EXERCISE: LeafStep = {
@@ -205,6 +213,7 @@ export class WorkoutUtils {
     ex_id: null,
     reps: 1,
     weight: 0,
+    notes: "",
   };
 
   public static DEFAULT_GROUP: StepGroup = {

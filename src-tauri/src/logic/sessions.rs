@@ -400,14 +400,23 @@ where
                 let add_data = session.additional_data.take();
 
                 if let Some(workout) = &session.workout_obj {
-                    WorkoutRepository::insert()
-                        .or_ignore()
-                        .item(&mut Workout {
-                            name: workout.name.clone(),
-                            enabled: true,
-                            steps: Vec::new(),
-                        })
-                        .execute_in(tx)?;
+                    match WorkoutRepository::select_by_id_in(tx, &workout.name) {
+                        Ok(Some(mut wkt)) => {
+                            wkt.notes = workout.notes.clone();
+                            wkt.update_by_id_in(tx)?;
+                        }
+                        _ => {
+                            WorkoutRepository::insert()
+                                .or_ignore()
+                                .item(&mut Workout {
+                                    name: workout.name.clone(),
+                                    enabled: true,
+                                    notes: workout.notes.clone(),
+                                    steps: Vec::new(),
+                                })
+                                .execute_in(tx)?;
+                        }
+                    }
 
                     if WorkoutStepRepository::count_by_workout_in(tx, &workout.name)? == 0 {
                         let mut insert = WorkoutStepRepository::insert();

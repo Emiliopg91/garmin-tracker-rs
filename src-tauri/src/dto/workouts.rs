@@ -38,5 +38,6 @@ pub struct WorkoutDetails {
     pub avg_volume: f32,
     pub sessions: Vec<WorkoutSession>,
     pub enabled: bool,
+    pub notes: Option<String>,
     pub steps: Vec<WorkoutStep>,
 }

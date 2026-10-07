@@ -30,6 +30,8 @@ pub struct WorkoutStep {
     pub time: Option<Option<u32>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub begin_idx: Option<u16>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub notes: Option<String>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -87,11 +89,13 @@ impl WorkoutStep {
             reps: None,
             time: None,
             weight: None,
+            notes: None,
         }
     }
-    pub fn rest(workout: &str, idx: u16, time: Option<u32>) -> Self {
+    pub fn rest(workout: &str, idx: u16, time: Option<u32>, notes: Option<String>) -> Self {
         let mut inst = Self::new(workout, idx, StepType::Rest);
         inst.time = Some(time);
+        inst.notes = notes;
         inst
     }
 
@@ -110,6 +114,7 @@ impl WorkoutStep {
         weight: f32,
         reps: Option<u16>,
         time: Option<u32>,
+        notes: Option<String>,
     ) -> Self {
         let mut inst = Self::new(workout, idx, StepType::Exercise);
         inst.ex_cat = Some(ex_cat);
@@ -117,6 +122,7 @@ impl WorkoutStep {
         inst.weight = Some(weight);
         inst.reps = Some(reps);
         inst.time = Some(time);
+        inst.notes = notes;
         inst
     }
 }

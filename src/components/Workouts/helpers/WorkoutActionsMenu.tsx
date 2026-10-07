@@ -7,6 +7,9 @@ import {
   ListItemText,
   Menu,
   MenuItem,
+  MenuList,
+  Paper,
+  Popper,
   Tooltip,
 } from "@mui/material";
 import { AppContext } from "@/context/AppContext";
@@ -72,30 +75,38 @@ export function WorkoutActionsMenu({
         </MenuItem>
         <MenuItem
           onClick={(e) => setSendMenuAnchor(e.currentTarget)}
+          onMouseEnter={(e) => setSendMenuAnchor(e.currentTarget)}
+          // The Popper is a React child, so hovering it doesn't count as leaving
+          onMouseLeave={() => setSendMenuAnchor(null)}
+          selected={Boolean(sendMenuAnchor)}
           disabled={registeredDevices.length == 0}
         >
           <ListItemText>{translate("send_to")}</ListItemText>
           <ChevronRightIcon fontSize="small" />
-        </MenuItem>
-      </Menu>
-      <Menu
-        anchorEl={sendMenuAnchor}
-        open={Boolean(sendMenuAnchor)}
-        onClose={() => setSendMenuAnchor(null)}
-        anchorOrigin={{ vertical: "top", horizontal: "left" }}
-        transformOrigin={{ vertical: "top", horizontal: "right" }}
-      >
-        {registeredDevices.map((device, idx) => (
-          <MenuItem
-            key={"dev-" + idx}
-            onClick={() => {
-              closeMenus();
-              sendToDevice(device.serial_number);
-            }}
+          <Popper
+            anchorEl={sendMenuAnchor}
+            open={Boolean(sendMenuAnchor)}
+            placement="left-start"
+            sx={{ zIndex: (theme) => theme.zIndex.modal + 1 }}
           >
-            {device.manufacturer + " " + device.model}
-          </MenuItem>
-        ))}
+            <Paper elevation={8}>
+              <MenuList>
+                {registeredDevices.map((device, idx) => (
+                  <MenuItem
+                    key={"dev-" + idx}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      closeMenus();
+                      sendToDevice(device.serial_number);
+                    }}
+                  >
+                    {device.manufacturer + " " + device.model}
+                  </MenuItem>
+                ))}
+              </MenuList>
+            </Paper>
+          </Popper>
+        </MenuItem>
       </Menu>
     </>
   );

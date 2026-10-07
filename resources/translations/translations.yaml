@@ -571,3 +571,6 @@ open:
 exit:
   en: Exit
   es: Salir
+notes:
+  en: Notes
+  es: Notas

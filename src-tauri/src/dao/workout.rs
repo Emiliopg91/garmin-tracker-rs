@@ -8,6 +8,7 @@ use crate::dao::workout_step::{self, WorkoutStep};
 pub struct Workout {
     pub name: String,
     pub enabled: bool,
+    pub notes: Option<String>,
 
     #[relationship((name, workout_step::entity::columns::WORKOUT))]
     pub steps: Vec<WorkoutStep>,

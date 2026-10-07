@@ -49,6 +49,7 @@ impl TryFrom<FitParser> for Workout {
 #[derive(Default)]
 pub(super) struct WorkoutAccumulator {
     name: String,
+    notes: Option<String>,
     /// `None` until the `workout` message is seen, then whether it is a strength workout
     is_strength: Option<bool>,
     steps: Vec<WorkoutStep>,
@@ -64,6 +65,12 @@ impl WorkoutAccumulator {
         }
 
         self.name = msg.wkt_name.clone();
+        self.notes = if !msg.wkt_description.is_empty() {
+            Some(msg.wkt_description.clone())
+        } else {
+            None
+        };
+
         Ok(())
     }
 
@@ -85,7 +92,13 @@ impl WorkoutAccumulator {
                         WktStepDuration::TIME => Some(msg.duration_value),
                         _ => None,
                     };
-                    self.steps.push(WorkoutStep::rest(name, idx, duration));
+                    let notes = if !msg.notes.is_empty() {
+                        Some(msg.notes.clone())
+                    } else {
+                        None
+                    };
+                    self.steps
+                        .push(WorkoutStep::rest(name, idx, duration, notes));
                 }
                 Intensity::ACTIVE => {
                     let ex_cat = msg.exercise_category.0;
@@ -103,8 +116,13 @@ impl WorkoutAccumulator {
                         WktStepDuration::TIME => Some(msg.duration_value),
                         _ => None,
                     };
+                    let notes = if !msg.notes.is_empty() {
+                        Some(msg.notes.clone())
+                    } else {
+                        None
+                    };
                     self.steps.push(WorkoutStep::exercise(
-                        name, idx, ex_cat, ex_id, weight, reps, time,
+                        name, idx, ex_cat, ex_id, weight, reps, time, notes,
                     ));
                 }
                 _ => {}
@@ -136,6 +154,7 @@ impl WorkoutAccumulator {
             name: self.name,
             enabled: true,
             steps: self.steps,
+            notes: self.notes,
         })
     }
 }

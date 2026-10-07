@@ -64,6 +64,7 @@ fn session_roundtrip_with_relationships() {
             .item(&mut crate::dao::workout::Workout {
                 name: "Leg day".to_string(),
                 enabled: true,
+                notes: Some("".to_string()),
                 steps: Vec::new(),
             })
             .execute_in(tx)?;
