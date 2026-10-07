@@ -8,7 +8,7 @@ import {
   TextField,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { WorkoutStepData, WorkoutUtils } from "@/utils/WorkoutUtils";
 import { WorkoutSetGroup } from "./helpers/WorkoutSetGroup";
 import { I18nSettingsContext } from "@/context/I18nSettingsContext";
@@ -21,6 +21,12 @@ type Props = {
   onClose: () => void;
 };
 
+export type ExerciseOption = {
+  label: string;
+  ex_cat: number;
+  ex_id: number;
+};
+
 export function WorkoutSetsModal({ workout, isEdit, onClose }: Props) {
   const { startLoading, finishLoading } = useContext(LoadingContext);
   const { translate, fromKg, toKg } = useContext(I18nSettingsContext);
@@ -29,6 +35,9 @@ export function WorkoutSetsModal({ workout, isEdit, onClose }: Props) {
     setName(workout.name);
   }, []);
 
+  const [rawCatalog, setRawCatalog] = useState<Record<number, number[]> | null>(
+    null,
+  );
   const [name, setName] = useState(workout?.name);
   const [notes, setNotes] = useState(workout?.notes);
   const [originalNotes] = useState(() => workout?.notes);
@@ -90,83 +99,117 @@ export function WorkoutSetsModal({ workout, isEdit, onClose }: Props) {
     setName(name);
   };
 
-  return (
-    <Dialog open={true} onClose={onClose} fullWidth maxWidth="md">
-      <DialogTitle>
-        {isEdit && <span>{name}</span>}
-        {!isEdit && (
-          <TextField
-            placeholder={translate("workout")}
-            error={name.length == 0}
-            onChange={onNameChange}
-            value={name}
-          ></TextField>
-        )}
-        <IconButton onClick={onClose} className="modal-close-button">
-          <CloseIcon />
-        </IconButton>
-      </DialogTitle>
+  useEffect(() => {
+    startLoading();
+    BackendClient.getExercisesCatalog()
+      .then(setRawCatalog)
+      .catch(() => onClose())
+      .finally(() => finishLoading());
+  }, []);
 
-      <DialogContent dividers>
-        <TextField
-          label={translate("notes")}
-          type="text"
-          maxRows={1}
-          size="small"
-          sx={{ width: 685, marginBottom: "20px" }}
-          value={notes ?? ""}
-          slotProps={{
-            htmlInput: {
-              maxLength: 200,
-            },
-          }}
-          onChange={(e) => setNotes(e.target.value)}
-        />
-        <br />
-        {steps.map((step, idx) =>
-          WorkoutUtils.isStepGroup(step) ? (
-            <WorkoutSetGroup
-              group={step}
-              index={idx}
-              sameLevel={steps.length}
-              key={`group-${idx}`}
-              swapPosition={swapPosition}
-              onChange={(g) => updateStep(idx, g)}
-              onDelete={() => {
-                deleteGroup(idx);
+  const exercisesCatalog = useMemo<ExerciseOption[] | null>(() => {
+    if (!rawCatalog) return null;
+    const catalog: ExerciseOption[] = [];
+    for (const [ex_cat, ex_ids] of Object.entries(rawCatalog)) {
+      for (const ex_id of ex_ids) {
+        catalog.push({
+          ex_cat: Number(ex_cat),
+          ex_id,
+          label: translate("exercise_" + ex_cat + "_" + ex_id),
+        });
+      }
+    }
+    // Sorted by category first, as Autocomplete's groupBy expects grouped options to be contiguous
+    return catalog.sort(
+      (a, b) =>
+        translate("exercise_" + a.ex_cat).localeCompare(
+          translate("exercise_" + b.ex_cat),
+        ) || a.label.localeCompare(b.label),
+    );
+  }, [rawCatalog, translate]);
+
+  return (
+    <>
+      {exercisesCatalog && (
+        <Dialog open={true} onClose={onClose} fullWidth maxWidth="md">
+          <DialogTitle>
+            {isEdit && <span>{name}</span>}
+            {!isEdit && (
+              <TextField
+                placeholder={translate("workout")}
+                error={name.length == 0}
+                onChange={onNameChange}
+                value={name}
+              ></TextField>
+            )}
+            <IconButton onClick={onClose} className="modal-close-button">
+              <CloseIcon />
+            </IconButton>
+          </DialogTitle>
+
+          <DialogContent dividers>
+            <TextField
+              label={translate("notes")}
+              type="text"
+              maxRows={1}
+              size="small"
+              sx={{ width: 685, marginBottom: "20px" }}
+              value={notes ?? ""}
+              slotProps={{
+                htmlInput: {
+                  maxLength: 200,
+                },
               }}
+              onChange={(e) => setNotes(e.target.value)}
             />
-          ) : (
-            <>
-              1x
-              <br />
-              {step.kind}
-              <hr />
-            </>
-          ),
-        )}
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            justifyContent: "flex-end",
-            alignItems: "center",
-            gap: "8px",
-          }}
-        >
-          <Button variant="contained" onClick={addGroup}>
-            {translate("add_set")}
-          </Button>
-          <Button
-            color="success"
-            variant="contained"
-            onClick={saveWorkout}
-            disabled={!canSave}
-          >
-            {translate("save_workout")}
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
+            <br />
+            {steps.map((step, idx) =>
+              WorkoutUtils.isStepGroup(step) ? (
+                <WorkoutSetGroup
+                  group={step}
+                  index={idx}
+                  sameLevel={steps.length}
+                  exercisesCatalog={exercisesCatalog}
+                  key={`group-${idx}`}
+                  swapPosition={swapPosition}
+                  onChange={(g) => updateStep(idx, g)}
+                  onDelete={() => {
+                    deleteGroup(idx);
+                  }}
+                />
+              ) : (
+                <>
+                  1x
+                  <br />
+                  {step.kind}
+                  <hr />
+                </>
+              ),
+            )}
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "flex-end",
+                alignItems: "center",
+                gap: "8px",
+              }}
+            >
+              <Button variant="contained" onClick={addGroup}>
+                {translate("add_set")}
+              </Button>
+              <Button
+                color="success"
+                variant="contained"
+                onClick={saveWorkout}
+                disabled={!canSave}
+              >
+                {translate("save_workout")}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+    </>
   );
 }

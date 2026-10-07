@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use garmin_tracker_rs_macros::traced_command;
 use rusqlite_orm::{
     dao::Repository,
+    errors::DatabaseError,
     types::{order_by::OrderBy, value::Value, where_clause::Where},
 };
 use tauri::{AppHandle, State};
@@ -147,4 +148,22 @@ pub async fn get_exercise_details(
             "Error getting exercise details",
         )),
     }
+}
+
+#[traced_command]
+#[tauri::command]
+pub async fn get_exercises_catalog(app: AppHandle) -> Result<HashMap<u16, Vec<u16>>, String> {
+    run_blocking(app, |db| {
+        let mut catalog: HashMap<u16, Vec<u16>> = HashMap::new();
+
+        db.run_in_connection(|conn| Ok(ExerciseRepository::select().fetch_in(conn)?))?
+            .iter()
+            .for_each(|e| {
+                catalog.entry(e.category).or_default().push(e.id);
+            });
+
+        Ok(catalog)
+    })
+    .await
+    .map_err(|e: DatabaseError| e.to_string())
 }

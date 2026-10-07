@@ -38,7 +38,7 @@ use crate::{
         },
         body_metrics::{add_body_measures, delete_body_metric, get_body_measures},
         devices::{get_registered_devices, import_from_device, send_to_device},
-        exercises::{get_exercise_details, get_exercises},
+        exercises::{get_exercise_details, get_exercises, get_exercises_catalog},
         export::{export_database, export_gpx, upload_to_cloud},
         sessions::{
             _import_from_files, get_heatmap_data, get_session_details, get_sessions,
@@ -323,6 +323,7 @@ pub fn run(log_level: LevelFilter) {
             //Exercises
             get_exercises,
             get_exercise_details,
+            get_exercises_catalog,
             //Workouts
             get_workout_list,
             get_workout_details,

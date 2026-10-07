@@ -20,19 +20,12 @@ export const DEFAULT_SETTINGS: Settings = {
   start_into_tray: false,
 };
 
-export type ExerciseOption = {
-  label: string;
-  ex_cat: number;
-  ex_id: number;
-};
-
 interface I18nSettingsContextType {
   i18nReady: boolean;
   settings: Settings;
   updateSettings: (changes: Partial<Settings>) => void;
   translate: (key: string, replacements?: string[]) => string;
   refreshTranslations: () => void;
-  exerciseCatalog: ExerciseOption[];
   fromKg: (kg: number) => number;
   toKg: (value: number) => number;
   fromKm: (km: number) => number;
@@ -59,7 +52,6 @@ const defaultValue: I18nSettingsContextType = {
   refreshTranslations: () => {
     /* empty */
   },
-  exerciseCatalog: [],
   fromKg: (kg: number) => {
     return kg;
   },

@@ -18,11 +18,13 @@ import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import ClearIcon from "@mui/icons-material/Clear";
 import AddCircleOutlineRoundedIcon from "@mui/icons-material/AddCircleOutlineRounded";
+import { ExerciseOption } from "../WorkoutSetsModal";
 
 type Props = {
   group: StepGroup;
   index: number;
   sameLevel: number;
+  exercisesCatalog: ExerciseOption[];
   onDelete: () => void;
   swapPosition: (pos1: number, pos2: number) => void;
   onChange: (group: StepGroup) => void;
@@ -32,6 +34,7 @@ export function WorkoutSetGroup({
   group,
   index,
   sameLevel,
+  exercisesCatalog,
   onDelete,
   swapPosition,
   onChange,
@@ -151,6 +154,7 @@ export function WorkoutSetGroup({
               key={`leaf-${idx}`}
               leaf={leaf}
               index={idx}
+              exercisesCatalog={exercisesCatalog}
               sameLevel={leafs.length}
               swapPosition={swapLeafPosition}
               onChange={(l) => updateLeaf(idx, l)}

@@ -1,7 +1,4 @@
-import {
-  ExerciseOption,
-  I18nSettingsContext,
-} from "@/context/I18nSettingsContext";
+import { I18nSettingsContext } from "@/context/I18nSettingsContext";
 import { StepType } from "@/utils/backend/models";
 import { LeafStep, WorkoutUtils } from "@/utils/WorkoutUtils";
 import {
@@ -20,11 +17,13 @@ import { useContext, useId, useState } from "react";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import ClearIcon from "@mui/icons-material/Clear";
+import { ExerciseOption } from "../WorkoutSetsModal";
 
 type Props = {
   leaf: LeafStep;
   index: number;
   sameLevel: number;
+  exercisesCatalog: ExerciseOption[];
   onDelete: () => void;
   swapPosition: (pos1: number, pos2: number) => void;
   onChange: (leaf: LeafStep) => void;
@@ -40,12 +39,12 @@ export function WorkoutSetLeaf({
   leaf,
   index,
   sameLevel,
+  exercisesCatalog,
   onDelete,
   swapPosition,
   onChange,
 }: Props) {
-  const { translate, getWeightUnit, exerciseCatalog } =
-    useContext(I18nSettingsContext);
+  const { translate, getWeightUnit } = useContext(I18nSettingsContext);
   const typeLabelId = useId();
   const limitLabelId = useId();
   const [timeInput, setTimeInput] = useState<string | null>(null);
@@ -66,7 +65,7 @@ export function WorkoutSetLeaf({
       ? `${String(Math.floor(leaf.time / 60)).padStart(2, "0")}:${String(leaf.time % 60).padStart(2, "0")}`
       : "";
   const selected =
-    exerciseCatalog.find(
+    exercisesCatalog.find(
       (e) => e.ex_cat == leaf.ex_cat && e.ex_id == leaf.ex_id,
     ) ?? undefined;
 
@@ -375,7 +374,7 @@ export function WorkoutSetLeaf({
         <Autocomplete
           size="small"
           sx={{ width: 480 }}
-          options={exerciseCatalog}
+          options={exercisesCatalog}
           value={selected}
           disableClearable
           groupBy={(opt) => translate("exercise_" + opt.ex_cat)}

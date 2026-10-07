@@ -9,7 +9,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { JSX } from "react/jsx-runtime";
 import {
   DEFAULT_SETTINGS,
-  ExerciseOption,
   I18nSettingsContext,
   KG_TO_LB,
   KM_TO_MI,
@@ -224,26 +223,6 @@ export function I18nSettingsProvider({
     [translations],
   );
 
-  const exerciseCatalog = useMemo<ExerciseOption[]>(
-    () =>
-      Object.keys(translations)
-        .map((key) => key.match(/^exercise_(\d+)_(\d+)$/))
-        .filter((m) => m != null)
-        .map((m) => ({
-          label: translations[m[0]],
-          ex_cat: Number(m[1]),
-          ex_id: Number(m[2]),
-        }))
-        // Sorted by category first, as Autocomplete's groupBy expects grouped options to be contiguous
-        .sort(
-          (a, b) =>
-            (translations["exercise_" + a.ex_cat] ?? "").localeCompare(
-              translations["exercise_" + b.ex_cat] ?? "",
-            ) || a.label.localeCompare(b.label),
-        ),
-    [translations],
-  );
-
   const refreshTranslations = useCallback(() => {
     BackendClient.getTranslations().then((translations) => {
       setTranslations(Object.freeze(translations));
@@ -273,7 +252,6 @@ export function I18nSettingsProvider({
       updateSettings,
       translate,
       refreshTranslations,
-      exerciseCatalog,
       toKg,
       fromKg,
       toKm,
@@ -293,7 +271,6 @@ export function I18nSettingsProvider({
       updateSettings,
       translate,
       refreshTranslations,
-      exerciseCatalog,
       toKg,
       fromKg,
       toKm,
