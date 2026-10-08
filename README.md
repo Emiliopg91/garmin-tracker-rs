@@ -1,10 +1,10 @@
-# Garmin Tracker
+# Strength Tracker
 
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Emiliopg91/garmin-tracker-rs)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Emiliopg91/strength-tracker-rs)
 
 **Sync your Garmin devices and track your activities — all in one desktop app.**
 
-Garmin Tracker is a Linux desktop application built with [Tauri](https://tauri.app/), combining a Rust backend with a React + TypeScript frontend. It connects to Garmin watches over USB (MTP), imports your activity `.FIT` files, and stores your sessions, exercises, and body measurements in a local SQLite database — no cloud account required.
+Strength Tracker is a Linux desktop application built with [Tauri](https://tauri.app/), combining a Rust backend with a React + TypeScript frontend. It connects to Garmin watches over USB (MTP), imports your activity `.FIT` files, and stores your sessions, exercises, and body measurements in a local SQLite database — no cloud account required.
 
 ## Screenshots
 
@@ -42,15 +42,15 @@ Garmin Tracker is a Linux desktop application built with [Tauri](https://tauri.a
 
 ### Arch Linux (via `AUR helper`/`PKGBUILD`)
 
-Install the AUR `garmin-tracker-rs` package to get latest stable version of the application and every external dependency.
+Install the AUR `strength-tracker-rs` package to get latest stable version of the application and every external dependency.
 
 ### From source
 
 Requirements: [Rust](https://www.rust-lang.org/tools/install), [pnpm](https://pnpm.io/), and the [Tauri prerequisites](https://tauri.app/start/prerequisites/) for your platform.
 
 ```bash
-git clone https://github.com/Emiliopg91/garmin-tracker-rs.git
-cd garmin-tracker-rs
+git clone https://github.com/Emiliopg91/strength-tracker-rs.git
+cd strength-tracker-rs
 pnpm install
 make build       # or: pnpm tauri build
 ```

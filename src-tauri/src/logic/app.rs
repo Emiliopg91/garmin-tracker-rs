@@ -1,9 +1,9 @@
 use std::{collections::HashMap, thread, time::Duration};
 
-use garmin_tracker_rs_macros::traced_command;
 use rusqlite_orm::database::DatabasePool;
 use semver::Version;
 use serde_json::Value;
+use strength_tracker_rs_macros::traced_command;
 use tauri::{AppHandle, Manager, State, WebviewWindowBuilder};
 use tauri_plugin_autostart::ManagerExt;
 
@@ -213,7 +213,7 @@ fn check_for_update(app: AppHandle) {
     loop {
         info!("Looking for updates...");
 
-        let result = curl_rest::Client::with_user_agent("garmin-tracker-rs")
+        let result = curl_rest::Client::with_user_agent("strength-tracker-rs")
             .get()
             .header(curl_rest::Header::Accept(
                 "application/vnd.github+json".into(),

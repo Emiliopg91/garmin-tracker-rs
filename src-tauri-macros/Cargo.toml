@@ -1,5 +1,5 @@
 [package]
-name = "garmin-tracker-rs-macros"
+name = "strength-tracker-rs-macros"
 version = "0.1.0"
 edition = "2024"
 

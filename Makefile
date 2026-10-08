@@ -33,8 +33,8 @@ test:
 	@cd src-tauri && cargo test --lib --bins --tests -- --test-threads=1
 
 dump:
-	@./src-tauri/target/debug/garmin-tracker-rs --dump
+	@./src-tauri/target/debug/strength-tracker-rs --dump
 
 decode:
 	@test -n "$(FILE)" || { echo "Usage: make decode FILE=<path.fit> [FILE=\"a.fit b.fit\"]"; exit 1; }
-	@./src-tauri/target/debug/garmin-tracker-rs --decode $(FILE)
+	@./src-tauri/target/debug/strength-tracker-rs --decode $(FILE)

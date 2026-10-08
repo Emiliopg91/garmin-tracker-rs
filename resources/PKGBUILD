@@ -1,4 +1,4 @@
-pkgname=garmin-tracker-rs
+pkgname=strength-tracker-rs
 pkgver=
 pkgrel=1
 pkgdesc='Sync your devices and track your strength training'
@@ -15,6 +15,9 @@ sha256sums=(
 
 depends=('webkit2gtk-4.1' 'zlib-ng-compat')
 makedepends=('mold' 'npm' 'pnpm' 'python-toml' 'python-yaml' 'rust' 'sccache')
+
+conflicts=('garmin-tracker-rs')
+replaces=('garmin-tracker-rs')
 
 install=${pkgname}.install
 
@@ -35,8 +38,8 @@ build() {
 
 package() {
   cd "$srcdir/${pkgname}/src-tauri/target/release/bundle/deb"
-  cp -a Garmin\ Tracker_${pkgver}_*/data/* "${pkgdir}"
+  cp -a Strength\ Tracker_${pkgver}_*/data/* "${pkgdir}"
 
   cd "$srcdir/${pkgname}/resources"
-  install -Dm555 garmin-tracker-rs-launcher.sh "$pkgdir/usr/share/garmin-tracker-rs/garmin-tracker-rs-launcher.sh"
+  install -Dm555 strength-tracker-rs-launcher.sh "$pkgdir/usr/share/strength-tracker-rs/strength-tracker-rs-launcher.sh"
 }

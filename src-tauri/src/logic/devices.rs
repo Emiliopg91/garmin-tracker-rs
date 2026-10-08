@@ -4,7 +4,6 @@ use std::{
 };
 
 use chrono::{Datelike, Local, TimeZone, Timelike};
-use garmin_tracker_rs_macros::traced_command;
 use nusb::hotplug::HotplugEvent;
 use rusqlite_orm::{
     dao::Repository,
@@ -12,6 +11,7 @@ use rusqlite_orm::{
     errors::DatabaseError,
     types::{value::Value, where_clause::Where},
 };
+use strength_tracker_rs_macros::traced_command;
 use tokio_stream::StreamExt;
 
 use tauri::{AppHandle, Emitter, Manager, State};

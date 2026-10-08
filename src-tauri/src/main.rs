@@ -1,8 +1,8 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use garmin_tracker_rs_lib::{check_running, force_write_mtp_rules};
 use std::process::exit;
+use strength_tracker_rs_lib::{check_running, force_write_mtp_rules};
 use tauri_plugin_log::log::LevelFilter;
 
 /// Binary entrypoint: handles the debug-only `--unwrap` dump mode, sets up env vars, and hands off to `run()`.
@@ -36,14 +36,14 @@ fn main() {
     #[cfg(debug_assertions)]
     if args.len() >= 3 && args.get(1).unwrap() == "--decode" {
         let paths = &args[2..];
-        garmin_tracker_rs_lib::decode_files(paths);
+        strength_tracker_rs_lib::decode_files(paths);
         exit(0);
     } else if args.len() >= 3 && args.get(1).unwrap() == "--encode" {
         let paths = &args[2..];
-        garmin_tracker_rs_lib::encode_files(paths);
+        strength_tracker_rs_lib::encode_files(paths);
         exit(0);
     } else if args.len() >= 2 && args.get(1).unwrap() == "--dump" {
-        garmin_tracker_rs_lib::dump_device();
+        strength_tracker_rs_lib::dump_device();
         exit(0);
     } else {
         if std::env::var("IN_DEBUG").is_err() {
@@ -57,5 +57,5 @@ fn main() {
         LevelFilter::Info
     };
 
-    garmin_tracker_rs_lib::run(log_level);
+    strength_tracker_rs_lib::run(log_level);
 }

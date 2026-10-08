@@ -1,5 +1,5 @@
-use garmin_tracker_rs_macros::traced_command;
 use rusqlite_orm::{dao::Repository, errors::DatabaseError, types::order_by::OrderBy};
+use strength_tracker_rs_macros::traced_command;
 use tauri::{AppHandle, State};
 use tauri_plugin_log::log::info;
 

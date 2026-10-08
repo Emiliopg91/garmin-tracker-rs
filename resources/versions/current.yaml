@@ -35,7 +35,7 @@ rust:
   chrono: 0.4.45
   curl-rest: 0.6.0
   embedded-io-adapters: 0.7.0
-  garmin-tracker-rs-macros: 0.1.0
+  strength-tracker-rs-macros: 0.1.0
   geo-types: 0.7.20
   gpx: 0.10.0
   libc: 0.2.190

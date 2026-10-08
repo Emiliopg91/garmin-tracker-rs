@@ -4,9 +4,9 @@ use std::{
 };
 
 use chrono::{Local, TimeZone};
-use garmin_tracker_rs_macros::traced_command;
 use gpx::Gpx;
 use rusqlite_orm::database::DatabasePool;
+use strength_tracker_rs_macros::traced_command;
 use tauri::{AppHandle, Manager, State};
 use tauri_plugin_log::log::info;
 

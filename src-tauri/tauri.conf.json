@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Garmin Tracker",
+  "productName": "Strength Tracker",
   "version": "2.8.1",
-  "identifier": "com.emiliopg91.garmin-tracker-rs",
+  "identifier": "com.emiliopg91.strength-tracker-rs",
   "build": {
     "beforeDevCommand": "pnpm dev",
     "devUrl": "http://localhost:1420",
@@ -13,7 +13,7 @@
   "app": {
     "windows": [
       {
-        "title": "Garmin Tracker",
+        "title": "Strength Tracker",
         "width": 800,
         "height": 770,
         "visible": false,

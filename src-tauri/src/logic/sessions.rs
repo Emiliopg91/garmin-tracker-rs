@@ -28,7 +28,6 @@ use crate::{
 };
 use chrono::{Datelike, Days, Local, Months, TimeZone, offset::LocalResult};
 use curl_rest::StatusCode;
-use garmin_tracker_rs_macros::traced_command;
 use rayon::prelude::*;
 use rusqlite_orm::{
     dao::Repository,
@@ -36,6 +35,7 @@ use rusqlite_orm::{
     errors::DatabaseError,
     types::{order_by::OrderBy, value::Value, where_clause::Where},
 };
+use strength_tracker_rs_macros::traced_command;
 use tauri::{AppHandle, Emitter, Manager, State};
 use tauri_plugin_log::log::{debug, error, info, warn};
 use tokio::process::Command;
@@ -637,7 +637,7 @@ pub fn update_pending_geolocation(app: &AppHandle, db: &DatabasePool) {
                     first.0, first.1
                 );
                 //
-                let resp = curl_rest::Client::with_user_agent("garmin-tracker-rs")
+                let resp = curl_rest::Client::with_user_agent("strength-tracker-rs")
                     .get()
                     .header(curl_rest::Header::Accept("application/json".into()))
                     .send(&url);
