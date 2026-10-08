@@ -106,6 +106,7 @@ impl WorkoutStep {
         inst
     }
 
+    #[allow(clippy::too_many_arguments)]
     pub fn exercise(
         workout: &str,
         idx: u16,

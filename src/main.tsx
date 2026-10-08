@@ -15,6 +15,7 @@ import "@/styles/common.css";
 import { AppProvider } from "./context/AppProvider";
 import { I18nSettingsProvider } from "./context/I18nSettingsProvider";
 import { LoadingProvider } from "./context/LoadingProvider";
+import { DeviceProvider } from "./context/DeviceProvider";
 
 delete (L.Icon.Default.prototype as unknown as { _getIconUrl?: unknown })
   ._getIconUrl;
@@ -30,7 +31,9 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <LoadingProvider>
       <I18nSettingsProvider>
         <AppProvider>
-          <App />
+          <DeviceProvider>
+            <App />
+          </DeviceProvider>
         </AppProvider>
       </I18nSettingsProvider>
     </LoadingProvider>

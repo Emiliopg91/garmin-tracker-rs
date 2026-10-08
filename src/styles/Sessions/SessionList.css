@@ -3,3 +3,8 @@
   position: relative !important;
   left: 0px !important;
 }
+
+.trophy-icon {
+  position: relative !important;
+  top: 2px;
+}

@@ -42,7 +42,7 @@ export function SessionSetsTable({
     <div className="session-sets-container">
       <table>
         <colgroup>
-          <col className="col-330" />
+          <col className="col-320" />
           <col className="col-230" />
         </colgroup>
 

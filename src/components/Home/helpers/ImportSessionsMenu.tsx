@@ -1,16 +1,16 @@
 import { I18nSettingsContext } from "@/context/I18nSettingsContext";
 import { LoadingContext } from "@/context/LoadingContext";
 import { BackendClient } from "@/utils/backend/client";
-import { DeviceListItem } from "@/utils/backend/models";
 import { useContext, useState } from "react";
 import { Button, Menu, MenuItem } from "@mui/material";
+import { DeviceContext } from "@/context/DeviceContext";
 
 type Props = {
-  availableDevices: DeviceListItem[];
   onImported: () => void;
 };
 
-export function ImportSessionsMenu({ availableDevices, onImported }: Props) {
+export function ImportSessionsMenu({ onImported }: Props) {
+  const { availableDevices } = useContext(DeviceContext);
   const { startLoading, finishLoading } = useContext(LoadingContext);
   const { translate } = useContext(I18nSettingsContext);
   const [importMenuAnchor, setImportMenuAnchor] = useState<{

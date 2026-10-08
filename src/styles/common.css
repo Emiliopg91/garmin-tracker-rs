@@ -71,8 +71,6 @@
 
 .trophy-icon {
   color: gold;
-  position: relative !important;
-  top: 2px;
 }
 
 .list-action-bar {
@@ -130,6 +128,10 @@
 
 .col-280 {
   width: 280px;
+}
+
+.col-320 {
+  width: 320px;
 }
 
 .col-330 {

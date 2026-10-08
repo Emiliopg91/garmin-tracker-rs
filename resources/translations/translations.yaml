@@ -143,8 +143,8 @@ latest_session:
   en: Latest session
   es: Última sesión
 enabled:
-  en: Enabled
-  es: Activado
+  en: Show in suggestions
+  es: Mostrar en sugerencias
 session_count:
   en: Session count
   es: Número de sesiones

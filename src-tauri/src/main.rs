@@ -51,10 +51,6 @@ fn main() {
         }
     }
 
-    unsafe {
-        std::env::set_var("GDK_BACKEND", "x11");
-    };
-
     let log_level: LevelFilter = if args.contains(&"-v".to_string()) {
         LevelFilter::Debug
     } else {

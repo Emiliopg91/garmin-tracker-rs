@@ -26,7 +26,7 @@ import { WorkoutSetsModal } from "../Workouts/WorkoutSetsModal";
 import { WorkoutActionsMenu } from "../Workouts/helpers/WorkoutActionsMenu";
 
 export function Home() {
-  const { availableDevices, sessionsVersion } = useContext(AppContext);
+  const { sessionsVersion } = useContext(AppContext);
   const { startLoading, finishLoading } = useContext(LoadingContext);
   const { translate, fromKg, formatDuration, formatTimeDate, formatNumber } =
     useContext(I18nSettingsContext);
@@ -490,10 +490,7 @@ export function Home() {
         )}
       </div>
 
-      <ImportSessionsMenu
-        availableDevices={availableDevices}
-        onImported={refresh}
-      />
+      <ImportSessionsMenu onImported={refresh} />
     </>
   );
 }

@@ -12,9 +12,9 @@ import {
   Popper,
   Tooltip,
 } from "@mui/material";
-import { AppContext } from "@/context/AppContext";
 import MenuIcon from "@mui/icons-material/Menu";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import { DeviceContext } from "@/context/DeviceContext";
 
 type Props = {
   workoutName: string;
@@ -29,7 +29,7 @@ export function WorkoutActionsMenu({
 }: Props) {
   const { startLoading, finishLoading } = useContext(LoadingContext);
   const { translate } = useContext(I18nSettingsContext);
-  const { registeredDevices } = useContext(AppContext);
+  const { registeredDevices } = useContext(DeviceContext);
   const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null);
   const [sendMenuAnchor, setSendMenuAnchor] = useState<HTMLElement | null>(
     null,

@@ -1,7 +1,6 @@
 import { AppContext } from "@/context/AppContext";
-import { LoadingContext } from "@/context/LoadingContext";
 import { I18nSettingsContext } from "@/context/I18nSettingsContext";
-import { JSX, useContext, useMemo } from "react";
+import { JSX, useCallback, useContext, useMemo, useState } from "react";
 import { NavBar, NavBarItem } from "../NavBar/NavBar";
 import "@/styles/app.css";
 import { Tabs } from "@/models/tabs";
@@ -15,10 +14,18 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import { Home } from "../Home/Home";
 
 export function App(): JSX.Element {
-  const { tab, setTab, appReady, showSettings, settingsOpened, closeSettings } =
-    useContext(AppContext);
-  const { loading } = useContext(LoadingContext);
+  const { appReady } = useContext(AppContext);
   const { translate } = useContext(I18nSettingsContext);
+
+  const [settingsOpened, setSettingsOpened] = useState(false);
+  const [tab, setTab] = useState(Tabs.HOME);
+  const showSettings = useCallback(() => {
+    setSettingsOpened(true);
+  }, []);
+
+  const closeSettings = useCallback(() => {
+    setSettingsOpened(false);
+  }, []);
 
   const leftNavBarItems: NavBarItem[] = useMemo(
     () => [
@@ -58,7 +65,7 @@ export function App(): JSX.Element {
         selected: tab == Tabs.BODY_METRICS,
       },
     ],
-    [tab, translate, setTab],
+    [tab, translate],
   );
 
   const rightNavBarItems: NavBarItem[] = useMemo(
@@ -81,7 +88,7 @@ export function App(): JSX.Element {
   return (
     <>
       <div id="viewport">
-        {(!appReady || loading) && <Loading />}
+        <Loading />
 
         {appReady && (
           <>

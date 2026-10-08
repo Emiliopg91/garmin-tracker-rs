@@ -1,7 +1,7 @@
 import { BackendListener } from "@/utils/backend/listener";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { JSX } from "react/jsx-runtime";
-import { LoadingContext } from "./LoadingContext";
+import { LoadingContext, LoadingStateContext } from "./LoadingContext";
 
 export function LoadingProvider({
   children,
@@ -35,12 +35,16 @@ export function LoadingProvider({
     };
   }, [startLoading, finishLoading]);
 
-  const value = useMemo(
-    () => ({ loading, startLoading, finishLoading }),
-    [loading, startLoading, finishLoading],
+  const actions = useMemo(
+    () => ({ startLoading, finishLoading }),
+    [startLoading, finishLoading],
   );
 
   return (
-    <LoadingContext.Provider value={value}>{children}</LoadingContext.Provider>
+    <LoadingContext.Provider value={actions}>
+      <LoadingStateContext.Provider value={loading}>
+        {children}
+      </LoadingStateContext.Provider>
+    </LoadingContext.Provider>
   );
 }
