@@ -95,17 +95,33 @@ export class SessionUtils {
         copy.weight = Number(fromKg(copy.weight).toFixed(1));
         details.sets[idx] = copy;
         details.volume += copy.reps * copy.weight;
-
-        const name = details.sets[idx].ex_cat + "-" + details.sets[idx].ex_id;
-        if (!details.exercises.includes(name)) {
-          details.exercises.push(name);
-        }
-        if (!details.grouped_series[name]) {
-          details.grouped_series[name] = [];
-        }
-        details.grouped_series[name].push(details.sets[idx]);
       });
+
+      const { exercises, grouped_series } = SessionUtils.groupSeries(
+        details.sets,
+      );
+      details.exercises = exercises;
+      details.grouped_series = grouped_series;
     }
+  }
+
+  // Groups sets by "cat-id" key; exercises and their series are ordered by set idx
+  public static groupSeries(sets: SessionSet[]): {
+    exercises: string[];
+    grouped_series: Record<string, SessionSet[]>;
+  } {
+    const exercises: string[] = [];
+    const grouped_series: Record<string, SessionSet[]> = {};
+    const sorted = sets.slice().sort((a, b) => a.idx - b.idx);
+    for (const serie of sorted) {
+      const name = serie.ex_cat + "-" + serie.ex_id;
+      if (!grouped_series[name]) {
+        grouped_series[name] = [];
+        exercises.push(name);
+      }
+      grouped_series[name].push(serie);
+    }
+    return { exercises, grouped_series };
   }
 
   private static handleGpsCoordiates(details: SessionFrontDetails) {

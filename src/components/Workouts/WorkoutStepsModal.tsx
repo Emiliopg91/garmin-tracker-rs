@@ -22,7 +22,7 @@ type Props = {
   onClose: () => void;
 };
 
-export function WorkoutSetsModal({ workout, isEdit, onClose }: Props) {
+export function WorkoutStepsModal({ workout, isEdit, onClose }: Props) {
   const withLoading = useLoadingTask();
   const { translate, fromKg, toKg } = useContext(I18nSettingsContext);
   const exercisesCatalog = useExerciseCatalog(onClose);
@@ -89,7 +89,7 @@ export function WorkoutSetsModal({ workout, isEdit, onClose }: Props) {
 
   return (
     <>
-      {exercisesCatalog && (
+      {exercisesCatalog.length > 0 && (
         <Dialog open={true} onClose={onClose} fullWidth maxWidth="md">
           <DialogTitle>
             {isEdit && <span>{name}</span>}

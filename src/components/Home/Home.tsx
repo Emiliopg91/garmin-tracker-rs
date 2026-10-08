@@ -24,7 +24,7 @@ import { WorkoutModal } from "../Workouts/WorkoutModal";
 import { Heatmap } from "./helpers/Heatmap";
 import { WorkloadChart } from "./helpers/WorkloadChart";
 import { ImportSessionsMenu } from "./helpers/ImportSessionsMenu";
-import { WorkoutSetsModal } from "../Workouts/WorkoutSetsModal";
+import { WorkoutStepsModal } from "../Workouts/WorkoutStepsModal";
 import { WorkoutActionsMenu } from "../Workouts/helpers/WorkoutActionsMenu";
 
 interface PeriodStats {
@@ -424,7 +424,7 @@ export function Home() {
 
       <div>
         {workoutEdit && (
-          <WorkoutSetsModal
+          <WorkoutStepsModal
             workout={workoutEdit}
             isEdit={true}
             onClose={() => setWorkoutEdit(undefined)}

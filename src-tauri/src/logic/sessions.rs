@@ -201,7 +201,7 @@ pub async fn get_session_details(
     }
 }
 
-/// Applies user edits (reps/weight) to a session's series and recomputes personal records.
+/// Applies user edits (session notes and reps/weight/exercise of its series) and recomputes personal records.
 #[traced_command]
 #[tauri::command]
 pub async fn save_session_changes(
@@ -223,10 +223,31 @@ pub async fn save_session_changes(
             update_session_notes(tx, details.timestamp, details.notes.as_deref())?;
 
             let mut exercises = HashSet::new();
+
+            SetRepository::select()
+                .where_(Where::And(vec![
+                    Where::Eq(entity::columns::SESSION, details.timestamp.into()),
+                    Where::In(
+                        entity::columns::IDX,
+                        details
+                            .sets
+                            .iter()
+                            .map(|s| s.idx.into())
+                            .collect::<Vec<_>>(),
+                    ),
+                ]))
+                .fetch_in(tx)?
+                .iter()
+                .for_each(|s| {
+                    exercises.insert((s.ex_cat, s.ex_id));
+                });
+
             for serie in &details.sets {
                 SetRepository::update()
                     .set(entity::columns::REPS, serie.reps.into())
                     .set(entity::columns::WEIGHT, serie.weight.into())
+                    .set(entity::columns::EX_CAT, serie.ex_cat.into())
+                    .set(entity::columns::EX_ID, serie.ex_id.into())
                     .where_(Where::And(vec![
                         Where::Eq(entity::columns::SESSION, details.timestamp.into()),
                         Where::Eq(entity::columns::IDX, serie.idx.into()),

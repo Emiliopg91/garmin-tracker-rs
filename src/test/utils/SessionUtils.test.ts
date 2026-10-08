@@ -95,6 +95,29 @@ describe("SessionUtils.detailsFromBackend - sets", () => {
   });
 });
 
+describe("SessionUtils.groupSeries", () => {
+  it("merges sets of the same exercise ordering by set idx", () => {
+    const sets = [
+      makeSet({ idx: 2, ex_cat: 3, ex_id: 4 }),
+      makeSet({ idx: 1, ex_cat: 1, ex_id: 2 }),
+      makeSet({ idx: 0, ex_cat: 3, ex_id: 4 }),
+    ];
+
+    const { exercises, grouped_series } = SessionUtils.groupSeries(sets);
+
+    expect(exercises).toEqual(["3-4", "1-2"]);
+    expect(grouped_series["3-4"].map((s) => s.idx)).toEqual([0, 2]);
+    expect(grouped_series["1-2"].map((s) => s.idx)).toEqual([1]);
+  });
+
+  it("returns empty structures when there are no sets", () => {
+    expect(SessionUtils.groupSeries([])).toEqual({
+      exercises: [],
+      grouped_series: {},
+    });
+  });
+});
+
 describe("SessionUtils.detailsFromBackend - laps", () => {
   it("converts lap start positions from semicircles to degrees", () => {
     const details = SessionUtils.detailsFromBackend(

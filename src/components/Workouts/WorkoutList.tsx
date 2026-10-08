@@ -8,7 +8,7 @@ import { useBackendEvent } from "@/hooks/useBackendEvent";
 import { useBackendList } from "@/hooks/useBackendList";
 import { I18nSettingsContext } from "@/context/I18nSettingsContext";
 import "@/styles/Workouts/WorkoutLists.css";
-import { WorkoutSetsModal } from "./WorkoutSetsModal";
+import { WorkoutStepsModal } from "./WorkoutStepsModal";
 import { Button } from "@mui/material";
 import { WorkoutUtils } from "@/utils/WorkoutUtils";
 import { BackendListener } from "@/utils/backend/listener";
@@ -136,7 +136,7 @@ export function WorkoutsList() {
 
       <div>
         {workoutEdit && (
-          <WorkoutSetsModal
+          <WorkoutStepsModal
             workout={workoutEdit}
             isEdit={isEdit}
             onClose={() => {

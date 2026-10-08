@@ -2,7 +2,7 @@ import { useLoadingTask } from "@/hooks/useLoadingTask";
 import { I18nSettingsContext } from "@/context/I18nSettingsContext";
 import { BackendClient } from "@/utils/backend/client";
 import { SessionSetsUpdate } from "@/utils/backend/models";
-import { useContext, useState } from "react";
+import { useContext, useMemo, useState } from "react";
 import {
   Button,
   Dialog,
@@ -12,7 +12,7 @@ import {
   TextareaAutosize,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import { SessionFrontDetails } from "@/utils/SessionUtils";
+import { SessionFrontDetails, SessionUtils } from "@/utils/SessionUtils";
 import { SessionMap } from "./helpers/SessionMap";
 import { SessionDetailsTable } from "./helpers/SessionDetailsTable";
 import { SessionHeartRateChart } from "./helpers/SessionHeartRateChart";
@@ -30,18 +30,42 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
   const { translate, toKg } = useContext(I18nSettingsContext);
   const [originalSession] = useState(session);
   const [localSession, setLocalSession] = useState({ ...session });
-  const [changed, setChanged] = useState(false);
-  const [sets, setSets] = useState(session.sets.slice());
   const [notes, setNotes] = useState(session.notes);
 
-  const hasChanges = (sets: typeof localSession.sets) =>
-    sets.some(
-      (serie, idx) =>
-        serie.reps != originalSession.sets[idx].reps ||
-        serie.weight != originalSession.sets[idx].weight,
-    );
+  const changed = useMemo(
+    () =>
+      notes != originalSession.notes ||
+      localSession.sets.some(
+        (serie, idx) =>
+          serie.reps != originalSession.sets[idx].reps ||
+          serie.weight != originalSession.sets[idx].weight ||
+          serie.ex_cat != originalSession.sets[idx].ex_cat ||
+          serie.ex_id != originalSession.sets[idx].ex_id,
+      ),
+    [localSession.sets, notes, originalSession],
+  );
 
-  const updateSerie = (
+  const updateSerieExercise = (
+    oldExercise: string,
+    newCat: number,
+    newId: number,
+  ) => {
+    const newExercise = newCat + "-" + newId;
+    if (newExercise === oldExercise) return;
+
+    setLocalSession((prev) => {
+      const sets = prev.sets.map((s) =>
+        s.ex_cat + "-" + s.ex_id === oldExercise
+          ? { ...s, ex_cat: newCat, ex_id: newId }
+          : s,
+      );
+
+      // Regroup from sets so moving into an exercise already present merges both groups
+      return { ...prev, sets, ...SessionUtils.groupSeries(sets) };
+    });
+  };
+
+  const updateSerieRepsWeight = (
     exercise: string,
     idx: number,
     field: "reps" | "weight",
@@ -55,9 +79,6 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
 
       const sets = prev.sets.slice();
       sets[serieIdx] = { ...sets[serieIdx], [field]: value };
-      setSets(sets);
-
-      setChanged(hasChanges(sets) || notes != originalSession.notes);
 
       return {
         ...prev,
@@ -68,15 +89,8 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
   };
 
   const updateNote = (notes: string) => {
-    setLocalSession((prev) => {
-      setNotes(notes);
-      setChanged(hasChanges(sets) || notes != originalSession.notes);
-
-      return {
-        ...prev,
-        notes,
-      };
-    });
+    setNotes(notes);
+    setLocalSession((prev) => ({ ...prev, notes }));
   };
 
   const saveChanges = () => {
@@ -88,7 +102,9 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
     localSession.sets.forEach((serie, serIdx) => {
       if (
         originalSession.sets[serIdx].reps != serie.reps ||
-        originalSession.sets[serIdx].weight != serie.weight
+        originalSession.sets[serIdx].weight != serie.weight ||
+        originalSession.sets[serIdx].ex_cat != serie.ex_cat ||
+        originalSession.sets[serIdx].ex_id != serie.ex_id
       ) {
         update.sets.push({
           ...serie,
@@ -151,7 +167,8 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
           <SessionSetsTable
             exercises={localSession.exercises}
             groupedSeries={localSession.grouped_series}
-            onUpdateSerie={updateSerie}
+            onUpdateSerieRepsWeight={updateSerieRepsWeight}
+            onUpdateSerieExercise={updateSerieExercise}
           />
         )}
         <div>

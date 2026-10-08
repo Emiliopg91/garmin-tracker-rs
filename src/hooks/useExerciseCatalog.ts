@@ -13,9 +13,7 @@ export type ExerciseOption = {
 export function useExerciseCatalog(onFailure: () => void) {
   const withLoading = useLoadingTask();
   const { translate } = useContext(I18nSettingsContext);
-  const [rawCatalog, setRawCatalog] = useState<Record<number, number[]> | null>(
-    null,
-  );
+  const [rawCatalog, setRawCatalog] = useState<Record<number, number[]>>({});
 
   const onFailureRef = useRef(onFailure);
   onFailureRef.current = onFailure;
@@ -26,8 +24,7 @@ export function useExerciseCatalog(onFailure: () => void) {
       .catch(() => onFailureRef.current());
   }, []);
 
-  const exercisesCatalog = useMemo<ExerciseOption[] | null>(() => {
-    if (!rawCatalog) return null;
+  const exercisesCatalog = useMemo<ExerciseOption[]>(() => {
     const catalog: ExerciseOption[] = [];
     const categoryLabels = new Map<number, string>();
     for (const [cat, ex_ids] of Object.entries(rawCatalog)) {
