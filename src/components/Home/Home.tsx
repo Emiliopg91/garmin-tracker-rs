@@ -25,6 +25,69 @@ import { ImportSessionsMenu } from "./helpers/ImportSessionsMenu";
 import { WorkoutSetsModal } from "../Workouts/WorkoutSetsModal";
 import { WorkoutActionsMenu } from "../Workouts/helpers/WorkoutActionsMenu";
 
+interface PeriodStats {
+  sessions: number;
+  time: number;
+  kcal: number;
+  load: number;
+}
+
+const PERIODS = ["today", "thisWeek", "previousWeek", "month"] as const;
+type Period = (typeof PERIODS)[number];
+type HomeStats = Record<Period, PeriodStats>;
+
+const emptyPeriod = (): PeriodStats => ({
+  sessions: 0,
+  time: 0,
+  kcal: 0,
+  load: 0,
+});
+
+const emptyStats = (): HomeStats => ({
+  today: emptyPeriod(),
+  thisWeek: emptyPeriod(),
+  previousWeek: emptyPeriod(),
+  month: emptyPeriod(),
+});
+
+const addSession = (stats: PeriodStats, session: SessionListItem) => {
+  stats.sessions += 1;
+  stats.time += session.total_elapsed_time;
+  stats.kcal += session.active_calories;
+  stats.load += session.training_load;
+};
+
+// Sessions must be sorted by timestamp, most recent first
+const calculateStats = (
+  sessions: SessionListItem[],
+  today: number,
+  adapter: ReturnType<typeof usePickerAdapter>,
+): HomeStats => {
+  const stats = emptyStats();
+
+  const startOfWeek = adapter.startOfWeek(adapter.startOfDay(new Date()));
+  const thisWeekLimit = startOfWeek.getTime() / 1000;
+  const prevWeekLimit = adapter.addWeeks(startOfWeek, -1).getTime() / 1000;
+  const monthLimit = today - 29 * 24 * 60 * 60;
+
+  for (const session of sessions) {
+    if (session.timestamp < monthLimit) {
+      break;
+    }
+    addSession(stats.month, session);
+    if (session.timestamp >= thisWeekLimit) {
+      addSession(stats.thisWeek, session);
+      if (session.timestamp >= today) {
+        addSession(stats.today, session);
+      }
+    } else if (session.timestamp >= prevWeekLimit) {
+      addSession(stats.previousWeek, session);
+    }
+  }
+
+  return stats;
+};
+
 export function Home() {
   const { sessionsVersion } = useContext(AppContext);
   const { startLoading, finishLoading } = useContext(LoadingContext);
@@ -35,24 +98,7 @@ export function Home() {
   const [day, setDay] = useState(() => new Date().toDateString());
   const [availableData, setAvailableData] = useState(false);
   const [workload, setWorkload] = useState<WorkoutLoad[]>([]);
-  const [minDate, setMinDate] = useState(0);
-
-  const [todaySessions, setTodaySessions] = useState(0);
-  const [todayTime, setTodayTime] = useState(0);
-  const [todayKcal, setTodayKCal] = useState(0);
-  const [todayLoad, setTodayLoad] = useState(0);
-  const [previousWeekSessions, setPreviousWeekSessions] = useState(0);
-  const [previousWeekTime, setPreviousWeekTime] = useState(0);
-  const [previousWeekKcal, setPreviousWeekKCal] = useState(0);
-  const [previousWeekLoad, setPreviousWeekLoad] = useState(0);
-  const [thisWeekSessions, setThisWeekSessions] = useState(0);
-  const [thisWeekTime, setThisWeekTime] = useState(0);
-  const [thisWeekKcal, setThisWeekKCal] = useState(0);
-  const [thisWeekLoad, setThisWeekLoad] = useState(0);
-  const [monthSessions, setMonthSessions] = useState(0);
-  const [monthTime, setMonthTime] = useState(0);
-  const [monthKcal, setMonthKCal] = useState(0);
-  const [monthLoad, setMonthLoad] = useState(0);
+  const [stats, setStats] = useState<HomeStats>(emptyStats);
   const [heatMapData, setHeatMapData] = useState<
     [number, number][][] | undefined
   >(undefined);
@@ -85,6 +131,7 @@ export function Home() {
 
         if (sessions.length > 0) {
           const workout_data = SessionUtils.calculateWorkoutLoad(sessions);
+          const overreaching = SessionUtils.isOverreaching(workout_data);
 
           startLoading();
           BackendClient.getHeatmapData()
@@ -120,92 +167,22 @@ export function Home() {
               finishLoading();
             });
 
-          let todaySessions = 0;
-          let todayTmp = 0;
-          let todayKcl = 0;
-          let todayLoad = 0;
-          let thisWeekSessions = 0;
-          let thisWeekTmp = 0;
-          let thisWeekKcl = 0;
-          let thisWeekLoad = 0;
-          let prevWeekSessions = 0;
-          let prevWeekTmp = 0;
-          let prevWeekKcl = 0;
-          let prevWeekLoad = 0;
-          let monthSessions = 0;
-          let monthTmp = 0;
-          let monthKcl = 0;
-          let monthLoad = 0;
-
-          const startOfWeek = adapter.startOfWeek(
-            adapter.startOfDay(new Date()),
-          );
-
-          const thisWeekLimit = startOfWeek.getTime() / 1000;
-          const prevWeekLimit =
-            adapter.addWeeks(startOfWeek, -1).getTime() / 1000;
-          const monthLimit = today - 29 * 24 * 60 * 60;
-
-          for (let i = 0; i < sessions.length; i++) {
-            if (sessions[i].timestamp < monthLimit) {
-              break;
-            }
-            monthSessions += 1;
-            monthTmp += sessions[i].total_elapsed_time;
-            monthKcl += sessions[i].active_calories;
-            monthLoad += sessions[i].training_load;
-            if (sessions[i].timestamp >= prevWeekLimit) {
-              if (sessions[i].timestamp < thisWeekLimit) {
-                prevWeekSessions += 1;
-                prevWeekTmp += sessions[i].total_elapsed_time;
-                prevWeekKcl += sessions[i].active_calories;
-                prevWeekLoad += sessions[i].training_load;
-              } else {
-                thisWeekSessions += 1;
-                thisWeekTmp += sessions[i].total_elapsed_time;
-                thisWeekKcl += sessions[i].active_calories;
-                thisWeekLoad += sessions[i].training_load;
-
-                if (sessions[i].timestamp >= today) {
-                  todaySessions += 1;
-                  todayTmp += sessions[i].total_elapsed_time;
-                  todayKcl += sessions[i].active_calories;
-                  todayLoad += sessions[i].training_load;
-                }
-              }
-            }
-          }
-
-          setTodaySessions(todaySessions);
-          setTodayKCal(todayKcl);
-          setTodayTime(todayTmp);
-          setTodayLoad(todayLoad);
-          setThisWeekSessions(thisWeekSessions);
-          setThisWeekKCal(thisWeekKcl);
-          setThisWeekTime(thisWeekTmp);
-          setThisWeekLoad(thisWeekLoad);
-          setPreviousWeekSessions(prevWeekSessions);
-          setPreviousWeekKCal(prevWeekKcl);
-          setPreviousWeekTime(prevWeekTmp);
-          setPreviousWeekLoad(prevWeekLoad);
-          setMonthSessions(monthSessions);
-          setMonthKCal(monthKcl);
-          setMonthTime(monthTmp);
-          setMonthLoad(monthLoad);
+          const newStats = calculateStats(sessions, today, adapter);
+          setStats(newStats);
 
           setWorkload(workout_data);
-          if (workout_data.length > 0) {
-            setMinDate(workout_data[0].date);
-          }
 
           setLastSession(sessions[0]);
 
-          const overreaching = SessionUtils.isOverreaching(workout_data);
           const lastSessDate = new Date(
             sessions[0].timestamp * 1000,
           ).toDateString();
           const todayDate = new Date().toDateString();
-          setRest(todayLoad > 50 || overreaching || lastSessDate == todayDate);
+          setRest(
+            newStats.today.load > 50 ||
+              overreaching ||
+              lastSessDate == todayDate,
+          );
         }
       })
       .finally(() => {
@@ -315,7 +292,10 @@ export function Home() {
               <legend>{translate("training_status")}</legend>
               <div style={{ display: "flex" }}>
                 {workload.length > 0 && (
-                  <WorkloadChart workload={workload} minDate={minDate} />
+                  <WorkloadChart
+                    workload={workload}
+                    minDate={workload[0].date}
+                  />
                 )}
                 <Heatmap data={heatMapData} />
               </div>
@@ -338,53 +318,42 @@ export function Home() {
                 <tbody>
                   <tr>
                     <td>{translate("sessions")}</td>
-                    <td>{formatNumber(todaySessions, 0)}</td>
-                    <td>{formatNumber(thisWeekSessions, 0)}</td>
-                    <td>{formatNumber(previousWeekSessions, 0)}</td>
-                    <td>{formatNumber(monthSessions, 0)}</td>
+                    {PERIODS.map((p) => (
+                      <td key={p}>{formatNumber(stats[p].sessions, 0)}</td>
+                    ))}
                   </tr>
                 </tbody>
                 <tbody>
                   <tr>
                     <td>{translate("workout_load")}</td>
-                    <td>
-                      {Math.round(todayLoad / todaySessions) +
-                        " / " +
-                        formatNumber(todayLoad, 0)}
-                    </td>
-                    <td>
-                      {Math.round(thisWeekLoad / thisWeekSessions) +
-                        " / " +
-                        formatNumber(thisWeekLoad, 0)}
-                    </td>
-                    <td>
-                      {Math.round(previousWeekLoad / previousWeekSessions) +
-                        " / " +
-                        formatNumber(previousWeekLoad, 0)}
-                    </td>
-                    <td>
-                      {Math.round(monthLoad / monthSessions) +
-                        " / " +
-                        formatNumber(monthLoad, 0)}
-                    </td>
+                    {PERIODS.map((p) => (
+                      <td key={p}>
+                        {formatNumber(
+                          stats[p].sessions > 0
+                            ? stats[p].load / stats[p].sessions
+                            : 0,
+                          0,
+                        ) +
+                          " / " +
+                          formatNumber(stats[p].load, 0)}
+                      </td>
+                    ))}
                   </tr>
                 </tbody>
                 <tbody>
                   <tr>
                     <td>{translate("active_time")}</td>
-                    <td>{formatDuration(todayTime)}</td>
-                    <td>{formatDuration(thisWeekTime)}</td>
-                    <td>{formatDuration(previousWeekTime)}</td>
-                    <td>{formatDuration(monthTime)}</td>
+                    {PERIODS.map((p) => (
+                      <td key={p}>{formatDuration(stats[p].time)}</td>
+                    ))}
                   </tr>
                 </tbody>
                 <tbody>
                   <tr>
                     <td>{translate("active_calories")}</td>
-                    <td>{formatNumber(todayKcal, 0)} Kcal</td>
-                    <td>{formatNumber(thisWeekKcal, 0)} Kcal</td>
-                    <td>{formatNumber(previousWeekKcal, 0)} Kcal</td>
-                    <td>{formatNumber(monthKcal, 0)} Kcal</td>
+                    {PERIODS.map((p) => (
+                      <td key={p}>{formatNumber(stats[p].kcal, 0)} Kcal</td>
+                    ))}
                   </tr>
                 </tbody>
               </table>
