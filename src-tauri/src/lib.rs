@@ -20,7 +20,7 @@ use rusqlite_orm::database::{
 };
 use rusqlite_orm::ddls;
 use tauri::{
-    Manager, WindowEvent,
+    AppHandle, Manager, RunEvent, WindowEvent,
     menu::{Menu, MenuItem, PredefinedMenuItem},
     tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
 };
@@ -167,6 +167,29 @@ fn schema_ddls() -> Vec<DdlVersion> {
     ddls
 }
 
+/// Turns SIGTERM/SIGINT/SIGHUP into a regular `app.exit(0)` so they are logged instead of killing the process.
+fn listen_for_signals(app: &AppHandle) {
+    use tokio::signal::unix::{SignalKind, signal};
+
+    for (kind, name) in [
+        (SignalKind::terminate(), "SIGTERM"),
+        (SignalKind::interrupt(), "SIGINT"),
+        (SignalKind::hangup(), "SIGHUP"),
+    ] {
+        let app = app.clone();
+        tauri::async_runtime::spawn(async move {
+            match signal(kind) {
+                Ok(mut stream) => {
+                    stream.recv().await;
+                    info!("Received {}, shutting down...", name);
+                    app.exit(0);
+                }
+                Err(e) => error!("Could not listen for {}: {}", name, e),
+            }
+        });
+    }
+}
+
 /// Boots the Tauri app: acquires the single-instance lock, opens/migrates the DB, loads settings, and registers commands.
 pub fn run(log_level: LevelFilter) {
     SingleInstance::acquire();
@@ -233,6 +256,8 @@ pub fn run(log_level: LevelFilter) {
             }
 
             let (database, settings) = initialize();
+
+            listen_for_signals(app.handle());
 
             let app_handle = app.handle().clone();
             let window = app_handle.get_webview_window("main");
@@ -353,13 +378,18 @@ pub fn run(log_level: LevelFilter) {
             eprintln!("Error while running tauri application {}", e);
             exit(constants::ExitCodes::TauriError.into())
         })
-        .run(|app, event| {
-            if let tauri::RunEvent::ExitRequested { api, code, .. } = event
-                && code.is_none()
-                && app.state::<SettingsLock>().read().unwrap().close_to_tray
+        .run(|app, event| match event {
+            RunEvent::ExitRequested { api, code, .. }
+                if code.is_none() && app.state::<SettingsLock>().read().unwrap().close_to_tray =>
             {
                 api.prevent_exit();
                 let _ = hide_main_window(app);
             }
+            RunEvent::Exit => info!(
+                "Stopped {} v{}",
+                *constants::APP_NAME,
+                *constants::APP_VERSION
+            ),
+            _ => {}
         });
 }
