@@ -418,6 +418,9 @@ today:
 this_week:
   en: This week
   es: Esta semana
+previous_week:
+  en: Previous week
+  es: Semana anterior
 activity_suggestion:
   en: Activity suggestion
   es: Sugerencia de actividad

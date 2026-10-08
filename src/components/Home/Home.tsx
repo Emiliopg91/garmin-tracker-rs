@@ -37,15 +37,19 @@ export function Home() {
   const [workload, setWorkload] = useState<WorkoutLoad[]>([]);
   const [minDate, setMinDate] = useState(0);
 
+  const [todaySessions, setTodaySessions] = useState(0);
   const [todayTime, setTodayTime] = useState(0);
   const [todayKcal, setTodayKCal] = useState(0);
   const [todayLoad, setTodayLoad] = useState(0);
-  const [weekTime, setWeekTime] = useState(0);
-  const [weekKcal, setWeekKCal] = useState(0);
-  const [weekLoad, setWeekLoad] = useState(0);
+  const [previousWeekSessions, setPreviousWeekSessions] = useState(0);
+  const [previousWeekTime, setPreviousWeekTime] = useState(0);
+  const [previousWeekKcal, setPreviousWeekKCal] = useState(0);
+  const [previousWeekLoad, setPreviousWeekLoad] = useState(0);
+  const [thisWeekSessions, setThisWeekSessions] = useState(0);
   const [thisWeekTime, setThisWeekTime] = useState(0);
   const [thisWeekKcal, setThisWeekKCal] = useState(0);
   const [thisWeekLoad, setThisWeekLoad] = useState(0);
+  const [monthSessions, setMonthSessions] = useState(0);
   const [monthTime, setMonthTime] = useState(0);
   const [monthKcal, setMonthKCal] = useState(0);
   const [monthLoad, setMonthLoad] = useState(0);
@@ -116,15 +120,19 @@ export function Home() {
               finishLoading();
             });
 
+          let todaySessions = 0;
           let todayTmp = 0;
           let todayKcl = 0;
           let todayLoad = 0;
+          let thisWeekSessions = 0;
           let thisWeekTmp = 0;
           let thisWeekKcl = 0;
           let thisWeekLoad = 0;
-          let weekTmp = 0;
-          let weekKcl = 0;
-          let weekLoad = 0;
+          let prevWeekSessions = 0;
+          let prevWeekTmp = 0;
+          let prevWeekKcl = 0;
+          let prevWeekLoad = 0;
+          let monthSessions = 0;
           let monthTmp = 0;
           let monthKcl = 0;
           let monthLoad = 0;
@@ -134,27 +142,32 @@ export function Home() {
           );
 
           const thisWeekLimit = startOfWeek.getTime() / 1000;
-          const weekLimit = today - 6 * 24 * 60 * 60;
+          const prevWeekLimit =
+            adapter.addWeeks(startOfWeek, -1).getTime() / 1000;
           const monthLimit = today - 29 * 24 * 60 * 60;
 
           for (let i = 0; i < sessions.length; i++) {
             if (sessions[i].timestamp < monthLimit) {
               break;
             }
+            monthSessions += 1;
             monthTmp += sessions[i].total_elapsed_time;
             monthKcl += sessions[i].active_calories;
             monthLoad += sessions[i].training_load;
-            if (sessions[i].timestamp >= weekLimit) {
-              weekTmp += sessions[i].total_elapsed_time;
-              weekKcl += sessions[i].active_calories;
-              weekLoad += sessions[i].training_load;
-
-              if (sessions[i].timestamp >= thisWeekLimit) {
+            if (sessions[i].timestamp >= prevWeekLimit) {
+              if (sessions[i].timestamp < thisWeekLimit) {
+                prevWeekSessions += 1;
+                prevWeekTmp += sessions[i].total_elapsed_time;
+                prevWeekKcl += sessions[i].active_calories;
+                prevWeekLoad += sessions[i].training_load;
+              } else {
+                thisWeekSessions += 1;
                 thisWeekTmp += sessions[i].total_elapsed_time;
                 thisWeekKcl += sessions[i].active_calories;
                 thisWeekLoad += sessions[i].training_load;
 
                 if (sessions[i].timestamp >= today) {
+                  todaySessions += 1;
                   todayTmp += sessions[i].total_elapsed_time;
                   todayKcl += sessions[i].active_calories;
                   todayLoad += sessions[i].training_load;
@@ -162,15 +175,20 @@ export function Home() {
               }
             }
           }
+
+          setTodaySessions(todaySessions);
           setTodayKCal(todayKcl);
           setTodayTime(todayTmp);
           setTodayLoad(todayLoad);
+          setThisWeekSessions(thisWeekSessions);
           setThisWeekKCal(thisWeekKcl);
           setThisWeekTime(thisWeekTmp);
           setThisWeekLoad(thisWeekLoad);
-          setWeekKCal(weekKcl);
-          setWeekTime(weekTmp);
-          setWeekLoad(weekLoad);
+          setPreviousWeekSessions(prevWeekSessions);
+          setPreviousWeekKCal(prevWeekKcl);
+          setPreviousWeekTime(prevWeekTmp);
+          setPreviousWeekLoad(prevWeekLoad);
+          setMonthSessions(monthSessions);
           setMonthKCal(monthKcl);
           setMonthTime(monthTmp);
           setMonthLoad(monthLoad);
@@ -313,17 +331,42 @@ export function Home() {
                     <th></th>
                     <th>{translate("today")}</th>
                     <th>{translate("this_week")}</th>
-                    <th>{translate("last_7_days")}</th>
+                    <th>{translate("previous_week")}</th>
                     <th>{translate("last_30_days")}</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
+                    <td>{translate("sessions")}</td>
+                    <td>{formatNumber(todaySessions, 0)}</td>
+                    <td>{formatNumber(thisWeekSessions, 0)}</td>
+                    <td>{formatNumber(previousWeekSessions, 0)}</td>
+                    <td>{formatNumber(monthSessions, 0)}</td>
+                  </tr>
+                </tbody>
+                <tbody>
+                  <tr>
                     <td>{translate("workout_load")}</td>
-                    <td>{formatNumber(todayLoad, 0)}</td>
-                    <td>{formatNumber(thisWeekLoad, 0)}</td>
-                    <td>{formatNumber(weekLoad, 0)}</td>
-                    <td>{formatNumber(monthLoad, 0)}</td>
+                    <td>
+                      {Math.round(todayLoad / todaySessions) +
+                        " / " +
+                        formatNumber(todayLoad, 0)}
+                    </td>
+                    <td>
+                      {Math.round(thisWeekLoad / thisWeekSessions) +
+                        " / " +
+                        formatNumber(thisWeekLoad, 0)}
+                    </td>
+                    <td>
+                      {Math.round(previousWeekLoad / previousWeekSessions) +
+                        " / " +
+                        formatNumber(previousWeekLoad, 0)}
+                    </td>
+                    <td>
+                      {Math.round(monthLoad / monthSessions) +
+                        " / " +
+                        formatNumber(monthLoad, 0)}
+                    </td>
                   </tr>
                 </tbody>
                 <tbody>
@@ -331,7 +374,7 @@ export function Home() {
                     <td>{translate("active_time")}</td>
                     <td>{formatDuration(todayTime)}</td>
                     <td>{formatDuration(thisWeekTime)}</td>
-                    <td>{formatDuration(weekTime)}</td>
+                    <td>{formatDuration(previousWeekTime)}</td>
                     <td>{formatDuration(monthTime)}</td>
                   </tr>
                 </tbody>
@@ -340,7 +383,7 @@ export function Home() {
                     <td>{translate("active_calories")}</td>
                     <td>{formatNumber(todayKcal, 0)} Kcal</td>
                     <td>{formatNumber(thisWeekKcal, 0)} Kcal</td>
-                    <td>{formatNumber(weekKcal, 0)} Kcal</td>
+                    <td>{formatNumber(previousWeekKcal, 0)} Kcal</td>
                     <td>{formatNumber(monthKcal, 0)} Kcal</td>
                   </tr>
                 </tbody>
