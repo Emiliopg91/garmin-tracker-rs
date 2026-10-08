@@ -8,12 +8,13 @@ import {
   TextField,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { WorkoutStepData, WorkoutUtils } from "@/utils/WorkoutUtils";
 import { WorkoutSetGroup } from "./helpers/WorkoutSetGroup";
 import { I18nSettingsContext } from "@/context/I18nSettingsContext";
 import { BackendClient } from "@/utils/backend/client";
 import { useLoadingTask } from "@/hooks/useLoadingTask";
+import { useExerciseCatalog } from "@/hooks/useExerciseCatalog";
 
 type Props = {
   workout: WorkoutDetails;
@@ -21,23 +22,15 @@ type Props = {
   onClose: () => void;
 };
 
-export type ExerciseOption = {
-  label: string;
-  ex_cat: number;
-  ex_id: number;
-};
-
 export function WorkoutSetsModal({ workout, isEdit, onClose }: Props) {
   const withLoading = useLoadingTask();
   const { translate, fromKg, toKg } = useContext(I18nSettingsContext);
+  const exercisesCatalog = useExerciseCatalog(onClose);
 
   useEffect(() => {
     setName(workout.name);
   }, []);
 
-  const [rawCatalog, setRawCatalog] = useState<Record<number, number[]> | null>(
-    null,
-  );
   const [name, setName] = useState(workout?.name);
   const [notes, setNotes] = useState(workout?.notes);
   const [originalNotes] = useState(() => workout?.notes);
@@ -93,33 +86,6 @@ export function WorkoutSetsModal({ workout, isEdit, onClose }: Props) {
     const name = e.target.value;
     setName(name);
   };
-
-  useEffect(() => {
-    withLoading(BackendClient.getExercisesCatalog())
-      .then(setRawCatalog)
-      .catch(() => onClose());
-  }, []);
-
-  const exercisesCatalog = useMemo<ExerciseOption[] | null>(() => {
-    if (!rawCatalog) return null;
-    const catalog: ExerciseOption[] = [];
-    for (const [ex_cat, ex_ids] of Object.entries(rawCatalog)) {
-      for (const ex_id of ex_ids) {
-        catalog.push({
-          ex_cat: Number(ex_cat),
-          ex_id,
-          label: translate("exercise_" + ex_cat + "_" + ex_id),
-        });
-      }
-    }
-    // Sorted by category first, as Autocomplete's groupBy expects grouped options to be contiguous
-    return catalog.sort(
-      (a, b) =>
-        translate("exercise_" + a.ex_cat).localeCompare(
-          translate("exercise_" + b.ex_cat),
-        ) || a.label.localeCompare(b.label),
-    );
-  }, [rawCatalog, translate]);
 
   return (
     <>

@@ -17,7 +17,7 @@ import { useContext, useId, useState } from "react";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import ClearIcon from "@mui/icons-material/Clear";
-import { ExerciseOption } from "../WorkoutSetsModal";
+import { ExerciseOption } from "@/hooks/useExerciseCatalog";
 
 type Props = {
   leaf: LeafStep;
