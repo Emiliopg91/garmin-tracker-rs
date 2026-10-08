@@ -1,12 +1,12 @@
 import { I18nSettingsContext } from "@/context/I18nSettingsContext";
-import { LoadingContext } from "@/context/LoadingContext";
+import { useLoadingTask } from "@/hooks/useLoadingTask";
 import { BackendClient } from "@/utils/backend/client";
 import { CloudProvider } from "@/utils/backend/models";
 import { useContext, useState } from "react";
 import { Button, Menu, MenuItem } from "@mui/material";
 
 export function UploadToCloudMenu() {
-  const { startLoading, finishLoading } = useContext(LoadingContext);
+  const withLoading = useLoadingTask();
   const { translate } = useContext(I18nSettingsContext);
   const [importMenuAnchor, setImportMenuAnchor] = useState<{
     top: number;
@@ -14,10 +14,7 @@ export function UploadToCloudMenu() {
   } | null>(null);
 
   const uploadToCloud = (provider: CloudProvider) => {
-    startLoading();
-    BackendClient.uploadToCloud(provider).finally(() => {
-      finishLoading();
-    });
+    withLoading(BackendClient.uploadToCloud(provider));
   };
 
   return (

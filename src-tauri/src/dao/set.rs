@@ -26,24 +26,3 @@ pub struct Set {
     #[allow(dead_code)]
     pub exercise: Option<Exercise>,
 }
-
-impl Set {
-    /// Upper bound of reps used for the estimation: beyond this the formulas are unreliable,
-    /// so higher-rep sets are estimated as if they were done at this count.
-    const MAX_ESTIMATION_REPS: u16 = 20;
-
-    /// Estimates the one-rep max: Brzycki up to 10 reps, Lander from 11 to 20.
-    pub fn estimate_1rm(weight: f32, reps: u16) -> i32 {
-        if reps <= 1 {
-            return weight as i32;
-        }
-
-        let r = reps.min(Self::MAX_ESTIMATION_REPS) as f32;
-
-        if r <= 10.0 {
-            ((weight * 36.0) / (37.0 - r)) as i32
-        } else {
-            ((100.0 * weight) / (101.3 - 2.67123 * r)) as i32
-        }
-    }
-}

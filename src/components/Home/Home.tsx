@@ -1,6 +1,8 @@
 import { AppContext } from "@/context/AppContext";
 import { I18nSettingsContext } from "@/context/I18nSettingsContext";
-import { LoadingContext } from "@/context/LoadingContext";
+import { useBackendEvent } from "@/hooks/useBackendEvent";
+import { useCurrentDay } from "@/hooks/useCurrentDay";
+import { useLoadingTask } from "@/hooks/useLoadingTask";
 import { BackendClient } from "@/utils/backend/client";
 import {
   SessionFrontDetails,
@@ -90,12 +92,12 @@ const calculateStats = (
 
 export function Home() {
   const { sessionsVersion } = useContext(AppContext);
-  const { startLoading, finishLoading } = useContext(LoadingContext);
+  const withLoading = useLoadingTask();
   const { translate, fromKg, formatDuration, formatTimeDate, formatNumber } =
     useContext(I18nSettingsContext);
   const adapter = usePickerAdapter();
 
-  const [day, setDay] = useState(() => new Date().toDateString());
+  const day = useCurrentDay();
   const [availableData, setAvailableData] = useState(false);
   const [workload, setWorkload] = useState<WorkoutLoad[]>([]);
   const [stats, setStats] = useState<HomeStats>(emptyStats);
@@ -121,160 +123,84 @@ export function Home() {
   );
 
   const refresh = () => {
-    startLoading();
     const today = new Date(new Date().setHours(0, 0, 0, 0)).getTime() / 1000;
-    BackendClient.getSessions(
-      today - SessionUtils.CHRONIC_DAYS * 2 * 24 * 60 * 60,
-    )
-      .then((sessions) => {
-        setAvailableData(sessions.length > 0);
+    withLoading(
+      BackendClient.getSessions(
+        today - SessionUtils.CHRONIC_DAYS * 2 * 24 * 60 * 60,
+      ),
+    ).then((sessions) => {
+      setAvailableData(sessions.length > 0);
 
-        if (sessions.length > 0) {
-          const workout_data = SessionUtils.calculateWorkoutLoad(sessions);
-          const overreaching = SessionUtils.isOverreaching(workout_data);
+      if (sessions.length > 0) {
+        const workout_data = SessionUtils.calculateWorkoutLoad(sessions);
+        const overreaching = SessionUtils.isOverreaching(workout_data);
 
-          startLoading();
-          BackendClient.getHeatmapData()
-            .then((data) => {
-              setHeatMapData(data);
-            })
-            .finally(() => {
-              finishLoading();
-            });
+        withLoading(BackendClient.getHeatmapData()).then(setHeatMapData);
 
-          startLoading();
-          BackendClient.getWorkoutList()
-            .then((workouts) => {
-              const filtered = workouts.filter((w) => w.enabled);
+        withLoading(BackendClient.getWorkoutList()).then((workouts) => {
+          const filtered = workouts.filter((w) => w.enabled);
 
-              if (!overreaching && filtered.length > 0) {
-                // Never-done workouts take priority, otherwise the least recent one
-                let oldest = filtered.find((w) => w.latest_session == null);
-                if (oldest === undefined) {
-                  oldest = filtered[0];
-                  for (const w of filtered) {
-                    if (oldest.latest_session! > w.latest_session!) {
-                      oldest = w;
-                    }
-                  }
+          if (!overreaching && filtered.length > 0) {
+            // Never-done workouts take priority, otherwise the least recent one
+            let oldest = filtered.find((w) => w.latest_session == null);
+            if (oldest === undefined) {
+              oldest = filtered[0];
+              for (const w of filtered) {
+                if (oldest.latest_session! > w.latest_session!) {
+                  oldest = w;
                 }
-                setWorkout(oldest);
-              } else {
-                setWorkout(undefined);
               }
-            })
-            .finally(() => {
-              finishLoading();
-            });
+            }
+            setWorkout(oldest);
+          } else {
+            setWorkout(undefined);
+          }
+        });
 
-          const newStats = calculateStats(sessions, today, adapter);
-          setStats(newStats);
+        const newStats = calculateStats(sessions, today, adapter);
+        setStats(newStats);
 
-          setWorkload(workout_data);
+        setWorkload(workout_data);
 
-          setLastSession(sessions[0]);
+        setLastSession(sessions[0]);
 
-          const lastSessDate = new Date(
-            sessions[0].timestamp * 1000,
-          ).toDateString();
-          const todayDate = new Date().toDateString();
-          setRest(
-            newStats.today.load > 50 ||
-              overreaching ||
-              lastSessDate == todayDate,
-          );
-        }
-      })
-      .finally(() => {
-        finishLoading();
-      });
+        setRest(newStats.today.load > 100 || overreaching);
+      }
+    });
   };
 
   const getSessionDetails = (timestamp: number) => {
-    startLoading();
-    BackendClient.getSessionDetails(timestamp)
-      .then((details) => {
-        setSessionDetails(SessionUtils.detailsFromBackend(details, fromKg));
-      })
-      .finally(() => {
-        finishLoading();
-      });
+    withLoading(BackendClient.getSessionDetails(timestamp)).then((details) => {
+      setSessionDetails(SessionUtils.detailsFromBackend(details, fromKg));
+    });
   };
   const getWorkoutDetails = (name: string) => {
-    startLoading();
-    BackendClient.getWorkoutDetails(name)
-      .then((details) => {
-        setWorkoutDetails(details);
-      })
-      .finally(() => {
-        finishLoading();
-      });
+    withLoading(BackendClient.getWorkoutDetails(name)).then(setWorkoutDetails);
   };
 
-  useEffect(() => {
-    const checkDay = () => setDay(new Date().toDateString());
-
-    const now = new Date();
-    const nextMidnight = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      now.getDate() + 1,
+  useBackendEvent(BackendListener.onSessionLocationUpdate, (data) => {
+    setLastSession((prev) =>
+      prev && prev.timestamp == data.session
+        ? { ...prev, name: data.location }
+        : prev,
     );
-    const timer = setTimeout(
-      checkDay,
-      nextMidnight.getTime() - now.getTime() + 1000,
+  });
+
+  useBackendEvent(BackendListener.onAddedWorkoutSteps, (names) => {
+    setWorkout((prev) =>
+      prev && names.includes(prev.name) ? { ...prev, has_steps: true } : prev,
     );
-
-    // Timers may not fire on time after the system suspends
-    document.addEventListener("visibilitychange", checkDay);
-    window.addEventListener("focus", checkDay);
-
-    return () => {
-      clearTimeout(timer);
-      document.removeEventListener("visibilitychange", checkDay);
-      window.removeEventListener("focus", checkDay);
-    };
-  }, [day]);
+  });
 
   useEffect(() => {
-    const unregisterSessionLocation = BackendListener.onSessionLocationUpdate(
-      (data) => {
-        setLastSession((prev) =>
-          prev && prev.timestamp == data.session
-            ? { ...prev, name: data.location }
-            : prev,
-        );
-      },
-    );
-
-    const unregisterAddedSteps = BackendListener.onAddedWorkoutSteps(
-      (names) => {
-        setWorkout((prev) =>
-          prev && names.includes(prev.name)
-            ? { ...prev, has_steps: true }
-            : prev,
-        );
-      },
-    );
-
     refresh();
-
-    return () => {
-      unregisterSessionLocation();
-      unregisterAddedSteps();
-    };
   }, [sessionsVersion, adapter, day]);
 
   const openEdit = (workout: string) => {
-    startLoading();
-    BackendClient.getWorkoutDetails(workout)
-      .then((details) => {
-        setWorkoutDetails(undefined);
-        setWorkoutEdit(details);
-      })
-      .finally(() => {
-        finishLoading();
-      });
+    withLoading(BackendClient.getWorkoutDetails(workout)).then((details) => {
+      setWorkoutDetails(undefined);
+      setWorkoutEdit(details);
+    });
   };
 
   return (
@@ -426,6 +352,9 @@ export function Home() {
                         <th className="text-center">
                           {translate("average_duration")}
                         </th>
+                        <th className="text-center">
+                          {translate("avg_workload")}
+                        </th>
                         <th></th>
                       </tr>
                     </thead>
@@ -448,6 +377,7 @@ export function Home() {
                         </td>
                         <td>{formatNumber(workout.sessions, 0)}</td>
                         <td>{formatDuration(workout.avg_time)}</td>
+                        <td>{workout.avg_load}</td>
                         <td onClick={(e) => e.stopPropagation()}>
                           {workout.has_steps && (
                             <WorkoutActionsMenu

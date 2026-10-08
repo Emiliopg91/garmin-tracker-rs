@@ -8,6 +8,7 @@ pub struct WorkoutListItem {
     pub latest_session: Option<u32>,
     pub sessions: u32,
     pub avg_time: u32,
+    pub avg_load: u16,
     pub enabled: bool,
     pub has_steps: bool,
 }

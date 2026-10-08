@@ -1,5 +1,5 @@
 import { AppContext } from "@/context/AppContext";
-import { LoadingContext } from "@/context/LoadingContext";
+import { useLoadingTask } from "@/hooks/useLoadingTask";
 import { I18nSettingsContext } from "@/context/I18nSettingsContext";
 import { BackendClient } from "@/utils/backend/client";
 import {
@@ -27,7 +27,7 @@ type Props = {
 
 export function Settings({ onClose }: Props) {
   const { environment } = useContext(AppContext);
-  const { startLoading, finishLoading } = useContext(LoadingContext);
+  const withLoading = useLoadingTask();
   const { settings, updateSettings, translate, refreshTranslations } =
     useContext(I18nSettingsContext);
 
@@ -43,113 +43,89 @@ export function Settings({ onClose }: Props) {
   const [closeToTray, setCloseToTray] = useState(settings.close_to_tray);
 
   const updateWeightUnit = (value: WeightUnit) => {
-    startLoading();
-    BackendClient.updateSettingsValue("weight_unit", value)
-      .then(() => {
+    withLoading(BackendClient.updateSettingsValue("weight_unit", value)).then(
+      () => {
         setWeightUnit(value);
         updateSettings({ weight_unit: value });
-      })
-      .finally(() => {
-        finishLoading();
-      });
+      },
+    );
   };
 
   const updateDistanceUnit = (value: DistanceUnit) => {
-    startLoading();
-    BackendClient.updateSettingsValue("distance_unit", value)
-      .then(() => {
+    withLoading(BackendClient.updateSettingsValue("distance_unit", value)).then(
+      () => {
         setDistanceUnit(value);
         updateSettings({ distance_unit: value });
-      })
-      .finally(() => {
-        finishLoading();
-      });
+      },
+    );
   };
 
   const updateAutoSync = (value: boolean) => {
-    startLoading();
-    BackendClient.updateSettingsValue("auto_sync", value ? "true" : "false")
-      .then(() => {
-        setAutoSync(value);
-        updateSettings({ auto_sync: value });
-      })
-      .finally(() => {
-        finishLoading();
-      });
+    withLoading(
+      BackendClient.updateSettingsValue("auto_sync", value ? "true" : "false"),
+    ).then(() => {
+      setAutoSync(value);
+      updateSettings({ auto_sync: value });
+    });
   };
 
   const updateStartOnBoot = (value: boolean) => {
-    startLoading();
-    BackendClient.updateSettingsValue("start_boot", value ? "true" : "false")
-      .then(() => {
-        setStartOnBoot(value);
-        updateSettings({ start_boot: value });
-      })
-      .finally(() => {
-        finishLoading();
-      });
+    withLoading(
+      BackendClient.updateSettingsValue("start_boot", value ? "true" : "false"),
+    ).then(() => {
+      setStartOnBoot(value);
+      updateSettings({ start_boot: value });
+    });
   };
 
   const updateLanguage = (value: Languages) => {
-    startLoading();
-    BackendClient.updateSettingsValue("language", value)
-      .then(() => {
+    withLoading(BackendClient.updateSettingsValue("language", value)).then(
+      () => {
         setLanguage(value);
         updateSettings({ language: value });
         refreshTranslations();
-      })
-      .finally(() => {
-        finishLoading();
-      });
+      },
+    );
   };
 
   const updateOnDeviceConnect = (value: boolean) => {
-    startLoading();
-    BackendClient.updateSettingsValue(
-      "on_device_connect",
-      value ? "true" : "false",
-    )
-      .then(() => {
-        setOnDeviceConnect(value);
-        updateSettings({ on_device_connect: value });
-      })
-      .finally(() => {
-        finishLoading();
-      });
+    withLoading(
+      BackendClient.updateSettingsValue(
+        "on_device_connect",
+        value ? "true" : "false",
+      ),
+    ).then(() => {
+      setOnDeviceConnect(value);
+      updateSettings({ on_device_connect: value });
+    });
   };
 
   const updateCloseToTray = (value: boolean) => {
-    startLoading();
-    BackendClient.updateSettingsValue("close_to_tray", value ? "true" : "false")
-      .then(() => {
-        setCloseToTray(value);
-        updateSettings({ close_to_tray: value });
-      })
-      .finally(() => {
-        finishLoading();
-      });
+    withLoading(
+      BackendClient.updateSettingsValue(
+        "close_to_tray",
+        value ? "true" : "false",
+      ),
+    ).then(() => {
+      setCloseToTray(value);
+      updateSettings({ close_to_tray: value });
+    });
   };
 
   const updateStartIntoTray = (value: boolean) => {
-    startLoading();
-    BackendClient.updateSettingsValue(
-      "start_into_tray",
-      value ? "true" : "false",
-    )
-      .then(() => {
-        setStartIntoTray(value);
-        updateSettings({ start_into_tray: value });
-      })
-      .finally(() => {
-        finishLoading();
-      });
+    withLoading(
+      BackendClient.updateSettingsValue(
+        "start_into_tray",
+        value ? "true" : "false",
+      ),
+    ).then(() => {
+      setStartIntoTray(value);
+      updateSettings({ start_into_tray: value });
+    });
   };
 
   const exportDatabase = () => {
-    startLoading();
-    BackendClient.exportDatabase().finally(() => {
-      finishLoading();
-    });
+    withLoading(BackendClient.exportDatabase());
   };
 
   return (

@@ -1,5 +1,6 @@
 import { I18nSettingsContext } from "@/context/I18nSettingsContext";
 import { ExerciseListItem } from "@/utils/backend/models";
+import { SessionUtils } from "@/utils/SessionUtils";
 import { useContext } from "react";
 
 type Props = {
@@ -26,7 +27,11 @@ export function ExerciseRow({ exercise, onSelect }: Props) {
           " " +
           getWeightUnit()}
       </td>
-      <td>{fromKg(exercise.e1rm) + " " + getWeightUnit()}</td>
+      <td>
+        {fromKg(SessionUtils.estimate1rm(exercise.weight, exercise.reps)) +
+          " " +
+          getWeightUnit()}
+      </td>
       <td>{formatDate(exercise.date)}</td>
     </tr>
   );

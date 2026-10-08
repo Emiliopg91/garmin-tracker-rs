@@ -1,40 +1,29 @@
 import { ExerciseDetails, ExerciseListItem } from "@/utils/backend/models";
 import { ExerciseModal } from "./ExerciseModal";
 import { ExerciseRow } from "./helpers/ExerciseRow";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import { BackendClient } from "@/utils/backend/client";
 import { AppContext } from "@/context/AppContext";
-import { LoadingContext } from "@/context/LoadingContext";
+import { useBackendList } from "@/hooks/useBackendList";
 import { I18nSettingsContext } from "@/context/I18nSettingsContext";
 
 export function ExercisesList() {
   const { sessionsVersion } = useContext(AppContext);
-  const { startLoading, finishLoading } = useContext(LoadingContext);
   const { translate } = useContext(I18nSettingsContext);
-  const [exercises, setExercises] = useState<ExerciseListItem[]>([]);
-  const [exerciseDetails, setExerciseDetails] = useState<
-    ExerciseDetails | undefined
-  >(undefined);
-
-  const refreshList = () => {
-    startLoading();
-    BackendClient.getExercises()
-      .then((data) => {
-        const sortedData = [...data].sort((a, b) => {
+  const [exercises] = useBackendList<ExerciseListItem>(
+    () =>
+      BackendClient.getExercises().then((data) =>
+        [...data].sort((a, b) => {
           return translate("exercise_" + a.category + "_" + a.id).localeCompare(
             translate("exercise_" + b.category + "_" + b.id),
           );
-        });
-        setExercises(sortedData);
-      })
-      .finally(() => {
-        finishLoading();
-      });
-  };
-
-  useEffect(() => {
-    refreshList();
-  }, [sessionsVersion]);
+        }),
+      ),
+    [sessionsVersion],
+  );
+  const [exerciseDetails, setExerciseDetails] = useState<
+    ExerciseDetails | undefined
+  >(undefined);
 
   const getExerciseDetails = (category: number, id: number) => {
     BackendClient.getExerciseDetails(category, id).then((details) => {

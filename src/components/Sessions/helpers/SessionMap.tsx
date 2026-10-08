@@ -1,5 +1,5 @@
 import { I18nSettingsContext } from "@/context/I18nSettingsContext";
-import { LoadingContext } from "@/context/LoadingContext";
+import { useLoadingTask } from "@/hooks/useLoadingTask";
 import { BackendClient } from "@/utils/backend/client";
 import { SessionLap } from "@/utils/backend/models";
 import { SessionUtils } from "@/utils/SessionUtils";
@@ -38,7 +38,7 @@ export function SessionMap({
   finishPoint,
   laps,
 }: Props) {
-  const { startLoading, finishLoading } = useContext(LoadingContext);
+  const withLoading = useLoadingTask();
   const { translate } = useContext(I18nSettingsContext);
   const [url, setUrl] = useState(1);
 
@@ -47,10 +47,7 @@ export function SessionMap({
   };
 
   const exportTrack = () => {
-    startLoading();
-    BackendClient.exportGpx(timestamp).finally(() => {
-      finishLoading();
-    });
+    withLoading(BackendClient.exportGpx(timestamp));
   };
 
   return (

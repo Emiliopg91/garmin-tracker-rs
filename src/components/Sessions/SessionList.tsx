@@ -1,9 +1,11 @@
 import { AppContext } from "@/context/AppContext";
-import { LoadingContext } from "@/context/LoadingContext";
+import { useBackendEvent } from "@/hooks/useBackendEvent";
+import { useBackendList } from "@/hooks/useBackendList";
+import { useLoadingTask } from "@/hooks/useLoadingTask";
 import { I18nSettingsContext } from "@/context/I18nSettingsContext";
 import { BackendClient } from "@/utils/backend/client";
 import { SessionListItem } from "@/utils/backend/models";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import { SessionModal } from "./SessionModal";
 import { SessionRow } from "./helpers/SessionRow";
 import { BackendListener } from "@/utils/backend/listener";
@@ -14,9 +16,12 @@ import { SessionsCompareModal } from "./SessionsCompareModal";
 
 export function SessionsList() {
   const { sessionsVersion } = useContext(AppContext);
-  const { startLoading, finishLoading } = useContext(LoadingContext);
+  const withLoading = useLoadingTask();
   const { translate, fromKg } = useContext(I18nSettingsContext);
-  const [sessions, setSessions] = useState<SessionListItem[]>([]);
+  const [sessions, setSessions, refreshList] = useBackendList<SessionListItem>(
+    () => BackendClient.getSessions(null),
+    [sessionsVersion],
+  );
   const [sessionDetails, setSessionDetails] = useState<
     SessionFrontDetails | undefined
   >(undefined);
@@ -28,45 +33,19 @@ export function SessionsList() {
     [SessionFrontDetails, SessionFrontDetails] | undefined
   >(undefined);
 
-  const refreshList = () => {
-    startLoading();
-    BackendClient.getSessions(null)
-      .then((data) => {
-        setSessions(data);
-      })
-      .finally(() => {
-        finishLoading();
+  useBackendEvent(BackendListener.onSessionLocationUpdate, (data) => {
+    setSessions((prev) => {
+      return prev.map((item) => {
+        if (item.timestamp !== data.session) return item;
+        return { ...item, name: data.location };
       });
-  };
-
-  useEffect(() => {
-    const unregisterSessionLocation = BackendListener.onSessionLocationUpdate(
-      (data) => {
-        setSessions((prev) => {
-          return prev.map((item) => {
-            if (item.timestamp !== data.session) return item;
-            return { ...item, name: data.location };
-          });
-        });
-      },
-    );
-
-    refreshList();
-
-    return () => {
-      unregisterSessionLocation();
-    };
-  }, [sessionsVersion]);
+    });
+  });
 
   const getSessionDetails = (timestamp: number) => {
-    startLoading();
-    BackendClient.getSessionDetails(timestamp)
-      .then((details) => {
-        setSessionDetails(SessionUtils.detailsFromBackend(details, fromKg));
-      })
-      .finally(() => {
-        finishLoading();
-      });
+    withLoading(BackendClient.getSessionDetails(timestamp)).then((details) => {
+      setSessionDetails(SessionUtils.detailsFromBackend(details, fromKg));
+    });
   };
 
   const toggleSelect = (session: SessionListItem) => {

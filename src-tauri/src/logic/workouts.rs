@@ -46,7 +46,7 @@ pub async fn get_workout_list(
 
             let mut workout_stats = HashMap::new();
             workouts.iter().for_each(|w| {
-                workout_stats.insert(w.name.clone(), (0, 0, None));
+                workout_stats.insert(w.name.clone(), (0, 0, None, 0_u32));
             });
 
             let enabled_workouts = workouts
@@ -63,12 +63,13 @@ pub async fn get_workout_list(
             sessions.iter().for_each(|s| {
                 let entry = workout_stats
                     .entry(s.name.clone())
-                    .or_insert((0_u32, 0_u32, None));
+                    .or_insert((0_u32, 0_u32, None, 0_u32));
                 entry.0 += 1_u32;
                 entry.1 += s.total_elapsed_time;
                 if entry.2.is_none() {
                     entry.2 = Some(s.date);
                 }
+                entry.3 += s.training_load as u32
             });
 
             let with_steps = WorkoutStepRepository::select()
@@ -91,6 +92,7 @@ pub async fn get_workout_list(
                     name: wd.0,
                     sessions: wd.1.0,
                     avg_time: wd.1.1.checked_div(wd.1.0).unwrap_or(0),
+                    avg_load: wd.1.3.checked_div(wd.1.0).unwrap_or(0) as u16,
                     latest_session: wd.1.2,
                 })
                 .collect::<Vec<_>>();

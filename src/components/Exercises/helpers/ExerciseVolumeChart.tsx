@@ -1,5 +1,6 @@
 import { I18nSettingsContext } from "@/context/I18nSettingsContext";
 import { SessionSet } from "@/utils/backend/models";
+import { SessionUtils } from "@/utils/SessionUtils";
 import { useContext, useEffect, useState } from "react";
 import {
   CartesianGrid,
@@ -22,7 +23,7 @@ function ExerciseVolumeTooltip({
   payload,
   label,
 }: TooltipContentProps) {
-  const { translate, formatDate, formatNumber } =
+  const { translate, formatDate, formatNumber, fromKg } =
     useContext(I18nSettingsContext);
 
   if (!active || !payload || payload.length === 0 || label == null) {
@@ -32,6 +33,7 @@ function ExerciseVolumeTooltip({
     date: number;
     volume: number;
     reps: number;
+    e1rm: number;
   };
   return (
     <div className="chart-tooltip">
@@ -39,7 +41,10 @@ function ExerciseVolumeTooltip({
         <b>{formatDate(data.date)}</b>
       </div>
       <div>
-        {translate("volume")}: {formatNumber(data.volume, 0)}
+        {translate("rm")}: {formatNumber(fromKg(data.e1rm), 1)}
+      </div>
+      <div>
+        {translate("volume")}: {formatNumber(fromKg(data.volume), 1)}
       </div>
       <div>
         {translate("repetitions")}: {formatNumber(data.reps, 0)}
@@ -51,27 +56,31 @@ function ExerciseVolumeTooltip({
 export function ExerciseVolumeChart({ series }: Props) {
   const { translate } = useContext(I18nSettingsContext);
   const [chartData, setChartData] = useState<
-    { date: number; volume: number; reps: number }[]
+    { date: number; volume: number; reps: number; e1rm: number }[]
   >([]);
   const [maxVol, setMaxVol] = useState(0);
   const [minDate, setMinDate] = useState(99999);
   const [maxDate, setMaxDate] = useState(0);
 
   useEffect(() => {
-    const data: { date: number; volume: number; reps: number }[] = [];
+    const data: { date: number; volume: number; reps: number; e1rm: number }[] =
+      [];
     Object.keys(series).forEach((k) => {
       const date = new Date(parseInt(k.split("\n")[1]));
 
       let count = 0;
       let weight = 0;
+      let e1rm = 0;
       series[k].forEach((s) => {
         count += s.reps;
         weight += s.reps * s.weight;
+        e1rm = Math.max(e1rm, SessionUtils.estimate1rm(s.weight, s.reps));
       });
       data.push({
         date: date.getTime(),
         volume: weight,
         reps: count,
+        e1rm: e1rm,
       });
     });
     data.sort((a, b) => a.date - b.date);
@@ -112,6 +121,16 @@ export function ExerciseVolumeChart({ series }: Props) {
           />{" "}
           <YAxis yAxisId="right" stroke="#fff" width={0} tick={false} />{" "}
           <Line
+            yAxisId="right"
+            type="monotone"
+            name={translate("rm")}
+            dataKey="e1rm"
+            stroke="#f00"
+            dot={{ fill: "#f00" }}
+            activeDot={{ stroke: "#f0f0f000" }}
+            isAnimationActive={false}
+          />
+          <Line
             yAxisId="left"
             type="monotone"
             name={translate("volume")}
@@ -126,8 +145,8 @@ export function ExerciseVolumeChart({ series }: Props) {
             type="monotone"
             name={translate("repetitions")}
             dataKey="reps"
-            stroke="#f00"
-            dot={{ fill: "#f00" }}
+            stroke="#0ff"
+            dot={{ fill: "#0ff" }}
             activeDot={{ stroke: "#f0f0f000" }}
             isAnimationActive={false}
           />

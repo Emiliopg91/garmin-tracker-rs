@@ -1,7 +1,6 @@
 mod additional_data;
 mod common;
 mod dto;
-mod e1rm;
 mod export;
 mod home;
 mod notes;

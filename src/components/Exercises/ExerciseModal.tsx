@@ -4,6 +4,7 @@ import { useContext } from "react";
 import { Dialog, DialogContent, DialogTitle, IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { ExerciseVolumeChart } from "./helpers/ExerciseVolumeChart";
+import { SessionUtils } from "@/utils/SessionUtils";
 
 type Props = {
   exercise: ExerciseDetails;
@@ -37,7 +38,16 @@ export function ExerciseModal({ exercise, onClose }: Props) {
             </tr>
             <tr>
               <td>{translate("rm")}:</td>
-              <td>{fromKg(exercise.e1rm) + " " + getWeightUnit()}</td>
+              <td>
+                {formatNumber(
+                  fromKg(
+                    SessionUtils.estimate1rm(exercise.weight, exercise.reps),
+                  ),
+                  1,
+                ) +
+                  " " +
+                  getWeightUnit()}
+              </td>
             </tr>
             <tr>
               <td>{translate("personal_record")}:</td>

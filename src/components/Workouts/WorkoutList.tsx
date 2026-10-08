@@ -2,9 +2,10 @@ import { WorkoutDetails, WorkoutListItem } from "@/utils/backend/models";
 import { WorkoutModal } from "./WorkoutModal";
 import { WorkoutRow } from "./helpers/WorkoutRow";
 import { BackendClient } from "@/utils/backend/client";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import { AppContext } from "@/context/AppContext";
-import { LoadingContext } from "@/context/LoadingContext";
+import { useBackendEvent } from "@/hooks/useBackendEvent";
+import { useBackendList } from "@/hooks/useBackendList";
 import { I18nSettingsContext } from "@/context/I18nSettingsContext";
 import "@/styles/Workouts/WorkoutLists.css";
 import { WorkoutSetsModal } from "./WorkoutSetsModal";
@@ -14,10 +15,25 @@ import { BackendListener } from "@/utils/backend/listener";
 
 export function WorkoutsList() {
   const { sessionsVersion } = useContext(AppContext);
-  const { startLoading, finishLoading } = useContext(LoadingContext);
   const { translate, toKg } = useContext(I18nSettingsContext);
 
-  const [workouts, setWorkouts] = useState<WorkoutListItem[]>([]);
+  const [workouts, setWorkouts, refreshList] = useBackendList<WorkoutListItem>(
+    () =>
+      BackendClient.getWorkoutList().then((data) =>
+        data.sort((a, b) => {
+          if (a.name.length > 0 && b.name.length > 0) {
+            return a.name.localeCompare(b.name);
+          } else {
+            if (a.name.length == 0) {
+              return 1;
+            } else {
+              return -1;
+            }
+          }
+        }),
+      ),
+    [sessionsVersion],
+  );
   const [workoutDetails, setWorkoutDetails] = useState<
     WorkoutDetails | undefined
   >(undefined);
@@ -52,41 +68,11 @@ export function WorkoutsList() {
     setWorkoutDetails(undefined);
   };
 
-  const refreshList = () => {
-    startLoading();
-    BackendClient.getWorkoutList()
-      .then((data) => {
-        data.sort((a, b) => {
-          if (a.name.length > 0 && b.name.length > 0) {
-            return a.name.localeCompare(b.name);
-          } else {
-            if (a.name.length == 0) {
-              return 1;
-            } else {
-              return -1;
-            }
-          }
-        });
-        setWorkouts(data);
-      })
-      .finally(() => {
-        finishLoading();
-      });
-  };
-
-  useEffect(() => {
-    refreshList();
-  }, [sessionsVersion]);
-
-  useEffect(() => {
-    return BackendListener.onAddedWorkoutSteps((names) => {
-      setWorkouts((prev) =>
-        prev.map((w) =>
-          names.includes(w.name) ? { ...w, has_steps: true } : w,
-        ),
-      );
-    });
-  }, []);
+  useBackendEvent(BackendListener.onAddedWorkoutSteps, (names) => {
+    setWorkouts((prev) =>
+      prev.map((w) => (names.includes(w.name) ? { ...w, has_steps: true } : w)),
+    );
+  });
 
   const getWorkoutDetails = (name: string) => {
     BackendClient.getWorkoutDetails(name).then((details) => {
@@ -119,6 +105,7 @@ export function WorkoutsList() {
               <th className="text-center">{translate("latest_session")}</th>
               <th className="text-center">{translate("session_count")}</th>
               <th className="text-center">{translate("average_duration")}</th>
+              <th className="text-center">{translate("avg_workload")}</th>
               <th></th>
             </tr>
           </thead>

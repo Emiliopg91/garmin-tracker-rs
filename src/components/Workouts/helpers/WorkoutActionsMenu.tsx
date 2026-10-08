@@ -1,5 +1,5 @@
 import { I18nSettingsContext } from "@/context/I18nSettingsContext";
-import { LoadingContext } from "@/context/LoadingContext";
+import { useLoadingTask } from "@/hooks/useLoadingTask";
 import { BackendClient } from "@/utils/backend/client";
 import { useContext, useState } from "react";
 import {
@@ -27,7 +27,7 @@ export function WorkoutActionsMenu({
   onOpenEdit,
   dense = false,
 }: Props) {
-  const { startLoading, finishLoading } = useContext(LoadingContext);
+  const withLoading = useLoadingTask();
   const { translate } = useContext(I18nSettingsContext);
   const { registeredDevices } = useContext(DeviceContext);
   const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null);
@@ -41,10 +41,7 @@ export function WorkoutActionsMenu({
   };
 
   const sendToDevice = (serial: string) => {
-    startLoading();
-    BackendClient.sendToDevice(workoutName, serial).finally(() => {
-      finishLoading();
-    });
+    withLoading(BackendClient.sendToDevice(workoutName, serial));
   };
 
   return (

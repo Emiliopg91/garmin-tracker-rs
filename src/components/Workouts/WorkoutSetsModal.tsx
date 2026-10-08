@@ -13,7 +13,7 @@ import { WorkoutStepData, WorkoutUtils } from "@/utils/WorkoutUtils";
 import { WorkoutSetGroup } from "./helpers/WorkoutSetGroup";
 import { I18nSettingsContext } from "@/context/I18nSettingsContext";
 import { BackendClient } from "@/utils/backend/client";
-import { LoadingContext } from "@/context/LoadingContext";
+import { useLoadingTask } from "@/hooks/useLoadingTask";
 
 type Props = {
   workout: WorkoutDetails;
@@ -28,7 +28,7 @@ export type ExerciseOption = {
 };
 
 export function WorkoutSetsModal({ workout, isEdit, onClose }: Props) {
-  const { startLoading, finishLoading } = useContext(LoadingContext);
+  const withLoading = useLoadingTask();
   const { translate, fromKg, toKg } = useContext(I18nSettingsContext);
 
   useEffect(() => {
@@ -83,14 +83,9 @@ export function WorkoutSetsModal({ workout, isEdit, onClose }: Props) {
         steps: WorkoutUtils.toWorkoutSteps(steps, name, toKg),
         notes,
       };
-      startLoading();
-      BackendClient.saveWorkout(isEdit, newWorkout)
-        .then(() => {
-          onClose();
-        })
-        .finally(() => {
-          finishLoading();
-        });
+      withLoading(BackendClient.saveWorkout(isEdit, newWorkout)).then(() => {
+        onClose();
+      });
     }
   };
 
@@ -100,11 +95,9 @@ export function WorkoutSetsModal({ workout, isEdit, onClose }: Props) {
   };
 
   useEffect(() => {
-    startLoading();
-    BackendClient.getExercisesCatalog()
+    withLoading(BackendClient.getExercisesCatalog())
       .then(setRawCatalog)
-      .catch(() => onClose())
-      .finally(() => finishLoading());
+      .catch(() => onClose());
   }, []);
 
   const exercisesCatalog = useMemo<ExerciseOption[] | null>(() => {

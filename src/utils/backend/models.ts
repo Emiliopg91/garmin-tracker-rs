@@ -34,10 +34,9 @@ export enum DistanceUnit {
 	Miles = "Miles",
 }
 
-// From src-tauri/src/dto/exercises.rs:31
+// From src-tauri/src/dto/exercises.rs:29
 export interface ExerciseDetails {
   category: number;
-  e1rm: number;
   id: number;
   pr_date: number;
   reps: number;
@@ -50,7 +49,6 @@ export interface ExerciseDetails {
 export interface ExerciseListItem {
   category: number;
   date: number;
-  e1rm: number;
   id: number;
   reps: number;
   weight: number;
@@ -161,7 +159,7 @@ export interface Workout {
   steps: WorkoutStep[];
 }
 
-// From src-tauri/src/dto/workouts.rs:33
+// From src-tauri/src/dto/workouts.rs:34
 export interface WorkoutDetails {
   avg_time: number;
   avg_volume: number;
@@ -176,6 +174,7 @@ export interface WorkoutDetails {
 
 // From src-tauri/src/dto/workouts.rs:6
 export interface WorkoutListItem {
+  avg_load: number;
   avg_time: number;
   enabled: boolean;
   has_steps: boolean;
@@ -184,7 +183,7 @@ export interface WorkoutListItem {
   sessions: number;
 }
 
-// From src-tauri/src/dto/workouts.rs:16
+// From src-tauri/src/dto/workouts.rs:17
 export interface WorkoutSession {
   date: number;
   time: number;

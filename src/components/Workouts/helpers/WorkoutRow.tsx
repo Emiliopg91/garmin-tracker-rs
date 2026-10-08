@@ -27,6 +27,7 @@ export function WorkoutRow({ workout, onSelect, onOpenEdit }: Props) {
       </td>
       <td>{formatNumber(workout.sessions, 0)}</td>
       <td>{workout.avg_time > 0 && formatDuration(workout.avg_time)}</td>
+      <td>{workout.avg_load > 0 && workout.avg_load}</td>
       {/* Menu is portaled but React events still bubble to the row */}
       <td onClick={(e) => e.stopPropagation()}>
         {workout.has_steps && (

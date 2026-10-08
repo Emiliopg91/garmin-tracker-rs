@@ -451,4 +451,19 @@ export class SessionUtils {
 
     return <Marker key={idx} position={lap} icon={icon} />;
   }
+
+  private static MAX_ESTIMATION_REPS = 20;
+
+  public static estimate1rm(weight: number, reps: number): number {
+    if (reps <= 1) {
+      return Math.trunc(weight);
+    }
+
+    const r = Math.min(reps, SessionUtils.MAX_ESTIMATION_REPS);
+
+    if (r <= 10) {
+      return Math.trunc((weight * 36) / (37 - r));
+    }
+    return Math.trunc((100 * weight) / (101.3 - 2.67123 * r));
+  }
 }

@@ -70,6 +70,9 @@ body_metrics:
 workload:
   en: Workload
   es: Carga
+avg_workload:
+  en: Average workload
+  es: Carga media
 reference:
   en: Reference
   es: Referencia

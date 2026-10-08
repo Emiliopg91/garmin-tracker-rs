@@ -1,6 +1,6 @@
 import { BackendClient } from "@/utils/backend/client";
-import { useContext, useEffect, useState } from "react";
-import { LoadingContext } from "@/context/LoadingContext";
+import { useContext, useState } from "react";
+import { useBackendList } from "@/hooks/useBackendList";
 import { I18nSettingsContext } from "@/context/I18nSettingsContext";
 import { BodyMetricListItem } from "@/utils/backend/models";
 import { BodyMetricsDetailsModal } from "./BodyMetricsDetailsModal";
@@ -12,10 +12,12 @@ import { BodyMetricsCompareModal } from "./BodyMetricsCompareModal";
 import "@/styles/BodyMetrics/BodyMetrics.css";
 
 export function BodyMetricList() {
-  const { startLoading, finishLoading } = useContext(LoadingContext);
   const { translate } = useContext(I18nSettingsContext);
 
-  const [bodyMetrics, setBodyMetrics] = useState<BodyMetricListItem[]>([]);
+  const [bodyMetrics, , refreshList] = useBackendList(
+    BackendClient.getBodyMeasures,
+    [],
+  );
   const [addingNew, setAddingNew] = useState(false);
   const [measureDetails, setMeasureDetails] = useState<
     BodyMetricListItem | undefined
@@ -35,17 +37,6 @@ export function BodyMetricList() {
     setComparingSessions(sessions);
   };
 
-  const refreshList = () => {
-    startLoading();
-    BackendClient.getBodyMeasures()
-      .then((data) => {
-        setBodyMetrics(data);
-      })
-      .finally(() => {
-        finishLoading();
-      });
-  };
-
   const toggleSelect = (metric: BodyMetricListItem) => {
     if (toCompare.includes(metric.date)) {
       setToCompare([...toCompare].filter((date) => date != metric.date));
@@ -55,10 +46,6 @@ export function BodyMetricList() {
       }
     }
   };
-
-  useEffect(() => {
-    refreshList();
-  }, []);
 
   const openModal = (details: BodyMetricListItem) => {
     setMeasureDetails(details);

@@ -14,7 +14,7 @@ use crate::{
     dao::{
         exercise::ExerciseRepository,
         session::{self, SessionRepository},
-        set::{self, Set, SetRepository},
+        set::{self, SetRepository},
     },
     dto::{
         exercises::{ExerciseDetails, ExerciseListItem},
@@ -43,7 +43,6 @@ pub async fn get_exercises(
                     reps: pr.reps,
                     weight: pr.weight,
                     date: pr.session,
-                    e1rm: Set::estimate_1rm(pr.weight, pr.reps),
                 })
                 .collect::<Vec<_>>())
         })
@@ -96,7 +95,6 @@ pub async fn get_exercise_details(
             res.reps = pr.reps;
             res.weight = pr.weight;
             res.pr_date = pr.session;
-            res.e1rm = Set::estimate_1rm(pr.weight, pr.reps);
 
             let mut timestamps: Vec<Value> = Vec::new();
             let mut last = None;

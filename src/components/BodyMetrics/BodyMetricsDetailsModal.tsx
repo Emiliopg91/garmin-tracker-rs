@@ -1,4 +1,4 @@
-import { LoadingContext } from "@/context/LoadingContext";
+import { useLoadingTask } from "@/hooks/useLoadingTask";
 import { I18nSettingsContext } from "@/context/I18nSettingsContext";
 import { BackendClient } from "@/utils/backend/client";
 import { BodyMetricListItem } from "@/utils/backend/models";
@@ -23,7 +23,7 @@ export function BodyMetricsDetailsModal({
   onClose,
   onDelete,
 }: Props) {
-  const { startLoading, finishLoading } = useContext(LoadingContext);
+  const withLoading = useLoadingTask();
   const {
     translate,
     fromKg,
@@ -34,15 +34,10 @@ export function BodyMetricsDetailsModal({
   } = useContext(I18nSettingsContext);
 
   const deleteEntry = () => {
-    startLoading();
-    BackendClient.deleteBodyMetric(measures.date)
-      .then(() => {
-        onDelete();
-        onClose();
-      })
-      .finally(() => {
-        finishLoading();
-      });
+    withLoading(BackendClient.deleteBodyMetric(measures.date)).then(() => {
+      onDelete();
+      onClose();
+    });
   };
 
   return (

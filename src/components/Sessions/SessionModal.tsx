@@ -1,4 +1,4 @@
-import { LoadingContext } from "@/context/LoadingContext";
+import { useLoadingTask } from "@/hooks/useLoadingTask";
 import { I18nSettingsContext } from "@/context/I18nSettingsContext";
 import { BackendClient } from "@/utils/backend/client";
 import { SessionSetsUpdate } from "@/utils/backend/models";
@@ -26,7 +26,7 @@ type Props = {
 };
 
 export function SessionModal({ session, onClose, onUpdate }: Props) {
-  const { startLoading, finishLoading } = useContext(LoadingContext);
+  const withLoading = useLoadingTask();
   const { translate, toKg } = useContext(I18nSettingsContext);
   const [originalSession] = useState(session);
   const [localSession, setLocalSession] = useState({ ...session });
@@ -80,7 +80,6 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
   };
 
   const saveChanges = () => {
-    startLoading();
     const update: SessionSetsUpdate = {
       timestamp: localSession.timestamp,
       sets: [],
@@ -97,14 +96,10 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
         });
       }
     });
-    BackendClient.saveSessionChanges(update)
-      .then(() => {
-        onUpdate();
-        onClose();
-      })
-      .finally(() => {
-        finishLoading();
-      });
+    withLoading(BackendClient.saveSessionChanges(update)).then(() => {
+      onUpdate();
+      onClose();
+    });
   };
 
   return (

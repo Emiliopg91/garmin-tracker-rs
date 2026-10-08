@@ -1,5 +1,5 @@
 import { I18nSettingsContext } from "@/context/I18nSettingsContext";
-import { LoadingContext } from "@/context/LoadingContext";
+import { useLoadingTask } from "@/hooks/useLoadingTask";
 import { BackendClient } from "@/utils/backend/client";
 import { useContext, useState } from "react";
 import { Button, Menu, MenuItem } from "@mui/material";
@@ -11,7 +11,7 @@ type Props = {
 
 export function ImportSessionsMenu({ onImported }: Props) {
   const { availableDevices } = useContext(DeviceContext);
-  const { startLoading, finishLoading } = useContext(LoadingContext);
+  const withLoading = useLoadingTask();
   const { translate } = useContext(I18nSettingsContext);
   const [importMenuAnchor, setImportMenuAnchor] = useState<{
     top: number;
@@ -19,29 +19,19 @@ export function ImportSessionsMenu({ onImported }: Props) {
   } | null>(null);
 
   const importFromDisk = () => {
-    startLoading();
-    BackendClient.importFromFiles()
-      .then((count) => {
-        if (count > 0) {
-          onImported();
-        }
-      })
-      .finally(() => {
-        finishLoading();
-      });
+    withLoading(BackendClient.importFromFiles()).then((count) => {
+      if (count > 0) {
+        onImported();
+      }
+    });
   };
 
   const importDevice = (serial: string) => {
-    startLoading();
-    BackendClient.importFromDevice(serial)
-      .then((count) => {
-        if (count > 0) {
-          onImported();
-        }
-      })
-      .finally(() => {
-        finishLoading();
-      });
+    withLoading(BackendClient.importFromDevice(serial)).then((count) => {
+      if (count > 0) {
+        onImported();
+      }
+    });
   };
 
   return (

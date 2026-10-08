@@ -11,7 +11,7 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { BackendClient } from "@/utils/backend/client";
-import { LoadingContext } from "@/context/LoadingContext";
+import { useLoadingTask } from "@/hooks/useLoadingTask";
 import { WorkoutVolumeChart } from "./helpers/WorkoutVolumeChart";
 import { WorkoutActionsMenu } from "./helpers/WorkoutActionsMenu";
 import { BackendListener } from "@/utils/backend/listener";
@@ -31,7 +31,7 @@ export function WorkoutModal({
   onUpdate,
   onOpenEdit,
 }: Props) {
-  const { startLoading, finishLoading } = useContext(LoadingContext);
+  const withLoading = useLoadingTask();
   const {
     translate,
     fromKg,
@@ -57,17 +57,14 @@ export function WorkoutModal({
   }, [initialWorkout.name]);
 
   const toggleEnabled = () => {
-    startLoading();
-    BackendClient.setWorkoutStatus(workout.name, !enabled)
-      .then(() => {
+    withLoading(BackendClient.setWorkoutStatus(workout.name, !enabled)).then(
+      () => {
         if (onUpdate) {
           onUpdate(workout.name, !enabled);
         }
         setEnabled((prev) => !prev);
-      })
-      .finally(() => {
-        finishLoading();
-      });
+      },
+    );
   };
 
   return (
