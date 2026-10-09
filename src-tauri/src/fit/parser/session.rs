@@ -76,11 +76,11 @@ impl TryFrom<FitParser> for Session {
         let mut serie_idx = 0;
         let series = series_data
             .into_iter()
-            .filter_map(|(idx, reps, weight)| {
-                if let Some(exercise) = exercises.get(idx)
+            .map(|(idx, reps, weight, duration)| {
+                let res = if let Some(exercise) = exercises.get(idx)
                     && let Some(exercise) = exercise
                 {
-                    let res = Some(Set {
+                    Set {
                         session: session_data.timestamp,
                         idx: serie_idx,
                         ex_cat: exercise.category,
@@ -89,14 +89,23 @@ impl TryFrom<FitParser> for Session {
                         weight,
                         pr: false,
                         exercise: Some(exercise.clone()),
-                    });
-
-                    serie_idx += 1;
-
-                    res
+                        duration,
+                    }
                 } else {
-                    None
-                }
+                    Set {
+                        session: session_data.timestamp,
+                        idx: serie_idx,
+                        ex_cat: u16::MAX,
+                        ex_id: 0,
+                        reps: 0,
+                        weight: 0_f32,
+                        pr: false,
+                        exercise: None,
+                        duration,
+                    }
+                };
+                serie_idx += 1;
+                res
             })
             .collect::<Vec<_>>();
 
@@ -167,13 +176,25 @@ fn handle_lap_message(
     Ok(())
 }
 
-fn handle_set_message(msg: mesgdef::Set, series_data: &mut Vec<(usize, u16, f32)>) {
+fn handle_set_message(msg: mesgdef::Set, series_data: &mut Vec<(usize, u16, f32, u32)>) {
+    let ex_idx = msg.wkt_step_index.0 as usize;
     if msg.repetitions != u16::MAX
         && msg.wkt_step_index.0 != u16::MAX
         && let Some(weight) = msg.weight_scaled()
     {
-        let ex_idx = msg.wkt_step_index.0 as usize;
-        series_data.push((ex_idx, msg.repetitions, weight as f32));
+        series_data.push((
+            ex_idx,
+            msg.repetitions,
+            weight as f32,
+            msg.duration_scaled().unwrap_or(0_f64) as u32,
+        ));
+    } else {
+        series_data.push((
+            ex_idx,
+            0,
+            0_f32,
+            msg.duration_scaled().unwrap_or(0_f64) as u32,
+        ));
     }
 }
 

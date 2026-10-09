@@ -1,8 +1,9 @@
 import { I18nSettingsContext } from "@/context/I18nSettingsContext";
-import { useContext, useEffect, useState } from "react";
+import { Fragment, useContext, useMemo } from "react";
 import { Dialog, DialogContent, DialogTitle, IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { SessionFrontDetails } from "@/utils/SessionUtils";
+import { SessionSet } from "@/utils/backend/models";
 
 type Props = {
   sessions: SessionFrontDetails[];
@@ -18,33 +19,39 @@ export function SessionsCompareModal({ sessions, onClose }: Props) {
     formatTimeDate,
     formatNumber,
   } = useContext(I18nSettingsContext);
-  const [exercises, setExercises] = useState<string[]>([]);
-
-  useEffect(() => {
+  // Non-rest sets grouped by exercise ("cat-id"); exercises follow the order
+  // of their first set across sessions
+  const { exercises, groupedSets } = useMemo(() => {
     const exercises: string[] = [];
-    let idx = 0;
+    const groupedSets = sessions.map((s) => {
+      const groups: Record<string, SessionSet[]> = {};
+      s.sets
+        .filter((set) => !set.rest)
+        .sort((a, b) => a.idx - b.idx)
+        .forEach((set) => {
+          const key = set.ex_cat + "-" + set.ex_id;
+          (groups[key] ??= []).push(set);
+        });
+      return groups;
+    });
+
+    let pos = 0;
     while (true) {
       let any = false;
-      for (let i = 0; i < sessions.length; i++) {
-        const session = sessions[i];
-        if (session.exercises.length > idx) {
-          const exercise = session.exercises[idx];
-          if (!exercises.includes(exercise)) {
-            exercises.push(exercise);
+      for (const groups of groupedSets) {
+        const keys = Object.keys(groups);
+        if (keys.length > pos) {
+          if (!exercises.includes(keys[pos])) {
+            exercises.push(keys[pos]);
           }
-
           any = true;
         }
       }
-
-      if (any) {
-        idx++;
-      } else {
-        break;
-      }
+      if (!any) break;
+      pos++;
     }
-    setExercises(exercises);
-  }, []);
+    return { exercises, groupedSets };
+  }, [sessions]);
 
   return (
     <Dialog open={true} onClose={onClose}>
@@ -138,35 +145,24 @@ export function SessionsCompareModal({ sessions, onClose }: Props) {
               </td>
             </tr>
             {exercises.map((exercise) => (
-              <tr
-                key={`exercise-${exercise}`}
-
-                style={{
-                  textAlign: "center",
-                  borderBottom: "1px solid gray",
-                }}
-              >
+              <tr key={`exercise-${exercise}`} style={{ textAlign: "center" }}>
                 <td className="divider-bottom-white">
                   {translate("exercise_" + exercise.replace("-", "_"))}
                 </td>
-                {sessions.map((sd, idx) => (
+                {groupedSets.map((groups, idx) => (
                   <td key={`session-${idx}`} className="divider-bottom-white">
-                    {sd.grouped_series[exercise]?.map((set, idx2) => (
-                      <>
-                        <span key={`session-${idx}-set-${exercise}-${idx2}`}>
-                          {set.reps +
-                            " x " +
-                            formatNumber(fromKg(set.weight), 1) +
-                            " " +
-                            getWeightUnit()}
-                        </span>
+                    {groups[exercise]?.map((set) => (
+                      <Fragment key={`session-${idx}-set-${set.idx}`}>
+                        {set.reps +
+                          " x " +
+                          formatNumber(set.weight, 1) +
+                          " " +
+                          getWeightUnit()}
                         <br />
-                      </>
+                      </Fragment>
                     ))}
                   </td>
                 ))}
-
-                <td></td>
               </tr>
             ))}
           </tbody>

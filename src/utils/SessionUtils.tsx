@@ -1,5 +1,5 @@
 import { Marker } from "react-leaflet";
-import { SessionDetails, SessionListItem, SessionSet } from "./backend/models";
+import { SessionDetails, SessionListItem } from "./backend/models";
 import L from "leaflet";
 
 const SEMICIRCLE_TO_DEGREES = 180.0 / 2 ** 31;
@@ -33,8 +33,6 @@ export interface SessionFrontDetails extends SessionDetails {
   }[];
   elevations: [number, number] | undefined;
   volume: number;
-  exercises: string[];
-  grouped_series: Record<string, SessionSet[]>;
 }
 
 export class SessionUtils {
@@ -54,8 +52,6 @@ export class SessionUtils {
       hrRanges: [0, 0, 0],
       volume: 0,
       elevations: undefined,
-      exercises: [],
-      grouped_series: {},
     };
 
     SessionUtils.handleSeries(details, fromKg);
@@ -96,32 +92,7 @@ export class SessionUtils {
         details.sets[idx] = copy;
         details.volume += copy.reps * copy.weight;
       });
-
-      const { exercises, grouped_series } = SessionUtils.groupSeries(
-        details.sets,
-      );
-      details.exercises = exercises;
-      details.grouped_series = grouped_series;
     }
-  }
-
-  // Groups sets by "cat-id" key; exercises and their series are ordered by set idx
-  public static groupSeries(sets: SessionSet[]): {
-    exercises: string[];
-    grouped_series: Record<string, SessionSet[]>;
-  } {
-    const exercises: string[] = [];
-    const grouped_series: Record<string, SessionSet[]> = {};
-    const sorted = sets.slice().sort((a, b) => a.idx - b.idx);
-    for (const serie of sorted) {
-      const name = serie.ex_cat + "-" + serie.ex_id;
-      if (!grouped_series[name]) {
-        grouped_series[name] = [];
-        exercises.push(name);
-      }
-      grouped_series[name].push(serie);
-    }
-    return { exercises, grouped_series };
   }
 
   private static handleGpsCoordiates(details: SessionFrontDetails) {

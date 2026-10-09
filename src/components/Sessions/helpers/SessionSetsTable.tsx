@@ -6,24 +6,17 @@ import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import { ExerciseOption, useExerciseCatalog } from "@/hooks/useExerciseCatalog";
 
 type Props = {
-  exercises: string[];
-  groupedSeries: Record<string, SessionSet[]>;
+  series: SessionSet[];
   onUpdateSerieRepsWeight: (
-    exercise: string,
     idx: number,
     field: "reps" | "weight",
     value: number,
   ) => void;
-  onUpdateSerieExercise: (
-    exercise: string,
-    category: number,
-    id: number,
-  ) => void;
+  onUpdateSerieExercise: (idx: number, category: number, id: number) => void;
 };
 
 export function SessionSetsTable({
-  exercises,
-  groupedSeries,
+  series,
   onUpdateSerieRepsWeight,
   onUpdateSerieExercise,
 }: Props) {
@@ -33,31 +26,24 @@ export function SessionSetsTable({
     console.warn("Could not load exercises catalog");
   });
 
-  const updateSerieReps = (exercise: string, idx: number, newVal: string) => {
+  const updateSerieReps = (idx: number, newVal: string) => {
     let reps = parseInt(newVal);
     if (isNaN(reps)) {
       reps = 0;
     }
-    onUpdateSerieRepsWeight(exercise, idx, "reps", reps);
+    onUpdateSerieRepsWeight(idx, "reps", reps);
   };
 
-  const updateSerieWeight = (exercise: string, idx: number, newVal: string) => {
+  const updateSerieWeight = (idx: number, newVal: string) => {
     let weight = parseFloat(newVal);
     if (isNaN(weight)) {
       weight = 0;
     }
-    onUpdateSerieRepsWeight(exercise, idx, "weight", weight);
+    onUpdateSerieRepsWeight(idx, "weight", weight);
   };
 
-  const onExerciseChange = (
-    exercise: string,
-    exerciseOption: ExerciseOption,
-  ) => {
-    onUpdateSerieExercise(
-      exercise,
-      exerciseOption.ex_cat,
-      exerciseOption.ex_id,
-    );
+  const onExerciseChange = (idx: number, exerciseOption: ExerciseOption) => {
+    onUpdateSerieExercise(idx, exerciseOption.ex_cat, exerciseOption.ex_id);
   };
 
   return (
@@ -75,108 +61,104 @@ export function SessionSetsTable({
           </tr>
         </thead>
         <tbody>
-          {exercises.map((exercise) =>
-            groupedSeries[exercise].map((serie, idx) => {
-              const selected =
-                idx === 0
-                  ? exercisesCatalog.find(
-                      (e) => e.ex_cat == serie.ex_cat && e.ex_id == serie.ex_id,
-                    )
-                  : undefined;
+          {series
+            .sort((a, b) => a.idx - b.idx)
+            .map((serie, idx) => {
+              const selected = exercisesCatalog.find(
+                (e) => e.ex_cat == serie.ex_cat && e.ex_id == serie.ex_id,
+              );
               return (
-                <tr key={`${exercise}-${idx}`}>
-                  {idx === 0 && (
-                    <td
-                      className="divider-bottom"
-                      rowSpan={groupedSeries[exercise].length}
-                    >
-                      {!selected && (
-                        <>
-                          {translate(
-                            "exercise_" + serie.ex_cat + "_" + serie.ex_id,
-                          )}
-                        </>
-                      )}
-                      {selected && (
-                        <Autocomplete
-                          size="small"
-                          sx={{ width: 300 }}
-                          options={exercisesCatalog}
-                          value={selected}
-                          disableClearable
-                          groupBy={(opt) => translate("exercise_" + opt.ex_cat)}
-                          getOptionKey={(opt) => `${opt.ex_cat}-${opt.ex_id}`}
-                          isOptionEqualToValue={(a, b) =>
-                            a.ex_cat == b.ex_cat && a.ex_id == b.ex_id
-                          }
-                          onChange={(_, opt) => onExerciseChange(exercise, opt)}
-                          renderInput={(params) => (
-                            <TextField
-                              {...params}
-                              multiline
-                              label={translate("select_exercise")}
-                            />
-                          )}
-                        />
-                      )}
+                <tr key={`set-${idx}`}>
+                  {serie.rest && (
+                    <td colSpan={2}>
+                      <div className="divider-bottom session-sets-rest-divider" />
                     </td>
                   )}
 
-                  <td
-                    className={[
-                      idx === groupedSeries[exercise].length - 1
-                        ? "divider-bottom group-cell-last"
-                        : undefined,
-                      idx === 0 ? "group-cell-first" : undefined,
-                    ]
-                      .filter(Boolean)
-                      .join(" ")}
-                  >
-                    <TextField
-                      label={translate("repetitions")}
-                      type="number"
-                      size="small"
-                      value={serie.reps}
-                      sx={{ width: 100 }}
-                      style={{ marginTop: "5px" }}
-                      slotProps={{
-                        htmlInput: {
-                          className: "no-spinner",
-                          min: 0,
-                        },
-                      }}
-                      onChange={(e) => {
-                        updateSerieReps(exercise, idx, e.target.value);
-                      }}
-                    />
-                    <TextField
-                      label={translate("weight") + " (" + getWeightUnit() + ")"}
-                      type="number"
-                      size="small"
-                      sx={{ width: 100, px: 1 }}
-                      style={{ marginTop: "5px" }}
-                      value={serie.weight?.toString()}
-                      slotProps={{
-                        htmlInput: {
-                          className: "no-spinner",
-                          min: 0,
-                        },
-                      }}
-                      onChange={(e) => {
-                        updateSerieWeight(exercise, idx, e.target.value);
-                      }}
-                    />
-                    {serie.pr && (
-                      <EmojiEventsIcon
-                        className="trophy-icon"
-                        style={{ marginTop: "15px" }}
-                      />
-                    )}
-                  </td>
+                  {!serie.rest && (
+                    <>
+                      <td>
+                        {!selected && (
+                          <>
+                            {translate(
+                              "exercise_" + serie.ex_cat + "_" + serie.ex_id,
+                            )}
+                          </>
+                        )}
+                        {selected && (
+                          <Autocomplete
+                            size="small"
+                            sx={{ width: 300, mt: 1 }}
+                            options={exercisesCatalog}
+                            value={selected}
+                            disableClearable
+                            groupBy={(opt) =>
+                              translate("exercise_" + opt.ex_cat)
+                            }
+                            getOptionKey={(opt) => `${opt.ex_cat}-${opt.ex_id}`}
+                            isOptionEqualToValue={(a, b) =>
+                              a.ex_cat == b.ex_cat && a.ex_id == b.ex_id
+                            }
+                            onChange={(_, opt) => onExerciseChange(idx, opt)}
+                            renderInput={(params) => (
+                              <TextField
+                                {...params}
+                                multiline
+                                label={translate("select_exercise")}
+                              />
+                            )}
+                          />
+                        )}
+                      </td>
+                      <td className="session-sets-values-cell">
+                        <TextField
+                          label={translate("repetitions")}
+                          type="number"
+                          size="small"
+                          value={serie.reps}
+                          sx={{ width: 100, mt: 1 }}
+                          style={{ marginTop: "5px" }}
+                          slotProps={{
+                            htmlInput: {
+                              className: "no-spinner",
+                              min: 0,
+                            },
+                          }}
+                          onChange={(e) => {
+                            updateSerieReps(idx, e.target.value);
+                          }}
+                        />
+                        <TextField
+                          label={
+                            translate("weight") + " (" + getWeightUnit() + ")"
+                          }
+                          type="number"
+                          size="small"
+                          sx={{ width: 100, px: 1, mt: 1 }}
+                          style={{ marginTop: "5px" }}
+                          value={serie.weight?.toString()}
+                          slotProps={{
+                            htmlInput: {
+                              className: "no-spinner",
+                              min: 0,
+                            },
+                          }}
+                          onChange={(e) => {
+                            updateSerieWeight(idx, e.target.value);
+                          }}
+                        />
+                        {serie.pr && (
+                          <EmojiEventsIcon
+                            className="trophy-icon"
+                            style={{ marginTop: "15px" }}
+                          />
+                        )}
+                      </td>
+                    </>
+                  )}
                 </tr>
               );
-            }),
-          )}
+            })}
         </tbody>
       </table>
     </div>

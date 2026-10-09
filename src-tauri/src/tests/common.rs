@@ -64,6 +64,7 @@ pub fn set(session: u32, idx: u8, exercise: (u16, u16), reps: u16, weight: f32) 
         weight,
         pr: false,
         exercise: None,
+        duration: 0,
     }
 }
 

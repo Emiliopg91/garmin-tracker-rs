@@ -44,12 +44,13 @@ const makeSet = (overrides: Partial<SessionSet> = {}): SessionSet => ({
   idx: 0,
   pr: false,
   reps: 10,
+  rest: false,
   weight: 50,
   ...overrides,
 });
 
 describe("SessionUtils.detailsFromBackend - sets", () => {
-  it("computes volume and groups sets by exercise in order of appearance", () => {
+  it("computes volume across all sets", () => {
     const details = SessionUtils.detailsFromBackend(
       makeDetails({
         sets: [
@@ -62,9 +63,6 @@ describe("SessionUtils.detailsFromBackend - sets", () => {
     );
 
     expect(details.volume).toBe(10 * 60 + 8 * 40 + 5 * 70);
-    expect(details.exercises).toEqual(["1-2", "3-4"]);
-    expect(details.grouped_series["1-2"].map((s) => s.idx)).toEqual([0, 2]);
-    expect(details.grouped_series["3-4"].map((s) => s.idx)).toEqual([1]);
   });
 
   it("converts weights to the selected unit rounded to one decimal", () => {
@@ -90,31 +88,6 @@ describe("SessionUtils.detailsFromBackend - sets", () => {
     const details = SessionUtils.detailsFromBackend(makeDetails(), kgToKg);
 
     expect(details.volume).toBe(0);
-    expect(details.exercises).toEqual([]);
-    expect(details.grouped_series).toEqual({});
-  });
-});
-
-describe("SessionUtils.groupSeries", () => {
-  it("merges sets of the same exercise ordering by set idx", () => {
-    const sets = [
-      makeSet({ idx: 2, ex_cat: 3, ex_id: 4 }),
-      makeSet({ idx: 1, ex_cat: 1, ex_id: 2 }),
-      makeSet({ idx: 0, ex_cat: 3, ex_id: 4 }),
-    ];
-
-    const { exercises, grouped_series } = SessionUtils.groupSeries(sets);
-
-    expect(exercises).toEqual(["3-4", "1-2"]);
-    expect(grouped_series["3-4"].map((s) => s.idx)).toEqual([0, 2]);
-    expect(grouped_series["1-2"].map((s) => s.idx)).toEqual([1]);
-  });
-
-  it("returns empty structures when there are no sets", () => {
-    expect(SessionUtils.groupSeries([])).toEqual({
-      exercises: [],
-      grouped_series: {},
-    });
   });
 });
 

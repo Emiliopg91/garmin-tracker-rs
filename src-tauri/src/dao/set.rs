@@ -21,6 +21,7 @@ pub struct Set {
     pub reps: u16,
     pub weight: f32,
     pub pr: bool,
+    pub duration: u32,
 
     #[relationship((ex_cat, exercise::entity::columns::CATEGORY),(ex_id, exercise::entity::columns::ID))]
     #[allow(dead_code)]

@@ -60,7 +60,7 @@ export enum Languages {
 	English = "English",
 }
 
-// From src-tauri/src/dto/sessions.rs:93
+// From src-tauri/src/dto/sessions.rs:95
 export interface SessionDetails {
   active_time: number;
   altitudes: (number | null)[];
@@ -83,7 +83,7 @@ export interface SessionDetails {
   training_load: number;
 }
 
-// From src-tauri/src/dto/sessions.rs:76
+// From src-tauri/src/dto/sessions.rs:78
 export interface SessionLap {
   idx: number;
   start_latitude: number | null;
@@ -103,7 +103,7 @@ export interface SessionListItem {
   training_load: number;
 }
 
-// From src-tauri/src/dto/sessions.rs:202
+// From src-tauri/src/dto/sessions.rs:204
 export interface SessionLocation {
   location: string;
   session: number;
@@ -116,10 +116,11 @@ export interface SessionSet {
   idx: number;
   pr: boolean;
   reps: number;
+  rest: boolean;
   weight: number;
 }
 
-// From src-tauri/src/dto/sessions.rs:195
+// From src-tauri/src/dto/sessions.rs:197
 export interface SessionSetsUpdate {
   notes: string | null;
   sets: SessionSet[];

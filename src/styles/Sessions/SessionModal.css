@@ -91,3 +91,11 @@
 .group-cell-last {
   padding-bottom: 5px;
 }
+
+.session-sets-rest-divider {
+  margin: 10px 0;
+}
+
+.session-sets-values-cell {
+  vertical-align: top;
+}

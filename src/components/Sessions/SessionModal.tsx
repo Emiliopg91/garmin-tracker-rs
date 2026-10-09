@@ -12,7 +12,7 @@ import {
   TextareaAutosize,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import { SessionFrontDetails, SessionUtils } from "@/utils/SessionUtils";
+import { SessionFrontDetails } from "@/utils/SessionUtils";
 import { SessionMap } from "./helpers/SessionMap";
 import { SessionDetailsTable } from "./helpers/SessionDetailsTable";
 import { SessionHeartRateChart } from "./helpers/SessionHeartRateChart";
@@ -45,45 +45,28 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
     [localSession.sets, notes, originalSession],
   );
 
-  const updateSerieExercise = (
-    oldExercise: string,
-    newCat: number,
-    newId: number,
-  ) => {
-    const newExercise = newCat + "-" + newId;
-    if (newExercise === oldExercise) return;
-
+  const updateSerieExercise = (idx: number, newCat: number, newId: number) => {
     setLocalSession((prev) => {
-      const sets = prev.sets.map((s) =>
-        s.ex_cat + "-" + s.ex_id === oldExercise
-          ? { ...s, ex_cat: newCat, ex_id: newId }
-          : s,
+      const sets = prev.sets.map((s, i) =>
+        i == idx ? { ...s, ex_cat: newCat, ex_id: newId } : s,
       );
 
-      // Regroup from sets so moving into an exercise already present merges both groups
-      return { ...prev, sets, ...SessionUtils.groupSeries(sets) };
+      return { ...prev, sets };
     });
   };
 
   const updateSerieRepsWeight = (
-    exercise: string,
     idx: number,
     field: "reps" | "weight",
     value: number,
   ) => {
     setLocalSession((prev) => {
-      const serieIdx = prev.grouped_series[exercise][idx].idx;
-
-      const groupedForEx = prev.grouped_series[exercise].slice();
-      groupedForEx[idx] = { ...groupedForEx[idx], [field]: value };
-
       const sets = prev.sets.slice();
-      sets[serieIdx] = { ...sets[serieIdx], [field]: value };
+      sets[idx] = { ...sets[idx], [field]: value };
 
       return {
         ...prev,
         sets,
-        grouped_series: { ...prev.grouped_series, [exercise]: groupedForEx },
       };
     });
   };
@@ -165,8 +148,7 @@ export function SessionModal({ session, onClose, onUpdate }: Props) {
         )}
         {localSession.sets && Object.keys(localSession.sets).length > 0 && (
           <SessionSetsTable
-            exercises={localSession.exercises}
-            groupedSeries={localSession.grouped_series}
+            series={localSession.sets}
             onUpdateSerieRepsWeight={updateSerieRepsWeight}
             onUpdateSerieExercise={updateSerieExercise}
           />
