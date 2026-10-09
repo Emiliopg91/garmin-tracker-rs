@@ -3,15 +3,13 @@ import { useLoadingTask } from "@/hooks/useLoadingTask";
 import { BackendClient } from "@/utils/backend/client";
 import { SessionLap } from "@/utils/backend/models";
 import { SessionUtils } from "@/utils/SessionUtils";
-import { useContext, useState } from "react";
-import {
-  FormControl,
-  FormControlLabel,
-  Link,
-  Radio,
-  RadioGroup,
-} from "@mui/material";
+import { useContext, useEffect, useRef, useState } from "react";
+import { IconButton, Tooltip } from "@mui/material";
 import { MapContainer, Marker, Polyline, TileLayer } from "react-leaflet";
+import FileDownloadIcon from "@mui/icons-material/FileDownload";
+import MapIcon from "@mui/icons-material/Map";
+import SatelliteAltIcon from "@mui/icons-material/SatelliteAlt";
+import L from "leaflet";
 
 const urls = [
   "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
@@ -41,9 +39,19 @@ export function SessionMap({
   const withLoading = useLoadingTask();
   const { translate } = useContext(I18nSettingsContext);
   const [url, setUrl] = useState(1);
+  const exportControlRef = useRef<HTMLDivElement>(null);
+  const typeControlRef = useRef<HTMLDivElement>(null);
 
-  const handleMapTypeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setUrl(event.target.value === "street" ? 0 : 1);
+  useEffect(() => {
+    for (const control of [exportControlRef, typeControlRef]) {
+      if (control.current) {
+        L.DomEvent.disableClickPropagation(control.current);
+      }
+    }
+  }, []);
+
+  const toggleMapType = () => {
+    setUrl((current) => (current === 0 ? 1 : 0));
   };
 
   const exportTrack = () => {
@@ -51,63 +59,67 @@ export function SessionMap({
   };
 
   return (
-    <>
-      <MapContainer
-        bounds={validPoints}
-        boundsOptions={{ padding: [20, 20] }}
-        attributionControl={false}
-        className="session-map"
-      >
-        <TileLayer url={urls[url]} attribution={""} />
+    <MapContainer
+      bounds={validPoints}
+      boundsOptions={{ padding: [20, 20] }}
+      attributionControl={false}
+      className="session-map"
+    >
+      <TileLayer url={urls[url]} attribution={""} />
 
-        {gpsSegments.map((val, idx) => (
-          <Polyline
-            key={"segment-" + idx}
-            positions={val.coordinates}
-            color={val.color}
-            weight={4}
-          />
-        ))}
+      {gpsSegments.map((val, idx) => (
+        <Polyline
+          key={"segment-" + idx}
+          positions={val.coordinates}
+          color={val.color}
+          weight={4}
+        />
+      ))}
 
-        <Marker position={startPoint} icon={SessionUtils.START_ICON}></Marker>
+      <Marker position={startPoint} icon={SessionUtils.START_ICON}></Marker>
 
-        <Marker position={finishPoint} icon={SessionUtils.END_ICON}></Marker>
+      <Marker position={finishPoint} icon={SessionUtils.END_ICON}></Marker>
 
-        {laps
-          .filter((lap) => lap.start_latitude && lap.start_longitude)
-          .map((lap) =>
-            SessionUtils.makeLapMarker(lap.idx + 1, [
-              lap.start_latitude!,
-              lap.start_longitude!,
-            ]),
-          )}
-      </MapContainer>
-      <div style={{ display: "flex" }}>
-        <FormControl className="session-map-type-control" style={{ flex: 1 }}>
-          <RadioGroup
-            row
-            name="row-radio-buttons-group"
-            value={url === 0 ? "street" : "satellite"}
-            onChange={handleMapTypeChange}
-          >
-            <FormControlLabel
-              value="satellite"
-              control={<Radio />}
-              label={translate("satellite_map")}
-            />
-            <FormControlLabel
-              value="street"
-              control={<Radio />}
-              label={translate("street_map")}
-            />
-          </RadioGroup>
-        </FormControl>
-        <div style={{ display: "block", margin: "auto" }}>
-          <Link href="#" onClick={exportTrack} style={{ flex: 1 }}>
-            {translate("export_gpx")}
-          </Link>
+      {laps
+        .filter((lap) => lap.start_latitude && lap.start_longitude)
+        .map((lap) =>
+          SessionUtils.makeLapMarker(lap.idx + 1, [
+            lap.start_latitude!,
+            lap.start_longitude!,
+          ]),
+        )}
+
+      <div className="leaflet-top leaflet-right">
+        <div
+          ref={exportControlRef}
+          className="leaflet-control session-map-control"
+        >
+          <Tooltip title={translate("export_gpx")}>
+            <IconButton size="small" onClick={exportTrack}>
+              <FileDownloadIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
         </div>
       </div>
-    </>
+
+      <div className="leaflet-bottom leaflet-right">
+        <div
+          ref={typeControlRef}
+          className="leaflet-control session-map-control"
+        >
+          <Tooltip
+            title={translate(url === 0 ? "satellite_map" : "street_map")}
+          >
+            <IconButton size="small" onClick={toggleMapType}>
+              {url === 0 ? (
+                <SatelliteAltIcon fontSize="small" />
+              ) : (
+                <MapIcon fontSize="small" />
+              )}
+            </IconButton>
+          </Tooltip>
+        </div>
+      </div>
+    </MapContainer>
   );
 }

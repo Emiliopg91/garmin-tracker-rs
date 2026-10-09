@@ -1,5 +1,5 @@
 import { Marker } from "react-leaflet";
-import { SessionDetails, SessionListItem } from "./backend/models";
+import { SessionDetails, SessionListItem, SessionSet } from "./backend/models";
 import L from "leaflet";
 
 const SEMICIRCLE_TO_DEGREES = 180.0 / 2 ** 31;
@@ -452,5 +452,12 @@ export class SessionUtils {
       return Math.trunc((weight * 36) / (37 - r));
     }
     return Math.trunc((100 * weight) / (101.3 - 2.67123 * r));
+  }
+
+  public static maxE1rm(sets: SessionSet[]): number {
+    return sets.reduce(
+      (max, s) => Math.max(max, SessionUtils.estimate1rm(s.weight, s.reps)),
+      0,
+    );
   }
 }

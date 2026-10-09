@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogTitle, IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { ExerciseVolumeChart } from "./helpers/ExerciseVolumeChart";
 import { SessionUtils } from "@/utils/SessionUtils";
+import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 
 type Props = {
   exercise: ExerciseDetails;
@@ -28,7 +29,7 @@ export function ExerciseModal({ exercise, onClose }: Props) {
         <table id="workout-details-table">
           <colgroup>
             <col className="col-200" />
-            <col className="col-150" />
+            <col />
             <col />
           </colgroup>
           <tbody>
@@ -43,7 +44,7 @@ export function ExerciseModal({ exercise, onClose }: Props) {
                   fromKg(
                     SessionUtils.estimate1rm(exercise.weight, exercise.reps),
                   ),
-                  1,
+                  0,
                 ) +
                   " " +
                   getWeightUnit()}
@@ -76,17 +77,23 @@ export function ExerciseModal({ exercise, onClose }: Props) {
         <table className="full-width">
           <colgroup>
             <col className="col-350" />
-            <col className="col-150" />
+            <col />
+            <col />
+            <col />
           </colgroup>
           <thead>
             <tr>
               <th>{translate("workout")}</th>
+              <th></th>
               <th>{translate("series")}</th>
+              <th>{translate("rm")}</th>
             </tr>
           </thead>
           <tbody>
-            {exercise.workouts.map((workout) =>
-              exercise.series[workout].map((serie, idx) => (
+            {exercise.workouts.map((workout) => {
+              const e1rm = SessionUtils.maxE1rm(exercise.series[workout]);
+
+              return exercise.series[workout].map((serie, idx) => (
                 <tr key={`${workout}-${idx}`}>
                   {idx === 0 && (
                     <td
@@ -98,7 +105,21 @@ export function ExerciseModal({ exercise, onClose }: Props) {
                         formatTimeDate(parseInt(workout.split("\n")[1]))}
                     </td>
                   )}
-
+                  <td
+                    className={
+                      idx === exercise.series[workout].length - 1
+                        ? "divider-bottom"
+                        : ""
+                    }
+                    style={{ textAlign: "right" }}
+                  >
+                    {serie.pr && (
+                      <EmojiEventsIcon
+                        fontSize="small"
+                        className="trophy-icon"
+                      />
+                    )}
+                  </td>
                   <td
                     className={`text-center${
                       idx === exercise.series[workout].length - 1
@@ -106,12 +127,24 @@ export function ExerciseModal({ exercise, onClose }: Props) {
                         : ""
                     }`}
                   >
-                    {serie.reps}x{formatNumber(fromKg(serie.weight), 1)}{" "}
-                    {getWeightUnit()}
+                    {serie.reps}x
+                    {formatNumber(fromKg(serie.weight), 1) +
+                      " " +
+                      getWeightUnit()}
                   </td>
+
+                  {idx === 0 && (
+                    <td
+                      className="divider-bottom"
+                      rowSpan={exercise.series[workout].length}
+                      style={{ textAlign: "center" }}
+                    >
+                      {formatNumber(fromKg(e1rm), 0) + " " + getWeightUnit()}
+                    </td>
+                  )}
                 </tr>
-              )),
-            )}
+              ));
+            })}
           </tbody>
         </table>
       </DialogContent>

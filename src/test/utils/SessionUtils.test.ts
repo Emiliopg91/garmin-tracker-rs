@@ -446,3 +446,26 @@ describe("SessionUtils.calculateWorkoutLoad", () => {
     );
   });
 });
+
+describe("SessionUtils.maxE1rm", () => {
+  it("returns 0 for no sets", () => {
+    expect(SessionUtils.maxE1rm([])).toBe(0);
+  });
+
+  it("returns the highest estimate across sets", () => {
+    const sets = [
+      makeSet({ weight: 100, reps: 1 }),
+      makeSet({ weight: 90, reps: 5 }),
+      makeSet({ weight: 60, reps: 12 }),
+    ];
+
+    expect(SessionUtils.maxE1rm(sets)).toBe(
+      Math.max(
+        SessionUtils.estimate1rm(100, 1),
+        SessionUtils.estimate1rm(90, 5),
+        SessionUtils.estimate1rm(60, 12),
+      ),
+    );
+    expect(SessionUtils.maxE1rm(sets)).toBe(101);
+  });
+});

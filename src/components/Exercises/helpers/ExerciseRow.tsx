@@ -28,7 +28,10 @@ export function ExerciseRow({ exercise, onSelect }: Props) {
           getWeightUnit()}
       </td>
       <td>
-        {fromKg(SessionUtils.estimate1rm(exercise.weight, exercise.reps)) +
+        {formatNumber(
+          fromKg(SessionUtils.estimate1rm(exercise.weight, exercise.reps)),
+          0,
+        ) +
           " " +
           getWeightUnit()}
       </td>

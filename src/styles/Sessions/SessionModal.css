@@ -3,16 +3,13 @@
 }
 
 .session-map {
-  height: 200px;
+  height: 240px;
   width: 100%;
 }
 
-/* !important on display: MUI's FormControl sets display:inline-flex at
-   runtime, injected after this file, same specificity */
-.session-map-type-control {
-  width: 100%;
-  display: flex !important;
-  align-items: center;
+.session-map-control {
+  background-color: rgba(30, 30, 30, 0.8);
+  border-radius: 4px;
 }
 
 .session-hr-chart {

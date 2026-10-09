@@ -63,24 +63,27 @@ export function ExerciseVolumeChart({ series }: Props) {
   const [maxDate, setMaxDate] = useState(0);
 
   useEffect(() => {
-    const data: { date: number; volume: number; reps: number; e1rm: number }[] =
-      [];
+    const data: {
+      date: number;
+      volume: number;
+      reps: number;
+      e1rm: number;
+    }[] = [];
+
     Object.keys(series).forEach((k) => {
       const date = new Date(parseInt(k.split("\n")[1]));
 
       let count = 0;
       let weight = 0;
-      let e1rm = 0;
       series[k].forEach((s) => {
         count += s.reps;
         weight += s.reps * s.weight;
-        e1rm = Math.max(e1rm, SessionUtils.estimate1rm(s.weight, s.reps));
       });
       data.push({
         date: date.getTime(),
         volume: weight,
         reps: count,
-        e1rm: e1rm,
+        e1rm: SessionUtils.maxE1rm(series[k]),
       });
     });
     data.sort((a, b) => a.date - b.date);
