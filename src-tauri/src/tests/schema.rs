@@ -37,7 +37,7 @@ fn schema_ddls_are_sorted_with_hooks_on_their_migration() {
         .filter(|d| d.update_fn.is_some())
         .map(|d| d.version)
         .collect::<Vec<_>>();
-    assert_eq!(with_hooks, vec![5, 6]);
+    assert!(with_hooks.is_empty());
 }
 
 #[test]

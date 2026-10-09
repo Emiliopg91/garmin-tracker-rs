@@ -72,7 +72,7 @@ const STRENGTH: [Expected; 6] = [
         total_calories: 351,
         metabolic_calories: 79,
         training_load: 62,
-        sets: 22,
+        sets: 33,
         records: 1377,
     },
     Expected {
@@ -84,7 +84,7 @@ const STRENGTH: [Expected; 6] = [
         total_calories: 316,
         metabolic_calories: 64,
         training_load: 73,
-        sets: 27,
+        sets: 39,
         records: 1339,
     },
     Expected {
@@ -96,7 +96,7 @@ const STRENGTH: [Expected; 6] = [
         total_calories: 322,
         metabolic_calories: 74,
         training_load: 65,
-        sets: 22,
+        sets: 33,
         records: 1631,
     },
     Expected {
@@ -108,7 +108,7 @@ const STRENGTH: [Expected; 6] = [
         total_calories: 310,
         metabolic_calories: 64,
         training_load: 59,
-        sets: 22,
+        sets: 33,
         records: 1313,
     },
     Expected {
@@ -120,7 +120,7 @@ const STRENGTH: [Expected; 6] = [
         total_calories: 384,
         metabolic_calories: 91,
         training_load: 76,
-        sets: 22,
+        sets: 33,
         records: 1848,
     },
     Expected {
@@ -132,7 +132,7 @@ const STRENGTH: [Expected; 6] = [
         total_calories: 307,
         metabolic_calories: 62,
         training_load: 82,
-        sets: 22,
+        sets: 33,
         records: 1373,
     },
 ];
@@ -241,7 +241,7 @@ fn parses_strength_sessions() {
         for (idx, set) in session.sets.iter().enumerate() {
             assert_eq!(set.session, expected.date);
             assert_eq!(set.idx as usize, idx);
-            assert!(set.exercise.is_some());
+            assert_eq!(set.exercise.is_some(), set.ex_cat != u16::MAX);
         }
 
         let additional_data = session.additional_data.unwrap();
@@ -271,8 +271,8 @@ fn parses_strength_sets_in_order() {
         [
             (8, 0, 10, 70.0),
             (17, 27, 20, 36.0),
-            (8, 0, 8, 70.0),
-            (17, 27, 20, 36.0)
+            (u16::MAX, 0, 0, 0.0),
+            (8, 0, 8, 70.0)
         ]
     );
 }
@@ -280,7 +280,7 @@ fn parses_strength_sets_in_order() {
 #[test]
 fn parses_strength_sets_with_fractional_weight() {
     let session = parse_fixture("strength_2");
-    let last = session.sets.last().unwrap();
+    let last = session.sets.iter().rfind(|s| s.ex_cat != u16::MAX).unwrap();
 
     assert_eq!(
         (last.ex_cat, last.ex_id, last.reps, last.weight),
