@@ -46,6 +46,7 @@ const makeSet = (overrides: Partial<SessionSet> = {}): SessionSet => ({
   reps: 10,
   rest: false,
   weight: 50,
+  duration: 0,
   ...overrides,
 });
 

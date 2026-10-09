@@ -23,7 +23,7 @@ use crate::{
         sessions::{SessionDetails, SessionListItem, SessionLocation, SessionSetsUpdate},
     },
     fit::parser::FitParser,
-    logic::{notifications::show_notification, report_error, run_blocking},
+    logic::{exercises::update_prs, notifications::show_notification, report_error, run_blocking},
     utils::translations::{Languages, translate, translate_and_replace},
 };
 use chrono::{Datelike, Days, Local, Months, TimeZone, offset::LocalResult};
@@ -37,7 +37,7 @@ use rusqlite_orm::{
 };
 use strength_tracker_rs_macros::traced_command;
 use tauri::{AppHandle, Emitter, Manager, State};
-use tauri_plugin_log::log::{debug, error, info, warn};
+use tauri_plugin_log::log::{error, info, warn};
 use tokio::process::Command;
 
 /// Returns every recorded session, newest first.
@@ -552,70 +552,6 @@ pub fn update_session_notes(
     Ok(())
 }
 
-/// Recomputes the `pr` flag for each affected exercise and notifies if any of the just-imported/edited sessions set a new record.
-pub fn update_prs(
-    tx: &rusqlite_orm::rusqlite::Transaction,
-    exercises: HashSet<(u16, u16)>,
-    sessions: &[u32],
-    lang: Option<Languages>,
-) -> rusqlite_orm::errors::Result<()> {
-    let mut new_prs = false;
-
-    let sessions = sessions.to_vec();
-
-    let mut update_false_conditions = vec![];
-    let mut update_true_conditions = vec![];
-
-    for exer in &exercises {
-        update_false_conditions.push(vec![exer.0.into(), exer.1.into()]);
-        if let Some(pr) = SetRepository::select()
-            .where_(Where::And(vec![
-                Where::Eq(set::entity::columns::EX_CAT, exer.0.into()),
-                Where::Eq(set::entity::columns::EX_ID, exer.1.into()),
-            ]))
-            .order_by(OrderBy::Desc(entity::columns::WEIGHT))
-            .order_by(OrderBy::Desc(entity::columns::REPS))
-            .order_by(OrderBy::Asc(entity::columns::SESSION))
-            .order_by(OrderBy::Asc(entity::columns::IDX))
-            .limit(1)
-            .fetch_one_in(tx)?
-        {
-            update_true_conditions.push(vec![pr.session.into(), pr.idx.into()]);
-            new_prs = new_prs || sessions.contains(&pr.session);
-        }
-    }
-
-    if !update_true_conditions.is_empty() {
-        SetRepository::update()
-            .set(set::entity::columns::PR, false.into())
-            .where_(Where::And(vec![
-                Where::InMultiple(
-                    vec![set::entity::columns::EX_CAT, set::entity::columns::EX_ID],
-                    update_false_conditions,
-                ),
-                Where::Eq(set::entity::columns::PR, true.into()),
-            ]))
-            .execute_in(tx)?;
-        SetRepository::update()
-            .set(set::entity::columns::PR, true.into())
-            .where_(Where::InMultiple(
-                vec![set::entity::columns::SESSION, set::entity::columns::IDX],
-                update_true_conditions,
-            ))
-            .execute_in(tx)?;
-    }
-
-    if new_prs && let Some(lang) = lang {
-        show_notification(NotificationDefinition {
-            title: translate("new_record", lang),
-            body: translate("contratulations_pr", lang),
-            kind: NotificationKind::Temporal,
-        });
-    }
-
-    Ok(())
-}
-
 static GELOCATION_MUTEX: Mutex<bool> = Mutex::new(false);
 
 /// Recover all pending workouts pending on geolocation
@@ -738,17 +674,6 @@ pub fn update_pending_geolocation(app: &AppHandle, db: &DatabasePool) {
             error!("Error while looking for pending sessions: {}", e);
         }
     }
-}
-
-pub fn recalculate_e1rm(
-    tx: &mut rusqlite_orm::rusqlite::Transaction,
-) -> rusqlite_orm::errors::Result<()> {
-    debug!("Recalculating e1RM...");
-    let mut sets = SetRepository::select().fetch_in(tx)?;
-    for set in &mut sets {
-        set.update_by_id_in(tx)?;
-    }
-    Ok(())
 }
 
 #[traced_command]

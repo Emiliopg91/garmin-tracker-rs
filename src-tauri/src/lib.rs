@@ -42,7 +42,7 @@ use crate::{
         export::{export_database, export_gpx, upload_to_cloud},
         sessions::{
             _import_from_files, get_heatmap_data, get_session_details, get_sessions,
-            import_from_files, recalculate_e1rm, save_session_changes,
+            import_from_files, save_session_changes,
         },
         workouts::{get_workout_details, get_workout_list, save_workout, set_workout_status},
     },
@@ -157,12 +157,11 @@ fn schema_ddls() -> Vec<DdlVersion> {
     let mut ddls = ddls!("../resources/ddl").to_vec();
     ddls.sort_by_key(|ddl| ddl.version);
 
-    for ddl in &mut ddls {
+    /*for ddl in &mut ddls {
         ddl.update_fn = match ddl.version {
-            5 | 6 => Some(recalculate_e1rm),
             _ => None,
         };
-    }
+    }*/
 
     ddls
 }

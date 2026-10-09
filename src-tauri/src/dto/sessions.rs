@@ -58,6 +58,7 @@ pub struct SessionSet {
     pub weight: f32,
     pub pr: bool,
     pub rest: bool,
+    pub duration: u32,
 }
 
 impl From<&Set> for SessionSet {
@@ -70,6 +71,7 @@ impl From<&Set> for SessionSet {
             weight: value.weight,
             pr: value.pr,
             rest: value.ex_cat == u16::MAX,
+            duration: value.duration,
         }
     }
 }

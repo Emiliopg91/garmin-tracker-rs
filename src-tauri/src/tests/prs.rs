@@ -8,7 +8,7 @@ use rusqlite_orm::{
 
 use crate::{
     dao::set::{self, Set, SetRepository},
-    logic::sessions::{recalculate_e1rm, update_prs},
+    logic::exercises::update_prs,
     tests::common,
 };
 
@@ -128,25 +128,4 @@ fn new_record_moves_the_flag() {
 
     insert_and_update(&db, vec![(2, vec![common::set(2, 0, SQUAT, 5, 105.0)])]);
     assert_eq!(pr_sets(&db), vec![(2, 0, SQUAT.0, SQUAT.1)]);
-}
-
-#[test]
-fn recalculate_e1rm_updates_every_set() {
-    let db = common::test_db();
-    db.run_in_transaction(|tx| {
-        let mut session = common::session(1);
-        session.sets = vec![
-            common::set(1, 0, SQUAT, 5, 100.0),
-            common::set(1, 1, SQUAT, 15, 60.0),
-        ];
-        common::insert_session(tx, session);
-        recalculate_e1rm(tx)?;
-        Ok(())
-    })
-    .unwrap();
-
-    let sets = db
-        .run_in_connection(|conn| Ok(SetRepository::select().fetch_in(conn)?))
-        .unwrap();
-    assert_eq!(sets.len(), 2);
 }

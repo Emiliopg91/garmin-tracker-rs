@@ -29,7 +29,9 @@ export function SessionRow({
       className={`clickable-row ${selectedForCompare ? "row-compare-selected" : ""}`}
     >
       <td>
-        {session.has_record && <EmojiEventsIcon className="trophy-icon" />}
+        {session.has_record && (
+          <EmojiEventsIcon fontSize="small" className="trophy-icon" />
+        )}
       </td>
       <td>{formatTimeDate(session.timestamp)}</td>
       <td>

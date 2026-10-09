@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use rusqlite_orm::{
     dao::Repository,
@@ -18,9 +18,11 @@ use crate::{
     },
     dto::{
         exercises::{ExerciseDetails, ExerciseListItem},
+        notifications::{NotificationDefinition, NotificationKind},
         sessions::SessionSet,
     },
-    logic::{report_error, run_blocking},
+    logic::{notifications::show_notification, report_error, run_blocking},
+    utils::translations::{Languages, translate},
 };
 
 /// Returns every exercise in the catalog, each annotated with its current personal record.
@@ -37,12 +39,18 @@ pub async fn get_exercises(
 
             Ok(prs
                 .iter()
-                .map(|pr| ExerciseListItem {
-                    category: pr.ex_cat,
-                    id: pr.ex_id,
-                    reps: pr.reps,
-                    weight: pr.weight,
-                    date: pr.session,
+                .filter_map(|pr| {
+                    if pr.ex_cat != u16::MAX {
+                        Some(ExerciseListItem {
+                            category: pr.ex_cat,
+                            id: pr.ex_id,
+                            reps: pr.reps,
+                            weight: pr.weight,
+                            date: pr.session,
+                        })
+                    } else {
+                        None
+                    }
                 })
                 .collect::<Vec<_>>())
         })
@@ -157,11 +165,79 @@ pub async fn get_exercises_catalog(app: AppHandle) -> Result<HashMap<u16, Vec<u1
         db.run_in_connection(|conn| Ok(ExerciseRepository::select().fetch_in(conn)?))?
             .iter()
             .for_each(|e| {
-                catalog.entry(e.category).or_default().push(e.id);
+                if e.category != u16::MAX {
+                    catalog.entry(e.category).or_default().push(e.id);
+                }
             });
 
         Ok(catalog)
     })
     .await
     .map_err(|e: DatabaseError| e.to_string())
+}
+
+/// Recomputes the `pr` flag for each affected exercise and notifies if any of the just-imported/edited sessions set a new record.
+pub fn update_prs(
+    tx: &rusqlite_orm::rusqlite::Transaction,
+    exercises: HashSet<(u16, u16)>,
+    sessions: &[u32],
+    lang: Option<Languages>,
+) -> rusqlite_orm::errors::Result<()> {
+    let mut new_prs = false;
+
+    let sessions = sessions.to_vec();
+
+    let mut update_false_conditions = vec![];
+    let mut update_true_conditions = vec![];
+
+    for exer in &exercises {
+        if exer.0 != u16::MAX {
+            update_false_conditions.push(vec![exer.0.into(), exer.1.into()]);
+            if let Some(pr) = SetRepository::select()
+                .where_(Where::And(vec![
+                    Where::Eq(set::entity::columns::EX_CAT, exer.0.into()),
+                    Where::Eq(set::entity::columns::EX_ID, exer.1.into()),
+                ]))
+                .order_by(OrderBy::Desc(set::entity::columns::WEIGHT))
+                .order_by(OrderBy::Desc(set::entity::columns::REPS))
+                .order_by(OrderBy::Asc(set::entity::columns::SESSION))
+                .order_by(OrderBy::Asc(set::entity::columns::IDX))
+                .limit(1)
+                .fetch_one_in(tx)?
+            {
+                update_true_conditions.push(vec![pr.session.into(), pr.idx.into()]);
+                new_prs = new_prs || sessions.contains(&pr.session);
+            }
+        }
+    }
+
+    if !update_true_conditions.is_empty() {
+        SetRepository::update()
+            .set(set::entity::columns::PR, false.into())
+            .where_(Where::And(vec![
+                Where::InMultiple(
+                    vec![set::entity::columns::EX_CAT, set::entity::columns::EX_ID],
+                    update_false_conditions,
+                ),
+                Where::Eq(set::entity::columns::PR, true.into()),
+            ]))
+            .execute_in(tx)?;
+        SetRepository::update()
+            .set(set::entity::columns::PR, true.into())
+            .where_(Where::InMultiple(
+                vec![set::entity::columns::SESSION, set::entity::columns::IDX],
+                update_true_conditions,
+            ))
+            .execute_in(tx)?;
+    }
+
+    if new_prs && let Some(lang) = lang {
+        show_notification(NotificationDefinition {
+            title: translate("new_record", lang),
+            body: translate("contratulations_pr", lang),
+            kind: NotificationKind::Temporal,
+        });
+    }
+
+    Ok(())
 }

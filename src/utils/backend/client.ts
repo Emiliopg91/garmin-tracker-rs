@@ -44,25 +44,25 @@ export class BackendClient {
 	}
 	
 
-	// From src-tauri/src/logic/exercises.rs:69
+	// From src-tauri/src/logic/exercises.rs:77
 	public static getExerciseDetails(category: number, id: number): Promise<ExerciseDetails> {
 	  return BackendClient.inner_invoke("get_exercise_details", { category, id }); 
 	}
 	
 
-	// From src-tauri/src/logic/exercises.rs:29
+	// From src-tauri/src/logic/exercises.rs:31
 	public static getExercises(): Promise<ExerciseListItem[]> {
 	  return BackendClient.inner_invoke("get_exercises"); 
 	}
 	
 
-	// From src-tauri/src/logic/exercises.rs:153
+	// From src-tauri/src/logic/exercises.rs:161
 	public static getExercisesCatalog(): Promise<Record<number, number[]>> {
 	  return BackendClient.inner_invoke("get_exercises_catalog"); 
 	}
 	
 
-	// From src-tauri/src/logic/sessions.rs:756
+	// From src-tauri/src/logic/sessions.rs:681
 	public static getHeatmapData(): Promise<[number, number][][]> {
 	  return BackendClient.inner_invoke("get_heatmap_data"); 
 	}
